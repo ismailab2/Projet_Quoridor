@@ -1,4 +1,4 @@
-package fr.bordeaux;
+package fr.bordeaux.gui;
 
 public class Main {
     public static void main(String[] args) {
