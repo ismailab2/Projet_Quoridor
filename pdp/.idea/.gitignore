@@ -6,3 +6,9 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+/pdp/01-preliminary/report.aux
+/pdp/01-preliminary/report.bbl
+/pdp/01-preliminary/report.blg
+/pdp/01-preliminary/report.fdb_latexmk
+/pdp/01-preliminary/report.log
+/pdp/01-preliminary/report.out
