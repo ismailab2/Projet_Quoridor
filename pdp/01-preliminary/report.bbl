@@ -1,0 +1,36 @@
+\begin{thebibliography}{1}
+
+\bibitem{browne2012}
+Cameron~B. Browne, Edward Powley, Daniel Whitehouse, Simon~M. Lucas, Peter~I.
+  Cowling, Philipp Rohlfshagen, Stephen Tavener, Diego P{\'e}rez, Spyridon
+  Samothrakis, and Simon Colton.
+\newblock A survey of monte carlo tree search methods.
+\newblock {\em IEEE Transactions on Computational Intelligence and AI in
+  Games}, 4(1), 2012.
+
+\bibitem{glendenning2005}
+Lisa Glendenning.
+\newblock Mastering quoridor.
+\newblock Undergraduate thesis / technical report, University of New Mexico,
+  2005.
+\newblock Rapport universitaire sur stratégies et IA pour Quoridor.
+
+\bibitem{lloyd2022}
+M.~Lloyd.
+\newblock {\em Quoridor Story: Strategy and Artificial Intelligence}.
+\newblock 2022.
+
+\bibitem{martin2017clean}
+Robert~C. Martin.
+\newblock {\em Clean Architecture: A Craftsman’s Guide to Software Structure
+  and Design}.
+\newblock Prentice Hall, Boston, MA, USA, 2017.
+
+\bibitem{mertens2006}
+P.~J.~C. Mertens.
+\newblock A quoridor-playing agent.
+\newblock Bsc thesis / technical report, Maastricht University, 2006.
+\newblock Étude sur le développement d'un agent Quoridor et analyse de la
+  complexité du jeu.
+
+\end{thebibliography}

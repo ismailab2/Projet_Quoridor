@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99e
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: report.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: plain.bst
+Reallocating 'name_of_file' (item size: 1) to 13 items.
+Database file #1: bibliography.bib
+Warning--empty publisher in lloyd2022
+You've used 5 entries,
+            2118 wiz_defined-function locations,
+            527 strings with 4910 characters,
+and the built_in function-call counts, 1366 in all, are:
+= -- 124
+> -- 81
+< -- 0
++ -- 35
+- -- 28
+* -- 84
+:= -- 263
+add.period$ -- 17
+call.type$ -- 5
+change.case$ -- 29
+chr.to.int$ -- 0
+cite$ -- 6
+duplicate$ -- 50
+empty$ -- 93
+format.name$ -- 28
+if$ -- 265
+int.to.chr$ -- 0
+int.to.str$ -- 5
+missing$ -- 5
+newline$ -- 30
+num.names$ -- 10
+pop$ -- 31
+preamble$ -- 1
+purify$ -- 24
+quote$ -- 0
+skip$ -- 30
+stack$ -- 0
+substring$ -- 27
+swap$ -- 3
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 16
+warning$ -- 1
+while$ -- 10
+width$ -- 6
+write$ -- 59
+(There was 1 warning)
