@@ -65,14 +65,14 @@ existe derrière celui-ci, sous réserve de l'absence de mur bloquant le mouveme
         \centering
         \includegraphics[width=\linewidth]{interdit.jpeg}
         \caption{Murs interdits}
-        \label{fig:architectures_groupees}
+        \label{fig:murs_interdits}
     \end{minipage}
     \hfill % Crée un espace élastique entre les deux blocs
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=\linewidth]{Saut_joueur.jpeg}
         \caption{Saut par dessus un joueur}
-        \label{fig:placeholder}
+        \label{fig:saut_joueur}
     \end{minipage}
 \end{figure}
 
@@ -113,9 +113,9 @@ notations algébriques et heuristiques.
 
 L'objectif de ce projet est de proposer une plateforme unifiée cherchant à combler l'écart entre les travaux académiques théoriques et les applications ludiques actuelles, souvent limitées à une interface unique ou à une intelligence artificielle simpliste. L'implémentation vise à intégrer un moteur de décision multi-paradigme combinant le Minimax avec élagage alpha-bêta, la recherche arborescente Monte Carlo (MCTS) et l'apprentissage automatique au sein d'une architecture modulaire robuste. En complément des standards ergonomiques actuels, le projet met l'accent sur une double interface (graphique et console interactive) ainsi que sur une infrastructure réseau asynchrone incluant la découverte dynamique de serveurs par broadcast UDP. Cette approche permet de garantir une fiabilité logicielle élevée, validée par une couverture de tests automatisés systématiques.
 
-\chapter{Algorithmes et structures de données}
+\section{Algorithmes et structures de données}
 
-\section{Modélisation du plateau par graphe}
+\subsection{Modélisation du plateau par graphe}
 
 Le plateau est modélisé par un graphe non orienté $G = (V, E)$ où chaque sommet
 représente une case du plateau et chaque arête un déplacement possible.
@@ -132,7 +132,7 @@ index = ligne \times 9 + colonne
 Les murs ne sont pas représentés comme des sommets, mais comme des contraintes
 invalidant certaines transitions.
 
-\section{Algorithmes de recherche de chemin}
+\subsection{Algorithmes de recherche de chemin}
 
 Le graphe étant non pondéré, un parcours en largeur (BFS) est utilisé pour calculer
 la distance minimale entre un pion et sa ligne d'arrivée. Cette information est
@@ -141,11 +141,11 @@ utilisée pour la détection de victoire et les fonctions d'évaluation du Minim
 Une vérification de connexité est également effectuée lors du placement des murs
 afin de garantir qu'un chemin valide subsiste toujours.
 
-\section{Stratégies d'intelligence artificielle}
+\subsection{Stratégies d'intelligence artificielle}
 
 Le Quoridor étant un jeu à information parfaite et déterministe, l'implémentation de joueurs artificiels repose sur des méthodes de recherche arborescente visant à explorer l'explosion combinatoire générée par le placement des murs.\cite{lloyd2022}
 
-\subsection{Minimax avec élagage alpha-bêta}
+\subsubsection{Minimax avec élagage alpha-bêta}
 
 L’algorithme Minimax est une méthode de prise de décision issue de la théorie des jeux pour les jeux à deux joueurs à information complète (comme le Quoridor ou les Échecs). Son objectif est de déterminer le coup optimal en anticipant les réactions rationnelles de l'adversaire. Le Minimax repose sur une exploration récursive de l’arbre des possibles, où chaque niveau de l'arbre représente le tour d'un joueur, le joueur “MAX” cherche à maximiser son score tandis que le joueur “MIN” cherche à minimiser son score. L’algorithme descend dans l’arbre jusqu’à une profondeur déterminée. Une fois à cette profondeur, des fonctions d’évaluation sont utilisées pour évaluer les positions aux feuilles de l'arbre, trois fonctions d'évaluation distinctes sont implémentées, basées notamment sur les distances minimales calculées via le module graph et la gestion des réserves de murs.\\
 Pour rendre l’algorithme meilleur, on utilise la technique d’optimisation d’élagage Alpha-Beta qui permet de ne pas explorer les branches dont on sait qu’elles n’influenceront pas le choix final. L’Alpha est le score minimum obtenable et Beta est le score maximum obtenable. Si, lors de l'exploration, l'algorithme découvre une branche où le score est inférieur à Alpha ou supérieur à Beta, il "coupe" (élague) cette branche. Cela permet de doubler, voire tripler la profondeur de recherche pour un même temps de calcul.
@@ -155,10 +155,10 @@ Pour rendre l’algorithme meilleur, on utilise la technique d’optimisation d�
     \centering
     \includegraphics[width=0.8\linewidth]{MiniMax.jpg}
     \caption{Exemple de MiniMax}
-    \label{fig:placeholder}
+    \label{fig:minimax}
 \end{figure}
 
-\subsection{Monte Carlo Tree Search}
+\subsubsection{Monte Carlo Tree Search}
 
 Un algorithme de \emph{Monte Carlo Tree Search} (MCTS) est également implémenté.
 L'algorithme MCTS repose sur quatre phases : sélection, expansion, simulation et mise
@@ -202,11 +202,11 @@ visites un indicateur fiable de la supériorité statistique d’un coup.
     \centering
     \includegraphics[width=0.5\linewidth]{MCTS_image.jpg}
     \caption{MCTS Représentation}
-    \label{fig:placeholder}
+    \label{fig:mcts}
 \end{figure}
 
 
-\subsection{Apprentissage automatique}
+\subsubsection{Apprentissage automatique}
 
 Un modèle de Machine Learning est intégré pour guider la sélection des coups dans le MCTS. Les variables utilisées incluent la distance à l'arrivée et le nombre de murs restants pour chaque joueur.
 
@@ -272,14 +272,12 @@ compromis efficace entre rigueur logicielle, évolutivité, lisibilité du code,
 
 \subsection{Schémas de l'architecture}
 
-\begin{figure}[H] % Le [H] de float est crucial ici
+\begin{figure}[H]
     \centering
-    % Première image : Architecture globale 
     \includegraphics[width=0.75\textwidth]{Architecture global pdp pre.png}
     \caption{Schéma global de l’architecture}
     \vspace{0.5cm} % Un peu d'espace entre les deux
     
-    % Deuxième image : UML détaillé 
     \includegraphics[width=0.82\textwidth]{uml core + graph en detaile.png}
     \caption{Schéma d'UML core + graph en détaillé}
     \label{fig:architectures_groupees}
@@ -290,7 +288,7 @@ compromis efficace entre rigueur logicielle, évolutivité, lisibilité du code,
 
 \subsection{Prérequis}
 L'implémentation de cet algorithme s'appuie sur plusieurs besoins :
-\begin{itemize}[label=\textbullet]
+\begin{itemize}
     \item \textbf{F33 (Heuristiques) :} Nécessité de fonctions d'évaluation pour quantifier l'avantage d'un plateau donné.
     \item \textbf{F8 (Mode IA) :} Cadre global permettant l'exécution et le test de l'algorithme.
     \item \textbf{F10 (Gestion des règles) :} Fournit la liste des coups légaux via le moteur de jeu, condition sine qua non pour l'exploration de l'arbre.
