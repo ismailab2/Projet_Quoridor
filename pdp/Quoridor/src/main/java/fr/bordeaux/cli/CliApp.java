@@ -1,4 +1,3 @@
 package fr.bordeaux.cli;
 
-public class CliApp {
-}
+public class CliApp {}

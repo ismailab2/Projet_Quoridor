@@ -1,4 +1,3 @@
 package fr.bordeaux.graph;
 
-public class GraphBuilder {
-}
+public class GraphBuilder {}

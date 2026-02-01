@@ -1,4 +1,3 @@
 package fr.bordeaux.persistence;
 
-public class GameSerializer {
-}
+public class GameSerializer {}
