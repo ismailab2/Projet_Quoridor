@@ -1,26 +1,27 @@
 package fr.bordeaux.core;
 
 public class Player {
-    Position position;
-    public Player(Position position) {
-        this.position = position;
-    }
+  Position position;
 
-    public Position getPlayerPosition() {
-        return position;
-    }
+  public Player(Position position) {
+    this.position = position;
+  }
 
-    public void setPlayerPosition(Position position) {
-        this.position = position;
-    }
+  public Position getPlayerPosition() {
+    return position;
+  }
 
-    public boolean hasWon() {
-        //nous allons implementés la logique de qui a gagner ici
-        return true;
-    }
+  public void setPlayerPosition(Position position) {
+    this.position = position;
+  }
 
-    @Override
-    public String toString() {
-        return "Player{" + "position=" + position + '}';
-    }
+  public boolean hasWon() {
+    // nous allons implementés la logique de qui a gagner ici
+    return true;
+  }
+
+  @Override
+  public String toString() {
+    return "Player{" + "position=" + position + '}';
+  }
 }
