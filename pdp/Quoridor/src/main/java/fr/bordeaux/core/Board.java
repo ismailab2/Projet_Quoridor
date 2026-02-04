@@ -141,7 +141,7 @@ public class Board {
     Grid[][] copy = new Grid[SIZE][SIZE];
     for (int x = 0; x < SIZE; x++) {
       for (int y = 0; y < SIZE; y++) {
-        copy[x][y] = cells[x][y]; // shallow copy suffices pour lecture
+        copy[x][y] = cells[x][y];
       }
     }
     return copy;
@@ -153,24 +153,21 @@ public class Board {
     sb.append("Board:\n");
 
     for (int y = 0; y < SIZE; y++) {
-      // --- ligne des murs horizontaux (au-dessus des cases) ---
       for (int x = 0; x < SIZE; x++) {
-        sb.append(cells[x][y].hasTopWall() ? "———" : "   "); // 3 espaces pour aligner
-        sb.append(" "); // petit espacement
+        sb.append(cells[x][y].hasTopWall() ? "———" : "   ");
+        sb.append(" ");
       }
       sb.append("\n");
 
-      // --- ligne avec joueurs et murs verticaux ---
       for (int x = 0; x < SIZE; x++) {
-        sb.append(cells[x][y].hasLeftWall() ? "|" : " "); // mur à gauche
+        sb.append(cells[x][y].hasLeftWall() ? "|" : " ");
         Player p = cells[x][y].getPlayer();
         sb.append(p != null ? " " + p.getName().charAt(0) + " " : " . ");
-        sb.append(cells[x][y].hasRightWall() ? "|" : " "); // mur à droite
+        sb.append(cells[x][y].hasRightWall() ? "|" : " ");
       }
       sb.append("\n");
     }
 
-    // --- ligne des murs horizontaux du bas ---
     for (int x = 0; x < SIZE; x++) {
       sb.append(cells[x][SIZE - 1].hasBottomWall() ? "———" : "   ");
       sb.append(" ");
