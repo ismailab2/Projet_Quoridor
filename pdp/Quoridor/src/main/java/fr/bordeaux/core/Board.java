@@ -82,38 +82,62 @@ public class Board {
     player.setPlayerPosition(to);
   }
 
-  /** Place a wall if allowed */
-  public void placeWall(Wall wall) {
-    Objects.requireNonNull(wall);
+    /** Place a wall if allowed */
+    public void placeWall(Wall wall) {
+        Objects.requireNonNull(wall, "Mur null");
 
-    if (!isValidCell(wall.getPositionWall())) {
-      throw new IllegalArgumentException("Mur hors plateau");
+        Position pos = wall.getPositionWall();
+        int x = pos.getX();
+        int y = pos.getY();
+
+        if (!isValidWallPosition(x, y)) {
+            throw new IllegalArgumentException("Mur hors plateau");
+        }
+
+        for (Wall w : walls) {
+            if (w.conflictsWith(wall)) {
+                throw new IllegalArgumentException("Mur en conflit avec un autre mur");
+            }
+        }
+
+        walls.add(wall);
+
+        if (wall.getOrientation() == Wall.OrientationWall.HORIZONTAL) {
+            placeHorizontalWall(x, y);
+        } else {
+            placeVerticalWall(x, y);
+        }
     }
 
-    for (Wall w : walls) {
-      if (w.conflictsWith(wall)) {
-        throw new IllegalArgumentException("Mur en conflit avec un autre mur");
-      }
+    private boolean isValidWallPosition(int x, int y) {
+        return x >= 0 && y >= 0
+                && x < cells.length - 1
+                && y < cells[0].length - 1;
     }
 
-    walls.add(wall);
+    private void placeHorizontalWall(int x, int y) {
+        // Cellules du haut → mur en bas
+        cells[x][y].setBottomWall(true);
+        cells[x + 1][y].setBottomWall(true);
 
-    // Mettre à jour les Grid pour le blocage des mouvements
-    Position pos = wall.getPositionWall();
-    if (wall.getOrientation() == Wall.OrientationWall.HORIZONTAL) {
-      cells[pos.getX()][pos.getY()].setBottomWall(true);
-      cells[pos.getX() + 1][pos.getY()].setBottomWall(true);
-      cells[pos.getX()][pos.getY() + 1].setTopWall(true);
-      cells[pos.getX() + 1][pos.getY() + 1].setTopWall(true);
-    } else { // VERTICAL
-      cells[pos.getX()][pos.getY()].setRightWall(true);
-      cells[pos.getX()][pos.getY() + 1].setRightWall(true);
-      cells[pos.getX() + 1][pos.getY()].setLeftWall(true);
-      cells[pos.getX() + 1][pos.getY() + 1].setLeftWall(true);
+        // Cellules du bas → mur en haut
+        cells[x][y + 1].setTopWall(true);
+        cells[x + 1][y + 1].setTopWall(true);
     }
-  }
 
-  /** Returns the row that a player must reach to win */
+    private void placeVerticalWall(int x, int y) {
+        // Cellules de gauche → mur à droite
+        cells[x][y].setRightWall(true);
+        cells[x][y + 1].setRightWall(true);
+
+        // Cellules de droite → mur à gauche
+        cells[x + 1][y].setLeftWall(true);
+        cells[x + 1][y + 1].setLeftWall(true);
+    }
+
+
+
+    /** Returns the row that a player must reach to win */
   public int getWinningRowForPlayer(Player player) {
     if (player.equals(players.get(0))) return SIZE - 1; // bas du plateau
     else if (player.equals(players.get(1))) return 0; // haut du plateau
