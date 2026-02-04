@@ -60,7 +60,7 @@ public class Player {
    * Check if the player has won the game. In Quoridor, a player wins when their pawn reaches the
    * opposite side of the board.
    *
-   * @param board the current board
+   * @param board the curent board
    * @return true if the player has reached the winning line
    */
   public boolean hasWon(Board board) {
