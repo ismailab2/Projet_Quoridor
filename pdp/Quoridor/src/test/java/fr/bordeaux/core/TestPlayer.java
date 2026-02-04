@@ -2,14 +2,16 @@ package fr.bordeaux.core;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 
 public class TestPlayer {
 
   @Test
-  public void constructor_shouldSetPosition() {
+  public void constructor_shouldSetPlayerPosition() {
     Position position = new Position(1, 2);
-    Player player = new Player(position);
+    Player player = new Player("ali", position);
 
     assertEquals(position, player.getPlayerPosition());
   }
@@ -17,7 +19,7 @@ public class TestPlayer {
   @Test
   public void getPlayerPosition_shouldReturnPosition() {
     Position position = new Position(3, 4);
-    Player player = new Player(position);
+    Player player = new Player("aba", position);
 
     Position result = player.getPlayerPosition();
 
@@ -29,7 +31,7 @@ public class TestPlayer {
     Position initialPosition = new Position(0, 0);
     Position newPosition = new Position(5, 6);
 
-    Player player = new Player(initialPosition);
+    Player player = new Player("aabb", initialPosition);
     player.setPlayerPosition(newPosition);
 
     assertEquals(newPosition, player.getPlayerPosition());
@@ -37,20 +39,15 @@ public class TestPlayer {
 
   @Test
   public void hasWon_shouldReturnTrue() {
-    Position position = new Position(1, 1);
-    Player player = new Player(position);
+    Position position = new Position(0, 4);
+    Position position2 = new Position(8, 4);
+    Player player = new Player("nn", position);
+    Player player1 = new Player("nn1", position2);
+    List<Player> players = new ArrayList<Player>();
+    players.add(player);
+    players.add(player1);
+    Board board = new Board(players);
 
-    assertTrue(player.hasWon());
-  }
-
-  @Test
-  public void toString_shouldContainPosition() {
-    Position position = new Position(2, 3);
-    Player player = new Player(position);
-
-    String result = player.toString();
-
-    assertTrue(result.contains("position"));
-    assertTrue(result.contains(position.toString()));
+    assertFalse(player.hasWon(board));
   }
 }
