@@ -1,6 +1,6 @@
 package fr.bordeaux.core;
 
-public class Grid {
+public class Cell {
   private Position position;
   private Player player; // pion sur la case
   private boolean topWall;
@@ -8,7 +8,7 @@ public class Grid {
   private boolean leftWall;
   private boolean rightWall;
 
-  public Grid(Position position) {
+  public Cell(Position position) {
     this.position = position;
     this.player = null;
     this.topWall = false;

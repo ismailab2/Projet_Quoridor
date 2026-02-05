@@ -1,37 +1,32 @@
 package fr.bordeaux.core;
 
 public class Wall {
-
-  public enum OrientationWall {
+  public enum Orientation {
     HORIZONTAL,
     VERTICAL;
   }
 
-  Position position;
-  OrientationWall orientation;
+  private Position position;
+  private Orientation orientation;
 
-  public Wall(Position position, OrientationWall orientation) {
+  public Wall(Position position, Orientation orientation) {
     this.position = position;
     this.orientation = orientation;
   }
 
-  public boolean conflictsWith(Wall wall) {
-    return position.equals(wall.position) && orientation.equals(wall.orientation);
-  }
-
-  public boolean blocksMovement(Position from, Position to) {
-    return position.equals(from) && orientation.equals(to);
-  }
-
-  public Position getPositionWall() {
+  public Position getPosition() {
     return position;
   }
 
-  public OrientationWall getOrientation() {
+  public Orientation getOrientation() {
     return orientation;
   }
 
-  public boolean isHorizontal() {
-    return orientation == OrientationWall.HORIZONTAL;
+  public boolean conflictsWith(Wall other) {
+    return position.equals(other.position) && orientation == other.orientation;
+  }
+
+  public boolean crosses(Wall other) {
+    return orientation != other.orientation && position.equals(other.position);
   }
 }
