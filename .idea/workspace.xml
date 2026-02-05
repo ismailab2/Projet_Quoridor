@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9f7dfd29-1afa-4c6e-9686-7d637e02ced3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Board.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Cell.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Cell.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/GameEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/GameEngine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/GameState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Move.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/OrientationWall.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/OrientationWall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Position.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/Position.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/RuleChecker.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/core/RuleChecker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/gui/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/main/java/fr/bordeaux/gui/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdp/Quoridor/src/test/java/fr/bordeaux/core/TestGameEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/pdp/Quoridor/src/test/java/fr/bordeaux/core/TestGameEngine.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="394WBkIJX8EXVBdCaG9GBmDCson" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Isma__branch&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="fr.bordeaux.core" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9f7dfd29-1afa-4c6e-9686-7d637e02ced3" name="Changes" comment="" />
+      <created>1769955692629</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1769955692629</updated>
+      <workItem from="1769955695200" duration="17992000" />
+      <workItem from="1770012206272" duration="289000" />
+      <workItem from="1770032149841" duration="1443000" />
+      <workItem from="1770038057397" duration="3159000" />
+      <workItem from="1770065352361" duration="102000" />
+      <workItem from="1770102601047" duration="1264000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
