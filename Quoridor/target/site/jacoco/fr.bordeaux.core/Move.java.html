@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Move.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.core</a> &gt; <span class="el_source">Move.java</span></div><h1>Move.java</h1><pre class="source lang-java linenums">package fr.bordeaux.core;
+
+/**
+ * Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe for
+ */
+public class Move {
+
+<span class="fc" id="L8">  public enum Type {</span>
+<span class="fc" id="L9">    PAWN,</span>
+<span class="fc" id="L10">    WALL</span>
+  }
+
+  private final Type type;
+  private final Position to;
+  private final Wall wall;
+
+<span class="fc" id="L17">  Move(Type type, Position to, Wall wall) {</span>
+<span class="fc" id="L18">    this.type = type;</span>
+<span class="fc" id="L19">    this.to = to;</span>
+<span class="fc" id="L20">    this.wall = wall;</span>
+<span class="fc" id="L21">  }</span>
+
+  public static Move pawn(Position to) {
+<span class="fc" id="L24">    return new Move(Type.PAWN, to, null);</span>
+  }
+
+  public static Move wall(Wall wall) {
+<span class="fc" id="L28">    return new Move(Type.WALL, null, wall);</span>
+  }
+
+  public Type getType() {
+<span class="fc" id="L32">    return type;</span>
+  }
+
+  public Position getTo() {
+<span class="fc" id="L36">    return to;</span>
+  }
+
+  public Wall getWall() {
+<span class="fc" id="L40">    return wall;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

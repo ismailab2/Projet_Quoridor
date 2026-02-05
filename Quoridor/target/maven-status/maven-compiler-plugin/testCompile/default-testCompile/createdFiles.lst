@@ -1,0 +1,8 @@
+fr\bordeaux\core\RuleCheckerTest.class
+fr\bordeaux\core\WallTest.class
+fr\bordeaux\core\BoardTest.class
+fr\bordeaux\core\GameStateTest.class
+fr\bordeaux\core\GameEngineTest.class
+fr\bordeaux\core\PlayerTest.class
+fr\bordeaux\core\MoveTest.class
+fr\bordeaux\core\PositionTest.class

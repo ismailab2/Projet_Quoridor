@@ -1,0 +1,27 @@
+lJne9YWZR8dVq9J2qTWOGFW+0VJRgcuxsZ9bdxY28r0=
+src\main\java\fr\bordeaux\AI\AiPlayer.java 2026-02-05T14:19:27.606221Z
+src\main\java\fr\bordeaux\cli\CliApp.java 2026-02-05T14:19:27.608708900Z
+src\main\java\fr\bordeaux\config\ConfigManager.java 2026-02-05T14:19:27.609710Z
+src\main\java\fr\bordeaux\core\Board.java 2026-02-05T14:23:52.961017600Z
+src\main\java\fr\bordeaux\core\Cell.java 2026-02-05T14:19:27.613740400Z
+src\main\java\fr\bordeaux\core\GameEngine.java 2026-02-05T14:19:27.614736800Z
+src\main\java\fr\bordeaux\core\GameState.java 2026-02-05T14:19:27.615736600Z
+src\main\java\fr\bordeaux\core\Move.java 2026-02-05T14:19:27.616735700Z
+src\main\java\fr\bordeaux\core\Player.java 2026-02-05T14:19:27.617759600Z
+src\main\java\fr\bordeaux\core\Position.java 2026-02-05T14:19:27.619173300Z
+src\main\java\fr\bordeaux\core\RuleChecker.java 2026-02-05T14:19:27.619173300Z
+src\main\java\fr\bordeaux\core\Wall.java 2026-02-05T14:19:27.620608Z
+src\main\java\fr\bordeaux\graph\GraphBuilder.java 2026-02-05T14:19:27.622687300Z
+src\main\java\fr\bordeaux\gui\Main.java 2026-02-05T15:33:35.548155900Z
+src\main\java\fr\bordeaux\i18n\I18n.java 2026-02-05T14:19:27.625234200Z
+src\main\java\fr\bordeaux\network\Server.java 2026-02-05T14:19:27.628593900Z
+src\main\java\fr\bordeaux\persistence\GameSerializer.java 2026-02-05T14:19:27.629611900Z
+src\main\java\fr\bordeaux\util\Logger.java 2026-02-05T14:19:27.631917800Z
+src\test\java\fr\bordeaux\core\BoardTest.java 2026-02-05T14:19:27.635400300Z
+src\test\java\fr\bordeaux\core\GameEngineTest.java 2026-02-05T14:19:27.636672800Z
+src\test\java\fr\bordeaux\core\GameStateTest.java 2026-02-05T14:19:27.637892500Z
+src\test\java\fr\bordeaux\core\MoveTest.java 2026-02-05T14:19:27.638999800Z
+src\test\java\fr\bordeaux\core\PlayerTest.java 2026-02-05T14:19:27.640046600Z
+src\test\java\fr\bordeaux\core\PositionTest.java 2026-02-05T14:19:27.641043200Z
+src\test\java\fr\bordeaux\core\RuleCheckerTest.java 2026-02-05T14:19:27.642127100Z
+src\test\java\fr\bordeaux\core\WallTest.java 2026-02-05T14:19:27.643640700Z
