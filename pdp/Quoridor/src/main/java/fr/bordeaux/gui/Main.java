@@ -87,8 +87,7 @@ public class Main {
     Position winningRowBob = new Position(8, 5);
     board.movePlayer(bob, winningRowBob);
     System.out.println("Bob se déplace à " + winningRowBob);
-    if (board.hasPlayerWon(bob))
-    {
+    if (board.hasPlayerWon(bob)) {
       System.out.println("Bob a gagné !");
     }
 

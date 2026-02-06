@@ -1,4 +1,3 @@
 package fr.bordeaux.core;
 
-public class GameState {
-}
+public class GameState {}
