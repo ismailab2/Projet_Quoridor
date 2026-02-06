@@ -1,0 +1,7 @@
+fr\bordeaux\core\TestPlayer.class
+fr\bordeaux\core\TestBoard.class
+fr\bordeaux\core\TestMove.class
+fr\bordeaux\core\TestGameEngine.class
+fr\bordeaux\graph\TestGraphBuilder.class
+fr\bordeaux\core\TestPosition.class
+fr\bordeaux\core\TestWall.class

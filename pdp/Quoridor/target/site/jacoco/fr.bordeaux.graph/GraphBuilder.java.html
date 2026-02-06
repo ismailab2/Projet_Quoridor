@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.graph</a> &gt; <span class="el_source">GraphBuilder.java</span></div><h1>GraphBuilder.java</h1><pre class="source lang-java linenums">package fr.bordeaux.graph;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+<span class="nc" id="L8">public class GraphBuilder {</span>
+  public static final int SIZE = 9;
+  public static final int NB_VERTICES = SIZE * SIZE;
+
+  public static int id(int row, int col) {
+<span class="fc" id="L13">    return row * SIZE + col;</span>
+  }
+
+  public static Map&lt;Integer, List&lt;Integer&gt;&gt; buildAdjacencyList() {
+<span class="fc" id="L17">    Map&lt;Integer, List&lt;Integer&gt;&gt; adj = new HashMap&lt;&gt;();</span>
+
+    // création des sommets
+<span class="fc bfc" id="L20" title="All 2 branches covered.">    for (int v = 0; v &lt; NB_VERTICES; v++) {</span>
+<span class="fc" id="L21">      adj.put(v, new ArrayList&lt;&gt;(4));</span>
+    }
+
+    // ajout des arêtes entre cases adjacentes
+<span class="fc bfc" id="L25" title="All 2 branches covered.">    for (int row = 0; row &lt; SIZE; row++) {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      for (int col = 0; col &lt; SIZE; col++) {</span>
+<span class="fc" id="L27">        int u = id(row, col);</span>
+
+        // Pour éviter d'ajouter deux fois la même arête,
+        // on relie seulement vers le bas et vers la droite.
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (row &lt; SIZE - 1) addUndirectedEdge(adj, u, id(row + 1, col));</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (col &lt; SIZE - 1) addUndirectedEdge(adj, u, id(row, col + 1));</span>
+      }
+    }
+<span class="fc" id="L35">    return adj;</span>
+  }
+
+  // Ajoute une arête non orientée entre u et v
+  private static void addUndirectedEdge(Map&lt;Integer, List&lt;Integer&gt;&gt; adj, int u, int v) {
+<span class="fc" id="L40">    adj.get(u).add(v);</span>
+<span class="fc" id="L41">    adj.get(v).add(u);</span>
+<span class="fc" id="L42">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
