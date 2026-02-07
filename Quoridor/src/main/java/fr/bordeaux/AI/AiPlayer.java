@@ -5,19 +5,31 @@ import fr.bordeaux.core.Move;
 
 public class AiPlayer {
 
-    private int depth;
+
+    private boolean canSearch = true; // Became false when the timer has finished
 
     public AiPlayer(int d){
-        this.depth = d;
+    }
+
+    public Move IterativeDeepening(Board b){
+        int d = 1;
+        Move save = null;
+
+        while (canSearch) {
+            Move = MiniMax(b, d);
+            d++;
+        }
+
+        return save;
     }
 
 
-    public Move MiniMax(Board b){
+    public Move MiniMax(Board b, int d){
         best_move = null;
         best_score = Integer.MIN_VALUE;
         for (Move s : b.generate_legal_moves()){
             b.push(s);
-            alpha = max(best_score, MinMax(b, this.depth, Integer.MIN_VALUE ,Integer.MAX_VALUE));
+            alpha = max(best_score, MinMax(b, d, Integer.MIN_VALUE ,Integer.MAX_VALUE));
             if(alpha > best_score){
                 best_score = alpha;
                 best_move = s;
