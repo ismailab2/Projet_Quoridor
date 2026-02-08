@@ -4,115 +4,114 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import fr.bordeaux.graph.Graph;
 
 public class BoardTest {
 
   private Board board;
-  private Player p1;
-  private Player p2;
+  private final int SIZE = 9;
 
   @Before
   public void setUp() {
-    board = new Board();
-    p1 = new Player("Alice", new Position(0, 0));
-    p2 = new Player("Bob", new Position(8, 8));
-    board.getCell(new Position(0, 0)).setPlayer(p1);
-    board.getCell(new Position(8, 8)).setPlayer(p2);
-
-    board.addWall(new Wall(new Position(1, 1), Wall.Orientation.HORIZONTAL));
-    board.addWall(new Wall(new Position(2, 2), Wall.Orientation.VERTICAL));
+    board = new Board(SIZE);
   }
 
   @Test
   public void testBoardInitialization() {
-    for (int x = 0; x < Board.SIZE; x++) {
-      for (int y = 0; y < Board.SIZE; y++) {
-        Cell cell = board.getCell(new Position(x, y));
-        assertNotNull(cell);
-      }
-    }
+    assertEquals(SIZE, board.getSize());
+    assertNotNull(board.getGraph());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidBoardSizeEven() {
+    new Board(8);
   }
 
   @Test
-  public void testIsInsideTrue() {
+  public void testIsInside() {
     assertTrue(board.isInside(new Position(0, 0)));
     assertTrue(board.isInside(new Position(8, 8)));
-    assertTrue(board.isInside(new Position(4, 5)));
+    assertFalse(board.isInside(new Position(-1, 4)));
+    assertFalse(board.isInside(new Position(9, 4)));
   }
 
   @Test
-  public void testIsInsideFalse() {
-    assertFalse(board.isInside(new Position(-1, 0)));
-    assertFalse(board.isInside(new Position(0, -1)));
-    assertFalse(board.isInside(new Position(9, 0)));
-    assertFalse(board.isInside(new Position(0, 9)));
+  public void testIdConversion() {
+    assertEquals(0, board.id(0, 0));
+    assertEquals(SIZE + 1, board.id(1, 1));
+    assertEquals((SIZE * SIZE) - 1, board.id(8, 8)); //63
   }
 
   @Test
-  public void testGetCellReturnsCorrectCell() {
-    Position p = new Position(3, 4);
-    Cell cell = board.getCell(p);
+  public void testAddHorizontalWallRemovesEdges() {
+    int row = 2;
+    int col = 2;
+    board.addWall(row, col, Orientation.HORIZONTAL);
 
-    assertEquals(3, cell.getPosition().getX());
-    assertEquals(4, cell.getPosition().getY());
+    Graph g = board.getGraph();
+
+    assertFalse(g.getNeighbors(board.id(2, 2)).contains(board.id(3, 2)));
+    assertFalse(g.getNeighbors(board.id(2, 3)).contains(board.id(3, 3)));
+    assertTrue(g.getNeighbors(board.id(2, 2)).contains(board.id(2, 3)));
   }
 
   @Test
-  public void testAddHorizontalWall() {
-    Wall wall = new Wall(new Position(2, 2), Wall.Orientation.HORIZONTAL);
-    board.addWall(wall);
+  public void testAddVerticalWallRemovesEdges() {
+    int row = 4;
+    int col = 1;
+    board.addWall(row, col, Orientation.VERTICAL);
 
-    assertEquals(3, board.getWalls().size());
+    Graph g = board.getGraph();
 
-    assertTrue(board.getCell(new Position(2, 2)).hasBottomWall());
-    assertTrue(board.getCell(new Position(3, 2)).hasBottomWall());
-
-    assertTrue(board.getCell(new Position(2, 3)).hasTopWall());
-    assertTrue(board.getCell(new Position(3, 3)).hasTopWall());
+    assertFalse(g.getNeighbors(board.id(4, 1)).contains(board.id(4, 2)));
+    assertFalse(g.getNeighbors(board.id(5, 1)).contains(board.id(5, 2)));
+    assertTrue(g.getNeighbors(board.id(4, 1)).contains(board.id(5, 1)));
   }
 
   @Test
-  public void testAddVerticalWall() {
-    Wall wall = new Wall(new Position(4, 1), Wall.Orientation.VERTICAL);
-    board.addWall(wall);
+  public void testHorizontalWallCollision() {
+    board.addWall(2, 2, Orientation.HORIZONTAL);
 
-    assertEquals(3, board.getWalls().size());
+    // Overlap
+    assertTrue(board.isWallCollision(new Position(2, 2), Orientation.HORIZONTAL));
 
-    assertTrue(board.getCell(new Position(4, 1)).hasRightWall());
-    assertTrue(board.getCell(new Position(4, 2)).hasRightWall());
+    // Partial overlap
+    assertTrue(board.isWallCollision(new Position(2, 1), Orientation.HORIZONTAL));
+    assertTrue(board.isWallCollision(new Position(2, 3), Orientation.HORIZONTAL));
 
-    assertTrue(board.getCell(new Position(5, 1)).hasLeftWall());
-    assertTrue(board.getCell(new Position(5, 2)).hasLeftWall());
+    // Cross
+    assertTrue(board.isWallCollision(new Position(2, 2), Orientation.VERTICAL));
+
+    // Valid cases
+    assertFalse(board.isWallCollision(new Position(2, 4), Orientation.HORIZONTAL));
+    assertFalse(board.isWallCollision(new Position(0, 2), Orientation.HORIZONTAL));
   }
 
   @Test
-  public void testGetWallsReturnsCopy() {
-    board.addWall(new Wall(new Position(1, 1), Wall.Orientation.HORIZONTAL));
+  public void testVerticalWallCollision() {
+    board.addWall(4, 4, Orientation.VERTICAL);
 
-    assertEquals(3, board.getWalls().size());
+    // Overlap
+    assertTrue(board.isWallCollision(new Position(4, 4), Orientation.VERTICAL));
 
-    board.getWalls().clear();
+    // Partial overlap
+    assertTrue(board.isWallCollision(new Position(3, 4), Orientation.VERTICAL));
+    assertTrue(board.isWallCollision(new Position(5, 4), Orientation.VERTICAL));
 
-    assertEquals(3, board.getWalls().size());
+    // Cross
+    assertTrue(board.isWallCollision(new Position(4, 4), Orientation.HORIZONTAL));
+
+    // Valid cases
+    assertFalse(board.isWallCollision(new Position(3, 3), Orientation.HORIZONTAL));
+    assertFalse(board.isWallCollision(new Position(5, 4), Orientation.HORIZONTAL));
   }
 
   @Test
-  public void testToStringContainsBoard() {
-    String str = board.toString();
-    assertNotNull(str);
-    assertTrue(str.contains("Board:"));
-  }
+  public void testNoCollisionWhenWallsAreParallelAdjacent() {
+    board.addWall(1, 1, Orientation.HORIZONTAL);
 
-  @Test
-  public void testToStringShowsWallsCount() {
-    String str = board.toString();
-    assertTrue(str.contains("Walls posés: 2"));
-  }
-
-  @Test
-  public void testToStringShowsPlayers() {
-    String str = board.toString();
-    assertTrue(str.contains(" A "));
-    assertTrue(str.contains(" B "));
+    //Valid cases
+    assertFalse(board.isWallCollision(new Position(0, 1), Orientation.HORIZONTAL));
+    assertFalse(board.isWallCollision(new Position(2, 1), Orientation.HORIZONTAL));
   }
 }

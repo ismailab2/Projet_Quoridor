@@ -12,21 +12,23 @@ public class GameEngine {
     this.state = state;
   }
 
-  public void play(Move move) {
-    if (!RuleChecker.isMoveLegal(state, move)) throw new IllegalArgumentException("Coup illégal");
-
-    Player p = state.currentPlayer();
-    Board b = state.getBoard();
-
-    if (move.getType() == Move.Type.PAWN) {
-      b.getCell(p.getPosition()).setPlayer(null);
-      p.setPosition(move.getTo());
-      b.getCell(move.getTo()).setPlayer(p);
-    } else {
-      b.addWall(move.getWall());
-      p.useWall();
+  public boolean play(Move move) {
+    if (state.isGameOver()) {
+      System.out.println("GAME OVER");
+      return false;
     }
 
-    state.nextPlayer();
+    if (!RuleChecker.isMoveLegal(state, move)) return false;
+
+    Player p = state.currentPlayer();
+    state.applyMove(move);
+    if (state.hasReachedGoal(p)) {
+      System.out.println(p.getName() + " won the game!");
+    }
+    return true;
+  }
+
+  public GameState getState() {
+    return state;
   }
 }

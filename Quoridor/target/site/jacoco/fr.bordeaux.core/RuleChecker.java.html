@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RuleChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.core</a> &gt; <span class="el_source">RuleChecker.java</span></div><h1>RuleChecker.java</h1><pre class="source lang-java linenums">package fr.bordeaux.core;
+
+/**
+ * RuleChecker checks if moves (pawn moves or wall placements) are valid according to Quoridor
+ * rules.
+ */
+public class RuleChecker {
+
+  private RuleChecker() {}
+
+  public static boolean isMoveLegal(GameState state, Move move) {
+<span class="fc bfc" id="L12" title="All 2 branches covered.">    if (move.isPawn()) {</span>
+<span class="fc" id="L13">      return pawnMoveLegal(state, move);</span>
+    } else {
+<span class="fc" id="L15">      return wallMoveLegal(state, move);</span>
+    }
+  }
+
+
+  private static boolean pawnMoveLegal(GameState state, Move move) {
+<span class="fc" id="L21">    Player p = state.currentPlayer();</span>
+<span class="fc" id="L22">    Board b = state.getBoard();</span>
+<span class="fc" id="L23">    Position to = move.getTo();</span>
+
+    //Check if position is inside the board
+<span class="fc bfc" id="L26" title="All 2 branches covered.">    if (!b.isInside(to)) return false;</span>
+
+    //Check if there is another player at the same place
+<span class="fc bfc" id="L29" title="All 2 branches covered.">    for (Player other : state.getPlayers()) {</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">      if (other.getPosition().equals(to)) return false;</span>
+      //TODO : On doit modifier ici pour les sauts par dessus un autre joueur
+<span class="fc" id="L32">    }</span>
+
+    //Check is there is an edge between the two vertices.
+<span class="fc" id="L35">    int currentId = b.id(p.getPosition().row(), p.getPosition().col());</span>
+<span class="fc" id="L36">    int targetId = b.id(to.row(), to.col());</span>
+
+<span class="fc" id="L38">    return b.getGraph().hasEdge(currentId, targetId);</span>
+  }
+
+  private static boolean wallMoveLegal(GameState state, Move move) {
+<span class="fc" id="L42">    Player p = state.currentPlayer();</span>
+<span class="fc" id="L43">    Board b = state.getBoard();</span>
+
+    //Has the player enough walls
+<span class="fc bfc" id="L46" title="All 2 branches covered.">    if (p.getRemainingWalls() &lt;= 0) return false;</span>
+
+    //Is there a collision between two walls
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    if (b.isWallCollision(move.getTo(), move.getOrientation())) return false;</span>
+
+    //Do all players still have a path to victory
+<span class="fc" id="L52">    return doesPathExist(state, move); //TODO</span>
+  }
+
+  private static boolean doesPathExist(GameState state, Move move) {
+    //TODO
+<span class="fc" id="L57">    return true;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

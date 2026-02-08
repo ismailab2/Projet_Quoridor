@@ -6,33 +6,54 @@ package fr.bordeaux.core;
  */
 public class RuleChecker {
 
+  private RuleChecker() {}
+
   public static boolean isMoveLegal(GameState state, Move move) {
-    return move.getType() == Move.Type.PAWN
-        ? pawnMoveLegal(state, move.getTo())
-        : wallMoveLegal(state, move.getWall());
+    if (move.isPawn()) {
+      return pawnMoveLegal(state, move);
+    } else {
+      return wallMoveLegal(state, move);
+    }
   }
 
-  private static boolean pawnMoveLegal(GameState state, Position to) {
+
+  private static boolean pawnMoveLegal(GameState state, Move move) {
+    Player p = state.currentPlayer();
+    Board b = state.getBoard();
+    Position to = move.getTo();
+
+    //Check if position is inside the board
+    if (!b.isInside(to)) return false;
+
+    //Check if there is another player at the same place
+    for (Player other : state.getPlayers()) {
+      if (other.getPosition().equals(to)) return false;
+      //TODO : On doit modifier ici pour les sauts par dessus un autre joueur
+    }
+
+    //Check is there is an edge between the two vertices.
+    int currentId = b.id(p.getPosition().row(), p.getPosition().col());
+    int targetId = b.id(to.row(), to.col());
+
+    return b.getGraph().hasEdge(currentId, targetId);
+  }
+
+  private static boolean wallMoveLegal(GameState state, Move move) {
     Player p = state.currentPlayer();
     Board b = state.getBoard();
 
-    if (!b.isInside(to)) return false;
-    if (b.getCell(to).getPlayer() != null) return false;
-
-    Position from = p.getPosition();
-    int dx = Math.abs(to.getX() - from.getX());
-    int dy = Math.abs(to.getY() - from.getY());
-
-    return dx + dy == 1;
-  }
-
-  private static boolean wallMoveLegal(GameState state, Wall wall) {
-    Player p = state.currentPlayer();
+    //Has the player enough walls
     if (p.getRemainingWalls() <= 0) return false;
 
-    for (Wall w : state.getBoard().getWalls()) {
-      if (w.conflictsWith(wall) || w.crosses(wall)) return false;
-    }
+    //Is there a collision between two walls
+    if (b.isWallCollision(move.getTo(), move.getOrientation())) return false;
+
+    //Do all players still have a path to victory
+    return doesPathExist(state, move); //TODO
+  }
+
+  private static boolean doesPathExist(GameState state, Move move) {
+    //TODO
     return true;
   }
 }

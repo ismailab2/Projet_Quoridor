@@ -5,17 +5,23 @@ package fr.bordeaux.core;
  * walls.
  */
 public class Player {
-  private String name;
+  private final String name;
   private Position position;
   private int remainingWalls = 10;
+  private final Position startingPosition;
 
   public Player(String name, Position positionStart) {
     this.name = name;
     this.position = positionStart;
+    this.startingPosition = positionStart;
   }
 
   public String getName() {
     return name;
+  }
+
+  public Position getStartingPosition() {
+    return startingPosition;
   }
 
   public Position getPosition() {

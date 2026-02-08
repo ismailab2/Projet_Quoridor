@@ -7,38 +7,42 @@ import org.junit.Test;
 
 public class MoveTest {
 
-  Move move, move1;
-  Position pos;
-  Wall wall;
+  private Move pawnMove;
+  private Move hWallMove;
+  private Move vWallMove;
 
   @Before
   public void setUp() {
-    pos = new Position(0, 0);
-    wall = new Wall(pos, Wall.Orientation.HORIZONTAL);
-    move = new Move(Move.Type.PAWN, pos, wall);
-    move1 = new Move(Move.Type.WALL, new Position(2, 2), wall);
+    pawnMove = Move.pawn(new Position(1, 1));
+    hWallMove = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    vWallMove = Move.wall(new Position(3, 3), Orientation.VERTICAL);
   }
 
   @Test
-  public void testMove() {
-    assertNotEquals(Move.Type.WALL, move.getType());
-    assertEquals(Move.Type.WALL, move1.getType());
-    assertEquals(pos, move.getTo());
-    assertEquals(wall, move1.getWall());
+  public void testMoveTypes() {
+    assertEquals(Move.Type.PAWN, pawnMove.getType());
+    assertEquals(Move.Type.WALL, hWallMove.getType());
+    assertEquals(Move.Type.WALL, vWallMove.getType());
+    assertTrue(pawnMove.isPawn());
+    assertTrue(hWallMove.isWall());
+    assertTrue(vWallMove.isWall());
   }
 
   @Test
-  public void testPawnMove() {
-    Position pos = new Position(0, 0);
-    assertEquals(pos, move.pawn(pos).getTo());
-    assertNotEquals(new Position(2, 3), move1.pawn(pos).getTo());
+  public void testPawnMoveData() {
+    assertEquals(new Position(1, 1), pawnMove.getTo());
+    assertNull(pawnMove.getOrientation());
   }
 
   @Test
-  public void testWallMove() {
-    Wall wall = new Wall(pos, Wall.Orientation.HORIZONTAL);
-    Wall wall1 = new Wall(new Position(2, 8), Wall.Orientation.HORIZONTAL);
-    assertEquals(wall, move.wall(wall).getWall());
-    assertNotEquals(wall1, move.wall(wall).getWall());
+  public void testHorizontalWallMoveData() {
+    assertEquals(new Position(2, 2), hWallMove.getTo());
+    assertEquals(Orientation.HORIZONTAL, hWallMove.getOrientation());
+  }
+
+  @Test
+  public void testVerticalWallMoveData() {
+    assertEquals(new Position(3, 3), vWallMove.getTo());
+    assertEquals(Orientation.VERTICAL, vWallMove.getOrientation());
   }
 }

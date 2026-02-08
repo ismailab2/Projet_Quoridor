@@ -21,7 +21,7 @@
         <tensorflow.version>0.5.0</tensorflow.version>
 
         <!-- default main class -->
-        <main.class>fr.bordeaux.gui.Main</main.class>
+        <main.class>fr.bordeaux.core.Main</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
@@ -182,7 +182,7 @@
         <profile>
             <id>cli</id>
             <properties>
-                <main.class>fr.bordeaux.gui.Main</main.class>
+                <main.class>fr.bordeaux.core.Main</main.class>
             </properties>
         </profile>
 
@@ -190,7 +190,7 @@
         <profile>
             <id>gui</id>
             <properties>
-                <main.class>fr.bordeaux.gui.Main</main.class>
+                <main.class>fr.bordeaux.core.Main</main.class>
             </properties>
         </profile>
 

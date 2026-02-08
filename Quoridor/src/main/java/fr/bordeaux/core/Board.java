@@ -1,112 +1,76 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.graph.GraphBuilder;
+import fr.bordeaux.graph.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/** Represents the Quoridor board. The board is a 9x9 grid of cells. */
+/** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
 public class Board {
 
-    public static final int SIZE = 9;
+    private final int size;
 
-    private final Cell[][] cells = new Cell[SIZE][SIZE];
-    private final List<Wall> walls = new ArrayList<>();
-    private final Map<Integer, List<Integer>> adjacency;
+    private final Graph graph;
 
-    public Board() {
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                cells[x][y] = new Cell(new Position(x, y));
+    public Board(int size) {
+        if (size < 3 || size > 15 || size % 2 == 0) {
+            throw new IllegalArgumentException("Size must be odd and between 3 and 15, but was : " + size);
+        }
+        //Create the graph representing the board
+        graph = GraphBuilder.buildEmptyGrid(size);
+        this.size = size;
+    }
+
+    public int id(int row, int col) {
+        return row * size + col;
+    }
+
+    //Method to add a wall by removing corresponding edges.
+    public void addWall(int row, int col, Orientation orientation) {
+        int u1 = id(row, col);
+        int u2 = id(row, col + 1);
+        int v1 = id(row + 1, col);
+        int v2 = id(row + 1, col + 1);
+        switch (orientation) {
+            case HORIZONTAL -> {
+                graph.removeEdge(u1, v1);
+                graph.removeEdge(u2, v2);
+            }
+            case VERTICAL -> {
+                graph.removeEdge(u1, u2);
+                graph.removeEdge(v1, v2);
             }
         }
-        adjacency = GraphBuilder.buildAdjacencyList();
     }
 
-    public Cell getCell(Position p) {
-        return cells[p.getX()][p.getY()];
+    //Check if position is inside the board.
+    public boolean isInside(Position position) {
+        return position.row() >= 0 && position.row() < size && position.col() >= 0 && position.col() < size;
     }
 
-    public boolean isInside(Position p) {
-        return p.getX() >= 0 && p.getX() < SIZE &&
-                p.getY() >= 0 && p.getY() < SIZE;
+    public Graph getGraph() {
+        return graph;
     }
 
-    public List<Wall> getWalls() {
-        return new ArrayList<>(walls);
+    public int getSize() {
+        return size;
     }
 
-    public void addWall(Wall wall) {
-        walls.add(wall);
-        applyWall(wall);
-    }
+    public boolean isWallCollision(Position to, Orientation orientation) {
+        int u1 = id(to.row(), to.col());
+        int u2 = id(to.row(), to.col() + 1);
+        int v1 = id(to.row() + 1, to.col());
+        int v2 = id(to.row()+ 1, to.col() + 1);
 
-    private void removeEdge(Position p1, Position p2) {
-        int u = GraphBuilder.id(p1.getX(), p1.getY());
-        int v = GraphBuilder.id(p2.getX(), p2.getY());
-        adjacency.get(u).remove(Integer.valueOf(v));
-        adjacency.get(v).remove(Integer.valueOf(u));
-        System.out.println("l'arret  est supprimer apres le pose d'une mur");
-        System.out.println( "entre le sommet a la position " + u + " et sommet a la position " + v + "\n");
-    }
+        //Overlap : At least a part of the wall is colliding with another wall
+        //Cross : There is already a wall at the same place but different orientation, can't form a cross
+        boolean hOverlap = !graph.hasEdge(u1, v1) || !graph.hasEdge(u2, v2);
+        boolean hCross = !graph.hasEdge(u1, u2) && !graph.hasEdge(v1, v2);
 
-    private void applyWall(Wall w) {
-        int x = w.getPosition().getX();
-        int y = w.getPosition().getY();
+        boolean vOverlap = !graph.hasEdge(u1, u2) || !graph.hasEdge(v1, v2);
+        boolean vCross = !graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2);
 
-        if (w.getOrientation() == Wall.Orientation.HORIZONTAL) {
-            cells[x][y].setBottomWall(true);
-            cells[x + 1][y].setBottomWall(true);
-            cells[x][y + 1].setTopWall(true);
-            cells[x + 1][y + 1].setTopWall(true);
-
-            removeEdge(new Position(x, y), new Position(x, y + 1));
-            removeEdge(new Position(x + 1, y), new Position(x + 1, y + 1));
-
-        } else {
-            cells[x][y].setRightWall(true);
-            cells[x][y + 1].setRightWall(true);
-            cells[x + 1][y].setLeftWall(true);
-            cells[x + 1][y + 1].setLeftWall(true);
-
-            removeEdge(new Position(x, y), new Position(x + 1, y));
-            removeEdge(new Position(x, y + 1), new Position(x + 1, y + 1));
-        }
-    }
-
-    public List<Integer> getNeighbors(Position p) {
-        int id = GraphBuilder.id(p.getX(), p.getY());
-        return adjacency.get(id);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Board:\n");
-
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                sb.append(cells[j][i].hasTopWall() ? "---" : "   ");
-                sb.append(" ");
-            }
-            sb.append("\n");
-
-            for (int k = 0; k < SIZE; k++) {
-                sb.append(cells[k][i].hasLeftWall() ? "|" : " ");
-                Player p = cells[k][i].getPlayer();
-                sb.append(p != null ? " " + p.getName().charAt(0) + " " : " . ");
-                sb.append(cells[k][i].hasRightWall() ? "|" : " ");
-            }
-            sb.append("\n");
-        }
-
-        for (int k = 0; k < SIZE; k++) {
-            sb.append(cells[k][SIZE - 1].hasBottomWall() ? "---" : "   ");
-            sb.append(" ");
-        }
-        sb.append("\n");
-
-        sb.append("Walls posés: ").append(walls.size());
-        return sb.toString();
+        return (orientation == Orientation.HORIZONTAL) ? hOverlap || hCross : vOverlap || vCross;
     }
 }

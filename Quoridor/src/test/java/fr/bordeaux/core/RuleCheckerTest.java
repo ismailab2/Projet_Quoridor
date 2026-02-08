@@ -13,45 +13,50 @@ public class RuleCheckerTest {
   private Player p2;
   private Board board;
 
-  @Before
+    @Before
   public void setUp() {
-    p1 = new Player("Alice", new Position(4, 0));
-    p2 = new Player("Bob", new Position(4, 8));
-
-    board = new Board();
+    p1 = new Player("Alice", new Position(0, 4));
+    p2 = new Player("Bob", new Position(8, 4));
+    int SIZE = 9;
+    board = new Board(SIZE);
     state = new GameState(board, List.of(p1, p2));
   }
 
   @Test
   public void testLegalPawnMove() {
-    Move move = Move.pawn(new Position(4, 1));
-    boolean legal = RuleChecker.isMoveLegal(state, move);
-    assertTrue(legal);
+    Move move = Move.pawn(new Position(1, 4));
+    assertTrue(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
   public void testPawnMoveOutsideBoard() {
-    Move move = Move.pawn(new Position(4, -1));
+    Move move = Move.pawn(new Position(-1, 4));
     assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
   public void testPawnMoveOnOccupiedCell() {
-    Move move = Move.pawn(new Position(4, 8));
+    p2.setPosition(new Position(1, 4));
+    Move move = Move.pawn(new Position(1, 4));
     assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
   public void testPawnMoveTooFar() {
-    Move move = Move.pawn(new Position(4, 3));
+    Move move = Move.pawn(new Position(2, 4));
+    assertFalse(RuleChecker.isMoveLegal(state, move));
+  }
+
+  @Test
+  public void testPawnMoveThroughWall() {
+    board.addWall(0, 4, Orientation.HORIZONTAL);
+    Move move = Move.pawn(new Position(1, 4));
     assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
   public void testLegalWallPlacement() {
-    Wall wall = new Wall(new Position(3, 3), Wall.Orientation.HORIZONTAL);
-    Move move = Move.wall(wall);
-
+    Move move = Move.wall(new Position(3, 3), Orientation.HORIZONTAL);
     assertTrue(RuleChecker.isMoveLegal(state, move));
   }
 
@@ -60,57 +65,27 @@ public class RuleCheckerTest {
     for (int i = 0; i < 10; i++) {
       p1.useWall();
     }
-    Wall wall = new Wall(new Position(3, 3), Wall.Orientation.HORIZONTAL);
-    Move move = Move.wall(wall);
+    Move move = Move.wall(new Position(3, 3), Orientation.HORIZONTAL);
     assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
   public void testWallConflict() {
-    Wall existing = new Wall(new Position(2, 2), Wall.Orientation.HORIZONTAL);
-    board.addWall(existing);
-    Wall same = new Wall(new Position(2, 2), Wall.Orientation.HORIZONTAL);
-    Move move = Move.wall(same);
+    board.addWall(2, 2, Orientation.HORIZONTAL);
+    Move move = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
     assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
   public void testWallCrossing() {
-    Wall horizontal = new Wall(new Position(5, 5), Wall.Orientation.HORIZONTAL);
-    board.addWall(horizontal);
-    Wall vertical = new Wall(new Position(5, 5), Wall.Orientation.VERTICAL);
-    Move move = Move.wall(vertical);
+    board.addWall(5, 5, Orientation.HORIZONTAL);
+    Move move = Move.wall(new Position(5, 5), Orientation.VERTICAL);
     assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 
   @Test
-  public void testPawnMoveLegalBranches() {
-    board.getCell(p1.getPosition()).setPlayer(p1);
-    board.getCell(p2.getPosition()).setPlayer(p2);
-    GameState state = new GameState(board, List.of(p1, p2));
-
-    assertFalse(RuleChecker.isMoveLegal(state, Move.pawn(new Position(4, -1))));
-    assertFalse(RuleChecker.isMoveLegal(state, Move.pawn(new Position(4, 8))));
-    assertTrue(RuleChecker.isMoveLegal(state, Move.pawn(new Position(4, 1))));
-  }
-
-  @Test
-  public void testWallMoveLegalBranches() {
-
-    GameState state = new GameState(board, List.of(p1, p2));
-    Wall existing = new Wall(new Position(2, 2), Wall.Orientation.HORIZONTAL);
-    board.addWall(existing);
-    for (int i = 0; i < 10; i++) p1.useWall();
-    assertFalse(
-        RuleChecker.isMoveLegal(
-            state, Move.wall(new Wall(new Position(3, 3), Wall.Orientation.HORIZONTAL))));
-    p1 = new Player("Alice", new Position(4, 0));
-    state = new GameState(board, List.of(p1, p2));
-    Wall conflict = new Wall(new Position(2, 2), Wall.Orientation.HORIZONTAL);
-    assertFalse(RuleChecker.isMoveLegal(state, Move.wall(conflict)));
-    Wall cross = new Wall(new Position(2, 2), Wall.Orientation.VERTICAL);
-    assertFalse(RuleChecker.isMoveLegal(state, Move.wall(cross)));
-    Wall legal = new Wall(new Position(3, 3), Wall.Orientation.HORIZONTAL);
-    assertTrue(RuleChecker.isMoveLegal(state, Move.wall(legal)));
+  public void testPawnMoveDiagonalIllegal() {
+    Move move = Move.pawn(new Position(1, 5));
+    assertFalse(RuleChecker.isMoveLegal(state, move));
   }
 }

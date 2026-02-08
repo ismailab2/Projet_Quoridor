@@ -1,7 +1,7 @@
 package fr.bordeaux.core;
 
 /**
- * Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe for
+ * Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe
  */
 public class Move {
 
@@ -12,31 +12,34 @@ public class Move {
 
   private final Type type;
   private final Position to;
-  private final Wall wall;
+  private final Orientation orientation;
 
-  Move(Type type, Position to, Wall wall) {
+  private Move(Type type, Position to, Orientation orientation) {
     this.type = type;
     this.to = to;
-    this.wall = wall;
+    this.orientation = orientation;
   }
 
   public static Move pawn(Position to) {
     return new Move(Type.PAWN, to, null);
   }
 
-  public static Move wall(Wall wall) {
-    return new Move(Type.WALL, null, wall);
+  public static Move wall(Position to, Orientation orientation) {
+    return new Move(Type.WALL, to, orientation);
   }
 
   public Type getType() {
     return type;
   }
-
   public Position getTo() {
     return to;
   }
+  public Orientation getOrientation() {return orientation;}
 
-  public Wall getWall() {
-    return wall;
+  public boolean isWall() {
+    return type == Type.WALL;
+  }
+  public boolean isPawn() {
+    return type == Type.PAWN;
   }
 }
