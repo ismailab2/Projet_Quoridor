@@ -32,4 +32,9 @@ public class QuitCommand implements Command {
             return;
         }
     }
+
+    @Override
+    public void helpText() {
+        System.out.println("Text for quit command");
+    }
 }
