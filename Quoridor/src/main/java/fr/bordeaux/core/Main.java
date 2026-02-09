@@ -2,11 +2,16 @@ package fr.bordeaux.core;
 
 import java.util.List;
 
+import fr.bordeaux.cli.CliApp;
 import static fr.bordeaux.core.Orientation.*;
 
 public class Main {
 
   public static void main(String[] args) {
+    
+    CliApp cli = new CliApp();
+    cli.run();
+
     int size = 9;
 
     Player p1 = new Player("Alice", new Position(0, 4));
