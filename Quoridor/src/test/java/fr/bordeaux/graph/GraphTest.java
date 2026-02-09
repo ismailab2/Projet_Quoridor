@@ -46,6 +46,28 @@ public class GraphTest {
         assertTrue(graph.hasEdge(1, 2));
     }
 
+    @Test
+    public void testAddEdgeIsSymmetric() {
+        assertFalse(graph.hasEdge(0, 2));
+
+        graph.addEdge(0, 2);
+
+        assertTrue(graph.hasEdge(0, 2));
+        assertTrue(graph.hasEdge(2, 0));
+
+        assertTrue(graph.getNeighbors(0).contains(2));
+        assertTrue(graph.getNeighbors(2).contains(1));
+        assertTrue(graph.getNeighbors(2).contains(0));
+    }
+
+    @Test
+    public void testAddEdgeDoesNotDuplicate() {
+        int initialSize = graph.getNeighbors(0).size();
+        graph.addEdge(0, 1);
+
+        assertEquals(initialSize, graph.getNeighbors(0).size());
+    }
+
     @Test(expected = NullPointerException.class)
     public void testHasEdgeWithInvalidVertex() {
         graph.hasEdge(99, 1);

@@ -3,6 +3,8 @@ package fr.bordeaux.core;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.function.Predicate;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -123,5 +125,58 @@ public class GameStateTest {
     assertFalse(gameState4.isGameOver());
     p3.setPosition(new Position(4, SIZE - 1));
     assertTrue(gameState4.isGameOver());
+  }
+
+  @Test
+  public void testGetWinConditionTopPlayer() {
+    // Starting first row (0), win last row (8)
+    Player alice = new Player("Alice", new Position(0, 4));
+    Predicate<Integer> win = gameState.getWinCondition(alice);
+
+    assertTrue(win.test(board.id(8, 0)));
+    assertTrue(win.test(board.id(8, 4)));
+    assertTrue(win.test(board.id(8, 8)));
+
+    assertFalse(win.test(board.id(0, 4)));
+    assertFalse(win.test(board.id(7, 4)));
+  }
+
+  @Test
+  public void testGetWinConditionBottomPlayer() {
+    // Starting last row (8), win first row (0)
+    Player bob = new Player("Bob", new Position(8, 4));
+    Predicate<Integer> win = gameState.getWinCondition(bob);
+
+    assertTrue(win.test(board.id(0, 0)));
+    assertTrue(win.test(board.id(0, 8)));
+
+    assertFalse(win.test(board.id(8, 4)));
+    assertFalse(win.test(board.id(1, 4)));
+  }
+
+  @Test
+  public void testGetWinConditionLeftPlayer() {
+    // Starting first column (0), win right column (8)
+    Player charlie = new Player("Charlie", new Position(4, 0));
+    Predicate<Integer> win = gameState.getWinCondition(charlie);
+
+    assertTrue(win.test(board.id(0, 8)));
+    assertTrue(win.test(board.id(8, 8)));
+
+    assertFalse(win.test(board.id(4, 0)));
+    assertFalse(win.test(board.id(4, 7)));
+  }
+
+  @Test
+  public void testGetWinConditionRightPlayer() {
+    // Starting last column (8), win first column (0)
+    Player david = new Player("David", new Position(4, 8));
+    Predicate<Integer> win = gameState.getWinCondition(david);
+
+    assertTrue(win.test(board.id(0, 0)));
+    assertTrue(win.test(board.id(8, 0)));
+
+    assertFalse(win.test(board.id(4, 8)));
+    assertFalse(win.test(board.id(4, 1)));
   }
 }

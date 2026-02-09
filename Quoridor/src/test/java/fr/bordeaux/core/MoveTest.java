@@ -24,6 +24,7 @@ public class MoveTest {
     assertEquals(Move.Type.WALL, hWallMove.getType());
     assertEquals(Move.Type.WALL, vWallMove.getType());
     assertTrue(pawnMove.isPawn());
+    assertFalse(pawnMove.isWall());
     assertTrue(hWallMove.isWall());
     assertTrue(vWallMove.isWall());
   }
