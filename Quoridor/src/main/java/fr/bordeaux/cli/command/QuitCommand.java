@@ -23,7 +23,10 @@ public class QuitCommand implements Command {
             String save = reader.readLine("Path where you want to save it >> ");
             return;
         } else {
-            System.out.println("Unrecognizable answer... Game not saved.");
+            if (line.toLowerCase().equals("n") || line.toLowerCase().equals("no")) {
+                System.out.println("You choose to not save...");
+            }
+            else { System.out.println("Unrecognizable answer... Game not saved."); }
             try { terminal.close(); }
             catch (IOException e) { e.printStackTrace(); }
             return;

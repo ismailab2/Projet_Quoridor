@@ -11,7 +11,7 @@ public class HelpCommand implements Command {
 
     @Override
     public void execute() {
-        if (tokens == null) { System.out.println("Pas de commande\n"); }
+        if (tokens == null || tokens.length == 1) { System.out.println("Pas de commande\n"); }
         else {
             for (int i = 1; i < tokens.length; i++) {
                 System.out.println(i + ": " + tokens[i]);
