@@ -1,6 +1,7 @@
 package fr.bordeaux.core;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Represents the state of a Quoridor game. Manages the board, players, current player, and move
@@ -24,7 +25,7 @@ public class GameState {
     if (move.isPawn()) {
       currentPlayer().setPosition(move.getTo());
     } else {
-      board.addWall(move.getTo().row(), move.getTo().col(), move.getOrientation());
+      board.addWall(move.getTo(), move.getOrientation());
       currentPlayer().useWall();
     }
     nextPlayer();
@@ -39,24 +40,34 @@ public class GameState {
     return false;
   }
 
+  //Returns if a player has won the game, uses predicate from getWinCondition
   public boolean hasReachedGoal(Player player) {
-    Position startingPosition = player.getStartingPosition();
-    Position actualPosition = player.getPosition();
+    int currentId = board.id(player.getPosition().row(), player.getPosition().col());
+    return getWinCondition(player).test(currentId);
+  }
+
+  //Returns the predicate for a player to win, used in BFS
+  public Predicate<Integer> getWinCondition(Player player) {
+    Position start = player.getStartingPosition();
+    int size = board.getSize();
+
     //Start first line, middle column
-    if (startingPosition.row() == 0) {
-        return actualPosition.row() == board.getSize() - 1;
+    if (start.row() == 0) {
+      return id -> (id / size) == size - 1; //Last row
     }
+
     //Start last line, middle column
-    else if (startingPosition.row() == board.getSize() - 1) {
-      return actualPosition.row() == 0;
+    else if (start.row() == size - 1) {
+      return id -> (id / size) == 0; //first row
     }
+
     //Start first column, middle line
-    else if (startingPosition.col() == 0) {
-      return actualPosition.col() == board.getSize() - 1;
+    else if (start.col() == 0) {
+      return id -> (id % size) == size - 1; //Last column
     }
     //Start last column, middle line
-    else  {
-      return actualPosition.col() == 0;
+    else {
+      return id -> (id % size) == 0; //First column
     }
   }
 
