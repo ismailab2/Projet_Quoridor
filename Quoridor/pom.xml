@@ -41,6 +41,12 @@
             <artifactId>commons-cli</artifactId>
             <version>1.6.0</version>
         </dependency>
+                <!-- CLI Terminal -->
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.30.6</version>
+        </dependency>
 
         <!-- JavaFX -->
         <dependency>
