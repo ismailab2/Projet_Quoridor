@@ -19,33 +19,28 @@ public class CliApp {
     private LineReader reader;
 
     public void run() {
-        while (running) {
-            try {
-                terminal = TerminalBuilder.builder().system(true).build();
-                reader = LineReaderBuilder.builder().terminal(terminal).build();
+        try {
+            terminal = TerminalBuilder.builder().system(true).build();
+            reader = LineReaderBuilder.builder().terminal(terminal).build();
+            while (running) {
                 String line = reader.readLine(">> ");
                 fetch(line);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        }
+            terminal.close();
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void fetch(String input) {
         System.out.println("Phrase reçu : \"" + input + "\"\n");
         String[] tokens = input.trim().split("\\s+");
         String command = tokens[0].toLowerCase();
+        Command cmd = null;
         switch (command) {
-            case "help": {
-                Command help = new HelpCommand(tokens);
-                help.execute();
-            }
-            case "quit": {
-                Command quit = new QuitCommand(terminal, reader);
-                quit.execute();               
-            }
+            case "help": { cmd = new HelpCommand(tokens); break; }
+            case "quit": { cmd = new QuitCommand(terminal, reader); this.running = false; break; }
             default: ;
         }
+        cmd.execute();
     }
 
     /* // A modifier (travail de Cengiz)
