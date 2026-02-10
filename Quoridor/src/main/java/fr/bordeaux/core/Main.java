@@ -10,18 +10,18 @@ import java.util.List;
 public class Main {
 
   public static void main(String[] args) {
-    
-    CliApp cli = new CliApp();
-    cli.run();
 
     int size = 9;
 
-    Player p1 = new Player("Alice", new Position(0, 4));
-    Player p2 = new Player("Bob", new Position(8, 4));
-
     Board board = new Board(size);
+    Player p1 = new Player("Alice", new Position(0, 4));
+    Player p2 = new Player("Bob", new Position(6, 4));
     GameState state = new GameState(board, List.of(p1, p2));
     GameEngine engine = new GameEngine(state);
+    
+    CliApp cli = new CliApp(engine);
+    cli.run();
+
 
     System.out.println("--- Début de la partie de Quoridor ---");
     System.out.println("Plateau de taille : " + board.getSize());
