@@ -1,6 +1,6 @@
 package fr.bordeaux.core;
 
-public enum  Orientation {
-    HORIZONTAL,
-    VERTICAL;
+public enum Orientation {
+  HORIZONTAL,
+  VERTICAL;
 }

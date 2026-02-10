@@ -23,16 +23,36 @@ public class BoardTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void testInvalidBoardSizeTooSmall() {
+    new Board(1); // Too small (less than 3)
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidBoardSizeTooLarge() {
+    new Board(17); // Too large (greater than 15)
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void testInvalidBoardSizeEven() {
-    new Board(8);
+    new Board(8); // Even number (must be odd)
   }
 
   @Test
   public void testIsInside() {
-    assertTrue(board.isInside(new Position(0, 0)));
-    assertTrue(board.isInside(new Position(8, 8)));
-    assertFalse(board.isInside(new Position(-1, 4)));
-    assertFalse(board.isInside(new Position(9, 4)));
+    // Valid positions
+    assertTrue(board.isInside(new Position(0, 0))); // Top Left
+    assertTrue(board.isInside(new Position(0, SIZE - 1))); // Top Right
+    assertTrue(board.isInside(new Position(SIZE - 1, 0))); // Bottom Left
+    assertTrue(board.isInside(new Position(SIZE - 1, SIZE - 1))); // Bottom Right
+    assertTrue(board.isInside(new Position(SIZE / 2, SIZE / 2))); // Center
+
+    // Invalid positions
+    assertFalse(board.isInside(new Position(-1, 4))); // Outside Top
+    assertFalse(board.isInside(new Position(SIZE, 4))); // Outside Bottom
+    assertFalse(board.isInside(new Position(4, -1))); // Outside Left
+    assertFalse(board.isInside(new Position(4, SIZE))); // Outside Right
+    assertFalse(board.isInside(new Position(-1, -1))); // Outside Top Left diagonal
+    assertFalse(board.isInside(new Position(SIZE, SIZE))); // Outside Bottom Right diagonal
   }
 
   @Test
@@ -44,9 +64,8 @@ public class BoardTest {
 
   @Test
   public void testAddHorizontalWallRemovesEdges() {
-    int row = 2;
-    int col = 2;
-    board.addWall(row, col, Orientation.HORIZONTAL);
+    Position position = new Position(2, 2);
+    board.addWall(position, Orientation.HORIZONTAL);
 
     Graph g = board.getGraph();
 
@@ -57,9 +76,8 @@ public class BoardTest {
 
   @Test
   public void testAddVerticalWallRemovesEdges() {
-    int row = 4;
-    int col = 1;
-    board.addWall(row, col, Orientation.VERTICAL);
+    Position position = new Position(4, 1);
+    board.addWall(position, Orientation.VERTICAL);
 
     Graph g = board.getGraph();
 
@@ -70,7 +88,8 @@ public class BoardTest {
 
   @Test
   public void testHorizontalWallCollision() {
-    board.addWall(2, 2, Orientation.HORIZONTAL);
+    Position position = new Position(2, 2);
+    board.addWall(position, Orientation.HORIZONTAL);
 
     // Overlap
     assertTrue(board.isWallCollision(new Position(2, 2), Orientation.HORIZONTAL));
@@ -89,7 +108,8 @@ public class BoardTest {
 
   @Test
   public void testVerticalWallCollision() {
-    board.addWall(4, 4, Orientation.VERTICAL);
+    Position position = new Position(4, 4);
+    board.addWall(position, Orientation.VERTICAL);
 
     // Overlap
     assertTrue(board.isWallCollision(new Position(4, 4), Orientation.VERTICAL));
@@ -108,10 +128,39 @@ public class BoardTest {
 
   @Test
   public void testNoCollisionWhenWallsAreParallelAdjacent() {
-    board.addWall(1, 1, Orientation.HORIZONTAL);
+    Position position = new Position(1, 1);
+    board.addWall(position, Orientation.HORIZONTAL);
 
     // Valid cases
     assertFalse(board.isWallCollision(new Position(0, 1), Orientation.HORIZONTAL));
     assertFalse(board.isWallCollision(new Position(2, 1), Orientation.HORIZONTAL));
+  }
+
+  @Test
+  public void testRemoveHorizontalWallRestoresEdges() {
+    Position pos = new Position(2, 2);
+    board.addWall(pos, Orientation.HORIZONTAL);
+
+    assertFalse(board.getGraph().hasEdge(board.id(2, 2), board.id(3, 2)));
+    assertFalse(board.getGraph().hasEdge(board.id(2, 3), board.id(3, 3)));
+
+    board.removeWall(pos, Orientation.HORIZONTAL);
+
+    assertTrue(board.getGraph().hasEdge(board.id(2, 2), board.id(3, 2)));
+    assertTrue(board.getGraph().hasEdge(board.id(2, 3), board.id(3, 3)));
+  }
+
+  @Test
+  public void testRemoveVerticalWallRestoresEdges() {
+    Position pos = new Position(4, 1);
+    board.addWall(pos, Orientation.VERTICAL);
+
+    assertFalse(board.getGraph().hasEdge(board.id(4, 1), board.id(4, 2)));
+    assertFalse(board.getGraph().hasEdge(board.id(5, 1), board.id(5, 2)));
+
+    board.removeWall(pos, Orientation.VERTICAL);
+
+    assertTrue(board.getGraph().hasEdge(board.id(4, 1), board.id(4, 2)));
+    assertTrue(board.getGraph().hasEdge(board.id(5, 1), board.id(5, 2)));
   }
 }

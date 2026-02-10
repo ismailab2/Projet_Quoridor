@@ -48,11 +48,23 @@ public class RuleChecker {
     if (b.isWallCollision(move.getTo(), move.getOrientation())) return false;
 
     // Do all players still have a path to victory
-    return doesPathExist(state, move); // TODO
+    return doesPathExist(state, move);
   }
 
+  // Check if a path still exists after applying a move, move must be a wall move.
   private static boolean doesPathExist(GameState state, Move move) {
-    // TODO
-    return true;
+    Board b = state.getBoard();
+    b.addWall(move.getTo(), move.getOrientation());
+
+    boolean canWin = true;
+    for (Player p : state.getPlayers()) {
+      int startId = b.id(p.getPosition().getX(), p.getPosition().getY());
+      if (b.findPath(startId, state.getWinCondition(p)).isEmpty()) {
+        canWin = false;
+        break;
+      }
+    }
+    b.removeWall(move.getTo(), move.getOrientation());
+    return canWin;
   }
 }

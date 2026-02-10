@@ -22,4 +22,9 @@ public class Graph {
   public boolean hasEdge(int currentId, int targetId) {
     return adjacencyList.get(currentId).contains(targetId);
   }
+
+  public void addEdge(int u, int v) {
+    if (!adjacencyList.get(u).contains(v)) adjacencyList.get(u).add(v);
+    if (!adjacencyList.get(v).contains(u)) adjacencyList.get(v).add(u);
+  }
 }
