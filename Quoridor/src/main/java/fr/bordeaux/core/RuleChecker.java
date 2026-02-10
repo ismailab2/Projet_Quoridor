@@ -16,24 +16,23 @@ public class RuleChecker {
     }
   }
 
-
   private static boolean pawnMoveLegal(GameState state, Move move) {
     Player p = state.currentPlayer();
     Board b = state.getBoard();
     Position to = move.getTo();
 
-    //Check if position is inside the board
+    // Check if position is inside the board
     if (!b.isInside(to)) return false;
 
-    //Check if there is another player at the same place
+    // Check if there is another player at the same place
     for (Player other : state.getPlayers()) {
       if (other.getPosition().equals(to)) return false;
-      //TODO : On doit modifier ici pour les sauts par dessus un autre joueur
+      // TODO : On doit modifier ici pour les sauts par dessus un autre joueur
     }
 
-    //Check is there is an edge between the two vertices.
-    int currentId = b.id(p.getPosition().row(), p.getPosition().col());
-    int targetId = b.id(to.row(), to.col());
+    // Check is there is an edge between the two vertices.
+    int currentId = b.id(p.getPosition().getX(), p.getPosition().getY());
+    int targetId = b.id(to.getX(), to.getY());
 
     return b.getGraph().hasEdge(currentId, targetId);
   }
@@ -42,18 +41,18 @@ public class RuleChecker {
     Player p = state.currentPlayer();
     Board b = state.getBoard();
 
-    //Has the player enough walls
+    // Has the player enough walls
     if (p.getRemainingWalls() <= 0) return false;
 
-    //Is there a collision between two walls
+    // Is there a collision between two walls
     if (b.isWallCollision(move.getTo(), move.getOrientation())) return false;
 
-    //Do all players still have a path to victory
-    return doesPathExist(state, move); //TODO
+    // Do all players still have a path to victory
+    return doesPathExist(state, move); // TODO
   }
 
   private static boolean doesPathExist(GameState state, Move move) {
-    //TODO
+    // TODO
     return true;
   }
 }

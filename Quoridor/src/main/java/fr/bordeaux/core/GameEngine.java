@@ -5,30 +5,29 @@ package fr.bordeaux.core;
  * rule checking, moves, and turn management.
  */
 public class GameEngine {
+    private final GameState state;
 
-  private final GameState state;
-
-  public GameEngine(GameState state) {
-    this.state = state;
-  }
-
-  public boolean play(Move move) {
-    if (state.isGameOver()) {
-      System.out.println("GAME OVER");
-      return false;
+    public GameEngine(GameState state) {
+        this.state = state;
     }
 
-    if (!RuleChecker.isMoveLegal(state, move)) return false;
+    public boolean play(Move move) {
+        if (state.isGameOver()) {
+            System.out.println("GAME OVER");
+            return false;
+        }
 
-    Player p = state.currentPlayer();
-    state.applyMove(move);
-    if (state.hasReachedGoal(p)) {
-      System.out.println(p.getName() + " won the game!");
+        if (!RuleChecker.isMoveLegal(state, move)) return false;
+
+        Player p = state.currentPlayer();
+        state.applyMove(move);
+        if (state.hasReachedGoal(p)) {
+            System.out.println(p.getName() + " won the game!");
+        }
+        return true;
     }
-    return true;
-  }
 
-  public GameState getState() {
-    return state;
-  }
+    public GameState getState() {
+        return state;
+    }
 }

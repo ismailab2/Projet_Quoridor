@@ -15,7 +15,7 @@ public class GameEngineTest {
   private GameEngine engine;
   private final int SIZE = 9;
 
-    @Before
+  @Before
   public void setUp() {
     p1 = new Player("Alice", new Position(0, 4));
     p2 = new Player("Bob", new Position(8, 4));
@@ -88,6 +88,6 @@ public class GameEngineTest {
 
   @Test
   public void testGetterState() {
-      assertEquals(state, engine.getState());
+    assertEquals(state, engine.getState());
   }
 }

@@ -2,9 +2,9 @@ package fr.bordeaux.core;
 
 import static org.junit.Assert.*;
 
+import fr.bordeaux.graph.Graph;
 import org.junit.Before;
 import org.junit.Test;
-import fr.bordeaux.graph.Graph;
 
 public class BoardTest {
 
@@ -39,7 +39,7 @@ public class BoardTest {
   public void testIdConversion() {
     assertEquals(0, board.id(0, 0));
     assertEquals(SIZE + 1, board.id(1, 1));
-    assertEquals((SIZE * SIZE) - 1, board.id(8, 8)); //63
+    assertEquals((SIZE * SIZE) - 1, board.id(8, 8)); // 63
   }
 
   @Test
@@ -110,7 +110,7 @@ public class BoardTest {
   public void testNoCollisionWhenWallsAreParallelAdjacent() {
     board.addWall(1, 1, Orientation.HORIZONTAL);
 
-    //Valid cases
+    // Valid cases
     assertFalse(board.isWallCollision(new Position(0, 1), Orientation.HORIZONTAL));
     assertFalse(board.isWallCollision(new Position(2, 1), Orientation.HORIZONTAL));
   }

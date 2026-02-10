@@ -21,7 +21,7 @@
         <tensorflow.version>0.5.0</tensorflow.version>
 
         <!-- default main class -->
-        <main.class>fr.bordeaux.core.Main</main.class>
+        <main.class>fr.bordeaux.gui.MainApp</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
@@ -75,7 +75,6 @@
                     <release>${java.version}</release>
                     <source>21</source>
                     <target>21</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
 
@@ -172,6 +171,15 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>fr.bordeaux.gui.MainApp</mainClass>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -182,7 +190,7 @@
         <profile>
             <id>cli</id>
             <properties>
-                <main.class>fr.bordeaux.core.Main</main.class>
+                <main.class>fr.bordeaux.gui.MainApp</main.class>
             </properties>
         </profile>
 
@@ -190,7 +198,7 @@
         <profile>
             <id>gui</id>
             <properties>
-                <main.class>fr.bordeaux.core.Main</main.class>
+                <main.class>fr.bordeaux.gui.MainApp</main.class>
             </properties>
         </profile>
 

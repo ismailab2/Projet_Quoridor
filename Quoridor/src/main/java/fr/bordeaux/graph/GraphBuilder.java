@@ -28,7 +28,7 @@ public class GraphBuilder {
         if (col < size - 1) addUndirectedEdge(adj, u, row * size + (col + 1));
       }
     }
-    return new  Graph(adj);
+    return new Graph(adj);
   }
 
   // Adds an undirected edge between vertices u and v

@@ -1,8 +1,6 @@
 package fr.bordeaux.core;
 
-/**
- * Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe
- */
+/** Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe */
 public class Move {
 
   public enum Type {
@@ -31,14 +29,19 @@ public class Move {
   public Type getType() {
     return type;
   }
+
   public Position getTo() {
     return to;
   }
-  public Orientation getOrientation() {return orientation;}
+
+  public Orientation getOrientation() {
+    return orientation;
+  }
 
   public boolean isWall() {
     return type == Type.WALL;
   }
+
   public boolean isPawn() {
     return type == Type.PAWN;
   }

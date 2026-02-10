@@ -1,8 +1,8 @@
 package fr.bordeaux.core;
 
-import java.util.List;
-
 import static fr.bordeaux.core.Orientation.*;
+
+import java.util.List;
 
 public class Main {
 
