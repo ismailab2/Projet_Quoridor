@@ -1,6 +1,8 @@
 package main.java.fr.bordeaux.cli.command;
 
+import fr.bordeaux.core.GameEngine;
+
 public interface Command {
-    void execute();
+    GameEngine execute(GameEngine engine);
     void helpText();
 }
