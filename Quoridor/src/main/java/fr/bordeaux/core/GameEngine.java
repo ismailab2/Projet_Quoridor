@@ -11,7 +11,8 @@ public class GameEngine {
     this.state = state;
   }
 
-  public boolean play(Move move) {
+
+    public boolean play(Move move) {
     if (state.isGameOver()) {
       System.out.println("GAME OVER");
       return false;
@@ -27,7 +28,18 @@ public class GameEngine {
     return true;
   }
 
+
   public GameState getState() {
     return state;
   }
+
+
+public static void startGame() { System.out.println("Nouvelle partie lancée !"); }
+public static void loadGame() { System.out.println("Charger une partie !"); }
+public static void saveGame() { System.out.println("Partie sauvegardée !"); }
+public static void undo() { System.out.println("Undo !"); }
+public static void redo() { System.out.println("Redo !"); }
+public static void pause() { System.out.println("Pause !"); }
+public static void hint() { System.out.println("Hint !"); }
+
 }
