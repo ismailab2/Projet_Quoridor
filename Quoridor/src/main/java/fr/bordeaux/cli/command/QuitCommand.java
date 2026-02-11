@@ -9,6 +9,8 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
+import fr.bordeaux.core.GameEngine;
+
 public class QuitCommand implements Command {
 
     private Terminal terminal;
@@ -17,11 +19,12 @@ public class QuitCommand implements Command {
     public QuitCommand(Terminal t, LineReader r) { terminal = t; reader = r; }
 
     @Override
-    public void execute() {
+    public GameEngine execute(GameEngine engine) {
+
         String line = reader.readLine("Save the game before quitting? [y/N] >> ");
         if (line.toLowerCase().equals("y") || line.toLowerCase().equals("yes")) {
             String save = reader.readLine("Path where you want to save it >> ");
-            return;
+            return engine;
         } else {
             if (line.toLowerCase().equals("n") || line.toLowerCase().equals("no")) {
                 System.out.println("You choose to not save...");
@@ -29,7 +32,7 @@ public class QuitCommand implements Command {
             else { System.out.println("Unrecognizable answer... Game not saved."); }
             try { terminal.close(); }
             catch (IOException e) { e.printStackTrace(); }
-            return;
+            return engine;
         }
     }
 

@@ -1,5 +1,6 @@
 package fr.bordeaux.cli.command;
 
+import fr.bordeaux.core.GameEngine;
 import main.java.fr.bordeaux.cli.command.Command;
 
 public class HelpCommand implements Command {
@@ -10,13 +11,14 @@ public class HelpCommand implements Command {
     public HelpCommand(String[] t) { this.tokens = t; }
 
     @Override
-    public void execute() {
+    public GameEngine execute(GameEngine engine) {
         if (tokens == null || tokens.length == 1) { System.out.println("Pas de commande\n"); }
         else {
             for (int i = 1; i < tokens.length; i++) {
                 System.out.println(i + ": " + tokens[i]);
             }
         }
+        return engine;
     }
 
     @Override

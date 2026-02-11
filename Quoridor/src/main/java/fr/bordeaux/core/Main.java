@@ -13,7 +13,7 @@ public class Main {
 
     Board board = new Board(size);
     Player p1 = new Player("Alice", new Position(0, 4));
-    Player p2 = new Player("Bob", new Position(6, 4));
+    Player p2 = new Player("Bob", new Position(8, 4));
     GameState state = new GameState(board, List.of(p1, p2));
     GameEngine engine = new GameEngine(state);
     
