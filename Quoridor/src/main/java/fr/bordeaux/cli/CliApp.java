@@ -65,9 +65,15 @@ public class CliApp {
     }
 
     private void printBoard() {
+        System.out.print("  ");
+        for (int i = 0; i < engine.getState().getBoard().getSize(); i++) {
+            System.out.print(((char)('A'+i))+" ");
+        }
+        System.out.println("");
         for (int i = 0; i < engine.getState().getBoard().getSize(); i++) {
             boolean empty = true;
             for (int j = 0; j < engine.getState().getBoard().getSize(); j++) {
+                if (j == 0) System.out.print((i+1) + " ");
                 int id = 1;
                 for (Player player : engine.getState().getPlayers()) {
                     if ((player.getPosition()).equals(new Position(i, j)))
@@ -77,7 +83,7 @@ public class CliApp {
                 empty = true;
             }
             if (i == engine.getState().getBoard().getSize()-1) break;
-            System.out.println("");
+            System.out.print("\n  ");
             for (int j = 0; j < engine.getState().getBoard().getSize(); j++)
                 System.out.print(". ");
             System.out.println("");

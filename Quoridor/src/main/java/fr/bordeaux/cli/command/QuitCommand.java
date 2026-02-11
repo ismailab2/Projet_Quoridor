@@ -24,7 +24,8 @@ public class QuitCommand implements Command {
         String line = reader.readLine("Save the game before quitting? [y/N] >> ");
         if (line.toLowerCase().equals("y") || line.toLowerCase().equals("yes")) {
             String save = reader.readLine("Path where you want to save it >> ");
-            return engine;
+            SaveCommand cmd = new SaveCommand(save);
+            return cmd.execute(engine);
         } else {
             if (line.toLowerCase().equals("n") || line.toLowerCase().equals("no")) {
                 System.out.println("You choose to not save...");
