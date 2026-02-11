@@ -6,6 +6,7 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import main.java.fr.bordeaux.cli.command.Command;
+import main.java.fr.bordeaux.cli.command.NewCommand;
 import main.java.fr.bordeaux.cli.command.QuitCommand;
 import fr.bordeaux.cli.command.HelpCommand;
 
@@ -33,13 +34,15 @@ public class CliApp {
         this.engine = e;
     }
     public CliApp() {
-        this(new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4))))));
+        this(null);
+        // this(new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4))))));
     }
 
     public void run() {
         System.out.println("Launching Command Line interface...");
         while (running) {
-            printBoard();
+            System.out.println(engine.getState().getBoard().getSize());
+            if (engine != null) printBoard();
             String line = reader.readLine(">> ");
             fetch(line);
         }
@@ -55,9 +58,10 @@ public class CliApp {
         switch (command) {
             case "help": { cmd = new HelpCommand(tokens); break; }
             case "quit": { cmd = new QuitCommand(terminal, reader); this.running = false; break; }
+            case "new": { cmd = new NewCommand(tokens, engine, terminal, reader); break; }
             default: System.out.println("Unknown command : " + command);
         }
-        if (cmd != null) cmd.execute();
+        if (cmd != null) engine = cmd.execute(engine);
     }
 
     private void printBoard() {
@@ -77,7 +81,7 @@ public class CliApp {
             for (int j = 0; j < engine.getState().getBoard().getSize(); j++)
                 System.out.print(". ");
             System.out.println("");
-            
         }
+        System.out.println("");
     }
 }
