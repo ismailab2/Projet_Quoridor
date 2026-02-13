@@ -37,7 +37,7 @@ public class HelpCommand implements Command {
         else {
             Command cmd = null;
             switch (tokens[1]) {
-                case "help": { this.help(); break; }
+                case "help": { System.out.println("Help command to implement.");; break; }
                 case "quit": { cmd = new QuitCommand(); break; }
                 case "new": { cmd = new NewCommand(); break; }
                 case "load": { cmd = new LoadCommand(); break; }
