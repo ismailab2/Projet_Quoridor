@@ -70,7 +70,7 @@ public class CliApp {
             case "quit": { cmd = new QuitCommand(terminal, reader); this.running = false; break; }
             case "new": { cmd = new NewCommand(tokens, terminal, reader); break; }
             case "load": { cmd = new LoadCommand(); break; }
-            case "save": { cmd = new SaveCommand(); break; }
+            case "save": { cmd = new SaveCommand(tokens); break; }
             case "pause": { cmd = new PauseCommand(); break; }
             case "undo": { cmd = new UndoCommand(); break; }
             case "redo": { cmd = new RedoCommand(); break; }

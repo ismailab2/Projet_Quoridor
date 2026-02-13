@@ -20,6 +20,7 @@ public class Main {
     GameState state = new GameState(board, List.of(p1, p2));
     GameEngine engine = new GameEngine(state);
     engine.play(Move.wall(new Position(2, 4), HORIZONTAL));
+    System.out.println(engine.getState().getPlayers());
     CliApp cli = new CliApp(engine);
     cli.run();
 
