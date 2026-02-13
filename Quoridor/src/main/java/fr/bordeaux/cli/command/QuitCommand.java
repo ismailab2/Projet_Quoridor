@@ -17,6 +17,7 @@ public class QuitCommand implements Command {
     private LineReader reader;
     
     public QuitCommand(Terminal t, LineReader r) { terminal = t; reader = r; }
+    public QuitCommand() { this(null, null); }
 
     @Override
     public GameEngine execute(GameEngine engine) {

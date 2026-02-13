@@ -18,7 +18,7 @@ public class Main {
     Player p2 = new Player("Bob", new Position(8, 4));
     GameState state = new GameState(board, List.of(p1, p2));
     GameEngine engine = new GameEngine(state);
-    
+    engine.play(Move.wall(new Position(2, 4), HORIZONTAL));
     CliApp cli = new CliApp(engine);
     cli.run();
 

@@ -5,18 +5,28 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.graph.Graph;
 import main.java.fr.bordeaux.cli.command.Command;
-import main.java.fr.bordeaux.cli.command.NewCommand;
 import main.java.fr.bordeaux.cli.command.QuitCommand;
-import fr.bordeaux.cli.command.HelpCommand;
+import main.java.fr.bordeaux.cli.command.NewCommand;
+import main.java.fr.bordeaux.cli.command.LoadCommand;
+import main.java.fr.bordeaux.cli.command.SaveCommand;
+import main.java.fr.bordeaux.cli.command.PauseCommand;
+import main.java.fr.bordeaux.cli.command.UndoCommand;
+import main.java.fr.bordeaux.cli.command.RedoCommand;
+import main.java.fr.bordeaux.cli.command.ShowCommand;
+import main.java.fr.bordeaux.cli.command.SetCommand;
+
+import fr.bordeaux.cli.command.*;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 public class CliApp {
 
@@ -24,11 +34,13 @@ public class CliApp {
     private boolean running = true;
     private Terminal terminal;
     private LineReader reader;
+    private Completer completer;
 
     public CliApp(GameEngine e) {
         try {
             terminal = TerminalBuilder.builder().system(true).build();
-            reader = LineReaderBuilder.builder().terminal(terminal).build();
+            completer = new StringsCompleter("help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo", "set");
+            reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
         }
         catch (Exception exc) { exc.printStackTrace(); }
         this.engine = e;
@@ -41,7 +53,6 @@ public class CliApp {
     public void run() {
         System.out.println("Launching Command Line interface...");
         while (running) {
-            System.out.println(engine.getState().getBoard().getSize());
             if (engine != null) printBoard();
             String line = reader.readLine(">> ");
             fetch(line);
@@ -51,29 +62,34 @@ public class CliApp {
     }
 
     private void fetch(String input) {
-        System.out.println("Phrase reçu : \"" + input + "\"\n");
         String[] tokens = input.trim().split("\\s+");
         String command = tokens[0].toLowerCase();
         Command cmd = null;
         switch (command) {
             case "help": { cmd = new HelpCommand(tokens); break; }
             case "quit": { cmd = new QuitCommand(terminal, reader); this.running = false; break; }
-            case "new": { cmd = new NewCommand(tokens, engine, terminal, reader); break; }
+            case "new": { cmd = new NewCommand(tokens, terminal, reader); break; }
+            case "load": { cmd = new LoadCommand(); break; }
+            case "save": { cmd = new SaveCommand(); break; }
+            case "pause": { cmd = new PauseCommand(); break; }
+            case "undo": { cmd = new UndoCommand(); break; }
+            case "redo": { cmd = new RedoCommand(); break; }
+            case "show": { cmd = new ShowCommand(); break; }
+            case "set": { cmd = new SetCommand(); break; }
             default: System.out.println("Unknown command : " + command);
         }
         if (cmd != null) engine = cmd.execute(engine);
     }
 
     private void printBoard() {
-        System.out.print("  ");
-        for (int i = 0; i < engine.getState().getBoard().getSize(); i++) {
+        int boardSize = engine.getState().getBoard().getSize();
+        Board b = engine.getState().getBoard();
+        for (int i = 0; i < boardSize; i++)
             System.out.print(((char)('A'+i))+" ");
-        }
         System.out.println("");
-        for (int i = 0; i < engine.getState().getBoard().getSize(); i++) {
+        for (int i = 0; i < boardSize; i++) {
             boolean empty = true;
-            for (int j = 0; j < engine.getState().getBoard().getSize(); j++) {
-                if (j == 0) System.out.print((i+1) + " ");
+            for (int j = 0; j < boardSize; j++) {
                 int id = 1;
                 for (Player player : engine.getState().getPlayers()) {
                     if ((player.getPosition()).equals(new Position(i, j)))
@@ -81,13 +97,29 @@ public class CliApp {
                     id += 1;
                 } if (empty) System.out.print("_ ");
                 empty = true;
+                if (j == boardSize-1) System.out.print((i+1));
             }
-            if (i == engine.getState().getBoard().getSize()-1) break;
-            System.out.print("\n  ");
-            for (int j = 0; j < engine.getState().getBoard().getSize(); j++)
-                System.out.print(". ");
+            if (i == boardSize-1) break;
+            System.out.println("");
+            for (int j = 0; j < boardSize; j++) {
+                System.out.print(printWall(b, i, j, true));
+            }
             System.out.println("");
         }
         System.out.println("");
+    }
+
+    private String printWall(Board b, int i, int j, boolean under) {
+        if (under) {
+            if (i >= b.getSize()-1) return "X ";
+            if (b.getGraph().hasEdge(b.id(i, j), b.id(i+1, j)))
+                return ". ";
+            else return "X ";
+        } else {
+            if (j >= b.getSize()-1) return "X";
+            if (b.getGraph().hasEdge(b.id(i, j), b.id(i, j+1)))
+                return " ";
+            else return "X";
+        }
     }
 }
