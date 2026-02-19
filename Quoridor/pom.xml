@@ -15,7 +15,7 @@
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <junit.version>4.13.2</junit.version>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <jacoco.version>0.8.11</jacoco.version>
         <javafx.version>21.0.2</javafx.version>
         <tensorflow.version>0.5.0</tensorflow.version>
@@ -41,9 +41,9 @@
 
         <!-- JUnit -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 

@@ -1,11 +1,10 @@
 package fr.bordeaux.core;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GameStateTest {
 
@@ -33,10 +32,12 @@ public class GameStateTest {
     assertEquals(human, game.getCurrentPlayer());
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void constructor_throws_if_bad_player_count() {
-    List<Player> players = List.of(human);
-    new GameState(board, players);
+  @Test
+  public void testPlayersNumberInvalidThree() {
+    Board board = new Board(9);
+    assertThrows(IllegalArgumentException.class,
+      () -> { new GameState(board, List.of(p1, p2, p3)); }
+    );
   }
 
   @Test

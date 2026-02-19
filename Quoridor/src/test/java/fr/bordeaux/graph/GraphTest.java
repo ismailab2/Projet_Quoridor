@@ -1,19 +1,19 @@
 package fr.bordeaux.graph;
 
-import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GraphTest {
 
   private Graph graph;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     Map<Integer, List<Integer>> adj = new HashMap<>();
     adj.put(0, new ArrayList<>(List.of(1)));
@@ -69,8 +69,10 @@ public class GraphTest {
     assertEquals(initialSize, graph.getNeighbors(0).size());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testHasEdgeWithInvalidVertex() {
-    graph.hasEdge(99, 1);
+    assertThrows(NullPointerException.class,
+      () -> {graph.hasEdge(99, 1); }
+    );
   }
 }

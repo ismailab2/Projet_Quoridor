@@ -1,9 +1,10 @@
 package fr.bordeaux.core;
 
-import static org.junit.Assert.*;
-
 import java.util.List;
-import org.junit.*;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RuleCheckerTest {
 
@@ -11,7 +12,7 @@ public class RuleCheckerTest {
   private Board board;
   private Player p1, p2;
 
-  @Before
+  @BeforeAll
   public void setup() {
     board = new Board(5); // petit plateau pour tester
     p1 = new Player("Human", new Position(0, 2), TypePlayer.HUMAN);

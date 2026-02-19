@@ -1,17 +1,17 @@
 package fr.bordeaux.core;
 
-import static org.junit.Assert.*;
 
 import fr.bordeaux.graph.Graph;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
 
   private Board board;
   private final int SIZE = 9;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     board = new Board(SIZE);
   }
@@ -22,19 +22,25 @@ public class BoardTest {
     assertNotNull(board.getGraph());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidBoardSizeTooSmall() {
-    new Board(1); // Too small (less than 3)
+    assertThrows(IllegalArgumentException.class,
+      () -> { new Board(1); }
+    ); // Too small (less than 3)
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidBoardSizeTooLarge() {
-    new Board(17); // Too large (greater than 15)
+    assertThrows(IllegalArgumentException.class,
+      () -> { new Board(17); }
+    ); // Too large (greater than 15)
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidBoardSizeEven() {
-    new Board(8); // Even number (must be odd)
+    assertThrows(IllegalArgumentException.class,
+      () -> { new Board(8); }
+    ); // Even number (must be odd)
   }
 
   @Test
