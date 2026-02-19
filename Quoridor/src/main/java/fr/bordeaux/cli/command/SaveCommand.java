@@ -1,6 +1,5 @@
-package main.java.fr.bordeaux.cli.command;
+package fr.bordeaux.cli.command;
 
-import main.java.fr.bordeaux.cli.command.*;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.GameEngine;
 
@@ -13,7 +12,7 @@ public class SaveCommand implements Command {
 
     @Override
     public GameEngine execute(GameEngine engine) {
-        engine.getState().save(this.tokens[1]); return engine;
+        /*engine.getState().save(this.tokens[1]);*/ return engine;
     }
     @Override
     public void helpText() { System.out.println("To implement"); }

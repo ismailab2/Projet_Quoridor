@@ -6,16 +6,16 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.graph.Graph;
-import main.java.fr.bordeaux.cli.command.Command;
-import main.java.fr.bordeaux.cli.command.QuitCommand;
-import main.java.fr.bordeaux.cli.command.NewCommand;
-import main.java.fr.bordeaux.cli.command.LoadCommand;
-import main.java.fr.bordeaux.cli.command.SaveCommand;
-import main.java.fr.bordeaux.cli.command.PauseCommand;
-import main.java.fr.bordeaux.cli.command.UndoCommand;
-import main.java.fr.bordeaux.cli.command.RedoCommand;
-import main.java.fr.bordeaux.cli.command.ShowCommand;
-import main.java.fr.bordeaux.cli.command.SetCommand;
+import fr.bordeaux.cli.command.Command;
+import fr.bordeaux.cli.command.QuitCommand;
+import fr.bordeaux.cli.command.NewCommand;
+import fr.bordeaux.cli.command.LoadCommand;
+import fr.bordeaux.cli.command.SaveCommand;
+import fr.bordeaux.cli.command.PauseCommand;
+import fr.bordeaux.cli.command.UndoCommand;
+import fr.bordeaux.cli.command.RedoCommand;
+import fr.bordeaux.cli.command.ShowCommand;
+import fr.bordeaux.cli.command.SetCommand;
 
 import fr.bordeaux.cli.command.*;
 
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.reader.Completer;
@@ -36,6 +37,11 @@ public class CliApp {
     private LineReader reader;
     private Completer completer;
 
+    public CliApp(GameEngine e, Terminal t, LineReader r) {
+        engine = e; terminal = t; reader = r;
+        completer = new StringsCompleter("help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo", "set");
+        reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
+    }
     public CliApp(GameEngine e) {
         try {
             terminal = TerminalBuilder.builder().system(true).build();
@@ -46,9 +52,10 @@ public class CliApp {
         this.engine = e;
     }
     public CliApp() {
-        this(null);
-        // this(new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4))))));
+        this(new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4))))));
     }
+    public boolean isRunning() { return running; }
+    public GameEngine getEngine() { return engine; }
 
     public void run() {
         System.out.println("Launching Command Line interface...");
@@ -57,11 +64,12 @@ public class CliApp {
             String line = reader.readLine(">> ");
             fetch(line);
         }
-        try { terminal.close(); } 
+        try { terminal.close(); }
+        catch (IOException e) { e.printStackTrace(); }
         catch (Exception e) { e.printStackTrace(); }
     }
 
-    private void fetch(String input) {
+    public void fetch(String input) {
         String[] tokens = input.trim().split("\\s+");
         String command = tokens[0].toLowerCase();
         Command cmd = null;

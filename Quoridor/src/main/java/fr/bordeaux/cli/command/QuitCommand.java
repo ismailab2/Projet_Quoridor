@@ -1,7 +1,8 @@
-package main.java.fr.bordeaux.cli.command;
+package fr.bordeaux.cli.command;
 
-import main.java.fr.bordeaux.cli.command.Command;
+import fr.bordeaux.cli.command.Command;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 import org.jline.reader.LineReader;
@@ -17,7 +18,8 @@ public class QuitCommand implements Command {
     private LineReader reader;
     
     public QuitCommand(Terminal t, LineReader r) { terminal = t; reader = r; }
-    public QuitCommand() { this(null, null); }
+    public QuitCommand() { this(null, null); } 
+
 
     @Override
     public GameEngine execute(GameEngine engine) {
@@ -32,8 +34,6 @@ public class QuitCommand implements Command {
                 System.out.println("You choose to not save...");
             }
             else { System.out.println("Unrecognizable answer... Game not saved."); }
-            try { terminal.close(); }
-            catch (IOException e) { e.printStackTrace(); }
             return engine;
         }
     }

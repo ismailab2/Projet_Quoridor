@@ -1,16 +1,16 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import main.java.fr.bordeaux.cli.command.Command;
-import main.java.fr.bordeaux.cli.command.QuitCommand;
-import main.java.fr.bordeaux.cli.command.NewCommand;
-import main.java.fr.bordeaux.cli.command.LoadCommand;
-import main.java.fr.bordeaux.cli.command.SaveCommand;
-import main.java.fr.bordeaux.cli.command.PauseCommand;
-import main.java.fr.bordeaux.cli.command.UndoCommand;
-import main.java.fr.bordeaux.cli.command.RedoCommand;
-import main.java.fr.bordeaux.cli.command.ShowCommand;
-import main.java.fr.bordeaux.cli.command.SetCommand;
+import fr.bordeaux.cli.command.Command;
+import fr.bordeaux.cli.command.QuitCommand;
+import fr.bordeaux.cli.command.NewCommand;
+import fr.bordeaux.cli.command.LoadCommand;
+import fr.bordeaux.cli.command.SaveCommand;
+import fr.bordeaux.cli.command.PauseCommand;
+import fr.bordeaux.cli.command.UndoCommand;
+import fr.bordeaux.cli.command.RedoCommand;
+import fr.bordeaux.cli.command.ShowCommand;
+import fr.bordeaux.cli.command.SetCommand;
 import fr.bordeaux.cli.command.*;
 
 public class HelpCommand implements Command {

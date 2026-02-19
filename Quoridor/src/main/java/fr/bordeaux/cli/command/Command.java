@@ -1,4 +1,4 @@
-package main.java.fr.bordeaux.cli.command;
+package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 
