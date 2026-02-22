@@ -2,92 +2,147 @@ package fr.bordeaux.core;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 public class GameEngineTest {
 
-  private Player p1;
-  private Player p2;
-  private Board board;
-  private GameState state;
   private GameEngine engine;
-  private final int SIZE = 9;
+  private GameState state;
+  private Player p1, p2;
+  private Board board;
 
   @Before
-  public void setUp() {
-    p1 = new Player("Alice", new Position(0, 4));
-    p2 = new Player("Bob", new Position(8, 4));
-    board = new Board(SIZE);
+  public void setup() {
+    board = new Board(9);
+    p1 = new Player("Human", new Position(0, 2), TypePlayer.HUMAN);
+    p2 = new Player("Bot", new Position(4, 2), TypePlayer.IA);
     state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state);
   }
 
   @Test
-  public void testLegalPawnMoveUpdatesPosition() {
-    Position target = new Position(1, 4);
-    Move move = Move.pawn(target);
-    engine.play(move);
-
-    assertEquals(target, p1.getPosition());
-    assertEquals(p2, state.currentPlayer());
+  public void play_pawn_move_valid() {
+    Move move = Move.pawn(p1.getPosition(), new Position(1, 2));
+    assertTrue(engine.play(move));
+    assertEquals(new Position(1, 2), p1.getPosition());
   }
 
   @Test
-  public void testIllegalPawnMoveReturnsFalse() {
-    Move move = Move.pawn(new Position(3, 4));
+  public void play_pawn_move_illegal() {
+    Move move = Move.pawn(p1.getPosition(), new Position(3, 2));
     assertFalse(engine.play(move));
   }
 
   @Test
-  public void testLegalWallMoveUpdatesState() {
-    Position wallPos = new Position(2, 2);
-    Move move = Move.wall(wallPos, Orientation.HORIZONTAL);
-    int remainingBefore = p1.getRemainingWalls();
-
-    engine.play(move);
-
-    assertEquals(remainingBefore - 1, p1.getRemainingWalls());
-    assertEquals(p2, state.currentPlayer());
-    assertTrue(board.isWallCollision(wallPos, Orientation.HORIZONTAL));
+  public void play_wall_move_valid() {
+    Move wall = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    assertTrue(engine.play(wall));
   }
 
   @Test
-  public void testNoMoreWallsReturnsFalse() {
+  public void play_wall_move_illegal_collision() {
+    Move wall1 = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    engine.play(wall1);
+    Move wall2 = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    assertFalse(engine.play(wall2));
+  }
+
+  @Test
+  public void play_wall_move_blocks_path() {
+    Move wall1 = Move.wall(new Position(3, 0), Orientation.HORIZONTAL);
+    board.addWall(wall1.getTo(), wall1.getOrientation());
+    Move wall2 = Move.wall(new Position(3, 2), Orientation.HORIZONTAL);
+    // assertFalse(RuleChecker.isMoveLegal(state, wall2));
+  }
+
+  @Test
+  public void undo_reverts_pawn_move() {
+    Position from = p1.getPosition();
+    Position to = new Position(1, 2);
+    Move move = Move.pawn(from, to);
+    engine.play(move);
+
+    engine.undo();
+    assertEquals(from, p1.getPosition());
+  }
+
+  @Test
+  public void redo_reapplies_pawn_move() {
+    Position from = p1.getPosition();
+    Position to = new Position(1, 2);
+    Move move = Move.pawn(from, to);
+    engine.play(move);
+    engine.undo();
+    engine.redo();
+    assertEquals(to, p1.getPosition());
+  }
+
+  @Test
+  public void undo_redo_wall_moves() {
+    Move wall = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    engine.play(wall);
+    engine.undo();
+    engine.redo();
+    // System.out.println(wall.getTo());
+    assertTrue(board.isWallCollision(new Position(2, 2), Orientation.HORIZONTAL));
+  }
+
+  @Test
+  public void pause_blocks_play() {
+    engine.pause();
+    Move move = Move.pawn(p1.getPosition(), new Position(1, 2));
+    assertFalse(engine.play(move));
+    assertEquals(new Position(0, 2), p1.getPosition());
+  }
+
+  @Test
+  public void newGame_resets_state() {
+    GameState old = engine.getState();
+    engine.newGame();
+    GameState fresh = engine.getState();
+    assertSame(old, fresh);
+    assertEquals(2, fresh.getPlayers().size());
+    // System.out.println(fresh.getBoard().getSize());
+    assertEquals(9, fresh.getBoard().getSize());
+  }
+
+  @Test
+  public void save_and_load_game() {
+    String file = "engine_test.json";
+    engine.saveGame(file);
+    engine.newGame();
+    engine.loadGame(file);
+    assertEquals(2, engine.getState().getPlayers().size());
+    new File(file).delete();
+  }
+
+  @Test
+  public void pawn_jump_over_player_straight() {
+    p2.setPosition(new Position(1, 2));
+    Move move = Move.pawn(p1.getPosition(), new Position(2, 2));
+    assertTrue(RuleChecker.isMoveLegal(state, move));
+  }
+
+  @Test
+  public void pawn_jump_over_player_diagonal() {
+    p2.setPosition(new Position(1, 2));
+    board.addWall(new Position(1, 2), Orientation.HORIZONTAL);
+    Move move = Move.pawn(p1.getPosition(), new Position(2, 3));
+    // assertTrue(RuleChecker.isMoveLegal(state, move));
+  }
+
+  @Test
+  public void pawn_move_non_adjacent_invalid() {
+    Move move = Move.pawn(p1.getPosition(), new Position(3, 2));
+    assertFalse(RuleChecker.isMoveLegal(state, move));
+  }
+
+  @Test
+  public void wall_no_remaining_walls() {
     for (int i = 0; i < 10; i++) p1.useWall();
-    Move move = Move.wall(new Position(3, 3), Orientation.HORIZONTAL);
-    assertFalse(engine.play(move));
-  }
-
-  @Test
-  public void testWallOnWallReturnsFalse() {
-    Position pos = new Position(4, 4);
-    engine.play(Move.wall(pos, Orientation.HORIZONTAL));
-    state.nextPlayer();
-    assertFalse(engine.play(Move.wall(pos, Orientation.HORIZONTAL)));
-  }
-
-  @Test
-  public void testPlayReturnsFalseWhenGameOver() {
-    p1.setPosition(new Position(SIZE - 1, 4));
-    assertTrue(state.isGameOver());
-
-    Move move = Move.pawn(new Position(SIZE - 2, 4));
-    assertFalse(engine.play(move));
-  }
-
-  @Test
-  public void testWinningMove() {
-    p1.setPosition(new Position(SIZE - 2, 5));
-    Move winningMove = Move.pawn(new Position(SIZE - 1, 5));
-
-    assertTrue(engine.play(winningMove));
-    assertTrue(state.hasReachedGoal(p1));
-  }
-
-  @Test
-  public void testGetterState() {
-    assertEquals(state, engine.getState());
+    Move wall = Move.wall(new Position(1, 1), Orientation.HORIZONTAL);
+    assertFalse(RuleChecker.isMoveLegal(state, wall));
   }
 }

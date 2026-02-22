@@ -1,26 +1,22 @@
 package fr.bordeaux.core;
 
-/**
- * The GameEngine class manages the core logic of a Quoridor game. It handles players, game state,
- * rule checking, moves, and turn management.
- */
 public class GameEngine {
-  private final GameState state;
+
+  private GameState state;
 
   public GameEngine(GameState state) {
     this.state = state;
   }
 
-
-    public boolean play(Move move) {
-    if (state.isGameOver()) {
-      System.out.println("GAME OVER");
+  public boolean play(Move move) {
+    if (state.isGameOver() || state.isPaused()) {
+      System.out.println("GAME OVER OR  PAUSE");
       return false;
     }
 
     if (!RuleChecker.isMoveLegal(state, move)) return false;
 
-    Player p = state.currentPlayer();
+    Player p = state.getCurrentPlayer();
     state.applyMove(move);
     if (state.hasReachedGoal(p)) {
       System.out.println(p.getName() + " won the game!");
@@ -28,18 +24,42 @@ public class GameEngine {
     return true;
   }
 
+  public void newGame() {
+    state.reset();
+    state.addListener(() -> {});
+  }
+
+  public void saveGame(String filename) {
+    state.saveGameJSON(filename);
+    // System.out.println("jeu sauvegarde !");
+  }
+
+  public void loadGame(String filename) {
+    GameState loaded = state.loadGameJSON(filename);
+    if (loaded != null) state = loaded;
+    // System.out.println("jeu load !");
+  }
+
+  public void undo() {
+    state.undo();
+    // System.out.println("jeu undo !");
+  }
+
+  public void redo() {
+    state.redo();
+    // System.out.println("jeu redo !");
+  }
+
+  public void pause() {
+    state.setPaused(true);
+    System.out.println("EN PAUSE ");
+  }
+
+  public void hint() {
+    //  TODO
+  }
 
   public GameState getState() {
     return state;
   }
-
-
-public static void startGame() { System.out.println("Nouvelle partie lancée !"); }
-public static void loadGame() { System.out.println("Charger une partie !"); }
-public static void saveGame() { System.out.println("Partie sauvegardée !"); }
-public static void undo() { System.out.println("Undo !"); }
-public static void redo() { System.out.println("Redo !"); }
-public static void pause() { System.out.println("Pause !"); }
-public static void hint() { System.out.println("Hint !"); }
-
 }

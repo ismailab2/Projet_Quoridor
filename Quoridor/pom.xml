@@ -21,11 +21,17 @@
         <tensorflow.version>0.5.0</tensorflow.version>
 
         <!-- default main class -->
-        <main.class>fr.bordeaux.gui.MainApp</main.class>
+        <main.class>fr.bordeaux.gui.QuoridorApp</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.2</version>
+        </dependency>
 
         <!-- JUnit -->
         <dependency>
@@ -190,7 +196,7 @@
         <profile>
             <id>cli</id>
             <properties>
-                <main.class>fr.bordeaux.gui.MainApp</main.class>
+                <main.class>fr.bordeaux.core.Main</main.class>
             </properties>
         </profile>
 
@@ -198,7 +204,7 @@
         <profile>
             <id>gui</id>
             <properties>
-                <main.class>fr.bordeaux.gui.QuoridorApp</main.class>
+                <main.class>fr.bordeaux.core.Main</main.class>
             </properties>
         </profile>
 

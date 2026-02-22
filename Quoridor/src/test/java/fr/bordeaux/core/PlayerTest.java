@@ -13,7 +13,7 @@ public class PlayerTest {
   @Before
   public void setUp() {
     startPos = new Position(0, 4);
-    player = new Player("Alice", startPos);
+    player = new Player("Alice", startPos, TypePlayer.HUMAN);
   }
 
   @Test
