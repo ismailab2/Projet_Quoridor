@@ -1,83 +1,158 @@
 package fr.bordeaux.core;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Predicate;
 
-/**
- * Represents the state of a Quoridor game. Manages the board, players, current player, and move
- * history. Undo/Redo functionality is implemented using stacks.
- */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GameState {
 
   private final Board board;
   private final List<Player> players;
-  private int currentPlayer = 0;
+  private int currentIndexPlayer;
+  private boolean paused;
+  private boolean gameOver;
+  private final Deque<Move> undoStack;
+  private final Deque<Move> redoStack;
 
-  public GameState(Board board, List<Player> players) {
-    if (players.size() != 2 && players.size() != 4) {
+  @JsonIgnore private transient List<Runnable> listeners = new ArrayList<>();
+
+  @JsonCreator
+  public GameState(
+      @JsonProperty("board") Board board,
+      @JsonProperty("players") List<Player> players,
+      @JsonProperty("currentIndexPlayer") int currentIndexPlayer) {
+    if (players.size() != 2 && players.size() != 4)
       throw new IllegalArgumentException(
-          "Number of players must be 2 or 4, but was : " + players.size());
-    }
+          "Number of players must be 2 or 4, but was: " + players.size());
+
     this.board = board;
     this.players = players;
+    this.currentIndexPlayer = currentIndexPlayer;
+    this.paused = false;
+    this.gameOver = false;
+    this.undoStack = new ArrayDeque<>();
+    this.redoStack = new ArrayDeque<>();
+  }
+
+  public GameState(Board board, List<Player> players) {
+    this(board, players, 0);
+  }
+
+  public void addListener(Runnable listener) {
+    listeners.add(listener);
+  }
+
+  private void notifyListeners() {
+    for (Runnable l : listeners) l.run();
   }
 
   public void applyMove(Move move) {
+    if (paused || gameOver) return;
+
+    Player player = getCurrentPlayer();
     if (move.isPawn()) {
-      currentPlayer().setPosition(move.getTo());
+      player.setPosition(move.getTo());
     } else {
       board.addWall(move.getTo(), move.getOrientation());
-      currentPlayer().useWall();
+      player.useWall();
     }
-    nextPlayer();
+
+    undoStack.push(move);
+    redoStack.clear();
+    getNextPlayer();
+    checkVictory();
+    notifyListeners();
+  }
+
+  private void applyMoveWithoutClearingRedo(Move move) {
+    Player player = getCurrentPlayer();
+    if (move.isPawn()) {
+      player.setPosition(move.getTo());
+    } else {
+      board.addWall(move.getTo(), move.getOrientation());
+      player.useWall();
+    }
+    undoStack.push(move);
+    getNextPlayer();
+    checkVictory();
+  }
+
+  public void undo() {
+    if (paused || gameOver) return;
+    if (undoStack.isEmpty()) return;
+
+    do {
+      Move last = undoStack.pop();
+      redoStack.push(last);
+      previousPlayer();
+      Player player = getCurrentPlayer();
+      if (last.isPawn()) {
+        player.setPosition(last.getFrom());
+      } else {
+        board.removeWall(last.getTo(), last.getOrientation());
+        player.giveBackWall();
+      }
+      gameOver = false;
+    } while (!undoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
+    notifyListeners();
+  }
+
+  public void redo() {
+    if (paused || gameOver) return;
+    if (redoStack.isEmpty()) return;
+
+    do {
+      Move move = redoStack.pop();
+      applyMoveWithoutClearingRedo(move);
+    } while (!redoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
+    notifyListeners();
   }
 
   public boolean isGameOver() {
-    for (Player player : players) {
-      if (hasReachedGoal(player)) {
-        return true;
-      }
+    return gameOver;
+  }
+
+  private void checkVictory() {
+    Player player = getCurrentPlayer();
+    if (hasReachedGoal(player)) {
+      player.addScore(1);
+      gameOver = true;
     }
-    return false;
   }
 
-  // Returns if a player has won the game, uses predicate from getWinCondition
   public boolean hasReachedGoal(Player player) {
-    int currentId = board.id(player.getPosition().getX(), player.getPosition().getY());
-    return getWinCondition(player).test(currentId);
+    int id = board.id(player.getPosition().getX(), player.getPosition().getY());
+    // System.out.println(getWinCondition(player).test(id));
+    return getWinCondition(player).test(id);
   }
 
-  // Returns the predicate for a player to win, used in BFS
   public Predicate<Integer> getWinCondition(Player player) {
     Position start = player.getStartingPosition();
     int size = board.getSize();
 
-    // Start first line, middle column
-    if (start.getX() == 0) {
-      return id -> (id / size) == size - 1; // Last row
-    }
-
-    // Start last line, middle column
-    else if (start.getX() == size - 1) {
-      return id -> (id / size) == 0; // first row
-    }
-
-    // Start first column, middle line
-    else if (start.getY() == 0) {
-      return id -> (id % size) == size - 1; // Last column
-    }
-    // Start last column, middle line
-    else {
-      return id -> (id % size) == 0; // First column
-    }
+    if (start.getX() == 0) return id -> (id / size) == size - 1; // last row
+    if (start.getX() == size - 1) return id -> (id / size) == 0; // first row
+    if (start.getY() == 0) return id -> (id % size) == size - 1; // last col
+    return id -> (id % size) == 0; // first col
   }
 
-  public Player currentPlayer() {
-    return players.get(currentPlayer);
+  public void getNextPlayer() {
+    currentIndexPlayer = (currentIndexPlayer + 1) % players.size();
   }
 
-  public void nextPlayer() {
-    currentPlayer = (currentPlayer + 1) % players.size();
+  private void previousPlayer() {
+    currentIndexPlayer = (currentIndexPlayer - 1 + players.size()) % players.size();
+  }
+
+  public Player getCurrentPlayer() {
+    return players.get(currentIndexPlayer);
   }
 
   public Board getBoard() {
@@ -86,5 +161,41 @@ public class GameState {
 
   public List<Player> getPlayers() {
     return players;
+  }
+
+  public void setPaused(boolean paused) {
+    this.paused = paused;
+  }
+
+  public boolean isPaused() {
+    return paused;
+  }
+
+  public void saveGameJSON(String filename) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      mapper.writeValue(new File(filename), this);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public GameState loadGameJSON(String filename) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.readValue(new File(filename), GameState.class);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public GameState reset() {
+    int size = 9;
+    Board newBoard = new Board(size);
+    List<Player> newPlayers = new ArrayList<>();
+    newPlayers.add(new Player("Human", new Position(0, size / 2), TypePlayer.HUMAN));
+    newPlayers.add(new Player("Bob", new Position(size - 1, size / 2), TypePlayer.IA));
+    return new GameState(newBoard, newPlayers);
   }
 }

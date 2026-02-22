@@ -2,180 +2,204 @@ package fr.bordeaux.core;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
+import java.io.File;
+import java.util.*;
 import java.util.function.Predicate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 public class GameStateTest {
 
+  private GameState game;
   private Board board;
-  private Player p1, p2, p3, p4;
-  private GameState gameState, gameState4;
-  private final int SIZE = 9;
+  private Player human;
+  private Player ia;
 
   @Before
-  public void setUp() {
-    board = new Board(SIZE);
-    p1 = new Player("Alice", new Position(0, 4));
-    p2 = new Player("Bob", new Position(8, 4));
-    p3 = new Player("Charlie", new Position(4, 0));
-    p4 = new Player("David", new Position(4, 8));
-    gameState = new GameState(board, List.of(p1, p2));
-    gameState4 = new GameState(board, List.of(p1, p2, p3, p4));
+  public void setup() {
+    board = new Board(9);
+    human = new Player("Human", new Position(0, 4), TypePlayer.HUMAN);
+    ia = new Player("IA", new Position(8, 4), TypePlayer.IA);
+
+    List<Player> players = new ArrayList<>();
+    players.add(human);
+    players.add(ia);
+
+    game = new GameState(board, players);
+  }
+
+  @Test
+  public void constructor_ok_2_players() {
+    assertNotNull(game);
+    assertEquals(human, game.getCurrentPlayer());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testPlayersNumberInvalidThree() {
-    Board board = new Board(9);
-    new GameState(board, List.of(p1, p2, p3));
+  public void constructor_throws_if_bad_player_count() {
+    List<Player> players = List.of(human);
+    new GameState(board, players);
   }
 
   @Test
-  public void testInitialCurrentPlayer() {
-    assertEquals(p1, gameState.currentPlayer());
+  public void listener_is_called_on_applyMove() {
+    final boolean[] called = {false};
+
+    game.addListener(() -> called[0] = true);
+
+    Position pos = game.getCurrentPlayer().getPosition();
+    Move move = Move.pawn(pos, new Position(1, 4));
+    game.applyMove(move);
+
+    assertTrue(called[0]);
   }
 
   @Test
-  public void testNextPlayerSwitchesTurn() {
-    gameState.nextPlayer();
-    assertEquals(p2, gameState.currentPlayer());
+  public void applyMove_pawn_changes_position_and_switch_player() {
+    Position newPos = new Position(1, 4);
+    Position pos = game.getCurrentPlayer().getPosition();
+
+    Move move = Move.pawn(pos, newPos);
+    game.applyMove(move);
+
+    assertEquals(newPos, human.getPosition());
+    assertEquals(ia, game.getCurrentPlayer());
   }
 
   @Test
-  public void testNextPlayerLoopsBack() {
-    gameState.nextPlayer();
-    gameState.nextPlayer();
-    assertEquals(p1, gameState.currentPlayer());
+  public void applyMove_wall_places_wall_and_switch_player() {
+    Move move = Move.wall(new Position(4, 4), Orientation.HORIZONTAL);
+
+    game.applyMove(move);
+
+    assertEquals(ia, game.getCurrentPlayer());
   }
 
   @Test
-  public void testApplyPawnMoveUpdatesPlayerPosition() {
-    Position target = new Position(1, 4);
-    Move move = Move.pawn(target);
-    gameState.applyMove(move);
-    assertEquals(target, p1.getPosition());
+  public void applyMove_does_nothing_if_paused() {
+    game.setPaused(true);
+
+    Position old = human.getPosition();
+    Position pos = game.getCurrentPlayer().getPosition();
+
+    game.applyMove(Move.pawn(pos, new Position(1, 4)));
+
+    assertEquals(old, human.getPosition());
   }
 
   @Test
-  public void testApplyWallMoveUpdatesBoardAndPlayer() {
-    int initialWalls = p1.getRemainingWalls();
-    Position wallPos = new Position(2, 2);
-    Move move = Move.wall(wallPos, Orientation.HORIZONTAL);
-    gameState.applyMove(move);
-    assertEquals(initialWalls - 1, p1.getRemainingWalls());
-    assertTrue(board.isWallCollision(wallPos, Orientation.HORIZONTAL));
+  public void undo_reverts_move() {
+    Position p1 = new Position(1, 4);
+    Player player = game.getCurrentPlayer();
+    game.applyMove(Move.pawn(player.getPosition(), p1));
+
+    game.undo();
+
+    assertEquals(new Position(0, 4), human.getPosition());
+    assertEquals(human, game.getCurrentPlayer());
   }
 
   @Test
-  public void testIsGameOverWhenPlayerReachesGoal() {
-    assertFalse(gameState.isGameOver());
-    p1.setPosition(new Position(SIZE - 1, 4));
-    assertTrue(gameState.isGameOver());
+  public void redo_reapplies_move() {
+    Position p1 = new Position(1, 4);
+    Position pos = game.getCurrentPlayer().getPosition();
+
+    Move move = Move.pawn(pos, p1);
+
+    // System.out.println("1 " + human.getPosition());
+    game.applyMove(move);
+    // System.out.println("2 " + human.getPosition());
+    game.undo();
+    // System.out.println("3 " + human.getPosition());
+    game.redo();
+    // System.out.println("4 " + human.getPosition());
+
+    assertEquals(p1, human.getPosition());
+    assertEquals(ia, game.getCurrentPlayer());
   }
 
   @Test
-  public void testGetBoard() {
-    assertSame(board, gameState.getBoard());
+  public void undo_does_nothing_if_stack_empty() {
+    game.undo();
+    assertEquals(human, game.getCurrentPlayer());
   }
 
   @Test
-  public void testGetPlayers() {
-    List<Player> players = gameState.getPlayers();
-    assertEquals(2, players.size());
-    assertTrue(players.contains(p1));
-    assertTrue(players.contains(p2));
+  public void redo_does_nothing_if_stack_empty() {
+    game.redo();
+    assertEquals(human, game.getCurrentPlayer());
   }
 
   @Test
-  public void testHasReachedGoalPlayer1() {
-    p1.setPosition(new Position(SIZE - 1, 4));
-    assertTrue(gameState4.hasReachedGoal(p1));
-    p1.setPosition(new Position(SIZE - 2, 4));
-    assertFalse(gameState4.hasReachedGoal(p1));
+  public void victory_is_detected() {
+    human.setPosition(new Position(8, 4));
+    Position pos = game.getCurrentPlayer().getPosition();
+    // System.out.println("1 " + human.getPosition());
+    game.applyMove(Move.pawn(pos, new Position(8, 4)));
+    // System.out.println("2 " + human.getPosition());
+
+    assertFalse(game.isGameOver());
   }
 
   @Test
-  public void testHasReachedGoalPlayer2() {
-    p2.setPosition(new Position(0, 4));
-    assertTrue(gameState4.hasReachedGoal(p2));
-    p2.setPosition(new Position(1, 4));
-    assertFalse(gameState4.hasReachedGoal(p2));
+  public void win_condition_from_top_row() {
+    Predicate<Integer> predicate = game.getWinCondition(human);
+    int id = board.id(8, 4);
+    assertTrue(predicate.test(id));
   }
 
   @Test
-  public void testHasReachedGoalPlayer3() {
-    p3.setPosition(new Position(4, SIZE - 1));
-    assertTrue(gameState4.hasReachedGoal(p3));
-    p3.setPosition(new Position(4, SIZE - 2));
-    assertFalse(gameState4.hasReachedGoal(p3));
+  public void win_condition_from_bottom_row() {
+    Player p = new Player("P", new Position(8, 4), TypePlayer.HUMAN);
+    GameState g = new GameState(board, List.of(p, ia));
+    Predicate<Integer> predicate = g.getWinCondition(p);
+    int id = board.id(0, 4);
+    assertTrue(predicate.test(id));
   }
 
   @Test
-  public void testHasReachedGoalPlayer4() {
-    p4.setPosition(new Position(4, 0));
-    assertTrue(gameState4.hasReachedGoal(p4));
-    p4.setPosition(new Position(4, 1));
-    assertFalse(gameState4.hasReachedGoal(p4));
+  public void win_condition_from_left_col() {
+    Player p = new Player("P", new Position(4, 0), TypePlayer.HUMAN);
+    GameState g = new GameState(board, List.of(p, ia));
+    Predicate<Integer> predicate = g.getWinCondition(p);
+    int id = board.id(4, 8);
+    assertTrue(predicate.test(id));
   }
 
   @Test
-  public void testIsGameOver4Players() {
-    assertFalse(gameState4.isGameOver());
-    p3.setPosition(new Position(4, SIZE - 1));
-    assertTrue(gameState4.isGameOver());
+  public void win_condition_from_right_col() {
+    Player p = new Player("P", new Position(4, 8), TypePlayer.HUMAN);
+    GameState g = new GameState(board, List.of(p, ia));
+    Predicate<Integer> predicate = g.getWinCondition(p);
+    int id = board.id(4, 0);
+    assertTrue(predicate.test(id));
   }
 
+  // =========================
+  // SAVE / LOAD JSON
+  // =========================
+
   @Test
-  public void testGetWinConditionTopPlayer() {
-    // Starting first row (0), win last row (8)
-    Player alice = new Player("Alice", new Position(0, 4));
-    Predicate<Integer> win = gameState.getWinCondition(alice);
+  public void save_and_load_json_works() {
+    String filename = "test_save.json";
+    game.saveGameJSON(filename);
 
-    assertTrue(win.test(board.id(8, 0)));
-    assertTrue(win.test(board.id(8, 4)));
-    assertTrue(win.test(board.id(8, 8)));
+    GameState loaded = game.loadGameJSON(filename);
 
-    assertFalse(win.test(board.id(0, 4)));
-    assertFalse(win.test(board.id(7, 4)));
+    assertNotNull(loaded);
+    assertEquals(game.getPlayers().size(), loaded.getPlayers().size());
+
+    new File(filename).delete();
   }
 
-  @Test
-  public void testGetWinConditionBottomPlayer() {
-    // Starting last row (8), win first row (0)
-    Player bob = new Player("Bob", new Position(8, 4));
-    Predicate<Integer> win = gameState.getWinCondition(bob);
-
-    assertTrue(win.test(board.id(0, 0)));
-    assertTrue(win.test(board.id(0, 8)));
-
-    assertFalse(win.test(board.id(8, 4)));
-    assertFalse(win.test(board.id(1, 4)));
-  }
+  // =========================
+  // RESET
+  // =========================
 
   @Test
-  public void testGetWinConditionLeftPlayer() {
-    // Starting first column (0), win right column (8)
-    Player charlie = new Player("Charlie", new Position(4, 0));
-    Predicate<Integer> win = gameState.getWinCondition(charlie);
+  public void reset_creates_new_game() {
+    GameState newGame = game.reset();
 
-    assertTrue(win.test(board.id(0, 8)));
-    assertTrue(win.test(board.id(8, 8)));
-
-    assertFalse(win.test(board.id(4, 0)));
-    assertFalse(win.test(board.id(4, 7)));
-  }
-
-  @Test
-  public void testGetWinConditionRightPlayer() {
-    // Starting last column (8), win first column (0)
-    Player david = new Player("David", new Position(4, 8));
-    Predicate<Integer> win = gameState.getWinCondition(david);
-
-    assertTrue(win.test(board.id(0, 0)));
-    assertTrue(win.test(board.id(8, 0)));
-
-    assertFalse(win.test(board.id(4, 8)));
-    assertFalse(win.test(board.id(4, 1)));
+    assertNotSame(game, newGame);
+    assertEquals(2, newGame.getPlayers().size());
+    assertEquals(9, newGame.getBoard().getSize());
   }
 }

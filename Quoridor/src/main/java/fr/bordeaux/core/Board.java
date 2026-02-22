@@ -1,5 +1,8 @@
 package fr.bordeaux.core;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.graph.*;
 import java.util.*;
 import java.util.function.Predicate;
@@ -8,10 +11,10 @@ import java.util.function.Predicate;
 public class Board {
 
   private final int size;
+  @JsonIgnore private final Graph graph;
 
-  private final Graph graph;
-
-  public Board(int size) {
+  @JsonCreator
+  public Board(@JsonProperty("size") int size) {
     if (size < 3 || size > 15 || size % 2 == 0) {
       throw new IllegalArgumentException(
           "Size must be odd and between 3 and 15, but was : " + size);
