@@ -6,17 +6,6 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.graph.Graph;
-import fr.bordeaux.cli.command.Command;
-import fr.bordeaux.cli.command.QuitCommand;
-import fr.bordeaux.cli.command.NewCommand;
-import fr.bordeaux.cli.command.LoadCommand;
-import fr.bordeaux.cli.command.SaveCommand;
-import fr.bordeaux.cli.command.PauseCommand;
-import fr.bordeaux.cli.command.UndoCommand;
-import fr.bordeaux.cli.command.RedoCommand;
-import fr.bordeaux.cli.command.ShowCommand;
-import fr.bordeaux.cli.command.SetCommand;
-
 import fr.bordeaux.cli.command.*;
 
 import java.io.IOException;
@@ -84,7 +73,7 @@ public class CliApp {
             case "redo": { cmd = new RedoCommand(); break; }
             case "show": { cmd = new ShowCommand(); break; }
             case "set": { cmd = new SetCommand(); break; }
-            default: System.out.println("Unknown command : " + command);
+            default: cmd = new MoveCommand(input);
         }
         if (cmd != null) engine = cmd.execute(engine);
     }
@@ -101,9 +90,9 @@ public class CliApp {
                 int id = 1;
                 for (Player player : engine.getState().getPlayers()) {
                     if ((player.getPosition()).equals(new Position(i, j)))
-                        { System.out.print(id + " "); empty = false; }
+                        { System.out.print(id + printWall(b, i, j, false)); empty = false; }
                     id += 1;
-                } if (empty) System.out.print("_ ");
+                } if (empty) System.out.print("_" + ((j!=boardSize-1)?printWall(b, i, j, false):" "));
                 empty = true;
                 if (j == boardSize-1) System.out.print((i+1));
             }

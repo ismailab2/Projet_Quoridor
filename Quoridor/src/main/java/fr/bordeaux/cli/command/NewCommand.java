@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -46,8 +47,11 @@ public class NewCommand implements Command {
             Player[] players = new Player[nbPlayer];
             
             for (int i = 0; i < nbPlayer; i++) {
-                String inputName = reader.readLine("Player's name >> ");
-                players[i] = new Player(inputName, positions[i]);
+                try {
+                    String inputName = reader.readLine("Player's name >> ");
+                    players[i] = new Player(inputName, positions[i]);
+                } 
+                catch (UserInterruptException e) { System.err.println("Tout va bien, je m'arrête !\n"); }
             }
             engine = new GameEngine(new GameState(board, Arrays.stream(players).toList()));
         }

@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -23,17 +24,22 @@ public class QuitCommand implements Command {
 
     @Override
     public GameEngine execute(GameEngine engine) {
-
-        String line = reader.readLine("Save the game before quitting? [y/N] >> ");
-        if (line.toLowerCase().equals("y") || line.toLowerCase().equals("yes")) {
-            String save = reader.readLine("Path where you want to save it >> ");
-            SaveCommand cmd = new SaveCommand(save);
-            return cmd.execute(engine);
-        } else {
-            if (line.toLowerCase().equals("n") || line.toLowerCase().equals("no")) {
-                System.out.println("You choose to not save...");
+        try {
+            String line = reader.readLine("Save the game before quitting? [y/N] >> ");
+            if (line.toLowerCase().equals("y") || line.toLowerCase().equals("yes")) {
+                String save = reader.readLine("Path where you want to save it >> ");
+                SaveCommand cmd = new SaveCommand(save);
+                return cmd.execute(engine);
+            } else {
+                if (line.toLowerCase().equals("n") || line.toLowerCase().equals("no")) {
+                    System.out.println("You choose to not save...");
+                }
+                else { System.out.println("Unrecognizable answer... Game not saved."); }
+                return engine;
             }
-            else { System.out.println("Unrecognizable answer... Game not saved."); }
+        }
+        catch (UserInterruptException e) {
+            System.err.println("Tout va bien, je m'arrête !\n");
             return engine;
         }
     }

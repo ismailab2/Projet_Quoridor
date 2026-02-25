@@ -22,22 +22,23 @@ public class HelpCommand implements Command {
 
     @Override
     public GameEngine execute(GameEngine engine) {
-        if (tokens == null || tokens.length == 1) { System.out.println("Pas de commande\n"); }
-        else {
-            for (int i = 1; i < tokens.length; i++) {
-                System.out.println(i + ": " + tokens[i]);
-            }
-        }
+        if (tokens == null) { System.out.println("Pas de commande\n"); }
+        else if (tokens.length == 1) { helpText(); }
+        else { helpFetch(); }
         return engine;
     }
 
     @Override
     public void helpText() {
+        System.out.println("helppppppppppppp");
+    }
+
+    public void helpFetch() {
         if (this.tokens.length <= 1) System.out.println("Un truc à expliquer");
         else {
             Command cmd = null;
             switch (tokens[1]) {
-                case "help": { System.out.println("Help command to implement.");; break; }
+                case "help": { System.out.println("Help command to implement."); break; }
                 case "quit": { cmd = new QuitCommand(); break; }
                 case "new": { cmd = new NewCommand(); break; }
                 case "load": { cmd = new LoadCommand(); break; }

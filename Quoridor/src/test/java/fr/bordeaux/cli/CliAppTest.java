@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.List;
 
 import org.jline.reader.LineReader;
@@ -41,7 +42,7 @@ public class CliAppTest {
     public static void setUp() {
         engine = new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4)))));
     }
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         engine = null;
     }
@@ -65,7 +66,7 @@ public class CliAppTest {
         assertFalse(cli.isRunning());
     }
     @ParameterizedTest
-    @ValueSource(strings = {"help", "quit", "save"})
+    @ValueSource(strings = {"help", "quit", "save", "foo"})
     public void testCommandDoesntChangeEngine(String str) throws Exception {
         GameEngine testEngine = engine;
 
@@ -79,5 +80,24 @@ public class CliAppTest {
         try { cli.fetch(str); }
         catch (EndOfFileException e) { e.printStackTrace(); }
         assertTrue(engine.equals(testEngine));
+    }
+
+    @Test
+    public void testFetchUnknownCommand() throws Exception {
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        PrintStream originOut = System.out;
+        System.setOut(new PrintStream(outContent));
+
+        ByteArrayInputStream in = new ByteArrayInputStream("".getBytes());
+        Terminal terminal = TerminalBuilder.builder().system(false)
+                .streams(in, outContent)
+                .build();
+        LineReader reader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .build();
+
+        CliApp cli = new CliApp(engine, terminal, reader);
+        cli.fetch("foo");
+        assertEquals(outContent.toString().trim(), "Invalid move format");
     }
 }
