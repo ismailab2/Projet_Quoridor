@@ -53,7 +53,8 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
-  //Apply a move, needs to be a valid move, it won't be checked in this function
+  //Apply a move, needs to be a valid move because it won't be checked in this function.
+  //Check victory is not done here as well
   public void applyMove(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
@@ -66,7 +67,6 @@ public class GameState {
     undoStack.push(move);
     redoStack.clear();
     getNextPlayer();
-    checkVictory();
     notifyListeners();
   }
 
@@ -80,7 +80,6 @@ public class GameState {
     }
     undoStack.push(move);
     getNextPlayer();
-    checkVictory();
   }
   // Undo the last move done
   public void undo() {
@@ -113,14 +112,6 @@ public class GameState {
 
   public boolean isGameOver() {
     return gameOver;
-  }
-
-  private void checkVictory() {
-    Player player = getCurrentPlayer();
-    if (hasReachedGoal(player)) {
-      player.addScore(1);
-      gameOver = true;
-    }
   }
 
   public boolean hasReachedGoal(Player player) {
@@ -193,5 +184,20 @@ public class GameState {
     newPlayers.add(new HumanPlayer("Human", new Position(0, size / 2)));
     newPlayers.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
     return new GameState(newBoard, newPlayers);
+  }
+
+  public GameState copy() {
+    Board boardCopy = this.board.copy();
+
+    List<Player> playersCopy = new ArrayList<>();
+    for (Player p : this.players) {
+      playersCopy.add(p.copy());
+    }
+
+    GameState copy = new GameState(boardCopy, playersCopy, this.currentIndexPlayer);
+
+    copy.gameOver = this.gameOver;
+    copy.paused = this.paused;
+    return copy;
   }
 }

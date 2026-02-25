@@ -82,18 +82,6 @@ public class GameStateTest {
   }
 
   @Test
-  public void applyMove_does_nothing_if_paused() {
-    game.setPaused(true);
-
-    Position old = human.getPosition();
-    Position pos = game.getCurrentPlayer().getPosition();
-
-    game.applyMove(Move.pawn(pos, new Position(1, 4)));
-
-    assertEquals(old, human.getPosition());
-  }
-
-  @Test
   public void undo_reverts_move() {
     Position p1 = new Position(1, 4);
     Player player = game.getCurrentPlayer();

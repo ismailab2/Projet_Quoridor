@@ -74,4 +74,15 @@ public class Graph {
     }
     return new ArrayList<>(); // Returns empty list if path doesn't exist
   }
+
+  public Graph copy() {
+    Map<Integer, List<Integer>> newAdjacencyList = new HashMap<>();
+
+    for (Map.Entry<Integer, List<Integer>> entry : this.adjacencyList.entrySet()) {
+      List<Integer> newList = new ArrayList<>(entry.getValue());
+
+      newAdjacencyList.put(entry.getKey(), newList);
+    }
+    return new Graph(newAdjacencyList);
+  }
 }

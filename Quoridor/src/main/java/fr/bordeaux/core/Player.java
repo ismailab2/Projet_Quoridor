@@ -41,6 +41,15 @@ public abstract class Player {
     this.startingPosition = positionStart;
   }
 
+  // Constructor used for copy
+  protected Player(String name, Position currentPos, Position startPos, int walls, int score) {
+    this.name = name;
+    this.position = new Position(currentPos.getX(), currentPos.getY());
+    this.startingPosition = startPos;
+    this.remainingWalls = walls;
+    this.score = score;
+  }
+
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
     Player p1 = new HumanPlayer("Human", new Position(0, 4));
@@ -91,6 +100,8 @@ public abstract class Player {
   }
 
   public abstract Move getNextMove(GameState state);
+
+  public abstract Player copy();
 
   @Override
   public String toString() {

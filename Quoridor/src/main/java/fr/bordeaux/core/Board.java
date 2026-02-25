@@ -23,6 +23,11 @@ public class Board {
     this.size = size;
   }
 
+  private Board(int size, Graph graph) {
+    this.size = size;
+    this.graph = graph;
+  }
+
   public int id(int row, int col) {
     return row * size + col;
   }
@@ -91,5 +96,8 @@ public class Board {
     boolean vCross = !graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2);
 
     return (orientation == Orientation.HORIZONTAL) ? hOverlap || hCross : vOverlap || vCross;
+  }
+  public Board copy() {
+    return new Board(size, this.graph.copy());
   }
 }

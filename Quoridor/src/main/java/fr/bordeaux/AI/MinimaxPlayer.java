@@ -22,6 +22,21 @@ public class MinimaxPlayer extends Player {
   }
 
   @Override
+  public Player copy() {
+    return new MinimaxPlayer(
+            this.getName(),
+            this.getPosition(),
+            this.getStartingPosition(),
+            this.getRemainingWalls(),
+            this.getScore()
+    );
+  }
+
+  private MinimaxPlayer(String name, Position current, Position start, int walls, int score) {
+    super(name, current, start, walls, score);
+  }
+
+  @Override
   public String toString() {
     return "AI " + super.toString();
   }

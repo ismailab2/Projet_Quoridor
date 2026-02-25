@@ -17,6 +17,21 @@ public class NeuralNetPlayer extends Player {
   }
 
   @Override
+  public Player copy() {
+    return new NeuralNetPlayer(
+            this.getName(),
+            this.getPosition(),
+            this.getStartingPosition(),
+            this.getRemainingWalls(),
+            this.getScore()
+    );
+  }
+
+  private NeuralNetPlayer(String name, Position current, Position start, int walls, int score) {
+    super(name, current, start, walls, score);
+  }
+
+  @Override
   public Move getNextMove(GameState state) {
     return null;
   }
