@@ -18,7 +18,7 @@ import fr.bordeaux.core.Position;
 public class AiPlayer { // MiniMax and IterativeDeepening are limited because it works with only 2 players. They will not work if the number of players is larger.
 
 
-    private int reflexionTime; // In seconds
+    private int reflexionTime = 5; // In seconds
     private final ScheduledExecutorService reflexionTimer = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> cleaner;
     private int d;
@@ -31,12 +31,27 @@ public class AiPlayer { // MiniMax and IterativeDeepening are limited because it
         this.g = g;
         this.reflexionTime = reflexionTime;
         this.d = d;
+        if (g.getPlayers().size != 2) {
+            throw new IllegalArgumentException(
+                " IA can only be used in a 1v1");
+        }
         if(selectedMode.equals("Iterative-Deepening")){
             mode = () -> IterativeDeepening();
+        }
+        else if(selectedMode.equals("Random")){
+            mode = () -> randomMove();
         }
         else{
             mode = () -> MiniMax(this.d);
         }
+    }
+
+    public AiPlayer(GameState g, int d){
+        this(g, d, 5, null);
+    }
+
+    public AiPlayer(GameState g, String selectedMode){
+        this(g, 1, 5, selectedMode);
     }
 
     public void play(){
@@ -58,17 +73,17 @@ public class AiPlayer { // MiniMax and IterativeDeepening are limited because it
         try{
             Move play_move = move.get(reflexionTime*1000 + 100, TimeUnit.MILLISECONDS); // Je rajoute un peu plus de temps question de sécurité pour eviter que les 2 threads se marche dessus
 
-            g.push(play_move);
+            g.applyMove(play_move);
 
             cleaner.cancel(false); // Nettoyer le timer 
 
         }
         catch (Exception e){
             if(saveMove == null){
-                g.push(randomMove(g));
+                g.applyMove(randomMove(g));
             }
             else{
-                g.push(saveMove);
+                g.applyMove(saveMove);
             }
         }
 
