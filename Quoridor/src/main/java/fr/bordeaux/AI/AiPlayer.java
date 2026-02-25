@@ -58,17 +58,17 @@ public class AiPlayer { // MiniMax and IterativeDeepening are limited because it
         try{
             Move play_move = move.get(reflexionTime*1000 + 100, TimeUnit.MILLISECONDS); // Je rajoute un peu plus de temps question de sécurité pour eviter que les 2 threads se marche dessus
 
-            g.applyMove(play_move);
+            g.push(play_move);
 
             cleaner.cancel(false); // Nettoyer le timer 
 
         }
         catch (Exception e){
             if(saveMove == null){
-                g.applyMove(randomMove(g));
+                g.push(randomMove(g));
             }
             else{
-                g.applyMove(saveMove);
+                g.push(saveMove);
             }
         }
 
@@ -96,7 +96,7 @@ public class AiPlayer { // MiniMax and IterativeDeepening are limited because it
         Move best_move = null;
         int best_score = Integer.MIN_VALUE;
         for (Move s : g.generate_legal_moves()){
-            g.applyMove(s);
+            g.push(s);
             int alpha = Math.max(best_score, MinMax(g, depth-1, Integer.MIN_VALUE ,Integer.MAX_VALUE));
             if(alpha > best_score){
                 best_score = alpha;
@@ -117,7 +117,7 @@ public class AiPlayer { // MiniMax and IterativeDeepening are limited because it
         }
 
         for (Move s : g.generate_legal_moves()){
-            g.applyMove(s);
+            g.push(s);
             alpha = Math.max(alpha, MinMax(g, d-1, alpha ,beta));
             g.pop();
             if(alpha>=beta){
@@ -136,7 +136,7 @@ public class AiPlayer { // MiniMax and IterativeDeepening are limited because it
         }
 
         for (Move s : g.generate_legal_moves()){
-            g.applyMove(s);
+            g.push(s);
             beta = Math.min(beta, MaxMin(g, d-1, alpha ,beta));
             g.pop();
             if(alpha>=beta){
