@@ -9,25 +9,27 @@ public class Move {
   }
 
   private final Type type;
+  private final Position from;
   private final Position to;
   private final Orientation orientation;
 
-  private Move(Type type, Position to, Orientation orientation) {
+  private Move(Type type, Position from, Position to, Orientation orientation) {
     this.type = type;
+    this.from = from;
     this.to = to;
     this.orientation = orientation;
   }
 
-  public static Move pawn(Position to) {
-    return new Move(Type.PAWN, to, null);
+  public static Move pawn(Position from, Position to) {
+    return new Move(Type.PAWN, from, to, null);
   }
 
   public static Move wall(Position to, Orientation orientation) {
-    return new Move(Type.WALL, to, orientation);
+    return new Move(Type.WALL, null, to, orientation);
   }
 
-  public Type getType() {
-    return type;
+  public Position getFrom() {
+    return from;
   }
 
   public Position getTo() {
@@ -36,6 +38,10 @@ public class Move {
 
   public Orientation getOrientation() {
     return orientation;
+  }
+
+  public Type getType() {
+    return type;
   }
 
   public boolean isWall() {

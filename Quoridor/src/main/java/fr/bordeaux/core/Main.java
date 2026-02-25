@@ -13,9 +13,10 @@ public class Main {
 
     int size = 9;
 
+    Player p1 = new Player("Human", new Position(0, 4), TypePlayer.HUMAN);
+    Player p2 = new Player("Bob", new Position(8, 4), TypePlayer.IA);
+
     Board board = new Board(size);
-    Player p1 = new Player("Alice", new Position(0, 4));
-    Player p2 = new Player("Bob", new Position(8, 4));
     GameState state = new GameState(board, List.of(p1, p2));
     GameEngine engine = new GameEngine(state);
     engine.play(Move.wall(new Position(2, 4), HORIZONTAL));
@@ -27,21 +28,30 @@ public class Main {
     System.out.println("Plateau de taille : " + board.getSize());
     System.out.println(board);
 
-    System.out.println("\nTour de : " + state.currentPlayer().getName());
-    Move move1 = Move.pawn(new Position(1, 4));
+    System.out.println("\nTour de : " + state.getCurrentPlayer().getName());
+
+    Position pos = state.getCurrentPlayer().getPosition();
+
+    Move move1 = Move.pawn(pos, new Position(1, 4));
     engine.play(move1);
-    System.out.println("Alice avance en " + p1.getPosition());
+    System.out.println("Human avance en " + p1.getPosition());
     System.out.println(board);
 
-    System.out.println("\nTour de : " + state.currentPlayer().getName());
-    Move move2 = Move.wall(new Position(2, 4), HORIZONTAL);
-    engine.play(move2);
-    System.out.println("Bob pose un mur horizontal en (2, 4)");
+    // engine.state().undo();
+    System.out.println("Bob annuler la pose un mur horizontal en (2, 4)");
     System.out.println("Murs restants pour Bob : " + p2.getRemainingWalls());
     System.out.println(board);
+    // engine.state().undo();
+    System.out.println("Human avancement annuler en " + p1.getPosition());
+    System.out.println(board);
 
-    System.out.println("\nTour de : " + state.currentPlayer().getName());
-    Move move3 = Move.pawn(new Position(2, 4));
+    // engine.state().redo();
+    System.out.println("Human fait redo et est en " + p1.getPosition());
+    System.out.println(board);
+
+    System.out.println("\nTour de : " + state.getCurrentPlayer().getName());
+
+    Move move3 = Move.pawn(pos, new Position(2, 4));
 
     try {
       engine.play(move3);

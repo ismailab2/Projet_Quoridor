@@ -2,48 +2,55 @@ package fr.bordeaux.core;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 public class MoveTest {
 
-  private Move pawnMove;
-  private Move hWallMove;
-  private Move vWallMove;
+  private Position from;
+  private Position to;
 
   @Before
-  public void setUp() {
-    pawnMove = Move.pawn(new Position(1, 1));
-    hWallMove = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
-    vWallMove = Move.wall(new Position(3, 3), Orientation.VERTICAL);
+  public void setup() {
+    from = new Position(0, 0);
+    to = new Position(1, 0);
   }
 
   @Test
-  public void testMoveTypes() {
-    assertEquals(Move.Type.PAWN, pawnMove.getType());
-    assertEquals(Move.Type.WALL, hWallMove.getType());
-    assertEquals(Move.Type.WALL, vWallMove.getType());
-    assertTrue(pawnMove.isPawn());
-    assertFalse(pawnMove.isWall());
-    assertTrue(hWallMove.isWall());
-    assertTrue(vWallMove.isWall());
+  public void createPawnMove_hasCorrectFields() {
+    Move move = Move.pawn(from, to);
+
+    assertEquals(Move.Type.PAWN, move.getType());
+    assertEquals(from, move.getFrom());
+    assertEquals(to, move.getTo());
+    assertNull(move.getOrientation());
+    assertTrue(move.isPawn());
+    assertFalse(move.isWall());
   }
 
   @Test
-  public void testPawnMoveData() {
-    // assertEquals(new Position(1, 1), pawnMove.getTo());
-    assertNull(pawnMove.getOrientation());
+  public void createWallMove_hasCorrectFields() {
+    Move move = Move.wall(to, Orientation.HORIZONTAL);
+
+    assertEquals(Move.Type.WALL, move.getType());
+    assertNull(move.getFrom());
+    assertEquals(to, move.getTo());
+    assertEquals(Orientation.HORIZONTAL, move.getOrientation());
+    assertTrue(move.isWall());
+    assertFalse(move.isPawn());
   }
 
   @Test
-  public void testHorizontalWallMoveData() {
-    // assertEquals(new Position(2, 2), hWallMove.getTo());
-    assertEquals(Orientation.HORIZONTAL, hWallMove.getOrientation());
+  public void pawnMove_fromTo_notNull() {
+    Move move = Move.pawn(from, to);
+    assertNotNull(move.getFrom());
+    assertNotNull(move.getTo());
   }
 
   @Test
-  public void testVerticalWallMoveData() {
-    // assertEquals((new Position(3, 3)), vWallMove.getTo());
-    assertEquals(Orientation.VERTICAL, vWallMove.getOrientation());
+  public void wallMove_fromIsNull() {
+    Move move = Move.wall(to, Orientation.VERTICAL);
+    assertNull(move.getFrom());
+    assertEquals(to, move.getTo());
+    assertEquals(Orientation.VERTICAL, move.getOrientation());
   }
 }

@@ -21,11 +21,23 @@
         <tensorflow.version>0.5.0</tensorflow.version>
 
         <!-- default main class -->
-        <main.class>fr.bordeaux.gui.MainApp</main.class>
+        <main.class>fr.bordeaux.gui.QuoridorApp</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.2</version>
+        </dependency>
 
         <!-- JUnit -->
         <dependency>
@@ -182,7 +194,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>fr.bordeaux.gui.MainApp</mainClass>
+                    <mainClass>fr.bordeaux.gui.QuoridorApp</mainClass>
                 </configuration>
             </plugin>
 
@@ -196,7 +208,7 @@
         <profile>
             <id>cli</id>
             <properties>
-                <main.class>fr.bordeaux.gui.MainApp</main.class>
+                <main.class>fr.bordeaux.core.Main</main.class>
             </properties>
         </profile>
 
@@ -204,7 +216,7 @@
         <profile>
             <id>gui</id>
             <properties>
-                <main.class>fr.bordeaux.gui.MainApp</main.class>
+                <main.class>fr.bordeaux.core.Main</main.class>
             </properties>
         </profile>
 

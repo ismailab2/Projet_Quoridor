@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Graph {
+
   private final Map<Integer, List<Integer>> adjacencyList;
 
   public Graph(Map<Integer, List<Integer>> adjacencyList) {
