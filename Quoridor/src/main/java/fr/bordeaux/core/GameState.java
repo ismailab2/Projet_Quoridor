@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fr.bordeaux.core.Move.Type;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -197,5 +200,41 @@ public class GameState {
     newPlayers.add(new Player("Human", new Position(0, size / 2), TypePlayer.HUMAN));
     newPlayers.add(new Player("Bob", new Position(size - 1, size / 2), TypePlayer.IA));
     return new GameState(newBoard, newPlayers);
+  }
+
+  public List<Move> generate_legal_moves(){
+    List<Move> res = new ArrayList<>();
+    Position player_pos = getCurrentPlayer().getPosition();
+    int x = player_pos.getX();
+    int y = player_pos.getY();
+    List<Move> all_possible_moves = new ArrayList<>();
+    for(int i = -1; i<2; i++){
+      for(int j = -1; j<2; j++){
+        if(i!=0 && j!=0){
+          all_possible_moves.add(Move.pawn(player_pos, new Position(x+i, y+j)));
+        }
+      }
+    }
+
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x+2, y) ));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x-2, y) ));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y+2) ));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y-2) ));
+
+    for(int i = 0; i<board.getSize(); i++){
+      for(int j = 0; j<board.getSize(); j++){
+        all_possible_moves.add(Move.wall(new Position(x, y) ,Orientation.HORIZONTAL));
+        all_possible_moves.add(Move.wall(new Position(x, y) ,Orientation.VERTICAL));
+      }
+    }
+
+    for(Move m : all_possible_moves){
+      if(RuleChecker.isMoveLegal(this, m)){
+        res.add(m);
+      }
+    }
+
+    return res;
+
   }
 }
