@@ -2,6 +2,7 @@ package fr.bordeaux.core;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 /** Represents a position on the Quoridor board. */
 public class Position {
@@ -25,16 +26,19 @@ public class Position {
 
   @Override
   public String toString() {
-    return "Position: "+this.x+", "+this.y;
+    return "Position: " + this.x + ", " + this.y;
   }
 
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null || getClass() != obj.getClass()) return false;
-    Position position = (Position)obj;
-    return this.x==position.x && this.y==position.y;
+    Position position = (Position) obj;
+    return this.x == position.x && this.y == position.y;
   }
+
   @Override
-  public int hashCode() { return Objects.hash(x, y); }
+  public int hashCode() {
+    return Objects.hash(x, y);
+  }
 }

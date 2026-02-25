@@ -53,9 +53,8 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
+  //Apply a move, needs to be a valid move, it won't be checked in this function
   public void applyMove(Move move) {
-    if (paused || gameOver) return;
-
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -83,35 +82,32 @@ public class GameState {
     getNextPlayer();
     checkVictory();
   }
-
+  // Undo the last move done
   public void undo() {
     if (paused || gameOver) return;
     if (undoStack.isEmpty()) return;
 
-    do {
-      Move last = undoStack.pop();
-      redoStack.push(last);
-      previousPlayer();
-      Player player = getCurrentPlayer();
-      if (last.isPawn()) {
-        player.setPosition(last.getFrom());
-      } else {
-        board.removeWall(last.getTo(), last.getOrientation());
-        player.giveBackWall();
-      }
-      gameOver = false;
-    } while (!undoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
+    Move last = undoStack.pop();
+    redoStack.push(last);
+    previousPlayer();
+    Player player = getCurrentPlayer();
+    if (last.isPawn()) {
+      player.setPosition(last.getFrom());
+    } else {
+      board.removeWall(last.getTo(), last.getOrientation());
+      player.giveBackWall();
+    }
+    gameOver = false;
     notifyListeners();
   }
 
+  // Redo the last move undone
   public void redo() {
     if (paused || gameOver) return;
     if (redoStack.isEmpty()) return;
 
-    do {
-      Move move = redoStack.pop();
-      applyMoveWithoutClearingRedo(move);
-    } while (!redoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
+    Move move = redoStack.pop();
+    applyMoveWithoutClearingRedo(move);
     notifyListeners();
   }
 
@@ -194,8 +190,8 @@ public class GameState {
     int size = 9;
     Board newBoard = new Board(size);
     List<Player> newPlayers = new ArrayList<>();
-    newPlayers.add(new Player("Human", new Position(0, size / 2), TypePlayer.HUMAN));
-    newPlayers.add(new Player("Bob", new Position(size - 1, size / 2), TypePlayer.IA));
+    newPlayers.add(new HumanPlayer("Human", new Position(0, size / 2)));
+    newPlayers.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
     return new GameState(newBoard, newPlayers);
   }
 }

@@ -1,10 +1,14 @@
 package fr.bordeaux.core;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import fr.bordeaux.AI.MinimaxPlayer;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class GameStateTest {
 
@@ -13,11 +17,11 @@ public class GameStateTest {
   private Player human;
   private Player ia;
 
-  @Before
+  @BeforeEach
   public void setup() {
     board = new Board(9);
-    human = new Player("Human", new Position(0, 4), TypePlayer.HUMAN);
-    ia = new Player("IA", new Position(8, 4), TypePlayer.IA);
+    human = new HumanPlayer("Human", new Position(0, 4));
+    ia = new MinimaxPlayer("IA", new Position(8, 4));
 
     List<Player> players = new ArrayList<>();
     players.add(human);
@@ -35,9 +39,12 @@ public class GameStateTest {
   @Test
   public void testPlayersNumberInvalidThree() {
     Board board = new Board(9);
-    assertThrows(IllegalArgumentException.class,
-      () -> { new GameState(board, List.of(p1, p2, p3)); }
-    );
+    Player human2 = new HumanPlayer("Human2", new Position(4, 4));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          new GameState(board, List.of(human, human2, ia));
+        });
   }
 
   @Test
@@ -149,7 +156,7 @@ public class GameStateTest {
 
   @Test
   public void win_condition_from_bottom_row() {
-    Player p = new Player("P", new Position(8, 4), TypePlayer.HUMAN);
+    Player p = new HumanPlayer("P", new Position(8, 4));
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
     int id = board.id(0, 4);
@@ -158,7 +165,7 @@ public class GameStateTest {
 
   @Test
   public void win_condition_from_left_col() {
-    Player p = new Player("P", new Position(4, 0), TypePlayer.HUMAN);
+    Player p = new HumanPlayer("P", new Position(4, 0));
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
     int id = board.id(4, 8);
@@ -167,7 +174,7 @@ public class GameStateTest {
 
   @Test
   public void win_condition_from_right_col() {
-    Player p = new Player("P", new Position(4, 8), TypePlayer.HUMAN);
+    Player p = new HumanPlayer("P", new Position(4, 8));
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
     int id = board.id(4, 0);
