@@ -32,6 +32,7 @@ public class QuoridorApp extends Application {
      */
     BoardView boardView = new BoardView(engine);
     borderPane.setCenter(boardView);
+    DragAndDrop.install(engine, boardView);
 
     Scene scene = new Scene(borderPane, 900, 700);
     ShortcutManager.getInstance().register(scene);
