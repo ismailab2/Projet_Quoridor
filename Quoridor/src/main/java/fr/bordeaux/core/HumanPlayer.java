@@ -15,12 +15,11 @@ public class HumanPlayer extends Player {
   @Override
   public Player copy() {
     return new HumanPlayer(
-            this.getName(),
-            this.getPosition(),
-            this.getStartingPosition(),
-            this.getRemainingWalls(),
-            this.getScore()
-    );
+        this.getName(),
+        this.getPosition(),
+        this.getStartingPosition(),
+        this.getRemainingWalls(),
+        this.getScore());
   }
 
   private HumanPlayer(String name, Position current, Position start, int walls, int score) {

@@ -1,14 +1,12 @@
 package fr.bordeaux.core;
 
 import com.fasterxml.jackson.annotation.*;
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import fr.bordeaux.AI.MCTSPlayer;
 import fr.bordeaux.AI.MinimaxPlayer;
 import fr.bordeaux.AI.NeuralNetPlayer;
+import fr.bordeaux.AI.RandomPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +31,7 @@ public abstract class Player {
 
   private final String name;
   private Position position;
-  private int remainingWalls = 10;  
+  private int remainingWalls = 10;
   private final Position startingPosition;
   private int score = 0;
 
@@ -57,7 +55,7 @@ public abstract class Player {
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
     Player p1 = new HumanPlayer("Human", new Position(0, 4));
-    Player p2 = new MinimaxPlayer("Bob", new Position(8, 4));
+    Player p2 = new MinimaxPlayer("Bob", new Position(8, 4), 2, 5, false);
     players.add(p1);
     players.add(p2);
     return players;

@@ -1,25 +1,50 @@
 package fr.bordeaux.AI;
 
-import java.util.List;
-import java.util.Random;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.core.Position;
+import java.util.List;
+import java.util.Random;
 
-public class RandomPlayer extends Player{
-    
+public class RandomPlayer extends Player {
 
-    @JsonCreator
-    public RandomPlayer(@JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart){
-        super(name, positionStart);
-    }
+  @JsonCreator
+  public RandomPlayer(
+      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
+    super(name, positionStart);
+  }
 
-    @Override
-    public Move getNextMove(GameState state) {
-        List<Move> l = state.generate_legal_moves();
-        Random random = new Random();
-        return l.get( random.nextInt(l.size()));
-    }
+  @Override
+  public Move getNextMove(GameState state) {
+    List<Move> l = state.generate_legal_moves();
+    Random random = new Random();
+    return l.get(random.nextInt(l.size()));
+  }
 
+  @Override
+  public String toString() {
+    return "Random AI " + super.toString();
+  }
+
+  @Override
+  public Player copy() {
+    return new RandomPlayer(
+        this.getName(),
+        this.getPosition(),
+        this.getStartingPosition(),
+        this.getRemainingWalls(),
+        this.getScore());
+  }
+
+  private RandomPlayer(String name, Position current, Position start, int walls, int score) {
+    super(name, current, start, walls, score);
+  }
+
+  @Override
+  public Boolean isAI() {
+    return true;
+  }
 }

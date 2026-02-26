@@ -6,7 +6,6 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,12 +21,11 @@ public class MCTSPlayer extends Player {
   @Override
   public Player copy() {
     return new MCTSPlayer(
-            this.getName(),
-            this.getPosition(),
-            this.getStartingPosition(),
-            this.getRemainingWalls(),
-            this.getScore()
-    );
+        this.getName(),
+        this.getPosition(),
+        this.getStartingPosition(),
+        this.getRemainingWalls(),
+        this.getScore());
   }
 
   private MCTSPlayer(String name, Position current, Position start, int walls, int score) {
@@ -36,7 +34,7 @@ public class MCTSPlayer extends Player {
 
   public static class Node {
     GameState state;
-    Move move; //Move that led to this node
+    Move move; // Move that led to this node
     Node parent;
     List<Node> children = new ArrayList<>();
     int wins = 0;
@@ -46,7 +44,7 @@ public class MCTSPlayer extends Player {
       this(state, null, null);
     }
 
-    public Node(GameState state,  Move move, Node parent) {
+    public Node(GameState state, Move move, Node parent) {
       this.state = state;
       this.move = move;
       this.parent = parent;
@@ -94,11 +92,11 @@ public class MCTSPlayer extends Player {
   private Node select(Node node) {
     Node current = node;
 
-    while(!current.state.isGameOver() && isFullyExpanded(current)) {
+    while (!current.state.isGameOver() && isFullyExpanded(current)) {
       current = bestUCT(current);
     }
 
-    //If game isn't over, and we have an incomplete node, we expand it
+    // If game isn't over, and we have an incomplete node, we expand it
     if (!current.state.isGameOver()) {
       return expand(current);
     }
@@ -108,12 +106,12 @@ public class MCTSPlayer extends Player {
   private Node bestUCT(Node node) {
     double bestScore = Double.NEGATIVE_INFINITY;
     Node bestChild = null;
-    double C = 1.41; //Square root of 2
+    double C = 1.41; // Square root of 2
 
     for (Node child : node.children) {
-      if (child.visits == 0) return child; //Priority to never visited nodes
+      if (child.visits == 0) return child; // Priority to never visited nodes
 
-      //Formula for determining the score of a child using Upper Confidence Bound
+      // Formula for determining the score of a child using Upper Confidence Bound
       double exploitation = (double) child.wins / child.visits;
       double exploration = C * Math.sqrt(Math.log(node.visits) / child.visits);
       double score = exploitation + exploration;
@@ -126,13 +124,13 @@ public class MCTSPlayer extends Player {
     return bestChild;
   }
 
-  //Check if there are still unexplored moves from node, false if there are.
+  // Check if there are still unexplored moves from node, false if there are.
   private boolean isFullyExpanded(Node node) {
     List<Move> legalMoves = generate_legal_moves();
     return node.children.size() == legalMoves.size();
   }
 
-  //Temporary method to compile
+  // Temporary method to compile
   private List<Move> generate_legal_moves() {
     return new ArrayList<>();
   }

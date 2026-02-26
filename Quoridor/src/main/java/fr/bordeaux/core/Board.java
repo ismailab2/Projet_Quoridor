@@ -97,6 +97,7 @@ public class Board {
 
     return (orientation == Orientation.HORIZONTAL) ? hOverlap || hCross : vOverlap || vCross;
   }
+
   public Board copy() {
     return new Board(size, this.graph.copy());
   }
