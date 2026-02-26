@@ -23,7 +23,6 @@ public class GameState {
   private boolean gameOver;
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
-  private final Deque<Move> IAStack;
 
 
   @JsonIgnore private transient List<Runnable> listeners = new ArrayList<>();
@@ -152,7 +151,7 @@ public class GameState {
     currentIndexPlayer = (currentIndexPlayer + 1) % players.size();
   }
 
-  private void previousPlayer() {
+  public void previousPlayer() {
     currentIndexPlayer = (currentIndexPlayer - 1 + players.size()) % players.size();
   }
 
@@ -240,30 +239,4 @@ public class GameState {
 
   }
 
-  public void push(Move move){
-    Player player = getCurrentPlayer();
-    if (move.isPawn()) {
-      player.setPosition(move.getTo());
-    } else {
-      board.addWall(move.getTo(), move.getOrientation());
-      player.useWall();
-    }
-
-    IAStack.push(move);
-    getNextPlayer();
-  }
-
-  public void pop() {
-    if (IAStack.isEmpty()) return;
-
-    Move last = IAStack.pop();
-    previousPlayer();
-    Player player = getCurrentPlayer();
-    if (last.isPawn()) {
-      player.setPosition(last.getFrom());
-    } else {
-      board.removeWall(last.getTo(), last.getOrientation());
-      player.giveBackWall();
-    }
-  }
 }

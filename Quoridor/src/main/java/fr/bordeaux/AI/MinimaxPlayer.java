@@ -1,5 +1,6 @@
 package fr.bordeaux.AI;
 
+import java.util.Deque;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -29,6 +30,7 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
     private final ExecutorService aiExecutor = Executors.newSingleThreadExecutor();
     private volatile Move saveMove = null;
     private Function<GameState, Move> mode ;
+    private final Deque<Move> IAStack;
 
   @JsonCreator
   public MinimaxPlayer(
@@ -111,13 +113,13 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
 
         if (Thread.currentThread().isInterrupted()) return null;
 
-        state.push(s);
+        state.push(state, s);
         int score = MinMax(state, d-1, Integer.MIN_VALUE ,Integer.MAX_VALUE);
         if(score > best_score || best_move == null){
             best_score = score;
             best_move = s;
         }
-        state.pop();
+        state.pop(state);
     }
 
     return best_move;
@@ -131,9 +133,9 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
         }
 
         for (Move s : g.generate_legal_moves()){
-            g.push(s);
+            g.push(g, s);
             alpha = Math.max(alpha, MinMax(g, d-1, alpha ,beta));
-            g.pop();
+            g.pop(g);
             if(alpha>=beta){
                 return beta;
             }
@@ -150,9 +152,9 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
         }
 
         for (Move s : g.generate_legal_moves()){
-            g.push(s);
+            g.push(g, s);
             beta = Math.min(beta, MaxMin(g, d-1, alpha ,beta));
-            g.pop();
+            g.pop(g);
             if(alpha>=beta){
                 return alpha;
             }
@@ -241,8 +243,36 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
         return (int) (l_min.size() - l_max.size() + (nb_wall_player * k1 - nb_wall_enemie * k2));
     }
 
-  @Override
-  public String toString() {
-    return "AI " + super.toString();
-  }
+
+    public void push(GameState g, Move move){
+        Player player = g.getCurrentPlayer();
+        if (move.isPawn()) {
+            player.setPosition(move.getTo());
+        } else {
+            g.getBoard().addWall(move.getTo(), move.getOrientation());
+            player.useWall();
+        }
+
+        IAStack.push(move);
+        g.getNextPlayer();
+    }
+
+    public void pop(GameState g) {
+        if (IAStack.isEmpty()) return;
+
+        Move last = IAStack.pop();
+        g.previousPlayer();
+        Player player = g.getCurrentPlayer();
+        if (last.isPawn()) {
+            player.setPosition(last.getFrom());
+        } else {
+            g.getBoard().removeWall(last.getTo(), last.getOrientation());
+            player.giveBackWall();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "AI " + super.toString();
+    }
 }
