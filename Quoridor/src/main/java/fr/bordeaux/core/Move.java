@@ -51,4 +51,15 @@ public class Move {
   public boolean isPawn() {
     return type == Type.PAWN;
   }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "type=" + type +
+                ", from=" + from +
+                ", to=" + to +
+                ", orientation=" + orientation +
+                '}';
+    }
+
 }

@@ -54,7 +54,10 @@ public class GameEngineTest {
     Move wall1 = Move.wall(new Position(3, 0), Orientation.HORIZONTAL);
     board.addWall(wall1.getTo(), wall1.getOrientation());
     Move wall2 = Move.wall(new Position(3, 2), Orientation.HORIZONTAL);
-    // assertFalse(RuleChecker.isMoveLegal(state, wall2));
+    System.out.println(state.getCurrentPlayer().getPosition());
+    System.out.println(RuleChecker.isMoveLegal(state, wall2));
+    assertFalse(RuleChecker.isMoveLegal(state, wall2));
+
   }
 
   @Test

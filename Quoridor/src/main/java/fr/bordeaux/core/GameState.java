@@ -45,17 +45,8 @@ public class GameState {
     this(board, players, 0);
   }
 
-  public void addListener(Runnable listener) {
-    listeners.add(listener);
-  }
-
-  private void notifyListeners() {
-    for (Runnable l : listeners) l.run();
-  }
-
   public void applyMove(Move move) {
     if (paused || gameOver) return;
-
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -63,8 +54,10 @@ public class GameState {
       board.addWall(move.getTo(), move.getOrientation());
       player.useWall();
     }
-
     undoStack.push(move);
+    System.out.println(undoStack);
+
+
     redoStack.clear();
     getNextPlayer();
     checkVictory();
@@ -84,10 +77,33 @@ public class GameState {
     checkVictory();
   }
 
+  private void checkVictory() {
+    Player player = getCurrentPlayer();
+    if (hasReachedGoal(player)) {
+      player.addScore(1);
+      setGameOver(true);
+    }
+  }
+
+  public boolean hasReachedGoal(Player player) {
+    int id = board.id(player.getPosition().getX(), player.getPosition().getY());
+    // System.out.println(getWinCondition(player).test(id));
+    return getWinCondition(player).test(id);
+  }
+
+  public Predicate<Integer> getWinCondition(Player player) {
+    Position start = player.getStartingPosition();
+    int size = board.getSize();
+
+    if (start.getX() == 0) return id -> (id / size) == size - 1; // last row
+    if (start.getX() == size - 1) return id -> (id / size) == 0; // first row
+    if (start.getY() == 0) return id -> (id % size) == size - 1; // last col
+    return id -> (id % size) == 0; // first col
+  }
+
   public void undo() {
     if (paused || gameOver) return;
     if (undoStack.isEmpty()) return;
-
     do {
       Move last = undoStack.pop();
       redoStack.push(last);
@@ -107,40 +123,11 @@ public class GameState {
   public void redo() {
     if (paused || gameOver) return;
     if (redoStack.isEmpty()) return;
-
     do {
       Move move = redoStack.pop();
       applyMoveWithoutClearingRedo(move);
     } while (!redoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
     notifyListeners();
-  }
-
-  public boolean isGameOver() {
-    return gameOver;
-  }
-
-  private void checkVictory() {
-    Player player = getCurrentPlayer();
-    if (hasReachedGoal(player)) {
-      player.addScore(1);
-      gameOver = true;
-    }
-  }
-
-  public boolean hasReachedGoal(Player player) {
-    int id = board.id(player.getPosition().getX(), player.getPosition().getY());
-    // System.out.println(getWinCondition(player).test(id));
-    return getWinCondition(player).test(id);
-  }
-
-  public Predicate<Integer> getWinCondition(Player player) {
-    Position start = player.getStartingPosition();
-    int size = board.getSize();
-
-    if (start.getX() == 0) return id -> (id / size) == size - 1; // last row
-    if (start.getX() == size - 1) return id -> (id / size) == 0; // first row
-    if (start.getY() == 0) return id -> (id % size) == size - 1; // last col
-    return id -> (id % size) == 0; // first col
   }
 
   public void getNextPlayer() {
@@ -167,8 +154,16 @@ public class GameState {
     this.paused = paused;
   }
 
+  public void setGameOver(boolean gameOver) {
+    this.gameOver = gameOver;
+  }
+
   public boolean isPaused() {
     return paused;
+  }
+
+  public boolean isGameOver() {
+    return gameOver;
   }
 
   public void saveGameJSON(String filename) {
@@ -198,4 +193,13 @@ public class GameState {
     newPlayers.add(new Player("Bob", new Position(size - 1, size / 2), TypePlayer.IA));
     return new GameState(newBoard, newPlayers);
   }
+
+  public void addListener(Runnable listener) {
+    listeners.add(listener);
+  }
+
+  private void notifyListeners() {
+    for (Runnable l : listeners) l.run();
+  }
+
 }
