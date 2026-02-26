@@ -81,34 +81,38 @@ public class GameState {
     undoStack.push(move);
     getNextPlayer();
   }
-  // Undo the last move done
+
   public void undo() {
     if (paused || gameOver) return;
     if (undoStack.isEmpty()) return;
 
-    Move last = undoStack.pop();
-    redoStack.push(last);
-    previousPlayer();
-    Player player = getCurrentPlayer();
-    if (last.isPawn()) {
-      player.setPosition(last.getFrom());
-    } else {
-      board.removeWall(last.getTo(), last.getOrientation());
-      player.giveBackWall();
-    }
-    gameOver = false;
+    do {
+      Move last = undoStack.pop();
+      redoStack.push(last);
+      previousPlayer();
+      Player player = getCurrentPlayer();
+      if (last.isPawn()) {
+        player.setPosition(last.getFrom());
+      } else {
+        board.removeWall(last.getTo(), last.getOrientation());
+        player.giveBackWall();
+      }
+      gameOver = false;
+    } while (!undoStack.isEmpty() && getCurrentPlayer().isAI());
     notifyListeners();
   }
 
-  // Redo the last move undone
   public void redo() {
     if (paused || gameOver) return;
     if (redoStack.isEmpty()) return;
 
-    Move move = redoStack.pop();
-    applyMoveWithoutClearingRedo(move);
+    do {
+      Move move = redoStack.pop();
+      applyMoveWithoutClearingRedo(move);
+    } while (!redoStack.isEmpty() && getCurrentPlayer().isAI());
     notifyListeners();
   }
+
 
   public boolean isGameOver() {
     return gameOver;

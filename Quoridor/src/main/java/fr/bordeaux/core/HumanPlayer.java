@@ -36,4 +36,9 @@ public class HumanPlayer extends Player {
   public String toString() {
     return "Human" + super.toString();
   }
+
+  @Override
+  public Boolean isAI() {
+    return false;
+  }
 }

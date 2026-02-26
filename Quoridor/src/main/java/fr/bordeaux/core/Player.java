@@ -1,9 +1,6 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import fr.bordeaux.AI.MCTSPlayer;
 import fr.bordeaux.AI.MinimaxPlayer;
 import fr.bordeaux.AI.NeuralNetPlayer;
@@ -100,6 +97,9 @@ public abstract class Player {
   }
 
   public abstract Move getNextMove(GameState state);
+
+  @JsonIgnore
+  public abstract Boolean isAI();
 
   public abstract Player copy();
 

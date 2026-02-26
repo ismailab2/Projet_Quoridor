@@ -40,4 +40,9 @@ public class MinimaxPlayer extends Player {
   public String toString() {
     return "AI " + super.toString();
   }
+
+  @Override
+  public Boolean isAI() {
+    return true;
+  }
 }
