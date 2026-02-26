@@ -17,22 +17,16 @@ public class RuleChecker {
     }
   }
 
-  private static boolean pawnMoveLegal(GameState state, Move move) {
+  public static boolean canJump(GameState state, Move move) {
+    // Jump gestion
     Player CurrentPlay = state.getCurrentPlayer();
     Board b = state.getBoard();
     Position from = CurrentPlay.getPosition();
     Position to = move.getTo();
-    // System.out.println("c'est from"+from);
-    // System.out.println(to.getX() + " " + to.getY());
-
-    if (!b.isInside(to)) return false;
 
     int fromId = b.id(from.getX(), from.getY());
     int toId = b.id(to.getX(), to.getY());
 
-    if (b.getGraph().hasEdge(fromId, toId)) return true;
-
-    // Gestion du saut
     for (Player otherPlayer : state.getPlayers()) {
       if (otherPlayer == CurrentPlay) {
         continue;
@@ -76,8 +70,25 @@ public class RuleChecker {
         if (canSideStep && to.equals(diag)) return true;
       }
     }
-
     return false;
+  }
+
+  private static boolean pawnMoveLegal(GameState state, Move move) {
+    Player CurrentPlay = state.getCurrentPlayer();
+    Board b = state.getBoard();
+    Position from = CurrentPlay.getPosition();
+    Position to = move.getTo();
+    // System.out.println("c'est from"+from);
+    // System.out.println(to.getX() + " " + to.getY());
+
+    if (!b.isInside(to)) return false;
+
+    int fromId = b.id(from.getX(), from.getY());
+    int toId = b.id(to.getX(), to.getY());
+
+    if (b.getGraph().hasEdge(fromId, toId)) return true;
+
+    return RuleChecker.canJump(state, move);
   }
 
   private static boolean isAdjacent(Position a, Position b) {
@@ -132,7 +143,7 @@ public class RuleChecker {
     boolean canWin = true;
     for (Player p : state.getPlayers()) {
       int startId = b.id(p.getPosition().getX(), p.getPosition().getY());
-      if (b.findPath(startId, state.getWinCondition(p)).isEmpty()) {
+      if (b.getGraph().findPathBFS(startId, state.getWinCondition(p)).isEmpty()) {
         canWin = false;
         break;
       }

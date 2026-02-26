@@ -2,19 +2,25 @@ package fr.bordeaux.core;
 
 import static fr.bordeaux.core.Orientation.*;
 
+import fr.bordeaux.cli.CliApp;
 import java.util.List;
 
 public class Main {
 
   public static void main(String[] args) {
+
     int size = 9;
 
-    Player p1 = new Player("Human", new Position(0, 4), TypePlayer.HUMAN);
-    Player p2 = new Player("Bob", new Position(8, 4), TypePlayer.IA);
+    Player p1 = new HumanPlayer("Human", new Position(0, 4));
+    Player p2 = new HumanPlayer("Bob", new Position(8, 4));
 
     Board board = new Board(size);
     GameState state = new GameState(board, List.of(p1, p2));
     GameEngine engine = new GameEngine(state);
+    engine.play(Move.wall(new Position(2, 4), HORIZONTAL));
+    System.out.println(engine.getState().getPlayers());
+    CliApp cli = new CliApp(engine);
+    cli.run();
 
     System.out.println("--- Début de la partie de Quoridor ---");
     System.out.println("Plateau de taille : " + board.getSize());

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.graph.*;
 import java.util.*;
-import java.util.function.Predicate;
 
 /** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
 public class Board {
@@ -22,6 +21,11 @@ public class Board {
     // Create the graph representing the board
     graph = GraphBuilder.buildEmptyGrid(size);
     this.size = size;
+  }
+
+  private Board(int size, Graph graph) {
+    this.size = size;
+    this.graph = graph;
   }
 
   public int id(int row, int col) {
@@ -93,50 +97,7 @@ public class Board {
 
     return (orientation == Orientation.HORIZONTAL) ? hOverlap || hCross : vOverlap || vCross;
   }
-
-  /**
-   * Finds the shortest path from a starting vertex to any vertex satisfying the goal condition.
-   * This method implements the Breadth-First Search (BFS) algorithm, which guarantees finding the
-   * shortest path in an unweighted graph. It is used to verify if a player can still reach their
-   * winning side and to calculate the necessary moves.
-   *
-   * @param startId The ID of the starting vertex (typically the player's current position).
-   * @param isGoal A predicate defining the victory condition (e.g., reaching the opposite
-   *     baseline).
-   * @return An ordered List of vertex IDs representing the path from start to goal (inclusive).
-   *     Returns an empty list if the destination is unreachable (e.g., player is blocked by walls).
-   */
-  public List<Integer> findPath(int startId, Predicate<Integer> isGoal) {
-    Queue<Integer> queue = new LinkedList<>(); // vertices to visit
-    queue.add(startId);
-
-    Map<Integer, Integer> parentMap =
-        new HashMap<>(); // Map representing the parents of each vertex
-    parentMap.put(startId, null);
-
-    while (!queue.isEmpty()) { // While there are vertices to visit
-      int current = queue.poll(); // Pop the next one
-
-      // Check if there is a path to victory, if there is returns the path
-      if (isGoal.test(current)) {
-        List<Integer> path = new ArrayList<>();
-        Integer parentId = current;
-        while (parentId != null) {
-          path.add(parentId);
-          parentId = parentMap.get(parentId);
-        }
-        Collections.reverse(path);
-        return path;
-      }
-
-      // Add next vertices to visit
-      for (int neighbor : graph.getNeighbors(current)) {
-        if (!parentMap.containsKey(neighbor)) {
-          parentMap.put(neighbor, current);
-          queue.add(neighbor);
-        }
-      }
-    }
-    return new ArrayList<>(); // Returns empty list if path doesn't exist
+  public Board copy() {
+    return new Board(size, this.graph.copy());
   }
 }
