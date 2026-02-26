@@ -45,6 +45,7 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
         else{
             mode = (state) -> MiniMax(state, this.depth);
         }
+        this.IAStack = null;
     }
 
     @Override
@@ -269,8 +270,15 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
         }
     }
 
-    @Override
-    public String toString() {
-        return "AI " + super.toString();
-    }
+
+  @Override
+  public String toString() {
+    return "AI " + super.toString();
+  }
+
+  @Override
+  public Boolean isAI() {
+    return true;
+  }
+
 }

@@ -1,18 +1,22 @@
 package fr.bordeaux.core;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class MoveTest {
 
   private Position from;
   private Position to;
 
-  @Before
-  public void setup() {
-    from = new Position(0, 0);
-    to = new Position(1, 0);
+  @BeforeEach
+  public void setUp() {
+    from = new Position(0, 1);
+    to = new Position(1, 1);
+    Move pawnMove = Move.pawn(from, to);
+    Move hWallMove = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    Move vWallMove = Move.wall(new Position(3, 3), Orientation.VERTICAL);
   }
 
   @Test

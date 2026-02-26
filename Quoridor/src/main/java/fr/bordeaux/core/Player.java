@@ -1,7 +1,9 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import fr.bordeaux.AI.MCTSPlayer;
+import fr.bordeaux.AI.MinimaxPlayer;
+import fr.bordeaux.AI.NeuralNetPlayer;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import fr.bordeaux.AI.MCTSPlayer;
@@ -37,10 +39,19 @@ public abstract class Player {
 
   @JsonCreator
   public Player(
-    @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
+      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;
+  }
+
+  // Constructor used for copy
+  protected Player(String name, Position currentPos, Position startPos, int walls, int score) {
+    this.name = name;
+    this.position = new Position(currentPos.getX(), currentPos.getY());
+    this.startingPosition = startPos;
+    this.remainingWalls = walls;
+    this.score = score;
   }
 
   public static List<Player> createDefaultPlayers() {
@@ -93,6 +104,11 @@ public abstract class Player {
   }
 
   public abstract Move getNextMove(GameState state);
+
+  @JsonIgnore
+  public abstract Boolean isAI();
+
+  public abstract Player copy();
 
   @Override
   public String toString() {
