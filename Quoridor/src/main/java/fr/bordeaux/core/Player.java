@@ -24,7 +24,8 @@ import java.util.List;
   @JsonSubTypes.Type(value = HumanPlayer.class, name = "human"),
   @JsonSubTypes.Type(value = MinimaxPlayer.class, name = "minimax"),
   @JsonSubTypes.Type(value = MCTSPlayer.class, name = "mcts"),
-  @JsonSubTypes.Type(value = NeuralNetPlayer.class, name = "neural")
+  @JsonSubTypes.Type(value = NeuralNetPlayer.class, name = "neural"),
+  @JsonSubTypes.Type(value = RandomPlayer.class, name = "random")
 })
 public abstract class Player {
 

@@ -32,98 +32,99 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
     private Function<GameState, Move> mode ;
     private final Deque<Move> IAStack;
 
-  @JsonCreator
-  public MinimaxPlayer(
-      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart, @JsonProperty("depth") int depth, @JsonProperty("reflexionTime") int reflexionTime, @JsonProperty("isIterativeDeepening") boolean isIterativeDeepening) {
-    super(name, positionStart);
-    this.depth = depth;
-    this.reflexionTime = reflexionTime;
+    @JsonCreator
+    public MinimaxPlayer(
+        @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart, @JsonProperty("depth") int depth, @JsonProperty("reflexionTime") int reflexionTime, @JsonProperty("isIterativeDeepening") boolean isIterativeDeepening) {
+        super(name, positionStart);
+        this.depth = depth;
+        this.reflexionTime = reflexionTime;
 
-    if(isIterativeDeepening){
-        mode = (state) -> IterativeDeepening(state);
-    }
-    else{
-        mode = (state) -> MiniMax(state, this.depth);
-    }
-  }
-
-  @Override
-  public Move getNextMove(GameState state) {
-
-    if (state.getPlayers().size() != 2) {
-        throw new IllegalArgumentException(
-            " IA can only be used in a 1v1");
-    }
-
-    saveMove = null;
-
-    Future<Move> futureMove = aiExecutor.submit(() -> mode.apply(state));
-
-    try{
-        return futureMove.get(reflexionTime, TimeUnit.SECONDS);
-    }
-    catch (TimeoutException e) {
-        futureMove.cancel(true);
-        System.out.println("Fin du temps de réflexion");
-        if (saveMove != null){
-            return saveMove;
+        if(isIterativeDeepening){
+            mode = (state) -> IterativeDeepening(state);
         }
         else{
-            return randomMove(state);
+            mode = (state) -> MiniMax(state, this.depth);
         }
-    } catch (InterruptedException | ExecutionException e) {
-        futureMove.cancel(true);
-        System.out.println("Anomalie détecter !");
-        e.printStackTrace();
-        if (saveMove != null){
+    }
+
+    @Override
+    public Move getNextMove(GameState state) {
+
+        if (state.getPlayers().size() != 2) {
+            throw new IllegalArgumentException(
+                " IA can only be used in a 1v1");
+        }
+
+        saveMove = null;
+
+        Future<Move> futureMove = aiExecutor.submit(() -> mode.apply(state));
+
+        try{
+            return futureMove.get(reflexionTime, TimeUnit.SECONDS);
+        }
+        catch (TimeoutException e) {
+            futureMove.cancel(true);
+            System.out.println("Fin du temps de réflexion");
+            if (saveMove != null){
+                return saveMove;
+            }
+            else{
+                return randomMove(state);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            futureMove.cancel(true);
+            System.out.println("Anomalie détecter !");
+            e.printStackTrace();
+            if (saveMove != null){
+                return saveMove;
+            }
+            else{
+                return randomMove(state);
+            }
+        }
+
+    }
+
+
+    private Move IterativeDeepening(GameState state){
+            int currentdepth = 1;
+            while (!Thread.currentThread().isInterrupted()) {
+
+                Move temp = MiniMax(state, currentdepth);
+                if (Thread.currentThread().isInterrupted()) {
+                    break; 
+                }
+
+                if (temp != null) {
+                    saveMove = temp;
+                }
+                currentdepth++;
+            }
+
             return saveMove;
         }
-        else{
-            return randomMove(state);
-        }
-    }
 
-  }
+    private Move MiniMax(GameState g, int d){
 
+        Move best_move = null;
+        int best_score = Integer.MIN_VALUE;
+        GameState state = g.copy();
 
-  private Move IterativeDeepening(GameState state){
-        int currentdepth = 1;
-        while (!Thread.currentThread().isInterrupted()) {
+        for (Move s : state.generate_legal_moves()){
 
-            Move temp = MiniMax(state, currentdepth);
-            if (Thread.currentThread().isInterrupted()) {
-                break; 
+            if (Thread.currentThread().isInterrupted()) return null;
+
+            state.push(state, s);
+            int score = MinMax(state, d-1, Integer.MIN_VALUE ,Integer.MAX_VALUE);
+            if(score > best_score || best_move == null){
+                best_score = score;
+                best_move = s;
             }
-
-            if (temp != null) {
-                saveMove = temp;
-            }
-            currentdepth++;
+            state.pop(state);
         }
 
-        return saveMove;
+        return best_move;
     }
-
-  private Move MiniMax(GameState state, int d){
-
-    Move best_move = null;
-    int best_score = Integer.MIN_VALUE;
-
-    for (Move s : state.generate_legal_moves()){
-
-        if (Thread.currentThread().isInterrupted()) return null;
-
-        state.push(state, s);
-        int score = MinMax(state, d-1, Integer.MIN_VALUE ,Integer.MAX_VALUE);
-        if(score > best_score || best_move == null){
-            best_score = score;
-            best_move = s;
-        }
-        state.pop(state);
-    }
-
-    return best_move;
-  }
 
   
     private int MaxMin(GameState g,int d, int alpha, int beta){
@@ -168,10 +169,7 @@ public class MinimaxPlayer extends Player { // MiniMax and IterativeDeepening ar
         return l.get( random.nextInt(l.size()));
     }
 
-
-
-
-
+    
 
     // Simple heuristic that count the difference between the column current position and the column start position. 
     // If the player start at the first row, this heuristic compare row instead of columns
