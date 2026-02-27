@@ -7,6 +7,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.bordeaux.AI.MinimaxPlayer;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 public class RuleCheckerTest {
 
   private GameState state;
@@ -16,8 +21,8 @@ public class RuleCheckerTest {
   @BeforeEach
   public void setup() {
     board = new Board(5); // petit plateau pour tester
-    p1 = new Player("Human", new Position(0, 2), TypePlayer.HUMAN);
-    p2 = new Player("Bot", new Position(4, 2), TypePlayer.IA);
+    p1 = new HumanPlayer("Human", new Position(0, 2));
+    p2 = new MinimaxPlayer("Bot", new Position(4, 2));
     state = new GameState(board, List.of(p1, p2));
   }
 

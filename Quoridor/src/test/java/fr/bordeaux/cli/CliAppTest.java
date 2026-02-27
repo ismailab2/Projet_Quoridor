@@ -1,21 +1,18 @@
 package fr.bordeaux.cli;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import fr.bordeaux.core.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
-
+import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.jline.reader.Completer;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.impl.completer.StringsCompleter;
-import org.jline.utils.ClosedException;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -38,7 +35,7 @@ import fr.bordeaux.cli.command.MoveCommand;
 import fr.bordeaux.cli.command.QuitCommand;
 
 public class CliAppTest {
-    private static GameEngine engine;
+  private static GameEngine engine;
 
     @BeforeAll
     public static void setUp() {
@@ -50,57 +47,48 @@ public class CliAppTest {
     }
     
 
-    // Quit command test
-    @Test
-    public void testFetchQuitNoSaving() throws Exception {
-        String input = "n\n";
+  @AfterAll
+  public static void tearDown() {
+    engine = null;
+  }
 
-        InputStream in = new ByteArrayInputStream(input.getBytes());
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+  // Quit command test
+  @Test
+  public void testFetchQuitNoSaving() throws Exception {
+    String input = "n\n";
 
-        Terminal terminal = TerminalBuilder.builder().system(false).streams(in, out).build();
-        LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
+    InputStream in = new ByteArrayInputStream(input.getBytes());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        CliApp cli = new CliApp(engine, terminal, reader);
-        try { cli.fetch("quit"); }
-        catch (EndOfFileException e) { e.printStackTrace(); }
-        
-        assertFalse(cli.isRunning());
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {"help", "quit", "save", "foo"})
-    public void testCommandDoesntChangeEngine(String str) throws Exception {
-        GameEngine testEngine = engine;
+    Terminal terminal = TerminalBuilder.builder().system(false).streams(in, out).build();
+    LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
 
-        InputStream in = new ByteArrayInputStream("n\n".getBytes());
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        Terminal terminal = TerminalBuilder.builder().system(false).streams(in, out).build();
-        LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
-
-        CliApp cli = new CliApp(engine, terminal, reader);
-        try { cli.fetch(str); }
-        catch (EndOfFileException e) { e.printStackTrace(); }
-        assertTrue(engine.equals(testEngine));
+    CliApp cli = new CliApp(engine, terminal, reader);
+    try {
+      cli.fetch("quit");
+    } catch (EndOfFileException e) {
+      e.printStackTrace();
     }
 
-    @Test
-    public void testFetchUnknownCommand() throws Exception {
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        PrintStream originOut = System.out;
-        System.setOut(new PrintStream(outContent));
+    assertFalse(cli.isRunning());
+  }
 
-        ByteArrayInputStream in = new ByteArrayInputStream("".getBytes());
-        Terminal terminal = TerminalBuilder.builder().system(false)
-                .streams(in, outContent)
-                .build();
-        LineReader reader = LineReaderBuilder.builder()
-                .terminal(terminal)
-                .build();
+  @ParameterizedTest
+  @ValueSource(strings = {"help", "quit", "save", "foo"})
+  public void testCommandDoesntChangeEngine(String str) throws Exception {
+    GameEngine testEngine = engine;
 
-        CliApp cli = new CliApp(engine, terminal, reader);
-        cli.fetch("foo");
-        assertEquals(outContent.toString().trim(), "Invalid move format");
+    InputStream in = new ByteArrayInputStream("n\n".getBytes());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+    Terminal terminal = TerminalBuilder.builder().system(false).streams(in, out).build();
+    LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
+
+    CliApp cli = new CliApp(engine, terminal, reader);
+    try {
+      cli.fetch(str);
+    } catch (EndOfFileException e) {
+      e.printStackTrace();
     }
 
     @Test

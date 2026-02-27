@@ -53,9 +53,9 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
+  //Apply a move, needs to be a valid move because it won't be checked in this function.
+  //Check victory is not done here as well
   public void applyMove(Move move) {
-    if (paused || gameOver) return;
-
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -67,7 +67,6 @@ public class GameState {
     undoStack.push(move);
     redoStack.clear();
     getNextPlayer();
-    checkVictory();
     notifyListeners();
   }
 
@@ -81,7 +80,6 @@ public class GameState {
     }
     undoStack.push(move);
     getNextPlayer();
-    checkVictory();
   }
 
   public void undo() {
@@ -100,7 +98,7 @@ public class GameState {
         player.giveBackWall();
       }
       gameOver = false;
-    } while (!undoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
+    } while (!undoStack.isEmpty() && getCurrentPlayer().isAI());
     notifyListeners();
   }
 
@@ -111,20 +109,13 @@ public class GameState {
     do {
       Move move = redoStack.pop();
       applyMoveWithoutClearingRedo(move);
-    } while (!redoStack.isEmpty() && getCurrentPlayer().getTypePlayer() != TypePlayer.HUMAN);
+    } while (!redoStack.isEmpty() && getCurrentPlayer().isAI());
     notifyListeners();
   }
 
+
   public boolean isGameOver() {
     return gameOver;
-  }
-
-  private void checkVictory() {
-    Player player = getCurrentPlayer();
-    if (hasReachedGoal(player)) {
-      player.addScore(1);
-      gameOver = true;
-    }
   }
 
   public boolean hasReachedGoal(Player player) {
@@ -194,8 +185,23 @@ public class GameState {
     int size = 9;
     Board newBoard = new Board(size);
     List<Player> newPlayers = new ArrayList<>();
-    newPlayers.add(new Player("Human", new Position(0, size / 2), TypePlayer.HUMAN));
-    newPlayers.add(new Player("Bob", new Position(size - 1, size / 2), TypePlayer.IA));
+    newPlayers.add(new HumanPlayer("Human", new Position(0, size / 2)));
+    newPlayers.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
     return new GameState(newBoard, newPlayers);
+  }
+
+  public GameState copy() {
+    Board boardCopy = this.board.copy();
+
+    List<Player> playersCopy = new ArrayList<>();
+    for (Player p : this.players) {
+      playersCopy.add(p.copy());
+    }
+
+    GameState copy = new GameState(boardCopy, playersCopy, this.currentIndexPlayer);
+
+    copy.gameOver = this.gameOver;
+    copy.paused = this.paused;
+    return copy;
   }
 }

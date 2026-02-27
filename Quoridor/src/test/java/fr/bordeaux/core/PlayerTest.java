@@ -1,8 +1,9 @@
 package fr.bordeaux.core;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class PlayerTest {
 
@@ -12,7 +13,7 @@ public class PlayerTest {
   @BeforeEach
   public void setUp() {
     startPos = new Position(0, 4);
-    player = new Player("Alice", startPos, TypePlayer.HUMAN);
+    player = new HumanPlayer("Alice", startPos);
   }
 
   @Test

@@ -14,26 +14,20 @@ import java.util.List;
 
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 
 public class NewCommand implements Command {
 
-    private String[] tokens;
-    private Terminal terminal;
-    private LineReader reader;
+  private String[] tokens;
+  private Terminal terminal;
+  private LineReader reader;
 
-    public NewCommand(String[] t, Terminal term, LineReader r) {
-        this.tokens = t;
-        this.terminal = term;
-        this.reader = r;
-    }
-    public NewCommand(Terminal t, LineReader r) {
-        this(new String[]{"9", "2"}, t, r);
-    }
-    public NewCommand() { this(null, null, null); }
+  public NewCommand(String[] t, Terminal term, LineReader r) {
+    this.tokens = t;
+    this.terminal = term;
+    this.reader = r;
+  }
 
     @Override
     public GameEngine execute(GameEngine engine) {
@@ -72,8 +66,14 @@ public class NewCommand implements Command {
             }
             engine = new GameEngine(new GameState(board, Arrays.stream(players).toList()));
         }
-        return engine;
+      }
+      engine = new GameEngine(new GameState(board, Arrays.stream(players).toList()));
     }
-    @Override
-    public void helpText() { System.out.println("To implement"); }
+    return engine;
+  }
+
+  @Override
+  public void helpText() {
+    System.out.println("To implement");
+  }
 }

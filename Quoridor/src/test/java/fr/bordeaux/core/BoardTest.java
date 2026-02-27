@@ -1,10 +1,10 @@
 package fr.bordeaux.core;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.graph.Graph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
 
@@ -24,23 +24,29 @@ public class BoardTest {
 
   @Test
   public void testInvalidBoardSizeTooSmall() {
-    assertThrows(IllegalArgumentException.class,
-      () -> { new Board(1); }
-    ); // Too small (less than 3)
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          new Board(1);
+        }); // Too small (less than 3)
   }
 
   @Test
   public void testInvalidBoardSizeTooLarge() {
-    assertThrows(IllegalArgumentException.class,
-      () -> { new Board(17); }
-    ); // Too large (greater than 15)
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          new Board(17);
+        }); // Too large (greater than 15)
   }
 
   @Test
   public void testInvalidBoardSizeEven() {
-    assertThrows(IllegalArgumentException.class,
-      () -> { new Board(8); }
-    ); // Even number (must be odd)
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          new Board(8);
+        }); // Even number (must be odd)
   }
 
   @Test
