@@ -1,7 +1,11 @@
 package fr.bordeaux.core;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +17,7 @@ public class GameStateTest {
   private Player human;
   private Player ia;
 
-  @Before
+  @BeforeEach
   public void setup() {
     board = new Board(9);
     human = new Player("Human", new Position(0, 4), TypePlayer.HUMAN);
@@ -36,7 +40,11 @@ public class GameStateTest {
   public void testPlayersNumberInvalidThree() {
     Board board = new Board(9);
     assertThrows(IllegalArgumentException.class,
-      () -> { new GameState(board, List.of(p1, p2, p3)); }
+      () -> { new GameState(board, List.of(
+                          new Player("J1", new Position(0, 4), TypePlayer.HUMAN), 
+                          new Player("J2", new Position(8, 4), TypePlayer.HUMAN),
+                          new Player("JIA", new Position(4, 0), TypePlayer.IA)));
+            }
     );
   }
 

@@ -31,8 +31,10 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.core.TypePlayer;
 import fr.bordeaux.graph.Graph;
 import fr.bordeaux.cli.command.Command;
+import fr.bordeaux.cli.command.MoveCommand;
 import fr.bordeaux.cli.command.QuitCommand;
 
 public class CliAppTest {
@@ -40,7 +42,7 @@ public class CliAppTest {
 
     @BeforeAll
     public static void setUp() {
-        engine = new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4)))));
+        engine = new GameEngine(new GameState(new Board(9), List.of(new Player("Human", new Position(0, 4), TypePlayer.HUMAN), new Player("Bob", new Position(8, 4), TypePlayer.HUMAN))));;
     }
     @AfterAll
     public static void tearDown() {
@@ -99,5 +101,32 @@ public class CliAppTest {
         CliApp cli = new CliApp(engine, terminal, reader);
         cli.fetch("foo");
         assertEquals(outContent.toString().trim(), "Invalid move format");
+    }
+
+    @Test
+    public void testMoveCommandPawn() throws IOException {
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        PrintStream originOut = System.out;
+        System.setOut(new PrintStream(outContent));
+
+        ByteArrayInputStream in = new ByteArrayInputStream("".getBytes());
+        Terminal terminal = TerminalBuilder.builder().system(false)
+                .streams(in, outContent)
+                .build();
+        LineReader reader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .build();
+
+        CliApp cli = new CliApp(engine, terminal, reader);
+        cli.fetch("e1-e2");
+        Position firstStart = engine.getState().getPlayers().getFirst().getStartingPosition();
+        Position firstMoved = engine.getState().getPlayers().getFirst().getPosition();
+        assertEquals(firstStart, MoveCommand.parsePosition("e1"));
+        assertEquals(firstMoved, MoveCommand.parsePosition("e2"));
+
+        Position secondStart = engine.getState().getPlayers().get(1).getStartingPosition();
+        Position secondMoved = engine.getState().getPlayers().get(1).getPosition();
+        assertEquals(secondStart, MoveCommand.parsePosition("e9"));
+        assertEquals(secondMoved, MoveCommand.parsePosition("e9"));
     }
 }

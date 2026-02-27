@@ -4,6 +4,7 @@ package fr.bordeaux.core;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +15,7 @@ public class GameEngineTest {
   private Player p1, p2;
   private Board board;
 
-  @BeforeAll
+  @BeforeEach
   public void setup() {
     board = new Board(9);
     p1 = new Player("Human", new Position(0, 2), TypePlayer.HUMAN);

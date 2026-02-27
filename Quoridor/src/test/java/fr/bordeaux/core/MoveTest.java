@@ -11,9 +11,9 @@ public class MoveTest {
 
   @BeforeEach
   public void setUp() {
-    pawnMove = Move.pawn(new Position(1, 1));
-    hWallMove = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
-    vWallMove = Move.wall(new Position(3, 3), Orientation.VERTICAL);
+    Move pawnMove = Move.pawn(new Position(0, 1), new Position(1, 1));
+    Move hWallMove = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    Move vWallMove = Move.wall(new Position(3, 3), Orientation.VERTICAL);
   }
 
   @Test

@@ -5,6 +5,7 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.core.TypePlayer;
 import fr.bordeaux.graph.Graph;
 import fr.bordeaux.cli.command.*;
 
@@ -16,6 +17,7 @@ import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.reader.Completer;
+import org.jline.reader.EndOfFileException;
 import org.jline.reader.impl.completer.StringsCompleter;
 
 public class CliApp {
@@ -41,7 +43,7 @@ public class CliApp {
         this.engine = e;
     }
     public CliApp() {
-        this(new GameEngine(new GameState(new Board(9), List.of(new Player("Alice", new Position(0, 4)), new Player("Bob", new Position(8, 4))))));
+        this(new GameEngine(new GameState(new Board(9), List.of(new Player("Human", new Position(0, 4), TypePlayer.HUMAN), new Player("Bob", new Position(8, 4), TypePlayer.HUMAN)))));
     }
     public boolean isRunning() { return running; }
     public GameEngine getEngine() { return engine; }

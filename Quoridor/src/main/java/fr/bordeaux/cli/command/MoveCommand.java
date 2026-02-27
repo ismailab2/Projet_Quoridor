@@ -32,7 +32,7 @@ public class MoveCommand implements Command {
     @Override
     public void helpText() { System.out.println("To implement"); }
 
-    public Position parsePosition(String str) {
+    public static Position parsePosition(String str) {
         if (str.length() < 2) throw new IllegalArgumentException("Invalid position format");
 
         int row = Integer.parseInt(str.substring(1))-1;
@@ -49,11 +49,11 @@ public class MoveCommand implements Command {
         Position from = parsePosition(moves[0]);
         Position to = parsePosition(moves[1]);
 
-        Player current = engine.getState().currentPlayer();
+        Player current = engine.getState().getCurrentPlayer();
         if (!current.getPosition().equals(from))
             throw new IllegalArgumentException("No pawn at " + moves[0]);
 
-        engine.play(Move.pawn(to));
+        engine.play(Move.pawn(from, to));
         return engine;
     }
 
