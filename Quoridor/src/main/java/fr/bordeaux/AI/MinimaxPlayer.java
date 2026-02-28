@@ -29,8 +29,10 @@ public class MinimaxPlayer
   private final ExecutorService aiExecutor = Executors.newSingleThreadExecutor();
   private volatile Move saveMove = null;
   private Function<GameState, Move> mode;
+  private Function<GameState, Integer> heuristic; // h1 Default heuristic
   private final Deque<Move> IAStack = new ArrayDeque<>();
   private final boolean isIterativeDeepening;
+  private final String heuristicName;
 
   @JsonCreator
   public MinimaxPlayer(
@@ -38,16 +40,37 @@ public class MinimaxPlayer
       @JsonProperty("positionStart") Position positionStart,
       @JsonProperty("depth") int depth,
       @JsonProperty("reflexionTime") int reflexionTime,
-      @JsonProperty("isIterativeDeepening") boolean isIterativeDeepening) {
+      @JsonProperty("isIterativeDeepening") boolean isIterativeDeepening,
+      @JsonProperty("heuristic") String h) {
     super(name, positionStart);
     this.depth = depth;
     this.reflexionTime = reflexionTime;
     this.isIterativeDeepening = isIterativeDeepening;
+    this.heuristicName = h;
 
     if (isIterativeDeepening) {
       mode = (state) -> IterativeDeepening(state);
     } else {
       mode = (state) -> MiniMax(state, this.depth);
+    }
+
+    setHeuristic(h);
+  }
+
+  public MinimaxPlayer(String name, Position positionStart, int depth){
+    this(name, positionStart, depth, 5, false, "h1");
+  }
+
+  public void setHeuristic(String nameH) {
+    if(nameH == null){
+      this.heuristic = (state) -> h1(state);
+    }
+    else{
+      switch(nameH) {
+        case "h2": this.heuristic = (state) -> h2(state); break;
+        case "h3": this.heuristic = (state) -> h3(state); break;
+        case "h1":   this.heuristic = (state) -> h1(state);
+      }
     }
   }
 
@@ -107,8 +130,7 @@ public class MinimaxPlayer
     Move best_move = null;
     int best_score = Integer.MIN_VALUE;
     GameState state = g.copy();
-
-    for (Move s : state.generate_legal_moves()) {
+    for (Move s : state.generateLegalMoves()) {
 
       if (Thread.currentThread().isInterrupted()) return null;
 
@@ -127,10 +149,10 @@ public class MinimaxPlayer
   private int MaxMin(GameState g, int d, int alpha, int beta) {
 
     if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
-      return h1(g);
+      return heuristic.apply(g);
     }
 
-    for (Move s : g.generate_legal_moves()) {
+    for (Move s : g.generateLegalMoves()) {
       push(g, s);
       alpha = Math.max(alpha, MinMax(g, d - 1, alpha, beta));
       pop(g);
@@ -144,10 +166,10 @@ public class MinimaxPlayer
   private int MinMax(GameState g, int d, int alpha, int beta) {
 
     if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
-      return h1(g);
+      return heuristic.apply(g);
     }
 
-    for (Move s : g.generate_legal_moves()) {
+    for (Move s : g.generateLegalMoves()) {
       push(g, s);
       beta = Math.min(beta, MaxMin(g, d - 1, alpha, beta));
       pop(g);
@@ -162,7 +184,7 @@ public class MinimaxPlayer
       GameState
           g) { // It is not planned to be able to launch it in the game, it will just be used for
     // testing
-    List<Move> l = g.generate_legal_moves();
+    List<Move> l = g.generateLegalMoves();
     Random random = new Random();
     return l.get(random.nextInt(l.size()));
   }
@@ -176,8 +198,15 @@ public class MinimaxPlayer
 
     if (startingPosition.getX() == 0) {
       return actualPosition.getX() - startingPosition.getX();
-    } else {
+    }
+    else if(startingPosition.getX() == g.getBoard().getSize()-1){
+      return startingPosition.getX() - actualPosition.getX();
+    }
+    else if (startingPosition.getY() == 0) {
       return actualPosition.getY() - startingPosition.getY();
+    }
+    else {
+      return startingPosition.getY() - actualPosition.getY();
     }
   }
 
@@ -286,7 +315,9 @@ public class MinimaxPlayer
         this.getScore(),
         this.depth,
         this.reflexionTime,
-        this.isIterativeDeepening);
+        this.isIterativeDeepening,
+        this.heuristicName
+      );
   }
 
   private MinimaxPlayer(
@@ -297,17 +328,21 @@ public class MinimaxPlayer
       int score,
       int depth,
       int reflexionTime,
-      boolean isIterativeDeepening) {
+      boolean isIterativeDeepening,
+      String h) {
     super(name, current, start, walls, score);
     this.depth = depth;
     this.reflexionTime = reflexionTime;
     this.isIterativeDeepening = isIterativeDeepening;
+    this.heuristicName = h;
+
 
     if (isIterativeDeepening) {
       mode = (state) -> IterativeDeepening(state);
     } else {
       mode = (state) -> MiniMax(state, this.depth);
     }
+    setHeuristic(h);
   }
 
   @Override

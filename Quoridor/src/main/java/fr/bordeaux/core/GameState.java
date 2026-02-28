@@ -204,7 +204,7 @@ public class GameState {
     return copy;
   }
 
-  public List<Move> generate_legal_moves() {
+  public List<Move> generateLegalMoves() {
     List<Move> res = new ArrayList<>();
     Position player_pos = getCurrentPlayer().getPosition();
     int x = player_pos.getX();
@@ -225,10 +225,15 @@ public class GameState {
 
 
     if (getCurrentPlayer().getRemainingWalls() > 0) {
-      for (int i = 0; i < board.getSize(); i++) {
-        for (int j = 0; j < board.getSize(); j++) {
-          all_possible_moves.add(Move.wall(new Position(i, j), Orientation.HORIZONTAL));
-          all_possible_moves.add(Move.wall(new Position(i, j), Orientation.VERTICAL));
+      for (x = 0; x < board.getSize() - 1; x++) { 
+        for (y = 1; y < board.getSize(); y++) {
+            Position pos_wall = new Position(x, y);
+            
+            
+            all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
+            
+            
+            all_possible_moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
         }
       }
     }

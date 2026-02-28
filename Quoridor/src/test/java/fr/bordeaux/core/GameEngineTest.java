@@ -19,7 +19,7 @@ public class GameEngineTest {
   public void setup() {
     board = new Board(9);
     p1 = new HumanPlayer("Human", new Position(0, 2));
-    p2 = new MinimaxPlayer("Bot", new Position(4, 2), 2, 5, false);
+    p2 = new MinimaxPlayer("Bot", new Position(4, 2), 2);
     state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state);
   }

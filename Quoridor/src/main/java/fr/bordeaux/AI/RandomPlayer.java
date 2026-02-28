@@ -19,7 +19,7 @@ public class RandomPlayer extends Player {
 
   @Override
   public Move getNextMove(GameState state) {
-    List<Move> l = state.generate_legal_moves();
+    List<Move> l = state.generateLegalMoves();
     Random random = new Random();
     return l.get(random.nextInt(l.size()));
   }

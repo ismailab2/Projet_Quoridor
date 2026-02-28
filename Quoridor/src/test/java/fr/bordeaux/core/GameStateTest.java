@@ -21,7 +21,7 @@ public class GameStateTest {
   public void setup() {
     board = new Board(9);
     human = new HumanPlayer("Human", new Position(0, 4));
-    ia = new MinimaxPlayer("IA", new Position(8, 4), 2, 5, false);
+    ia = new MinimaxPlayer("IA", new Position(8, 4), 2);
 
     List<Player> players = new ArrayList<>();
     players.add(human);
