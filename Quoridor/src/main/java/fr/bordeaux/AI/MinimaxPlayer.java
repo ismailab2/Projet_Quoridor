@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Move.Type;
+import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 
@@ -193,8 +195,18 @@ public class MinimaxPlayer
   // start position.
   // If the player start at the first row, this heuristic compare row instead of columns
   private int h1(GameState g) {
-    Position startingPosition = getStartingPosition();
-    Position actualPosition = getPosition();
+
+    List<Player> lp = g.getPlayers();
+    Player me = null;
+    for (Player p : lp) {
+      if (p.getName().equals(this.getName())) {
+        me = p;
+        break;
+      }
+    }
+
+    Position startingPosition = me.getStartingPosition();
+    Position actualPosition = me.getPosition();
 
     if (startingPosition.getX() == 0) {
       return actualPosition.getX() - startingPosition.getX();
@@ -214,15 +226,18 @@ public class MinimaxPlayer
   private int h2(GameState g) {
     List<Player> lp = g.getPlayers();
     Player enemie = null;
+    Player me = null;
     for (Player p : lp) {
-      if (!p.equals(this)) {
+      if (p.getName().equals(this.getName())) {
+        me = p;
+      }
+      else{
         enemie = p;
-        break;
       }
     }
 
-    Position playerStartingPosition = getStartingPosition();
-    Position playerActualPosition = getPosition();
+    Position playerStartingPosition = me.getStartingPosition();
+    Position playerActualPosition = me.getPosition();
     if (enemie == null) {
       throw new IllegalStateException("No enemie found !");
     }
@@ -231,34 +246,46 @@ public class MinimaxPlayer
 
     if (playerStartingPosition.getX() == 0) {
       return (playerActualPosition.getX() - playerStartingPosition.getX())
+          - (enemieStartingPosition.getX() - enemieActualPosition.getX() );
+    }
+    else if (playerStartingPosition.getX() == g.getBoard().getSize()-1) {
+      return (playerStartingPosition.getX() - playerActualPosition.getX())
           - (enemieActualPosition.getX() - enemieStartingPosition.getX());
-    } else {
+    }
+    else if (playerStartingPosition.getY() == 0) {
       return (playerActualPosition.getY() - playerStartingPosition.getY())
+          - (enemieStartingPosition.getY() - enemieActualPosition.getY());
+    }
+    else {
+      return (playerStartingPosition.getY() - playerActualPosition.getY())
           - (enemieActualPosition.getY() - enemieStartingPosition.getY());
     }
   }
 
   private int h3(GameState g) {
-    // K1 and K2 are the coefficients of wall remaining fot the player and his enemie, at the end of
+    // K1 and K2 are the coefficients of wall remaining for the player and his enemie, at the end of
     // the project we will use a neuronal network to determine them.
     float k1 = 1.2f;
     float k2 = 0.8f;
+
+    List<Player> lp = g.getPlayers();
+    Player enemie = null;
+    Player me = null;
+    for (Player p : lp) {
+      if (p.getName().equals(this.getName())) {
+        me = p;
+      }
+      else{
+        enemie = p;
+      }
+    }
 
     List<Integer> l_max =
         g.getBoard()
             .getGraph()
             .findPathBFS(
-                g.getBoard().id(getPosition().getX(), getPosition().getY()),
-                g.getWinCondition(this));
-
-    List<Player> lp = g.getPlayers();
-    Player enemie = null;
-    for (Player p : lp) {
-      if (!p.equals(this)) {
-        enemie = p;
-        break;
-      }
-    }
+                g.getBoard().id(me.getPosition().getX(), me.getPosition().getY()),
+                g.getWinCondition(me));
 
     List<Integer> l_min =
         g.getBoard()
@@ -267,10 +294,20 @@ public class MinimaxPlayer
                 g.getBoard().id(enemie.getPosition().getX(), enemie.getPosition().getY()),
                 g.getWinCondition(enemie));
 
-    int nb_wall_player = getRemainingWalls();
+    int nb_wall_player = me.getRemainingWalls();
     int nb_wall_enemie = enemie.getRemainingWalls();
 
-    return (int) (l_min.size() - l_max.size() + (nb_wall_player * k1 - nb_wall_enemie * k2));
+
+    if (l_max.size() <= 1) {
+        return 10000;
+    }
+    if (l_min.size() <= 1) {
+        return -10000;
+    }
+
+    int scoreBFS = (l_min.size() - l_max.size()) * 10;
+    int scoreWall = (int) (nb_wall_player * k1*10 - nb_wall_enemie * k2*10);
+    return scoreBFS + scoreWall;
   }
 
   private void push(GameState g, Move move) {

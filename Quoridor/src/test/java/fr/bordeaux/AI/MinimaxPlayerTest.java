@@ -14,6 +14,7 @@ import fr.bordeaux.AI.RandomPlayer;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.Move.Type;
 import fr.bordeaux.core.Player;
@@ -28,7 +29,26 @@ public class MinimaxPlayerTest {
 
 
   @Test
-  public void checkMiniMax(){
+  public void checkMiniMaxMoveWall(){
+    board = new Board(9);
+    ia1 = new MinimaxPlayer("IA1", new Position(8, 4), 2, 5, false, "h3");
+    ia2 = new RandomPlayer("IA2", new Position(0, 4));
+    ia1.setPosition(new Position(2, 4));
+    ia2.setPosition(new Position(7,2));
+    
+    List<Player> players = new ArrayList<>();
+    players.add(ia1);
+    players.add(ia2);
+    game = new GameState(board, players);
+
+    Move res = ia1.getNextMove(game);
+  
+    assertTrue(res.getTo().equals(new Position(7, 1)) && res.getType() == Type.WALL && res.getOrientation() == Orientation.HORIZONTAL);
+  }
+
+
+  @Test
+  public void checkMiniMaxMovePawn(){
     board = new Board(3);
     ia1 = new MinimaxPlayer("IA1", new Position(2, 1), 2);
     ia2 = new RandomPlayer("IA2", new Position(0, 1));
@@ -44,26 +64,4 @@ public class MinimaxPlayerTest {
     assertTrue(res.getTo().equals(new Position(0, 1)) && res.getType() == Type.PAWN && res.getOrientation() == null && res.getFrom().equals(new Position(1, 1)));
   }
 
-/*   @Test
-  // Check whether the MiniMax algorithm is better than a random algorithm. With a depth of 3, the
-  // MiniMax algorithm should never lose
-  public void checkMiniMaxBetterThanRandom() {
-    board = new Board(9);
-    ia1 = new MinimaxPlayer("IA1", new Position(0, 4), 3, 5, false);
-    ia2 = new RandomPlayer("IA2", new Position(8, 4));
-    List<Player> players = new ArrayList<>();
-    players.add(ia1);
-    players.add(ia2);
-    game = new GameState(board, players);
-
-    while (!game.isGameOver()) {
-      if (game.getCurrentPlayer().equals(ia1)) {
-        game.applyMove(ia1.getNextMove(game));
-      } else if (game.getCurrentPlayer().equals(ia2)) {
-        game.applyMove(ia2.getNextMove(game));
-      }
-    }
-
-    assertTrue(game.hasReachedGoal(ia1));
-  } */
 }
