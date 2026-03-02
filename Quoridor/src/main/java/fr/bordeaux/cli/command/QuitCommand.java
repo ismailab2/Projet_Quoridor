@@ -1,10 +1,19 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.cli.CliApp;
+import fr.bordeaux.cli.command.Command;
+
+import java.io.EOFException;
+import java.io.IOException;
+
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.ClosedException;
+
+import fr.bordeaux.core.GameEngine;
 
 public class QuitCommand implements Command {
 

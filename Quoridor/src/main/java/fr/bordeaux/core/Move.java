@@ -21,6 +21,7 @@ public class Move {
   }
 
   public static Move pawn(Position from, Position to) {
+    System.out.println("\n\n\n" + from + "\n\n");
     return new Move(Type.PAWN, from, to, null);
   }
 

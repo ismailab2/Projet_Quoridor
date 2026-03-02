@@ -1,19 +1,16 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.graph.*;
+
 import java.util.*;
 
 /** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
 public class Board {
 
   private final int size;
-  @JsonIgnore private final Graph graph;
+  private final Graph graph;
 
-  @JsonCreator
-  public Board(@JsonProperty("size") int size) {
+  public Board(int size) {
     if (size < 3 || size > 15 || size % 2 == 0) {
       throw new IllegalArgumentException(
           "Size must be odd and between 3 and 15, but was : " + size);
@@ -28,7 +25,7 @@ public class Board {
     this.graph = graph;
   }
 
-  public int id(int row, int col) {
+    public int id(int row, int col) {
     return row * size + col;
   }
 

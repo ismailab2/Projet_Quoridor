@@ -1,5 +1,10 @@
 package fr.bordeaux.core;
 
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.AI.MinimaxPlayer;
