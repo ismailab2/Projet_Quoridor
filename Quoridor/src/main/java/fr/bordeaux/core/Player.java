@@ -1,32 +1,12 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import fr.bordeaux.AI.MCTSPlayer;
 import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
-import fr.bordeaux.AI.RandomPlayer;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * Represents a player in Quoridor. A player has a name, a pawn position, a number of remaining
  * walls, and a score.
  */
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME, // Uses a name to identify a class
-    include = JsonTypeInfo.As.PROPERTY, // Needs to be a property in the JSON
-    property = "type" // The name of the property
-    )
-@JsonSubTypes({
-  // Attributes the appropriate class to the name property
-  @JsonSubTypes.Type(value = HumanPlayer.class, name = "human"),
-  @JsonSubTypes.Type(value = MinimaxPlayer.class, name = "minimax"),
-  @JsonSubTypes.Type(value = MCTSPlayer.class, name = "mcts"),
-  @JsonSubTypes.Type(value = NeuralNetPlayer.class, name = "neural"),
-  @JsonSubTypes.Type(value = RandomPlayer.class, name = "random")
-})
 public abstract class Player {
 
   private final String name;
@@ -35,9 +15,9 @@ public abstract class Player {
   private final Position startingPosition;
   private int score = 0;
 
-  @JsonCreator
+
   public Player(
-      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
+      String name, Position positionStart) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;
@@ -103,7 +83,6 @@ public abstract class Player {
 
   public abstract Move getNextMove(GameState state);
 
-  @JsonIgnore
   public abstract Boolean isAI();
 
   public abstract Player copy();

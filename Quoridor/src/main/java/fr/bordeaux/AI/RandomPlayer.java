@@ -1,7 +1,5 @@
 package fr.bordeaux.AI;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
@@ -11,9 +9,8 @@ import java.util.Random;
 
 public class RandomPlayer extends Player {
 
-  @JsonCreator
   public RandomPlayer(
-      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
+      String name, Position positionStart) {
     super(name, positionStart);
   }
 

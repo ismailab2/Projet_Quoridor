@@ -1,16 +1,8 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class GameState {
 
   private final Board board;
@@ -21,13 +13,12 @@ public class GameState {
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
 
-  @JsonIgnore private transient List<Runnable> listeners = new ArrayList<>();
+   private transient List<Runnable> listeners = new ArrayList<>();
 
-  @JsonCreator
   public GameState(
-      @JsonProperty("board") Board board,
-      @JsonProperty("players") List<Player> players,
-      @JsonProperty("currentIndexPlayer") int currentIndexPlayer) {
+      Board board,
+      List<Player> players,
+      int currentIndexPlayer) {
     if (players.size() != 2 && players.size() != 4)
       throw new IllegalArgumentException(
           "Number of players must be 2 or 4, but was: " + players.size());
@@ -161,24 +152,16 @@ public class GameState {
     return paused;
   }
 
-  public void saveGameJSON(String filename) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      mapper.writeValue(new File(filename), this);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public void saveGame(String filename) {
+      System.out.println("save a implementer");
   }
 
-  public GameState loadGameJSON(String filename) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      return mapper.readValue(new File(filename), GameState.class);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
+  /*
+  public GameState loadGame(String filename) {
+      return ;
   }
+
+   */
 
   public GameState reset() {
     int size = 9;

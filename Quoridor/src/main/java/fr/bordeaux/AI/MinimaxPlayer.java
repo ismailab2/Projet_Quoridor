@@ -1,7 +1,5 @@
 package fr.bordeaux.AI;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Move.Type;
@@ -36,14 +34,14 @@ public class MinimaxPlayer
   private final boolean isIterativeDeepening;
   private final String heuristicName;
 
-  @JsonCreator
+  
   public MinimaxPlayer(
-      @JsonProperty("name") String name,
-      @JsonProperty("positionStart") Position positionStart,
-      @JsonProperty("depth") int depth,
-      @JsonProperty("reflexionTime") int reflexionTime,
-      @JsonProperty("isIterativeDeepening") boolean isIterativeDeepening,
-      @JsonProperty("heuristic") String h) {
+       String name,
+       Position positionStart,
+       int depth,
+       int reflexionTime,
+       boolean isIterativeDeepening,
+       String h) {
     super(name, positionStart);
     this.depth = depth;
     this.reflexionTime = reflexionTime;
