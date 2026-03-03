@@ -1,7 +1,5 @@
 package fr.bordeaux.AI;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
@@ -10,9 +8,7 @@ import fr.bordeaux.core.Position;
 /** Represents an Ai player with MCTS */
 public class NeuralNetPlayer extends Player {
 
-  @JsonCreator
-  public NeuralNetPlayer(
-      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
+  public NeuralNetPlayer(String name, Position positionStart) {
     super(name, positionStart);
   }
 

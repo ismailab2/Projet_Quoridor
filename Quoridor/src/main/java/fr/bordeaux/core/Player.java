@@ -3,6 +3,7 @@ package fr.bordeaux.core;
 import fr.bordeaux.AI.MinimaxPlayer;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Represents a player in Quoridor. A player has a name, a pawn position, a number of remaining
  * walls, and a score.
@@ -15,9 +16,7 @@ public abstract class Player {
   private final Position startingPosition;
   private int score = 0;
 
-
-  public Player(
-      String name, Position positionStart) {
+  public Player(String name, Position positionStart) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;

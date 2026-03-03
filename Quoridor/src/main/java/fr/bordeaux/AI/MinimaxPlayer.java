@@ -2,11 +2,8 @@ package fr.bordeaux.AI;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Move.Type;
-import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -34,14 +31,13 @@ public class MinimaxPlayer
   private final boolean isIterativeDeepening;
   private final String heuristicName;
 
-  
   public MinimaxPlayer(
-       String name,
-       Position positionStart,
-       int depth,
-       int reflexionTime,
-       boolean isIterativeDeepening,
-       String h) {
+      String name,
+      Position positionStart,
+      int depth,
+      int reflexionTime,
+      boolean isIterativeDeepening,
+      String h) {
     super(name, positionStart);
     this.depth = depth;
     this.reflexionTime = reflexionTime;
@@ -57,19 +53,23 @@ public class MinimaxPlayer
     setHeuristic(h);
   }
 
-  public MinimaxPlayer(String name, Position positionStart, int depth){
+  public MinimaxPlayer(String name, Position positionStart, int depth) {
     this(name, positionStart, depth, 5, false, "h1");
   }
 
   public void setHeuristic(String nameH) {
-    if(nameH == null){
+    if (nameH == null) {
       this.heuristic = (state) -> h1(state);
-    }
-    else{
-      switch(nameH) {
-        case "h2": this.heuristic = (state) -> h2(state); break;
-        case "h3": this.heuristic = (state) -> h3(state); break;
-        case "h1":   this.heuristic = (state) -> h1(state);
+    } else {
+      switch (nameH) {
+        case "h2":
+          this.heuristic = (state) -> h2(state);
+          break;
+        case "h3":
+          this.heuristic = (state) -> h3(state);
+          break;
+        case "h1":
+          this.heuristic = (state) -> h1(state);
       }
     }
   }
@@ -208,14 +208,11 @@ public class MinimaxPlayer
 
     if (startingPosition.getX() == 0) {
       return actualPosition.getX() - startingPosition.getX();
-    }
-    else if(startingPosition.getX() == g.getBoard().getSize()-1){
+    } else if (startingPosition.getX() == g.getBoard().getSize() - 1) {
       return startingPosition.getX() - actualPosition.getX();
-    }
-    else if (startingPosition.getY() == 0) {
+    } else if (startingPosition.getY() == 0) {
       return actualPosition.getY() - startingPosition.getY();
-    }
-    else {
+    } else {
       return startingPosition.getY() - actualPosition.getY();
     }
   }
@@ -228,8 +225,7 @@ public class MinimaxPlayer
     for (Player p : lp) {
       if (p.getName().equals(this.getName())) {
         me = p;
-      }
-      else{
+      } else {
         enemie = p;
       }
     }
@@ -244,17 +240,14 @@ public class MinimaxPlayer
 
     if (playerStartingPosition.getX() == 0) {
       return (playerActualPosition.getX() - playerStartingPosition.getX())
-          - (enemieStartingPosition.getX() - enemieActualPosition.getX() );
-    }
-    else if (playerStartingPosition.getX() == g.getBoard().getSize()-1) {
+          - (enemieStartingPosition.getX() - enemieActualPosition.getX());
+    } else if (playerStartingPosition.getX() == g.getBoard().getSize() - 1) {
       return (playerStartingPosition.getX() - playerActualPosition.getX())
           - (enemieActualPosition.getX() - enemieStartingPosition.getX());
-    }
-    else if (playerStartingPosition.getY() == 0) {
+    } else if (playerStartingPosition.getY() == 0) {
       return (playerActualPosition.getY() - playerStartingPosition.getY())
           - (enemieStartingPosition.getY() - enemieActualPosition.getY());
-    }
-    else {
+    } else {
       return (playerStartingPosition.getY() - playerActualPosition.getY())
           - (enemieActualPosition.getY() - enemieStartingPosition.getY());
     }
@@ -272,8 +265,7 @@ public class MinimaxPlayer
     for (Player p : lp) {
       if (p.getName().equals(this.getName())) {
         me = p;
-      }
-      else{
+      } else {
         enemie = p;
       }
     }
@@ -295,16 +287,15 @@ public class MinimaxPlayer
     int nb_wall_player = me.getRemainingWalls();
     int nb_wall_enemie = enemie.getRemainingWalls();
 
-
     if (l_max.size() <= 1) {
-        return 10000;
+      return 10000;
     }
     if (l_min.size() <= 1) {
-        return -10000;
+      return -10000;
     }
 
     int scoreBFS = (l_min.size() - l_max.size()) * 10;
-    int scoreWall = (int) (nb_wall_player * k1*10 - nb_wall_enemie * k2*10);
+    int scoreWall = (int) (nb_wall_player * k1 * 10 - nb_wall_enemie * k2 * 10);
     return scoreBFS + scoreWall;
   }
 
@@ -351,8 +342,7 @@ public class MinimaxPlayer
         this.depth,
         this.reflexionTime,
         this.isIterativeDeepening,
-        this.heuristicName
-      );
+        this.heuristicName);
   }
 
   private MinimaxPlayer(
@@ -370,7 +360,6 @@ public class MinimaxPlayer
     this.reflexionTime = reflexionTime;
     this.isIterativeDeepening = isIterativeDeepening;
     this.heuristicName = h;
-
 
     if (isIterativeDeepening) {
       mode = (state) -> IterativeDeepening(state);

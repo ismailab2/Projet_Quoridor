@@ -13,12 +13,9 @@ public class GameState {
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
 
-   private transient List<Runnable> listeners = new ArrayList<>();
+  private transient List<Runnable> listeners = new ArrayList<>();
 
-  public GameState(
-      Board board,
-      List<Player> players,
-      int currentIndexPlayer) {
+  public GameState(Board board, List<Player> players, int currentIndexPlayer) {
     if (players.size() != 2 && players.size() != 4)
       throw new IllegalArgumentException(
           "Number of players must be 2 or 4, but was: " + players.size());
@@ -136,6 +133,10 @@ public class GameState {
     return players.get(currentIndexPlayer);
   }
 
+  public int getCurrentIndexPlayer() {
+    return currentIndexPlayer;
+  }
+
   public Board getBoard() {
     return board;
   }
@@ -153,7 +154,7 @@ public class GameState {
   }
 
   public void saveGame(String filename) {
-      System.out.println("save a implementer");
+    System.out.println("save a implementer");
   }
 
   /*
@@ -206,17 +207,14 @@ public class GameState {
     all_possible_moves.add(Move.pawn(player_pos, new Position(x, y + 2)));
     all_possible_moves.add(Move.pawn(player_pos, new Position(x, y - 2)));
 
-
     if (getCurrentPlayer().getRemainingWalls() > 0) {
-      for (x = 0; x < board.getSize() - 1; x++) { 
+      for (x = 0; x < board.getSize() - 1; x++) {
         for (y = 1; y < board.getSize(); y++) {
-            Position pos_wall = new Position(x, y);
-            
-            
-            all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
-            
-            
-            all_possible_moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
+          Position pos_wall = new Position(x, y);
+
+          all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
+
+          all_possible_moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
         }
       }
     }

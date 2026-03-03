@@ -1,7 +1,6 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.graph.*;
-
 import java.util.*;
 
 /** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
@@ -25,7 +24,7 @@ public class Board {
     this.graph = graph;
   }
 
-    public int id(int row, int col) {
+  public int id(int row, int col) {
     return row * size + col;
   }
 

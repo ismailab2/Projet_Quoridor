@@ -9,8 +9,7 @@ import java.util.Random;
 
 public class RandomPlayer extends Player {
 
-  public RandomPlayer(
-      String name, Position positionStart) {
+  public RandomPlayer(String name, Position positionStart) {
     super(name, positionStart);
   }
 
