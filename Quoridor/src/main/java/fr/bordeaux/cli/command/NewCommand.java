@@ -9,10 +9,8 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.HumanPlayer;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-
 import java.util.Arrays;
 import java.util.List;
-
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;

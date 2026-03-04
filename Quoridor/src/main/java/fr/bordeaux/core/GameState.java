@@ -1,16 +1,8 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class GameState {
 
   private final Board board;
@@ -21,13 +13,9 @@ public class GameState {
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
 
-  @JsonIgnore private transient List<Runnable> listeners = new ArrayList<>();
+  private transient List<Runnable> listeners = new ArrayList<>();
 
-  @JsonCreator
-  public GameState(
-      @JsonProperty("board") Board board,
-      @JsonProperty("players") List<Player> players,
-      @JsonProperty("currentIndexPlayer") int currentIndexPlayer) {
+  public GameState(Board board, List<Player> players, int currentIndexPlayer) {
     if (players.size() != 2 && players.size() != 4)
       throw new IllegalArgumentException(
           "Number of players must be 2 or 4, but was: " + players.size());
@@ -53,8 +41,8 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
-  //Apply a move, needs to be a valid move because it won't be checked in this function.
-  //Check victory is not done here as well
+  // Apply a move, needs to be a valid move because it won't be checked in this function.
+  // Check victory is not done here as well
   public void applyMove(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
@@ -122,7 +110,6 @@ public class GameState {
     notifyListeners();
   }
 
-
   public boolean isGameOver() {
     return gameOver;
   }
@@ -147,12 +134,16 @@ public class GameState {
     currentIndexPlayer = (currentIndexPlayer + 1) % players.size();
   }
 
-  private void previousPlayer() {
+  public void previousPlayer() {
     currentIndexPlayer = (currentIndexPlayer - 1 + players.size()) % players.size();
   }
 
   public Player getCurrentPlayer() {
     return players.get(currentIndexPlayer);
+  }
+
+  public int getCurrentIndexPlayer() {
+    return currentIndexPlayer;
   }
 
   public Board getBoard() {
@@ -171,24 +162,16 @@ public class GameState {
     return paused;
   }
 
-  public void saveGameJSON(String filename) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      mapper.writeValue(new File(filename), this);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public void saveGame(String filename) {
+    System.out.println("save a implementer");
   }
 
-  public GameState loadGameJSON(String filename) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      return mapper.readValue(new File(filename), GameState.class);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
+  /*
+  public GameState loadGame(String filename) {
+      return ;
   }
+
+   */
 
   public GameState reset() {
     int size = 9;
@@ -212,5 +195,45 @@ public class GameState {
     copy.gameOver = this.gameOver;
     copy.paused = this.paused;
     return copy;
+  }
+
+  public List<Move> generateLegalMoves() {
+    List<Move> res = new ArrayList<>();
+    Position player_pos = getCurrentPlayer().getPosition();
+    int x = player_pos.getX();
+    int y = player_pos.getY();
+    List<Move> all_possible_moves = new ArrayList<>();
+    for (int i = -1; i < 2; i++) {
+      for (int j = -1; j < 2; j++) {
+        if (i != 0 || j != 0) {
+          all_possible_moves.add(Move.pawn(player_pos, new Position(x + i, y + j)));
+        }
+      }
+    }
+
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x + 2, y)));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x - 2, y)));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y + 2)));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y - 2)));
+
+    if (getCurrentPlayer().getRemainingWalls() > 0) {
+      for (x = 0; x < board.getSize() - 1; x++) {
+        for (y = 1; y < board.getSize(); y++) {
+          Position pos_wall = new Position(x, y);
+
+          all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
+
+          all_possible_moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
+        }
+      }
+    }
+
+    for (Move m : all_possible_moves) {
+      if (RuleChecker.isMoveLegal(this, m)) {
+        res.add(m);
+      }
+    }
+
+    return res;
   }
 }

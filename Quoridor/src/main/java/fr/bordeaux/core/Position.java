@@ -2,18 +2,13 @@ package fr.bordeaux.core;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Objects;
-
 /** Represents a position on the Quoridor board. */
 public class Position {
 
   int x;
   int y;
 
-  @JsonCreator
-  public Position(@JsonProperty("x") int x, @JsonProperty("y") int y) {
+  public Position(int x, int y) {
     this.x = x;
     this.y = y;
   }

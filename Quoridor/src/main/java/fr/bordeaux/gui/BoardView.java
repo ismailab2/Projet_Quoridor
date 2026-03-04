@@ -100,7 +100,7 @@ public class BoardView extends GridPane {
   }
 
   private void handleWallClick(int row, int col) {
-    // Exemple simple : clique secondaire ajoute mur horizontal
+    //  clique secondaire ajoute mur horizontal
     Move wallMove = Move.wall(new Position(row, col), Orientation.HORIZONTAL);
 
     if (RuleChecker.isMoveLegal(engine.getState(), wallMove)) {

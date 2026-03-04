@@ -1,8 +1,5 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.bordeaux.graph.*;
 import java.util.*;
 
@@ -10,10 +7,9 @@ import java.util.*;
 public class Board {
 
   private final int size;
-  @JsonIgnore private final Graph graph;
+  private final Graph graph;
 
-  @JsonCreator
-  public Board(@JsonProperty("size") int size) {
+  public Board(int size) {
     if (size < 3 || size > 15 || size % 2 == 0) {
       throw new IllegalArgumentException(
           "Size must be odd and between 3 and 15, but was : " + size);
@@ -97,6 +93,7 @@ public class Board {
 
     return (orientation == Orientation.HORIZONTAL) ? hOverlap || hCross : vOverlap || vCross;
   }
+
   public Board copy() {
     return new Board(size, this.graph.copy());
   }

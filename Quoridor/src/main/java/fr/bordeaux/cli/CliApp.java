@@ -1,5 +1,7 @@
 package fr.bordeaux.cli;
 
+import fr.bordeaux.cli.command.*;
+import fr.bordeaux.core.*;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
@@ -17,9 +19,6 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.jline.reader.Completer;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.impl.completer.StringsCompleter;
 
 public class CliApp {
 
@@ -29,10 +28,26 @@ public class CliApp {
   private LineReader reader;
   private Completer completer;
 
-    public CliApp(GameEngine e, Terminal t, LineReader r) {
-        engine = e; terminal = t; reader = r;
-        completer = new StringsCompleter("help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo", "set");
-        reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
+  public CliApp(GameEngine e, Terminal t, LineReader r) {
+    engine = e;
+    terminal = t;
+    reader = r;
+    completer =
+        new StringsCompleter(
+            "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo", "set");
+    reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
+  }
+
+  public CliApp(GameEngine e) {
+    try {
+      terminal = TerminalBuilder.builder().system(true).build();
+      completer =
+          new StringsCompleter(
+              "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
+              "set");
+      reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
+    } catch (Exception exc) {
+      exc.printStackTrace();
     }
     public CliApp() {
         this(new GameEngine(new GameState(new Board(9), List.of(new HumanPlayer("Human", new Position(0, 4)), new MinimaxPlayer("Bob", new Position(8, 4))))));
