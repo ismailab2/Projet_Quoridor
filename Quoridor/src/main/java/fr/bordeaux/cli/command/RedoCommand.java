@@ -26,6 +26,16 @@ public class RedoCommand implements Command {
 
   @Override
   public void helpText() {
-    System.out.println("To implement");
+      System.out.println("=== REDO Command ===\n");
+      System.out.println("Usage:");
+      System.out.println("  redo");
+      System.out.println("  redo [N]\n");
+      System.out.println("Description:");
+      System.out.println("  Replays previously undone moves.\n");
+      System.out.println("  - If no number is specified, one move is redone.");
+      System.out.println("  - If N is specified, N moves are redone.\n");
+      System.out.println("Examples:");
+      System.out.println("  redo      -> redo one move");
+      System.out.println("  redo 3    -> redo three moves\n");
   }
 }

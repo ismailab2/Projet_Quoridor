@@ -33,7 +33,16 @@ public class MoveCommand implements Command {
   
   }
   @Override public void helpText() {
-    System.out.println("To implement");
+    System.out.println("=== Move Commands ===\n");
+    System.out.println("Usage:");
+    System.out.println("To move a pawn : e2-e3 (if it's legal).");
+    System.out.println("        Remember that you can't neither move diagonally nor jump over a wall nor exit the board.");
+    System.out.println("To place a wall : e2h (if it's legal).");
+    System.out.println("        It place the wall horizontally under the case e2 and under the case f2.");
+    System.out.println("        You can't place a wall horizontally if it's the right edge of the board (colonne E for a 5x5 board).");
+    System.out.println("                : e2v (if it's legal).");
+    System.out.println("        It place the wall vertically next to the case e2 and next to the case e1");
+    System.out.println("        You can't place a wall vertically if it's the top edge of the board. (row 1 on any board).\n");
   }
 
   public Position parsePosition(String str) {

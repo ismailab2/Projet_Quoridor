@@ -79,5 +79,20 @@ public class NewCommand implements Command {
         return engine;
     }
     @Override
-    public void helpText() { System.out.println("To implement"); }
+    public void helpText() {
+        System.out.println("=== NEW Command ===\n");
+        System.out.println("Usage:");
+        System.out.println("  new");
+        System.out.println("  new [boardSize] [nbPlayer]\n");
+        System.out.println("Description:");
+        System.out.println("  Starts a new game.\n");
+        System.out.println("Arguments (optional):");
+        System.out.println("  boardSize    : An odd integer greater than or equal to 3.");
+        System.out.println("  playerCount  : Must be either 2 or 4.\n");
+        System.out.println("If no arguments are provided, default settings are used.\n");
+        System.out.println("Examples:");
+        System.out.println("  new       -> 9x9 board with 2 players");
+        System.out.println("  new 5     -> 5x5 board with 2 players");
+        System.out.println("  new 7 4   -> 7x7 board with 4 players\n");
+    }
 }

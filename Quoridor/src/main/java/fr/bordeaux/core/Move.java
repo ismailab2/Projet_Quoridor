@@ -52,10 +52,10 @@ public class Move {
     return type == Type.PAWN;
   }
 
-  @Override
+  /* @Override
   public String toString() {
     char letterFirst = ((char)('a'+from.x));
     String numberFirst = Integer.toString(from.y);
     return super.toString();
-  }
+  } */
 }

@@ -46,6 +46,12 @@ public class QuitCommand implements Command {
 
   @Override
   public void helpText() {
-    System.out.println("Text for quit command");
+    System.out.println("=== QUIT Command ===\n");
+    System.out.println("Usage:");
+    System.out.println("  quit\n");
+    System.out.println("Description:");
+    System.out.println("  Exits the application.\n");
+    System.out.println("Information:");
+    System.out.println("  This command will ask you if you want to save before quitting.\n");
   }
 }

@@ -59,8 +59,11 @@ public class CliApp {
 
   public void run() {
     System.out.println("Launching Command Line interface...");
+    if (engine != null) {
+      ShowCommand show = new ShowCommand();
+      show.execute(engine);
+    }
     while (running) {
-      if (engine != null) printBoard();
       String line = reader.readLine(">> ");
       fetch(line);
     }
@@ -135,48 +138,6 @@ public class CliApp {
     if (cmd != null) engine = cmd.execute(engine);
     for (Move m : engine.getState().getMovesPlayed()) {
       System.out.println(m.toString());
-    }
-  }
-
-  private void printBoard() {
-    int boardSize = engine.getState().getBoard().getSize();
-    Board b = engine.getState().getBoard();
-    for (int i = 0; i < boardSize; i++) System.out.print(((char) ('A' + i)) + " ");
-    System.out.println("");
-    for (int i = 0; i < boardSize; i++) {
-      boolean empty = true;
-      for (int j = 0; j < boardSize; j++) {
-        int id = 1;
-        for (Player player : engine.getState().getPlayers()) {
-          if ((player.getPosition()).equals(new Position(i, j))) {
-            System.out.print(id + printWall(b, i, j, false));
-            empty = false;
-          }
-          id += 1;
-        }
-        if (empty) System.out.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
-        empty = true;
-        if (j == boardSize - 1) System.out.print((i + 1));
-      }
-      if (i == boardSize - 1) break;
-      System.out.println("");
-      for (int j = 0; j < boardSize; j++) {
-        System.out.print(printWall(b, i, j, true));
-      }
-      System.out.println("");
-    }
-    System.out.println("");
-  }
-
-  private String printWall(Board b, int i, int j, boolean under) {
-    if (under) {
-      if (i >= b.getSize() - 1) return "X ";
-      if (b.getGraph().hasEdge(b.id(i, j), b.id(i + 1, j))) return ". ";
-      else return "X ";
-    } else {
-      if (j >= b.getSize() - 1) return "X";
-      if (b.getGraph().hasEdge(b.id(i, j), b.id(i, j + 1))) return " ";
-      else return "X";
     }
   }
 }

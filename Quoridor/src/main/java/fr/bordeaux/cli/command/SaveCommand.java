@@ -21,6 +21,14 @@ public class SaveCommand implements Command {
 
   @Override
   public void helpText() {
-    System.out.println("To implement");
+    System.out.println("=== SAVE Command ===\n");
+    System.out.println("Usage:");
+    System.out.println("  save FILE\n");
+    System.out.println("Description:");
+    System.out.println("  Saves the current game state into the specified file FILE.\n");
+    System.out.println("Arguments:");
+    System.out.println("  FILE   : Destination file path (required).\n");
+    System.out.println("Example:");
+    System.out.println("  save mygame.txt\n");
   }
 }
