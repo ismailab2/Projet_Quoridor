@@ -18,38 +18,21 @@ public class MoveCommand implements Command {
     this(null);
   }
 
-    public static Position parsePosition(String str) {
-        if (str.length() < 2) throw new IllegalArgumentException("Invalid position format");
-
-        int row = Integer.parseInt(str.substring(1))-1;
-        int col = str.charAt(0) -'a';
-
-        return new Position(row, col);
-    }
-
-    public GameEngine handleMove(GameEngine engine) {
-        String[] moves = move.split("-");
-        if (moves.length != 2)
-            throw new IllegalArgumentException("Invalid move syntax");
-
-        Position from = parsePosition(moves[0]);
-        Position to = parsePosition(moves[1]);
-
-        Player current = engine.getState().getCurrentPlayer();
-        if (!current.getPosition().equals(from))
-            throw new IllegalArgumentException("No pawn at " + moves[0]);
-
-        engine.play(Move.pawn(from, to));
+  @Override public GameEngine execute(GameEngine engine) {
+    try {
+      if (move.contains("-")) return handleMove(engine);
+      else if (move.contains("v") || move.contains("h")) return handleWall(engine);
+      else {
+        System.out.println("Invalid move format");
         return engine;
       }
     } catch (Exception e) {
       e.printStackTrace();
-      return engine;
+      return engine; 
     }
+  
   }
-
-  @Override
-  public void helpText() {
+  @Override public void helpText() {
     System.out.println("To implement");
   }
 

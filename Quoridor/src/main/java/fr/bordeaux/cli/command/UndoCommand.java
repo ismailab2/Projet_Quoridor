@@ -7,11 +7,12 @@ public class UndoCommand implements Command {
   private String[] tokens;
 
   public UndoCommand() {
-    System.out.println("To implement");
+    this(new String[]{"undo", "1"});
   }
+  public UndoCommand(String[] t ) { tokens = t; }
 
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(GameEngine engine) { 
     if (tokens.length == 1) engine.getState().undo();
     else if (tokens.length >= 3) {
       System.out.println("Undo command should look like : undo [N] with N an integer");

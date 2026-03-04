@@ -7,7 +7,7 @@ public class RedoCommand implements Command {
   private String[] tokens;
 
   public RedoCommand() {
-    System.out.println("To implement");
+    this(new String[]{"redo", "1"});
   }
 
   public RedoCommand(String[] t) {

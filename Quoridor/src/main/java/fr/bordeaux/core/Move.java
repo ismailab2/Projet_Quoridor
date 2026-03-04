@@ -21,7 +21,6 @@ public class Move {
   }
 
   public static Move pawn(Position from, Position to) {
-    System.out.println("\n\n\n" + from + "\n\n");
     return new Move(Type.PAWN, from, to, null);
   }
 
@@ -51,5 +50,12 @@ public class Move {
 
   public boolean isPawn() {
     return type == Type.PAWN;
+  }
+
+  @Override @Override
+  public String toString() {
+    String letterFirst = (String)((char)('a'+from.x));
+    String numberFirst = Integer.toString(from.y);
+      return super.toString();
   }
 }
