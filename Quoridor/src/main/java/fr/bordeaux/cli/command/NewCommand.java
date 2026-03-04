@@ -42,7 +42,7 @@ public class NewCommand implements Command {
             new Position(0, (size-1)/2), new Position(size-1, (size-1)/2),
             new Position((size-1)/2, 0), new Position((size-1)/2, size-1)
         };
-        if (tokens.length == 1) return new GameEngine(new GameState(new Board(size), List.of(new HumanPlayer("Human", new Position(0, 4)), new MinimaxPlayer("Bob", new Position(8, 4)))));
+        if (tokens.length == 1) return new GameEngine(new GameState(new Board(size), List.of(new HumanPlayer("Human", new Position(0, 4)), new HumanPlayer("Bob", new Position(8, 4)))));
         else {
             int nbPlayer = tokens.length <= 2 ? 2:Integer.parseInt(tokens[2]);
             Board board = new Board(size);
@@ -61,7 +61,7 @@ public class NewCommand implements Command {
                     if (typePlayer.equals("h")) {
                       players[i] = new HumanPlayer(inputName, positions[i]);
                     } else {
-                      players[i] = new MinimaxPlayer(inputName, positions[i]);
+                      players[i] = new MinimaxPlayer(inputName, positions[i], 2);
                     }
                 } 
                 catch (EndOfFileException | UserInterruptException e) {
