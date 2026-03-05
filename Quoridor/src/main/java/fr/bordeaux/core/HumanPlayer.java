@@ -1,26 +1,20 @@
 package fr.bordeaux.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /** Represents a human player */
 public class HumanPlayer extends Player {
 
-  @JsonCreator
-  public HumanPlayer(
-      @JsonProperty("name") String name, @JsonProperty("positionStart") Position positionStart) {
+  public HumanPlayer(String name, Position positionStart) {
     super(name, positionStart);
   }
 
   @Override
   public Player copy() {
     return new HumanPlayer(
-            this.getName(),
-            this.getPosition(),
-            this.getStartingPosition(),
-            this.getRemainingWalls(),
-            this.getScore()
-    );
+        this.getName(),
+        this.getPosition(),
+        this.getStartingPosition(),
+        this.getRemainingWalls(),
+        this.getScore());
   }
 
   private HumanPlayer(String name, Position current, Position start, int walls, int score) {

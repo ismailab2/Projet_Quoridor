@@ -13,12 +13,9 @@ public class GameState {
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
 
-   private transient List<Runnable> listeners = new ArrayList<>();
+  private transient List<Runnable> listeners = new ArrayList<>();
 
-  public GameState(
-      Board board,
-      List<Player> players,
-      int currentIndexPlayer) {
+  public GameState(Board board, List<Player> players, int currentIndexPlayer) {
     if (players.size() != 2 && players.size() != 4)
       throw new IllegalArgumentException(
           "Number of players must be 2 or 4, but was: " + players.size());
@@ -44,8 +41,8 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
-  //Apply a move, needs to be a valid move because it won't be checked in this function.
-  //Check victory is not done here as well
+  // Apply a move, needs to be a valid move because it won't be checked in this function.
+  // Check victory is not done here as well
   public void applyMove(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
@@ -104,7 +101,6 @@ public class GameState {
     notifyListeners();
   }
 
-
   public boolean isGameOver() {
     return gameOver;
   }
@@ -129,12 +125,16 @@ public class GameState {
     currentIndexPlayer = (currentIndexPlayer + 1) % players.size();
   }
 
-  private void previousPlayer() {
+  public void previousPlayer() {
     currentIndexPlayer = (currentIndexPlayer - 1 + players.size()) % players.size();
   }
 
   public Player getCurrentPlayer() {
     return players.get(currentIndexPlayer);
+  }
+
+  public int getCurrentIndexPlayer() {
+    return currentIndexPlayer;
   }
 
   public Board getBoard() {
@@ -154,7 +154,7 @@ public class GameState {
   }
 
   public void saveGame(String filename) {
-      System.out.println("save a implementer");
+    System.out.println("save a implementer");
   }
 
   /*
@@ -186,5 +186,45 @@ public class GameState {
     copy.gameOver = this.gameOver;
     copy.paused = this.paused;
     return copy;
+  }
+
+  public List<Move> generateLegalMoves() {
+    List<Move> res = new ArrayList<>();
+    Position player_pos = getCurrentPlayer().getPosition();
+    int x = player_pos.getX();
+    int y = player_pos.getY();
+    List<Move> all_possible_moves = new ArrayList<>();
+    for (int i = -1; i < 2; i++) {
+      for (int j = -1; j < 2; j++) {
+        if (i != 0 || j != 0) {
+          all_possible_moves.add(Move.pawn(player_pos, new Position(x + i, y + j)));
+        }
+      }
+    }
+
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x + 2, y)));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x - 2, y)));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y + 2)));
+    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y - 2)));
+
+    if (getCurrentPlayer().getRemainingWalls() > 0) {
+      for (x = 0; x < board.getSize() - 1; x++) {
+        for (y = 1; y < board.getSize(); y++) {
+          Position pos_wall = new Position(x, y);
+
+          all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
+
+          all_possible_moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
+        }
+      }
+    }
+
+    for (Move m : all_possible_moves) {
+      if (RuleChecker.isMoveLegal(this, m)) {
+        res.add(m);
+      }
+    }
+
+    return res;
   }
 }

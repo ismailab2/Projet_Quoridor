@@ -30,14 +30,11 @@ public class GameEngine {
   }
 
   public void saveGame(String filename) {
-    state.saveGameJSON(filename);
-    // System.out.println("jeu sauvegarde !");
+    System.out.println("jeu sauvegarde !");
   }
 
   public void loadGame(String filename) {
-    GameState loaded = state.loadGameJSON(filename);
-    if (loaded != null) state = loaded;
-    // System.out.println("jeu load !");
+    System.out.println("jeu load !");
   }
 
   public void undo() {
