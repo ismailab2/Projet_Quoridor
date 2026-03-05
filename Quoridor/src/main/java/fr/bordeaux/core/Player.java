@@ -1,24 +1,22 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.AI.MCTSPlayer;
 import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Represents a player in Quoridor. A player has a name, a pawn position, a number of remaining
  * walls, and a score.
  */
 public abstract class Player {
+
   private final String name;
   private Position position;
   private int remainingWalls = 10;
   private final Position startingPosition;
   private int score = 0;
 
-
-  public Player(
-      String name, Position positionStart) {
+  public Player(String name, Position positionStart) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;
@@ -36,7 +34,7 @@ public abstract class Player {
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
     Player p1 = new HumanPlayer("Human", new Position(0, 4));
-    Player p2 = new MinimaxPlayer("Bob", new Position(8, 4));
+    Player p2 = new MinimaxPlayer("Bob", new Position(8, 4), 2);
     players.add(p1);
     players.add(p2);
     return players;

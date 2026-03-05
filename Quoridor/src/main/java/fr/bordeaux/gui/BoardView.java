@@ -54,7 +54,7 @@ public class BoardView extends GridPane {
       Rectangle pawn = new Rectangle(cellSize * 0.6, cellSize * 0.6);
       pawn.setArcWidth(15);
       pawn.setArcHeight(15);
-      //pawn.setFill(player.getTypePlayer() == TypePlayer.HUMAN ? Color.BLUE : Color.RED);
+      // pawn.setFill(player.getTypePlayer() == TypePlayer.HUMAN ? Color.BLUE : Color.RED);
 
       StackPane cell =
           (StackPane)

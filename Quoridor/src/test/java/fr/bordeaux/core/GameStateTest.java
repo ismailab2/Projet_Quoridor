@@ -7,8 +7,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +21,7 @@ public class GameStateTest {
   public void setup() {
     board = new Board(9);
     human = new HumanPlayer("Human", new Position(0, 4));
-    ia = new MinimaxPlayer("IA", new Position(8, 4));
+    ia = new MinimaxPlayer("IA", new Position(8, 4), 2);
 
     List<Player> players = new ArrayList<>();
     players.add(human);
