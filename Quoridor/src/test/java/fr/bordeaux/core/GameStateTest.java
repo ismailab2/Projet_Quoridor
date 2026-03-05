@@ -169,10 +169,6 @@ public class GameStateTest {
     assertTrue(predicate.test(id));
   }
 
-  // =========================
-  // SAVE / LOAD JSON
-  // =========================
-
   @Test
   public void save_and_load_json_works() {
     String filename = "test_save.json";
@@ -185,10 +181,6 @@ public class GameStateTest {
 
     new File(filename).delete();
   }
-
-  // =========================
-  // RESET
-  // =========================
 
   @Test
   public void reset_creates_new_game() {

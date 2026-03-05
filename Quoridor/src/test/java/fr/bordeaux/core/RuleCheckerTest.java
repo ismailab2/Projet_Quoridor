@@ -21,10 +21,6 @@ public class RuleCheckerTest {
     state = new GameState(board, List.of(p1, p2));
   }
 
-  // ===========================
-  // Tests des mouvements de pion
-  // ===========================
-
   @Test
   public void pawnMove_inside_board_returns_true() {
     Move move = Move.pawn(p1.getPosition(), new Position(1, 2));
