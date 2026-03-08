@@ -2,6 +2,8 @@ package fr.bordeaux.AI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.bordeaux.AI.MinimaxPlayer;
+import fr.bordeaux.AI.RandomPlayer;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
@@ -60,5 +62,23 @@ public class MinimaxPlayerTest {
             && res.getType() == Type.PAWN
             && res.getOrientation() == null
             && res.getFrom().equals(new Position(1, 1)));
+  }
+
+  @Test
+  public void checkTimer(){
+    board = new Board(9);
+    ia1 = new MinimaxPlayer("IA1", new Position(8, 4), 10);
+    ia2 = new MinimaxPlayer("IA2", new Position(0, 4), 2);
+    List<Player> players = new ArrayList<>();
+    players.add(ia1);
+    players.add(ia2);
+    game = new GameState(board, players);
+
+    long startTime = System.currentTimeMillis();
+    Move move = ia1.getNextMove(game);
+    long duration = System.currentTimeMillis() - startTime;
+
+    assert(duration>=5000);
+    assertNotNull(move);
   }
 }

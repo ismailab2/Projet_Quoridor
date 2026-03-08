@@ -50,6 +50,7 @@ public class RandomPlayerTest {
     int khi2 = 0;
     for(Move m : legalMoves){
       int o_i = counts.getOrDefault(m, 0);
+      System.out.println("Move : " + m.getType() + " " + m.getTo() + " ---> " + o_i);
       khi2 += Math.pow((o_i - e), 2)/e;
     }
 
