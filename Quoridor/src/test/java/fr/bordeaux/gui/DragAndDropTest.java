@@ -27,6 +27,12 @@ class DragAndDropTest {
         assertNotNull(state);
     }
 
+    // The game must have at least 2 players
+    @Test
+    void install_minTwoPlayers() {
+        assertTrue(state.getPlayers().size() >= 2);
+    }
+
     // installDragOnPawn()
     // Current player must be at his start position
     @Test
