@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Represents an Ai player with MCTS */
-public class MCTSPlayer extends Player {
+public class MCTSPlayer extends AiPlayer {
 
   public MCTSPlayer(String name, Position positionStart) {
     super(name, positionStart);
@@ -213,5 +213,10 @@ public class MCTSPlayer extends Player {
   @Override
   public Boolean isAI() {
     return true;
+  }
+
+  @Override
+  public String getAiMode() {
+    return "mcts";
   }
 }

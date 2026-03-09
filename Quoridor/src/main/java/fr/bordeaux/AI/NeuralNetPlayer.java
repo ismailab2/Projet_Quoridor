@@ -6,7 +6,7 @@ import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 
 /** Represents an Ai player with MCTS */
-public class NeuralNetPlayer extends Player {
+public class NeuralNetPlayer extends AiPlayer {
 
   public NeuralNetPlayer(String name, Position positionStart) {
     super(name, positionStart);
@@ -39,5 +39,10 @@ public class NeuralNetPlayer extends Player {
   @Override
   public Boolean isAI() {
     return true;
+  }
+
+  @Override
+  public String getAiMode() {
+    return "neuralnetwork";
   }
 }

@@ -7,7 +7,7 @@ import fr.bordeaux.core.Position;
 import java.util.List;
 import java.util.Random;
 
-public class RandomPlayer extends Player {
+public class RandomPlayer extends AiPlayer {
 
   public RandomPlayer(String name, Position positionStart) {
     super(name, positionStart);
@@ -42,5 +42,10 @@ public class RandomPlayer extends Player {
   @Override
   public Boolean isAI() {
     return true;
+  }
+
+  @Override
+  public String getAiMode() {
+    return "random";
   }
 }

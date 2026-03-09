@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 /** Represents an Ai player with Minimax */
 public class MinimaxPlayer
-    extends Player { // MiniMax and IterativeDeepening are limited because it works with only 2
+    extends AiPlayer { // MiniMax and IterativeDeepening are limited because it works with only 2
   // players. They will not work if the number of players is larger.
 
   private int depth;
@@ -372,5 +372,25 @@ public class MinimaxPlayer
   @Override
   public Boolean isAI() {
     return true;
+  }
+
+  @Override
+  public String getAiMode() {
+    if(isIterativeDeepening){
+      return "iterative-deepening";
+    }
+    return "minimax";
+  }
+
+  public int getDepth(){
+    return depth;
+  }
+
+  public int getReflexionTime(){
+    return reflexionTime;
+  }
+
+  public String getHeuristic(){
+    return heuristicName;
   }
 }
