@@ -20,8 +20,8 @@ public class MoveCommand implements Command {
 
   @Override public GameEngine execute(GameEngine engine) {
     try {
-      if (move.contains("-")) return handleMove(engine);
-      else if (move.contains("v") || move.contains("h")) return handleWall(engine);
+      if (move.contains("-") && (move.length()==5 || move.length()==7)) return handleMove(engine);
+      else if ((move.contains("v") || move.contains("h")) && move.length() == 3) return handleWall(engine);
       else {
         System.out.println("Invalid move format");
         return engine;
