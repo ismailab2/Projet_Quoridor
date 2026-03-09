@@ -227,4 +227,19 @@ public class GameState {
 
     return res;
   }
+
+  public String getMode(){
+    // TODO
+    return "";
+  }
+
+  public int getTurnLimit(){
+    // TODO
+    return 0;
+  }
+
+  public boolean isDebug(){
+    // TODO
+    return false;
+  }
 }

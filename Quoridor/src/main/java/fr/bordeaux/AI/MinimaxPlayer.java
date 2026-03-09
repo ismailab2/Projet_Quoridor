@@ -377,7 +377,7 @@ public class MinimaxPlayer
   @Override
   public String getAiMode() {
     if(isIterativeDeepening){
-      return "iterative-deepening";
+      return "minimax-iterative-deepening";
     }
     return "minimax";
   }

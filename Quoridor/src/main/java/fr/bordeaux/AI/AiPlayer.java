@@ -22,6 +22,8 @@ public abstract class AiPlayer extends Player {
 
     public abstract String getAiMode();
 
+    public abstract int getReflexionTime();
+
     @Override
     public abstract Player copy();
 
