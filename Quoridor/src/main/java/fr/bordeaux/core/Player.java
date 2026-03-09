@@ -34,7 +34,7 @@ public abstract class Player {
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
     Player p1 = new HumanPlayer("Human", new Position(0, 4));
-    Player p2 = new MinimaxPlayer("Bob", new Position(8, 4), 2);
+    Player p2 = new HumanPlayer("Bob", new Position(8, 4));
     players.add(p1);
     players.add(p2);
     return players;

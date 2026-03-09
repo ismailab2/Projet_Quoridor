@@ -22,11 +22,20 @@ public class MinimaxPlayerTest {
   private Player ia1;
   private Player ia2;
 
+
+  @Test
+  public void checkParameters(){
+    assertThrows(IllegalArgumentException.class, () -> {ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(-12).build();});
+    assertThrows(IllegalArgumentException.class, () -> {ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withReflexion(0).build();});
+    assertThrows(IllegalArgumentException.class, () -> {ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withHeuristic("bonjour").build();});
+  }
+
+
   @Test
   public void checkMiniMaxMoveWall() {
     board = new Board(9);
-    ia1 = new MinimaxPlayer("IA1", new Position(8, 4), 2, 5, false, "h3");
-    ia2 = new RandomPlayer("IA2", new Position(0, 4));
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(2).withReflexion(5).withHeuristic("h3").build();
+    ia2 = MinimaxPlayer.builder("IA2", new Position(0, 4)).build();
     ia1.setPosition(new Position(2, 4));
     ia2.setPosition(new Position(7, 2));
 
@@ -46,7 +55,7 @@ public class MinimaxPlayerTest {
   @Test
   public void checkMiniMaxMovePawn() {
     board = new Board(3);
-    ia1 = new MinimaxPlayer("IA1", new Position(2, 1), 2);
+    ia1 = MinimaxPlayer.builder("IA1", new Position(2, 1)).withDepth(2).build();
     ia2 = new RandomPlayer("IA2", new Position(0, 1));
     ia1.setPosition(new Position(1, 1));
     ia2.setPosition(new Position(0, 2));
@@ -67,8 +76,8 @@ public class MinimaxPlayerTest {
   @Test
   public void checkTimer(){
     board = new Board(9);
-    ia1 = new MinimaxPlayer("IA1", new Position(8, 4), 10);
-    ia2 = new MinimaxPlayer("IA2", new Position(0, 4), 2);
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(10).build();
+    ia2 = new RandomPlayer("IA2", new Position(0, 4));
     List<Player> players = new ArrayList<>();
     players.add(ia1);
     players.add(ia2);
