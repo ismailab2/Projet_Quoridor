@@ -65,6 +65,7 @@ public class CliApp {
     }
     while (running) {
       String line = reader.readLine(">> ");
+      System.out.println("\n\n"+line+"\n\n");
       fetch(line);
     }
     try {

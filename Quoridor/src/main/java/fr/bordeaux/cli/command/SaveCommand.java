@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.persistence.GameSerializer;
 
 public class SaveCommand implements Command {
 
@@ -16,7 +17,8 @@ public class SaveCommand implements Command {
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    /*engine.getState().save(this.tokens[1]);*/ return engine;
+    GameSerializer.saveGame(engine.getState(), tokens[1]);
+    return engine;
   }
 
   @Override
