@@ -236,4 +236,31 @@ public class GameState {
 
     return res;
   }
+
+    public List<Position> getLegalMoves(Player player) {
+        List<Position> res = new ArrayList<>();
+        Position player_pos = player.getPosition();
+        int x = player_pos.getX();
+        int y = player_pos.getY();
+        List<Move> all_possible_moves = new ArrayList<>();
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                if (i != 0 || j != 0) {
+                    all_possible_moves.add(Move.pawn(player_pos, new Position(x + i, y + j)));
+                }
+            }
+        }
+
+        all_possible_moves.add(Move.pawn(player_pos, new Position(x + 2, y)));
+        all_possible_moves.add(Move.pawn(player_pos, new Position(x - 2, y)));
+        all_possible_moves.add(Move.pawn(player_pos, new Position(x, y + 2)));
+        all_possible_moves.add(Move.pawn(player_pos, new Position(x, y - 2)));
+
+        for (Move m : all_possible_moves) {
+            if (RuleChecker.isMoveLegal(this, m)) {
+                res.add(m.getTo());
+            }
+        }
+        return res;
+    }
 }

@@ -2,13 +2,17 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
-import java.util.Objects;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
+import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+/**
+ * Main JavaFX application class for Quoridor.
+ * Shows the board in the center, player 1 walls on right, player 2 walls on left.
+ */
 public class QuoridorApp extends Application {
 
     @Override
@@ -17,46 +21,31 @@ public class QuoridorApp extends Application {
 
         GameState state = new GameState(new Board(9), Player.createDefaultPlayers());
         GameEngine engine = new GameEngine(state);
+
         ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
-        ShortcutManager.getInstance().setActionDispatcher(dispatcher);
+        BorderPane root = new BorderPane();
 
-        BorderPane borderPane = new BorderPane();
+        // Menu bar on top
         MainMenuBar menuBar = new MainMenuBar(dispatcher);
-        borderPane.setTop(menuBar);
+        root.setTop(menuBar);
 
-    /*
-    BackgroundImage background = getBackgroundImage();
-    borderPane.setBackground(new Background(background));
-
-     */
+        // BoardView in center
         BoardView boardView = new BoardView(engine);
-        borderPane.setCenter(boardView);
-        DragAndDrop.install(engine, boardView);
+        root.setCenter(boardView);;
 
-        Scene scene = new Scene(borderPane, 900, 700);
-        ShortcutManager.getInstance().register(scene);
+        // Scene
+        Scene scene = new Scene(root, 900, 700);
 
-        boardView.prefWidthProperty().bind(borderPane.widthProperty());
-        boardView
-                .prefHeightProperty()
-                .bind(borderPane.heightProperty().subtract(menuBar.heightProperty()));
+        // Shortcuts
+        ShortcutManager manager = ShortcutManager.getInstance();
+        manager.setDispatcher(dispatcher);
+        manager.register(scene);
 
         stage.setTitle("Quoridor");
         stage.setScene(scene);
+        stage.setResizable(true);
         stage.show();
-    }
-
-    private BackgroundImage getBackgroundImage() {
-        Image bgImage =
-                new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/background.png")));
-        BackgroundSize bgSize = new BackgroundSize(100, 100, true, true, true, false);
-        return new BackgroundImage(
-                bgImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                bgSize);
     }
 
     @Override

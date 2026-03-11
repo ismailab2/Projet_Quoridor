@@ -60,7 +60,6 @@ public class GameEngine {
 
   public void pause() {
     state.setPaused(true);
-    System.out.println("EN PAUSE ");
   }
 
   public void hint() {

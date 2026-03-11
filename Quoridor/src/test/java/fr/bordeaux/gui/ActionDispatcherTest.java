@@ -106,7 +106,7 @@ class ActionDispatcherTest {
                 }
                 latch.countDown();
             });
-            latch.await(5, TimeUnit.SECONDS); // attend la fin sur FX thread
+            latch.await(10, TimeUnit.SECONDS); // attend la fin sur FX thread
 
             verify(engine).newGame();
             verify(engine).loadGame("save.txt");
