@@ -8,7 +8,6 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.graph.Graph;
-import fr.bordeaux.AI.MinimaxPlayer;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
 import java.io.IOException;
@@ -65,6 +64,7 @@ public class CliApp {
     }
     while (running) {
       String line = reader.readLine(">> ");
+      System.out.println("\n"+line+"\n");
       fetch(line);
     }
     try {
@@ -99,7 +99,7 @@ public class CliApp {
         }
       case "load":
         {
-          cmd = new LoadCommand();
+          cmd = new LoadCommand(tokens);
           break;
         }
       case "save":
@@ -110,6 +110,11 @@ public class CliApp {
       case "pause":
         {
           cmd = new PauseCommand();
+          break;
+        }
+      case "hint":
+        {
+          cmd = new HintCommand();
           break;
         }
       case "undo":
@@ -136,8 +141,5 @@ public class CliApp {
         cmd = new MoveCommand(input);
     }
     if (cmd != null) engine = cmd.execute(engine);
-    for (Move m : engine.getState().getMovesPlayed()) {
-      System.out.println(m.toString());
-    }
   }
 }

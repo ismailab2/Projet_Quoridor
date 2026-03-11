@@ -1,16 +1,25 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.persistence.GameSerializer;
 
 public class LoadCommand implements Command {
 
-  public LoadCommand() {
-    System.out.println("To implement");
+  private String[] tokens;
+
+  public LoadCommand(String p) {
+    this(new String[]{"load", p});
   }
+
+  public LoadCommand(String[] t) { this.tokens = t; }
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    System.out.println("To implement");
+    try {
+      return new GameEngine(GameSerializer.loadGame(tokens[1]));
+    } catch (Exception e) {
+      System.err.println("Ca va pas du tout : " + e);
+    } 
     return engine;
   }
 

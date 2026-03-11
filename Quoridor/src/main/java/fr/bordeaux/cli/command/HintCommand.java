@@ -1,17 +1,38 @@
 package fr.bordeaux.cli.command;
 
+import fr.bordeaux.AI.MCTSPlayer;
+import fr.bordeaux.AI.MCTSPlayer.Node;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
+import fr.bordeaux.core.Position;
+import fr.bordeaux.core.Move.Type;
 
 public class HintCommand implements Command {
 
   public HintCommand() {
-    System.out.println("To implement");
+    ;
   }
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    System.out.println("To implement");
+    MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
+    Move hint = ia.getNextMove(engine.getState());
+    String bestMove = "";
+    if (hint.getType() == Type.PAWN) {
+      bestMove = posToString(hint.getFrom()) + "-" + posToString(hint.getTo());
+    } else {
+      char orientationChar = (hint.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v');
+      bestMove = posToString(hint.getTo()) + orientationChar;
+    }
+    System.out.println("Best move : " + bestMove);
     return engine;
+  }
+
+  private String posToString(Position p) {
+      char letter = (char) ('a' + p.getX());
+      int number = p.getY();
+      return "" + letter + number;
   }
 
   @Override
