@@ -1,0 +1,2 @@
+mauvais_entete
+2  # Couleur du joueur courant

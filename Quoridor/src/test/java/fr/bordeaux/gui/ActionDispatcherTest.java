@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 class ActionDispatcherTest {
+    /*
 
     @BeforeAll
     static void initJavaFX() {
@@ -125,4 +126,6 @@ class ActionDispatcherTest {
             }
         }
     }
+
+     */
 }

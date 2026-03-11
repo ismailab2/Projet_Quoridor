@@ -1,0 +1,33 @@
+[settings] # Paramètres du programme
+verbose=false
+blitz=false
+constest=false
+ai=false
+turns-limit=100
+debug=false
+nb-players=2
+player-1-name=Joueur1
+player-1-starting-position=Position: 0, 4
+player-2-name=Joueur2
+player-2-starting-position=Position: 8, 4
+[game]
+2  # Current player color
+# Board (2 players)
+. . . . 1 . . . .
+                 
+. . . . . . . . .
+                 
+. . . . . . . . .
+      _ _        
+. . . . . . . . .
+                 
+. . . . . .|. . .
+                 
+. . . . . .|. . .
+                 
+. . . . . . . . .
+                 
+. . . . . . . . .
+                 
+. . . . 2 . . . .
+walls: 10 10
