@@ -50,7 +50,6 @@ public class RandomPlayerTest {
     int khi2 = 0;
     for(Move m : legalMoves){
       int o_i = counts.getOrDefault(m, 0);
-      System.out.println("Move : " + m.getType() + " " + m.getTo() + " ---> " + o_i);
       khi2 += Math.pow((o_i - e), 2)/e;
     }
 
@@ -65,5 +64,14 @@ public class RandomPlayerTest {
     double threshold = df * Math.pow(1.0 - term1 + z * Math.sqrt(term1), 3);
 
     assertTrue(khi2 < threshold, "IA est biaisée -> Khi2 : " + khi2 + " > Seuil : " + threshold); // Statistically, there is a 1/10,000 chance that the test will fail.
+  }
+
+  @Test
+  public void checkToStringAndSettings(){
+    RandomPlayer ia1 = new RandomPlayer("IA1", new Position(8, 4));
+    assertEquals(ia1.toString(), "Random AI " + String.format("Player{name='%s', pos=%s, walls=%d, score=%d}", ia1.getName(), ia1.getPosition(), ia1.getRemainingWalls(), ia1.getScore()));
+    Map<String, Object> settings = new HashMap<>();
+    settings.put("mode", "random");
+    assertEquals(ia1.getSettings(), settings);
   }
 }

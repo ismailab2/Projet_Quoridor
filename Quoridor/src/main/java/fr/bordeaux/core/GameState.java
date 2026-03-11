@@ -15,6 +15,12 @@ public class GameState {
   private boolean gameOver;
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
+  private boolean debug =false;
+  private boolean verbose =false;
+  private boolean blitz =false;
+  private boolean contest =false;
+  private boolean ai =false;
+  private int turnLimit = 100;
 
   private transient List<Runnable> listeners = new ArrayList<>();
 
@@ -263,4 +269,53 @@ public class GameState {
         }
         return res;
     }
+
+  public boolean isDebug(){
+    return debug;
+  }
+
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+
+  public boolean isVerbose() {
+    return verbose;
+  }
+
+  public void setVerbose(boolean verbose) {
+    this.verbose = verbose;
+  }
+
+  public boolean isBlitz() {
+    return blitz;
+  }
+
+  public void setBlitz(boolean blitz) {
+    this.blitz = blitz;
+  }
+
+  public boolean isContest() {
+    return contest;
+  }
+
+  public void setContest(boolean contest) {
+    this.contest = contest;
+  }
+
+  public boolean isAi() {
+    return ai;
+  }
+
+  public void setAi(boolean ai) {
+    this.ai = ai;
+  }
+
+  public int getTurnLimit(){
+    return turnLimit;
+  }
+
+  public void setTurnLimit(int turnLimit){
+    this.turnLimit = turnLimit;
+  }
+
 }

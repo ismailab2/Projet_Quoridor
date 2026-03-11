@@ -7,7 +7,9 @@ import fr.bordeaux.core.Position;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +21,7 @@ import java.util.function.Function;
 
 /** Represents an Ai player with Minimax */
 public class MinimaxPlayer
-    extends Player { // MiniMax and IterativeDeepening are limited because it works with only 2
+    extends AiPlayer { // MiniMax and IterativeDeepening are limited because it works with only 2
   // players. They will not work if the number of players is larger.
 
   private int depth;
@@ -417,4 +419,21 @@ public class MinimaxPlayer
   public Boolean isAI() {
     return true;
   }
+
+
+  @Override
+  public Map<String, Object> getSettings() { 
+    Map<String, Object> settings = new HashMap<>();
+    if(isIterativeDeepening){
+      settings.put("mode", "minimax-iterative-deepening");
+    }
+    else{
+      settings.put("mode", "minimax");
+      settings.put("depth", depth);
+    }
+    settings.put("reflexion", reflexionTime);
+    settings.put("heuristic", heuristicName);
+    return settings;
+  }
+
 }

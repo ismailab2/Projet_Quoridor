@@ -5,10 +5,12 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Represents an Ai player with MCTS */
-public class MCTSPlayer extends Player {
+public class MCTSPlayer extends AiPlayer {
 
   public MCTSPlayer(String name, Position positionStart) {
     super(name, positionStart);
@@ -213,5 +215,12 @@ public class MCTSPlayer extends Player {
   @Override
   public Boolean isAI() {
     return true;
+  }
+
+  @Override
+  public Map<String, Object> getSettings() { // return all settings of MCTS
+    Map<String, Object> settings = new HashMap<>();
+    settings.put("mode", "mcts");
+    return settings;
   }
 }
