@@ -1,5 +1,8 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameLoadException;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -68,6 +71,15 @@ public class GameState {
     }
     undoStack.push(move);
     getNextPlayer();
+  }
+
+  public Move[] getMovesPlayed() {
+    Object[] obj = undoStack.toArray();
+    Move[] moves = new Move[obj.length];
+    for (int i = 0; i < obj.length; i++) {
+      moves[i] = (Move)obj[i];
+    }
+    return moves;
   }
 
   public void undo() {
@@ -153,16 +165,13 @@ public class GameState {
     return paused;
   }
 
-  public void saveGame(String filename) {
-    System.out.println("save a implementer");
+  public void saveGame(String filename) throws IOException {
+    GameSerializer.saveGame(this, filename);
   }
 
-  /*
-  public GameState loadGame(String filename) {
-      return ;
+  public static GameState loadGame(String filename) throws IOException, GameLoadException {
+    return GameSerializer.loadGame(filename);
   }
-
-   */
 
   public GameState reset() {
     int size = 9;
