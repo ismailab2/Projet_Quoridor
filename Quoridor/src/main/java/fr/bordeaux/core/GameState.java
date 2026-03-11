@@ -73,6 +73,15 @@ public class GameState {
     getNextPlayer();
   }
 
+  public Move[] getMovesPlayed() {
+    Object[] obj = undoStack.toArray();
+    Move[] moves = new Move[obj.length];
+    for (int i = 0; i < obj.length; i++) {
+      moves[i] = (Move)obj[i];
+    }
+    return moves;
+  }
+
   public void undo() {
     if (paused || gameOver) return;
     if (undoStack.isEmpty()) return;
