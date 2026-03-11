@@ -100,7 +100,7 @@ public class CliApp {
         }
       case "load":
         {
-          cmd = new LoadCommand();
+          cmd = new LoadCommand(tokens);
           break;
         }
       case "save":

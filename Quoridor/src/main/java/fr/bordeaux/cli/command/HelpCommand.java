@@ -79,7 +79,7 @@ public class HelpCommand implements Command {
           }
         case "load":
           {
-            cmd = new LoadCommand();
+            cmd = new LoadCommand(tokens);
             break;
           }
         case "save":

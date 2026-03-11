@@ -17,7 +17,11 @@ public class SaveCommand implements Command {
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    GameSerializer.saveGame(engine.getState(), tokens[1]);
+    try {
+      GameSerializer.saveGame(engine.getState(), tokens[1]);
+    } catch (Exception e) {
+      System.err.println("Ca va pas du tout : " + e);
+    } 
     return engine;
   }
 
