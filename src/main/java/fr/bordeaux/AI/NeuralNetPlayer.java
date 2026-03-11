@@ -39,11 +39,6 @@ public class NeuralNetPlayer extends AiPlayer {
   }
 
   @Override
-  public Boolean isAI() {
-    return true;
-  }
-
-  @Override
   public Map<String, Object> getSettings() { // return all settings of neuralNetwork
     Map<String, Object> settings = new HashMap<>();
     settings.put("mode", "neural-network");

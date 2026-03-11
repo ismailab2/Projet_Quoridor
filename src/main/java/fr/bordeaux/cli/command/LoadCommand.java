@@ -1,7 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameLoader;
 
 public class LoadCommand implements Command {
 
@@ -18,7 +18,7 @@ public class LoadCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
-      return new GameEngine(GameSerializer.loadGame(tokens[1]));
+      return new GameEngine(GameLoader.loadGame(tokens[1]));
     } catch (Exception e) {
       System.err.println("Ca va pas du tout : " + e);
     }

@@ -1,7 +1,8 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.persistence.GameLoadException;
-import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameLoader;
+import fr.bordeaux.persistence.GameSaver;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
@@ -172,11 +173,11 @@ public class GameState {
   }
 
   public void saveGame(String filename) throws IOException {
-    GameSerializer.saveGame(this, filename);
+    GameSaver.saveGame(this, filename);
   }
 
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    return GameSerializer.loadGame(filename);
+    return GameLoader.loadGame(filename);
   }
 
   public GameState reset() {

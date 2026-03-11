@@ -1,7 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameSaver;
 
 public class SaveCommand implements Command {
 
@@ -18,7 +18,7 @@ public class SaveCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
-      GameSerializer.saveGame(engine.getState(), tokens[1]);
+      GameSaver.saveGame(engine.getState(), tokens[1]);
     } catch (Exception e) {
       System.err.println("Ca va pas du tout : " + e);
     }

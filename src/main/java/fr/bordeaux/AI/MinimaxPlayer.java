@@ -420,11 +420,6 @@ public class MinimaxPlayer
   }
 
   @Override
-  public Boolean isAI() {
-    return true;
-  }
-
-  @Override
   public Map<String, Object> getSettings() {
     Map<String, Object> settings = new HashMap<>();
     if (isIterativeDeepening) {

@@ -141,7 +141,7 @@ public class MCTSPlayer extends AiPlayer {
 
   private Node expand(Node node) {
     // Pop the last available move not already a child
-    Move move = node.untriedMoves.remove(node.untriedMoves.size() - 1);
+    Move move = node.untriedMoves.removeLast();
 
     GameState nextState = node.state.copy();
     nextState.applyMove(move);
@@ -210,11 +210,6 @@ public class MCTSPlayer extends AiPlayer {
   @Override
   public String toString() {
     return "AI " + super.toString();
-  }
-
-  @Override
-  public Boolean isAI() {
-    return true;
   }
 
   @Override
