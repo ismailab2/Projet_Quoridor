@@ -61,7 +61,7 @@ public class NewCommand implements Command {
                     if (typePlayer.equals("h")) {
                       players[i] = new HumanPlayer(inputName, positions[i]);
                     } else {
-                      players[i] = new MinimaxPlayer(inputName, positions[i], 2);
+                      players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
                     }
                 } 
                 catch (EndOfFileException | UserInterruptException e) {
