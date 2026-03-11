@@ -21,7 +21,7 @@
         <tensorflow.version>0.5.0</tensorflow.version>
 
         <!-- default main class -->
-        <main.class>fr.bordeaux.core.Main</main.class>
+        <main.class>fr.bordeaux.Main</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
