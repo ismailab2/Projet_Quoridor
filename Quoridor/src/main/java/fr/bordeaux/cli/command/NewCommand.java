@@ -1,6 +1,9 @@
 package fr.bordeaux.cli.command;
 
+import fr.bordeaux.AI.MCTSPlayer;
 import fr.bordeaux.AI.MinimaxPlayer;
+import fr.bordeaux.AI.NeuralNetPlayer;
+import fr.bordeaux.AI.RandomPlayer;
 import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.Board;
@@ -11,6 +14,8 @@ import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -50,18 +55,37 @@ public class NewCommand implements Command {
             
             for (int i = 0; i < nbPlayer; i++) {
                 try {
-                    String typePlayer = reader.readLine("Player's type ([h]uman/ia) >> ");
+                    System.out.println("Player's type available :");
+                    System.out.println("- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [nn] NeuralNetwork ia  - [r]andom ia");
+                    String typePlayer = reader.readLine("Player's type >> ");
                     if (typePlayer == null) throw new EndOfFileException();
-                    if (!typePlayer.equals("h") && !typePlayer.equals("ia")) { 
-                        System.out.println("Wrong type, please enter h or ia"); i--;
+                    if (!typePlayer.equals("h") && !typePlayer.equals("mcts") && !typePlayer.equals("mini") && !typePlayer.equals("nn") && !typePlayer.equals("r")) { 
+                        System.out.println("Wrong type, please enter h / mcts / mini / nn / r"); i--;
                         continue;
                     }
                     String inputName = reader.readLine("Player's name >> ");
                     if (inputName == null) throw new EndOfFileException();
-                    if (typePlayer.equals("h")) {
-                      players[i] = new HumanPlayer(inputName, positions[i]);
-                    } else {
-                      players[i] = new MinimaxPlayer(inputName, positions[i], 2);
+                    switch (typePlayer) {
+                        case "h": {
+                            players[i] = new HumanPlayer(inputName, positions[i]);
+                            break;
+                        }
+                        case "mcts": {
+                            players[i] = new MCTSPlayer(inputName, positions[i]);
+                            break;
+                        }
+                        case "mini": {
+                            players[i] = new MinimaxPlayer(inputName, positions[i], 1);
+                            break;
+                        }
+                        case "nn": {
+                            players[i] = new NeuralNetPlayer(inputName, positions[i]);
+                            break;
+                        }
+                        default: {
+                            players[i] = new RandomPlayer(inputName, positions[i]);
+                            break;
+                        }
                     }
                 } 
                 catch (EndOfFileException | UserInterruptException e) {
