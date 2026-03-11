@@ -168,7 +168,6 @@ public class GameSaver {
         w.print(strMove + ' ');
       }
       currentPlayer = (currentPlayer + 1) % playersCount;
-      ;
     }
   }
 }

@@ -225,7 +225,7 @@ public class GameState {
 
     if (getCurrentPlayer().getRemainingWalls() > 0) {
       for (x = 0; x < board.getSize() - 1; x++) {
-        for (y = 1; y < board.getSize(); y++) {
+        for (y = 0; y < board.getSize() - 1; y++) {
           Position pos_wall = new Position(x, y);
 
           all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));

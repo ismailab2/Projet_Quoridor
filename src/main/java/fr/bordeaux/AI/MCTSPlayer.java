@@ -4,16 +4,21 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /** Represents an Ai player with MCTS */
 public class MCTSPlayer extends AiPlayer {
 
-  public MCTSPlayer(String name, Position positionStart) {
+  private final long reflectionTime; // Time in milliseconds
+
+  public MCTSPlayer(String name, Position positionStart, long reflectionTime) {
     super(name, positionStart);
+    this.reflectionTime = reflectionTime;
+  }
+
+  // Default constructor with 2 seconds if not specified
+  public MCTSPlayer(String name, Position positionStart) {
+    this(name, positionStart, 2000);
   }
 
   @Override
@@ -23,11 +28,14 @@ public class MCTSPlayer extends AiPlayer {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore());
+        this.getScore(),
+        this.reflectionTime);
   }
 
-  private MCTSPlayer(String name, Position current, Position start, int walls, int score) {
+  private MCTSPlayer(
+      String name, Position current, Position start, int walls, int score, long reflectionTime) {
     super(name, current, start, walls, score);
+    this.reflectionTime = reflectionTime;
   }
 
   public static class Node {
@@ -48,6 +56,7 @@ public class MCTSPlayer extends AiPlayer {
       this.move = move;
       this.parent = parent;
       this.untriedMoves = new ArrayList<>(state.generateLegalMoves());
+      Collections.shuffle(this.untriedMoves);
     }
 
     public Move getBestMove() {
@@ -67,16 +76,29 @@ public class MCTSPlayer extends AiPlayer {
 
   @Override
   public Move getNextMove(GameState state) {
-    // Create the root of the search tree using a copy of the current game state
-    Node root = new Node(state.copy());
 
     // Get this Ai player index in list of player of gameState
     int myIndex = state.getPlayers().indexOf(this);
 
+    // Check if there is an obvious winning move
+    List<Move> legalMoves = state.generateLegalMoves();
+    for (Move m : legalMoves) {
+      GameState check = state.copy();
+      check.applyMove(m);
+      Player meInCheck = check.getPlayers().get(myIndex);
+
+      if (check.hasReachedGoal(meInCheck)) {
+        return m;
+      }
+    }
+
+    // Create the root of the search tree using a copy of the current game state
+    Node root = new Node(state.copy());
+
     long startTime = System.currentTimeMillis();
 
     // Thinking loop: run as many simulations as possible within the time limit (2 seconds)
-    while (System.currentTimeMillis() - startTime < 2000) {
+    while (System.currentTimeMillis() - startTime < this.reflectionTime) {
 
       // 1. selection & expansion: Find the most promising node or create a new one
       Node selected = select(root, myIndex);
@@ -153,11 +175,6 @@ public class MCTSPlayer extends AiPlayer {
   // Check if there are still unexplored moves from node, false if there are.
   private boolean isFullyExpanded(Node node) {
     return node.untriedMoves.isEmpty();
-  }
-
-  // Temporary method to compile
-  private List<Move> generateLegalMoves() {
-    return new ArrayList<>();
   }
 
   private int simulate(Node node) {
