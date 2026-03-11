@@ -110,29 +110,21 @@ public class MinimaxPlayer
   }
 
   public void setHeuristic(String nameH) {
-    if (nameH == null) {
-      this.heuristic = (state) -> h1(state);
-    } else {
-      switch (nameH) {
-        case "h2":
-          this.heuristic = (state) -> h2(state);
-          break;
-        case "h3":
-          this.heuristic = (state) -> h3(state);
-          break;
-        case "h1":
-          this.heuristic = (state) -> h1(state);
-      }
+    switch (nameH) {
+      case "h2":
+        this.heuristic = (state) -> h2(state);
+        break;
+      case "h3":
+        this.heuristic = (state) -> h3(state);
+        break;
+      case "h1":
+        this.heuristic = (state) -> h1(state);
     }
   }
 
   @Override
   public Move getNextMove(GameState state) {
-
-    if (state.getPlayers().size() != 2) {
-      throw new IllegalArgumentException(" IA can only be used in a 1v1");
-    }
-
+    
     saveMove = null;
 
     Future<Move> futureMove = aiExecutor.submit(() -> mode.apply(state));

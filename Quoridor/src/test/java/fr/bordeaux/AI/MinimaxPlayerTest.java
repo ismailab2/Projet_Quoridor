@@ -90,4 +90,34 @@ public class MinimaxPlayerTest {
     assert(duration>=5000);
     assertNotNull(move);
   }
+
+  @Test
+  public void checkIterativeDeepening(){
+    board = new Board(9);
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(2).withHeuristic("h2").build();
+    ia2 = new RandomPlayer("IA2", new Position(0, 4));
+    List<Player> players = new ArrayList<>();
+    players.add(ia1);
+    players.add(ia2);
+    game = new GameState(board, players);
+
+    Move move1 = ia1.getNextMove(game);
+
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).isIterativeDeepening(true).withHeuristic("h2").build();
+    List<Player> new_players = new ArrayList<>();
+    new_players.add(ia1);
+    new_players.add(ia2);
+    game = new GameState(board, new_players);
+
+    Move move2 = ia1.getNextMove(game);
+
+    assertTrue(move1.equals(move2));
+  }
+
+  @Test
+  public void checkToString(){
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).build();
+    assertEquals(ia1.toString(), "MiniMax AI " + String.format("Player{name='%s', pos=%s, walls=%d, score=%d}", ia1.getName(), ia1.getPosition(), ia1.getRemainingWalls(), ia1.getScore()));
+  }
+
 }
