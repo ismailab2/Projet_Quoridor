@@ -54,7 +54,7 @@ public class RuleChecker {
             b.getGraph().hasEdge(fromId, opId) && b.getGraph().hasEdge(opId, jumpId);
 
         if (canJumpStraight && to.equals(jump)) {
-          System.out.println("jump straight");
+          // System.out.println("jump straight");
           return true;
         }
       }

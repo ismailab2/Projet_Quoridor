@@ -65,7 +65,7 @@ public class CliApp {
     }
     while (running) {
       String line = reader.readLine(">> ");
-      System.out.println("\n\n"+line+"\n\n");
+      System.out.println("\n"+line+"\n");
       fetch(line);
     }
     try {
@@ -113,6 +113,11 @@ public class CliApp {
           cmd = new PauseCommand();
           break;
         }
+      case "hint":
+        {
+          cmd = new HintCommand();
+          break;
+        }
       case "undo":
         {
           cmd = new UndoCommand(tokens);
@@ -137,8 +142,5 @@ public class CliApp {
         cmd = new MoveCommand(input);
     }
     if (cmd != null) engine = cmd.execute(engine);
-    for (Move m : engine.getState().getMovesPlayed()) {
-      System.out.println(m.toString());
-    }
   }
 }
