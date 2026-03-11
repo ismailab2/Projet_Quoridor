@@ -75,7 +75,7 @@ public class NewCommand implements Command {
                             break;
                         }
                         case "mini": {
-                            players[i] = new MinimaxPlayer(inputName, positions[i], 1);
+                            players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
                             break;
                         }
                         case "nn": {

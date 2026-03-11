@@ -8,7 +8,6 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.graph.Graph;
-import fr.bordeaux.AI.MinimaxPlayer;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
 import java.io.IOException;
