@@ -1,5 +1,8 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameLoadException;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -12,6 +15,12 @@ public class GameState {
   private boolean gameOver;
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
+  private boolean debug =false;
+  private boolean verbose =false;
+  private boolean blitz =false;
+  private boolean contest =false;
+  private boolean ai =false;
+  private int turnLimit = 100;
 
   private transient List<Runnable> listeners = new ArrayList<>();
 
@@ -68,6 +77,15 @@ public class GameState {
     }
     undoStack.push(move);
     getNextPlayer();
+  }
+
+  public Move[] getMovesPlayed() {
+    Object[] obj = undoStack.toArray();
+    Move[] moves = new Move[obj.length];
+    for (int i = 0; i < obj.length; i++) {
+      moves[i] = (Move)obj[i];
+    }
+    return moves;
   }
 
   public void undo() {
@@ -153,16 +171,13 @@ public class GameState {
     return paused;
   }
 
-  public void saveGame(String filename) {
-    System.out.println("save a implementer");
+  public void saveGame(String filename) throws IOException {
+    GameSerializer.saveGame(this, filename);
   }
 
-  /*
-  public GameState loadGame(String filename) {
-      return ;
+  public static GameState loadGame(String filename) throws IOException, GameLoadException {
+    return GameSerializer.loadGame(filename);
   }
-
-   */
 
   public GameState reset() {
     int size = 9;
@@ -228,18 +243,53 @@ public class GameState {
     return res;
   }
 
-  public String getMode(){
-    // TODO
-    return "";
+
+  public boolean isDebug(){
+    return debug;
+  }
+
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+
+  public boolean isVerbose() {
+    return verbose;
+  }
+
+  public void setVerbose(boolean verbose) {
+    this.verbose = verbose;
+  }
+
+  public boolean isBlitz() {
+    return blitz;
+  }
+
+  public void setBlitz(boolean blitz) {
+    this.blitz = blitz;
+  }
+
+  public boolean isContest() {
+    return contest;
+  }
+
+  public void setContest(boolean contest) {
+    this.contest = contest;
+  }
+
+  public boolean isAi() {
+    return ai;
+  }
+
+  public void setAi(boolean ai) {
+    this.ai = ai;
   }
 
   public int getTurnLimit(){
-    // TODO
-    return 0;
+    return turnLimit;
   }
 
-  public boolean isDebug(){
-    // TODO
-    return false;
+  public void setTurnLimit(int turnLimit){
+    this.turnLimit = turnLimit;
   }
+
 }

@@ -1,5 +1,7 @@
 package fr.bordeaux.core;
 
+import java.util.Objects;
+
 /** Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe */
 public class Move {
 
@@ -21,7 +23,6 @@ public class Move {
   }
 
   public static Move pawn(Position from, Position to) {
-    System.out.println("\n\n\n" + from + "\n\n");
     return new Move(Type.PAWN, from, to, null);
   }
 
@@ -62,5 +63,18 @@ public class Move {
                 ", orientation=" + orientation +
                 '}';
     }
+  
+  @Override
+  public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof Move)) return false;
+      Move move = (Move) o;
+      return type == move.type && ((from == null && move.from == null) || from.equals(move.from)) && to.equals(move.to) && orientation == move.orientation;
+  }
+
+  @Override
+  public int hashCode() {
+      return Objects.hash(type, from, to, orientation);
+  }
 
 }

@@ -1,5 +1,7 @@
 package fr.bordeaux.AI;
 
+import java.util.Map;
+
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
@@ -20,14 +22,12 @@ public abstract class AiPlayer extends Player {
         return true;
     }
 
-    public abstract String getAiMode();
-
-    public abstract int getReflexionTime();
-
     @Override
     public abstract Player copy();
 
     @Override
     public abstract Move getNextMove(GameState state);
+
+    public abstract Map<String, Object> getSettings(); // return all settings of minimax
     
 }

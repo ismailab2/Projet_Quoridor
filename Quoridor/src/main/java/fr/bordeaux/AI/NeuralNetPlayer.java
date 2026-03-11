@@ -1,5 +1,8 @@
 package fr.bordeaux.AI;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
@@ -42,7 +45,9 @@ public class NeuralNetPlayer extends AiPlayer {
   }
 
   @Override
-  public String getAiMode() {
-    return "neuralnetwork";
+  public Map<String, Object> getSettings() { // return all settings of neuralNetwork
+    Map<String, Object> settings = new HashMap<>();
+    settings.put("mode", "neural-network");
+    return settings;
   }
 }
