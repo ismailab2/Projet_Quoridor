@@ -1,4 +1,0 @@
-[defaults]
-verbose = true
-blitz = false
-timeout = 30

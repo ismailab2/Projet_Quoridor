@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoadCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.cli.command</a> &gt; <span class="el_source">LoadCommand.java</span></div><h1>LoadCommand.java</h1><pre class="source lang-java linenums">package fr.bordeaux.cli.command;
+
+import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.persistence.GameSerializer;
+
+public class LoadCommand implements Command {
+
+  private String[] tokens;
+
+  public LoadCommand(String p) {
+<span class="nc" id="L11">    this(new String[]{&quot;load&quot;, p});</span>
+<span class="nc" id="L12">  }</span>
+
+<span class="nc" id="L14">  public LoadCommand(String[] t) { this.tokens = t; }</span>
+
+  @Override
+  public GameEngine execute(GameEngine engine) {
+    try {
+<span class="nc" id="L19">      return new GameEngine(GameSerializer.loadGame(tokens[1]));</span>
+<span class="nc" id="L20">    } catch (Exception e) {</span>
+<span class="nc" id="L21">      System.err.println(&quot;Ca va pas du tout : &quot; + e);</span>
+    } 
+<span class="nc" id="L23">    return engine;</span>
+  }
+
+  @Override
+  public void helpText() {
+<span class="nc" id="L28">    System.out.println(&quot;=== LOAD Command ===\n&quot;);</span>
+<span class="nc" id="L29">    System.out.println(&quot;Usage:&quot;);</span>
+<span class="nc" id="L30">    System.out.println(&quot;  load FILE\n&quot;);</span>
+<span class="nc" id="L31">    System.out.println(&quot;Description:&quot;);</span>
+<span class="nc" id="L32">    System.out.println(&quot;  Loads a saved game from the specified FILE.\n&quot;);</span>
+<span class="nc" id="L33">    System.out.println(&quot;Arguments:&quot;);</span>
+<span class="nc" id="L34">    System.out.println(&quot;  FILE   : Path to the save file (required).\n&quot;);</span>
+<span class="nc" id="L35">    System.out.println(&quot;Example:&quot;);</span>
+<span class="nc" id="L36">    System.out.println(&quot;  load savegame.txt\n&quot;);</span>
+<span class="nc" id="L37">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

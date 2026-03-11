@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HelpCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.cli.command</a> &gt; <span class="el_source">HelpCommand.java</span></div><h1>HelpCommand.java</h1><pre class="source lang-java linenums">package fr.bordeaux.cli.command;
+
+import fr.bordeaux.core.GameEngine;
+
+public class HelpCommand implements Command {
+
+  private String[] tokens;
+
+<span class="nc" id="L9">  public HelpCommand() {</span>
+<span class="nc" id="L10">    this.tokens = null;</span>
+<span class="nc" id="L11">  }</span>
+
+<span class="nc" id="L13">  public HelpCommand(String[] t) {</span>
+<span class="nc" id="L14">    this.tokens = t;</span>
+<span class="nc" id="L15">  }</span>
+
+  @Override
+  public GameEngine execute(GameEngine engine) {
+<span class="nc bnc" id="L19" title="All 2 branches missed.">    if (tokens == null) {</span>
+<span class="nc" id="L20">      System.out.println(&quot;Pas de commande\n&quot;);</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">    } else if (tokens.length == 1) {</span>
+<span class="nc" id="L22">      helpCli();</span>
+    } else {
+<span class="nc" id="L24">      helpFetch();</span>
+    }
+<span class="nc" id="L26">    return engine;</span>
+  }
+
+  @Override
+  public void helpText() {
+<span class="nc" id="L31">    System.out.println(&quot;Rien&quot;);</span>
+<span class="nc" id="L32">  }</span>
+
+  public void helpCli() {
+<span class="nc" id="L35">    System.out.println(&quot;/=== Quoridor Command Line Help ===/\n&quot;);</span>
+<span class="nc" id="L36">    System.out.println(&quot;Commands :\n&quot;);</span>
+<span class="nc" id="L37">    System.out.println(&quot;new [ARGS] :          Start a new game with the given args&quot;);</span>
+<span class="nc" id="L38">    System.out.println(&quot;help [CMD] :          If no command is given, displays this message.&quot;);</span>
+<span class="nc" id="L39">    System.out.println(&quot;                      Otherwise, displays a more detailed help for a specific command.&quot;);</span>
+<span class="nc" id="L40">    System.out.println(&quot;help move :           Shows you how to play a move.&quot;);</span>
+<span class="nc" id="L41">    System.out.println(&quot;quit :                Quit the current game. It'll ask you if you want to save it before quitting.&quot;);</span>
+<span class="nc" id="L42">    System.out.println(&quot;load [filename] :     Load a game from the given file \&quot;filename\&quot;.&quot;);</span>
+<span class="nc" id="L43">    System.out.println(&quot;save [filename] :     Save the current game to a file \&quot;filename\&quot;.&quot;);</span>
+<span class="nc" id="L44">    System.out.println(&quot;pause :               Pause the timer if you're in a blitz game, else it does nothing.&quot;);</span>
+<span class="nc" id="L45">    System.out.println(&quot;hint :                Suggest you a move if you don't know what to play.&quot;);</span>
+<span class="nc" id="L46">    System.out.println(&quot;undo [N] :            Unplays the N last move played. Just once if no N given.&quot;);</span>
+<span class="nc" id="L47">    System.out.println(&quot;redo [N] :            Replays the N undone move played. Just once if no N given.&quot;);</span>
+<span class="nc" id="L48">    System.out.println(&quot;show board :          Displays the board of the current game.&quot;);</span>
+<span class="nc" id="L49">    System.out.println(&quot;show history :        Displays all the moves that were played during the game. From older to the more recent.&quot;);</span>
+<span class="nc" id="L50">    System.out.println(&quot;show time :           Displays the time you and your opponent(s) each remain.&quot;);</span>
+<span class="nc" id="L51">    System.out.println(&quot;show configuration :  Displays the configurations set on your game.&quot;);</span>
+<span class="nc" id="L52">    System.out.println(&quot;set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE&quot;);</span>
+<span class="nc" id="L53">  }</span>
+
+  public void helpMove() {
+    ;
+<span class="nc" id="L57">  }</span>
+
+
+  public void helpFetch() {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">    if (this.tokens.length &lt;= 1) System.out.println(&quot;Un truc à expliquer&quot;);</span>
+    else {
+<span class="nc" id="L63">      Command cmd = null;</span>
+<span class="nc bnc" id="L64" title="All 11 branches missed.">      switch (tokens[1]) {</span>
+        case &quot;move&quot;:
+          {
+<span class="nc" id="L67">            cmd = new MoveCommand();</span>
+<span class="nc" id="L68">            break;</span>
+          }
+        case &quot;quit&quot;:
+          {
+<span class="nc" id="L72">            cmd = new QuitCommand();</span>
+<span class="nc" id="L73">            break;</span>
+          }
+        case &quot;new&quot;:
+          {
+<span class="nc" id="L77">            cmd = new NewCommand();</span>
+<span class="nc" id="L78">            break;</span>
+          }
+        case &quot;load&quot;:
+          {
+<span class="nc" id="L82">            cmd = new LoadCommand(tokens);</span>
+<span class="nc" id="L83">            break;</span>
+          }
+        case &quot;save&quot;:
+          {
+<span class="nc" id="L87">            cmd = new SaveCommand(tokens);</span>
+<span class="nc" id="L88">            break;</span>
+          }
+        case &quot;pause&quot;:
+          {
+<span class="nc" id="L92">            cmd = new PauseCommand();</span>
+<span class="nc" id="L93">            break;</span>
+          }
+        case &quot;undo&quot;:
+          {
+<span class="nc" id="L97">            cmd = new UndoCommand();</span>
+<span class="nc" id="L98">            break;</span>
+          }
+        case &quot;redo&quot;:
+          {
+<span class="nc" id="L102">            cmd = new RedoCommand();</span>
+<span class="nc" id="L103">            break;</span>
+          }
+        case &quot;show&quot;:
+          {
+<span class="nc" id="L107">            cmd = new ShowCommand();</span>
+<span class="nc" id="L108">            break;</span>
+          }
+        case &quot;set&quot;:
+          {
+<span class="nc" id="L112">            cmd = new SetCommand();</span>
+<span class="nc" id="L113">            break;</span>
+          }
+        default:
+          {
+<span class="nc" id="L117">            cmd = null;</span>
+          }
+      }
+<span class="nc bnc" id="L120" title="All 2 branches missed.">      if (cmd != null) {</span>
+<span class="nc" id="L121">        cmd.helpText();</span>
+      }
+    }
+<span class="nc" id="L124">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

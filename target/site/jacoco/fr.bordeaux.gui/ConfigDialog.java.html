@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfigDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.gui</a> &gt; <span class="el_source">ConfigDialog.java</span></div><h1>ConfigDialog.java</h1><pre class="source lang-java linenums">package fr.bordeaux.gui;
+
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+
+<span class="nc" id="L14">public class ConfigDialog {</span>
+
+    /**
+     * Shows the configuration dialog for keyboard shortcuts.
+     * Allows the user to view and customize shortcuts for all actions.
+     */
+    public static void show() {
+        // Create a new window (Stage) for the configuration dialog
+<span class="nc" id="L22">        Stage stage = new Stage();</span>
+<span class="nc" id="L23">        stage.setTitle(&quot;Shortcut Configuration&quot;);</span>
+<span class="nc" id="L24">        stage.setResizable(true);</span>
+
+        // GridPane layout to arrange labels and buttons in rows and columns
+<span class="nc" id="L27">        GridPane grid = new GridPane();</span>
+<span class="nc" id="L28">        grid.setVgap(10);</span>
+<span class="nc" id="L29">        grid.setHgap(10);</span>
+
+<span class="nc" id="L31">        int row = 0;</span>
+
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        for (Action action : Action.values()) {</span>
+<span class="nc" id="L34">            Label actionLabel = new Label(action.name());</span>
+<span class="nc" id="L35">            KeyCombination currentShortcut = ShortcutManager.getInstance().getShortcut(action);</span>
+<span class="nc" id="L36">            Button keyButton = new Button(currentShortcut.getName());</span>
+
+<span class="nc" id="L38">            keyButton.setFocusTraversable(true); // Allow button to receive key events</span>
+<span class="nc" id="L39">            keyButton.setOnKeyPressed((KeyEvent ke) -&gt; {</span>
+<span class="nc" id="L40">                KeyCode code = ke.getCode();</span>
+<span class="nc bnc" id="L41" title="All 6 branches missed.">                if (code == KeyCode.CONTROL || code == KeyCode.SHIFT || code == KeyCode.ALT) return;</span>
+
+                // Detect pressed modifier keys
+<span class="nc bnc" id="L44" title="All 2 branches missed.">                KeyCombination.Modifier ctrl = ke.isControlDown() ? KeyCombination.CONTROL_DOWN : null;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                KeyCombination.Modifier shift = ke.isShiftDown() ? KeyCombination.SHIFT_DOWN : null;</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                KeyCombination.Modifier alt = ke.isAltDown() ? KeyCombination.ALT_DOWN : null;</span>
+
+                // Build the new KeyCodeCombination based on modifiers
+                KeyCodeCombination newShortcut;
+<span class="nc bnc" id="L50" title="All 6 branches missed.">                if (ctrl != null &amp;&amp; shift != null &amp;&amp; alt != null) newShortcut = new KeyCodeCombination(code, ctrl, shift, alt);</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">                else if (ctrl != null &amp;&amp; shift != null) newShortcut = new KeyCodeCombination(code, ctrl, shift);</span>
+<span class="nc bnc" id="L52" title="All 4 branches missed.">                else if (ctrl != null &amp;&amp; alt != null) newShortcut = new KeyCodeCombination(code, ctrl, alt);</span>
+<span class="nc bnc" id="L53" title="All 4 branches missed.">                else if (shift != null &amp;&amp; alt != null) newShortcut = new KeyCodeCombination(code, shift, alt);</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                else if (ctrl != null) newShortcut = new KeyCodeCombination(code, ctrl);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                else if (shift != null) newShortcut = new KeyCodeCombination(code, shift);</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                else if (alt != null) newShortcut = new KeyCodeCombination(code, alt);</span>
+<span class="nc" id="L57">                else newShortcut = new KeyCodeCombination(code);</span>
+
+                // Update the shortcut in ShortcutManager and change the button text
+<span class="nc" id="L60">                ShortcutManager.getInstance().setShortcut(action, newShortcut);</span>
+<span class="nc" id="L61">                keyButton.setText(newShortcut.getName());</span>
+<span class="nc" id="L62">            });</span>
+
+<span class="nc" id="L64">            grid.add(actionLabel, 0, row);</span>
+<span class="nc" id="L65">            grid.add(keyButton, 1, row);</span>
+<span class="nc" id="L66">            row++;</span>
+        }
+
+<span class="nc" id="L69">        Button saveButton = new Button(&quot;Save&quot;);</span>
+<span class="nc" id="L70">        saveButton.setOnAction(e -&gt; stage.close());</span>
+
+<span class="nc" id="L72">        HBox saveBox = new HBox(saveButton);</span>
+<span class="nc" id="L73">        saveBox.setSpacing(10);</span>
+<span class="nc" id="L74">        grid.add(saveBox, 0, row, 2, 1); // span two columns</span>
+
+<span class="nc" id="L76">        Scene scene = new Scene(grid, 400, 50 + row * 40);</span>
+<span class="nc" id="L77">        stage.setScene(scene);</span>
+<span class="nc" id="L78">        stage.show();</span>
+<span class="nc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

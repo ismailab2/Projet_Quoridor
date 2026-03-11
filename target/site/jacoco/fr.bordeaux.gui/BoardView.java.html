@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BoardView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.gui</a> &gt; <span class="el_source">BoardView.java</span></div><h1>BoardView.java</h1><pre class="source lang-java linenums">package fr.bordeaux.gui;
+
+import fr.bordeaux.core.*;
+import javafx.animation.FadeTransition;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
+
+import java.util.List;
+
+/**
+ * BoardView for Quoridor game.
+ * Shows board, players, walls, blinking current player, and highlights accessible cells.
+ */
+public class BoardView extends GridPane {
+
+    private final GameEngine engine;
+<span class="fc" id="L20">    private final int cellSize = 100;</span>
+<span class="fc" id="L21">    private final int wallThickness = 10;</span>
+    private StackPane[][] cells;  // for easy access
+    private Rectangle[][] pawns;  // keep track of pawn rectangles for blinking
+
+<span class="fc" id="L25">    public BoardView(GameEngine engine) {</span>
+<span class="fc" id="L26">        this.engine = engine;</span>
+<span class="fc" id="L27">        int size = engine.getState().getBoard().getSize();</span>
+<span class="fc" id="L28">        cells = new StackPane[size][size];</span>
+<span class="fc" id="L29">        pawns = new Rectangle[engine.getState().getPlayers().size()][size]; // store only one dimension for example</span>
+
+<span class="fc" id="L31">        engine.getState().addListener(this::drawBoard);</span>
+<span class="fc" id="L32">        drawBoard();</span>
+<span class="fc" id="L33">    }</span>
+
+    public void drawBoard() {
+<span class="fc" id="L36">        getChildren().clear();</span>
+<span class="fc" id="L37">        Board board = engine.getState().getBoard();</span>
+<span class="fc" id="L38">        int size = board.getSize();</span>
+
+        // Create cells
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        for (int row = 0; row &lt; size; row++) {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            for (int col = 0; col &lt; size; col++) {</span>
+<span class="fc" id="L43">                StackPane cell = new StackPane();</span>
+<span class="fc" id="L44">                cell.setPrefSize(cellSize, cellSize);</span>
+<span class="fc" id="L45">                cell.setStyle(&quot;-fx-border-color: black; -fx-background-color: beige;&quot;);</span>
+<span class="fc" id="L46">                cells[row][col] = cell;</span>
+
+<span class="fc" id="L48">                int r = row;</span>
+<span class="fc" id="L49">                int c = col;</span>
+
+<span class="fc" id="L51">                cell.setOnMouseClicked(e -&gt; {</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">                    if (e.getButton() == MouseButton.PRIMARY) handleCellClick(r, c);</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">                    else if (e.getButton() == MouseButton.SECONDARY) handleWallClick(r, c);</span>
+<span class="fc" id="L54">                });</span>
+
+<span class="fc" id="L56">                add(cell, col, row);</span>
+            }
+        }
+
+<span class="fc" id="L60">        drawWalls();</span>
+<span class="fc" id="L61">        drawPlayers();</span>
+<span class="fc" id="L62">        highlightCurrentPlayer();</span>
+<span class="fc" id="L63">    }</span>
+
+    private void drawPlayers() {
+<span class="fc" id="L66">        List&lt;Player&gt; players = engine.getState().getPlayers();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (int i = 0; i &lt; players.size(); i++) {</span>
+<span class="fc" id="L68">            Player player = players.get(i);</span>
+<span class="fc" id="L69">            Position pos = player.getPosition();</span>
+
+<span class="fc" id="L71">            Rectangle pawn = new Rectangle(cellSize * 0.6, cellSize * 0.6);</span>
+<span class="fc" id="L72">            pawn.setArcWidth(15);</span>
+<span class="fc" id="L73">            pawn.setArcHeight(15);</span>
+
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">            if (i == 0) {</span>
+<span class="fc" id="L76">                pawn.setFill(Color.RED);</span>
+            } else {
+<span class="nc" id="L78">                pawn.setFill(Color.BLACK);</span>
+            }
+
+<span class="fc" id="L81">            pawns[i][0] = pawn;</span>
+
+<span class="fc" id="L83">            StackPane cell = cells[pos.getX()][pos.getY()];</span>
+<span class="fc" id="L84">            cell.getChildren().add(pawn);</span>
+
+            // Click on pawn: highlight accessible cells
+<span class="fc" id="L87">            pawn.setOnMouseClicked(e -&gt; {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                if (e.getButton() == MouseButton.PRIMARY) highlightAccessibleCells(player);</span>
+<span class="nc" id="L89">            });</span>
+        }
+<span class="fc" id="L91">    }</span>
+
+    private void drawWalls() {
+<span class="fc" id="L94">        Board board = engine.getState().getBoard();</span>
+<span class="fc" id="L95">        int size = board.getSize();</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        for (int row = 0; row &lt; size - 1; row++) {</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">            for (int col = 0; col &lt; size - 1; col++) {</span>
+<span class="fc" id="L98">                Position pos = new Position(row, col);</span>
+
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">                if (board.isWallCollision(pos, Orientation.HORIZONTAL)) {</span>
+<span class="nc" id="L101">                    Rectangle wall = new Rectangle(cellSize * 2, wallThickness, Color.BROWN);</span>
+<span class="nc" id="L102">                    add(wall, col, row);</span>
+                }
+
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">                if (board.isWallCollision(pos, Orientation.VERTICAL)) {</span>
+<span class="nc" id="L106">                    Rectangle wall = new Rectangle(wallThickness, cellSize * 2, Color.BROWN);</span>
+<span class="nc" id="L107">                    add(wall, col, row);</span>
+                }
+            }
+        }
+<span class="fc" id="L111">    }</span>
+
+    private void highlightCurrentPlayer() {
+<span class="fc" id="L114">        Player current = engine.getState().getCurrentPlayer();</span>
+<span class="fc" id="L115">        Position pos = current.getPosition();</span>
+
+<span class="fc" id="L117">        StackPane cell = cells[pos.getX()][pos.getY()];</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (cell.getChildren().isEmpty()) return;</span>
+
+<span class="fc" id="L120">        Rectangle pawn = (Rectangle) cell.getChildren().get(0);</span>
+
+<span class="fc" id="L122">        FadeTransition ft = new FadeTransition(Duration.seconds(0.5), pawn);</span>
+<span class="fc" id="L123">        ft.setFromValue(1.0);</span>
+<span class="fc" id="L124">        ft.setToValue(0.2);</span>
+<span class="fc" id="L125">        ft.setCycleCount(FadeTransition.INDEFINITE);</span>
+<span class="fc" id="L126">        ft.setAutoReverse(true);</span>
+<span class="fc" id="L127">        ft.play();</span>
+<span class="fc" id="L128">    }</span>
+
+    private void highlightAccessibleCells(Player player) {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (StackPane[] row : cells)</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            for (StackPane cell : row)</span>
+<span class="nc" id="L133">                cell.setStyle(&quot;-fx-border-color: black; -fx-background-color: beige;&quot;);</span>
+
+<span class="nc" id="L135">        List&lt;Position&gt; moves = engine.getState().getLegalMoves(player);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (Position pos : moves) {</span>
+<span class="nc" id="L137">            StackPane cell = cells[pos.getX()][pos.getY()];</span>
+<span class="nc" id="L138">            cell.setStyle(&quot;-fx-border-color: black; -fx-background-color: lightgreen;&quot;);</span>
+<span class="nc" id="L139">        }</span>
+<span class="nc" id="L140">    }</span>
+
+    private void handleCellClick(int row, int col) {
+<span class="fc" id="L143">        Player current = engine.getState().getCurrentPlayer();</span>
+<span class="fc" id="L144">        Move move = Move.pawn(current.getPosition(), new Position(row, col));</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (engine.play(move)) drawBoard();</span>
+<span class="fc" id="L146">    }</span>
+
+    private void handleWallClick(int row, int col) {
+<span class="fc" id="L149">        Move wallMove = Move.wall(new Position(row, col), Orientation.HORIZONTAL);</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        if (RuleChecker.isMoveLegal(engine.getState(), wallMove)) {</span>
+<span class="fc" id="L151">            engine.play(wallMove);</span>
+<span class="fc" id="L152">            drawBoard();</span>
+        }
+<span class="fc" id="L154">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

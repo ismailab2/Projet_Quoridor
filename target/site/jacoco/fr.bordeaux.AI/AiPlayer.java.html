@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AiPlayer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.AI</a> &gt; <span class="el_source">AiPlayer.java</span></div><h1>AiPlayer.java</h1><pre class="source lang-java linenums">package fr.bordeaux.AI;
+
+import java.util.Map;
+
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Player;
+import fr.bordeaux.core.Position;
+
+public abstract class AiPlayer extends Player {
+
+    public AiPlayer(String name, Position positionStart) {
+<span class="fc" id="L13">        super(name, positionStart);</span>
+<span class="fc" id="L14">    }</span>
+
+    protected AiPlayer(String name, Position current, Position start, int walls, int score) {
+<span class="fc" id="L17">        super(name, current, start, walls, score);</span>
+<span class="fc" id="L18">    }</span>
+
+    @Override
+    public Boolean isAI() {
+<span class="nc" id="L22">        return true;</span>
+    }
+
+    @Override
+    public abstract Player copy();
+
+    @Override
+    public abstract Move getNextMove(GameState state);
+
+    public abstract Map&lt;String, Object&gt; getSettings(); // return all settings of minimax
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

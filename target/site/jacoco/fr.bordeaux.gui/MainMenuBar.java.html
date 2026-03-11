@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainMenuBar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.gui</a> &gt; <span class="el_source">MainMenuBar.java</span></div><h1>MainMenuBar.java</h1><pre class="source lang-java linenums">package fr.bordeaux.gui;
+
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+
+public class MainMenuBar extends MenuBar {
+    private final ActionDispatcher dispatcher;
+<span class="nc" id="L10">    public MainMenuBar(ActionDispatcher dispatcher) {</span>
+<span class="nc" id="L11">        this.dispatcher = dispatcher;</span>
+<span class="nc" id="L12">        getMenus().addAll(createFileMenu(),createGameMenu());</span>
+<span class="nc" id="L13">    }</span>
+
+    private Menu createFileMenu() {
+<span class="nc" id="L16">        Menu file = new Menu(&quot;File&quot;);</span>
+<span class="nc" id="L17">        file.getItems().addAll(</span>
+<span class="nc" id="L18">                menuItem(&quot;New Game&quot;,Action.NEW_GAME),</span>
+<span class="nc" id="L19">                menuItem(&quot;Load Game&quot;,Action.LOAD_GAME),</span>
+<span class="nc" id="L20">                menuItem(&quot;Save Game&quot;,Action.SAVE_GAME),</span>
+                new SeparatorMenuItem(),
+<span class="nc" id="L22">                menuItem(&quot;Configuration&quot;,Action.CONFIGURATION),</span>
+<span class="nc" id="L23">                menuItem(&quot;Info&quot;,Action.INFO),</span>
+                new SeparatorMenuItem(),
+<span class="nc" id="L25">                menuItem(&quot;Quit&quot;,Action.QUIT)</span>
+        );
+<span class="nc" id="L27">        return file;</span>
+    }
+
+    private Menu createGameMenu() {
+<span class="nc" id="L31">        Menu game = new Menu(&quot;Game&quot;);</span>
+<span class="nc" id="L32">        game.getItems().addAll(</span>
+<span class="nc" id="L33">                menuItem(&quot;Undo&quot;, Action.UNDO),</span>
+<span class="nc" id="L34">                menuItem(&quot;Redo&quot;, Action.REDO),</span>
+                new SeparatorMenuItem(),
+<span class="nc" id="L36">                menuItem(&quot;Pause&quot;, Action.PAUSE),</span>
+<span class="nc" id="L37">                menuItem(&quot;Hint&quot;, Action.HINT)</span>
+        );
+<span class="nc" id="L39">        return game;</span>
+    }
+
+    private MenuItem menuItem(String text, Action action) {
+<span class="nc" id="L43">        MenuItem item = new MenuItem(text);</span>
+<span class="nc" id="L44">        item.setOnAction(event -&gt; dispatcher.dispatch(action));</span>
+
+<span class="nc" id="L46">        item.setAccelerator(</span>
+<span class="nc" id="L47">                ShortcutManager.getInstance().getShortcut(action)</span>
+        );
+<span class="nc" id="L49">        return item;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
