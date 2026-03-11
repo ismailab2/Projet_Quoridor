@@ -1,17 +1,9 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
-import fr.bordeaux.AI.RandomPlayer;
+import fr.bordeaux.AI.*;
 import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.cli.command.*;
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.HumanPlayer;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -42,12 +34,12 @@ public class NewCommand implements Command {
     @Override
     public GameEngine execute(GameEngine engine) {
         if (tokens.length > 5) { System.out.println("wrong amount of arguments..."); }
-        int size = tokens.length >= 2 ? Integer.parseInt(tokens[1]):9;
+        int size = (tokens.length >= 2 ? Integer.parseInt(tokens[1]):9)-1;
         Position[] positions = {
-            new Position(0, (size-1)/2), new Position(size-1, (size-1)/2),
-            new Position((size-1)/2, 0), new Position((size-1)/2, size-1)
+            new Position(0, size/2), new Position(size, size/2),
+            new Position(size/2, 0), new Position(size/2, size)
         };
-        if (tokens.length == 1) return new GameEngine(new GameState(new Board(size), List.of(new HumanPlayer("Human", new Position(0, 4)), new HumanPlayer("Bob", new Position(8, 4)))));
+        if (tokens.length == 1) return new GameEngine(new GameState(new Board(size+1), List.of(new HumanPlayer("Human", new Position(0, 4)), new HumanPlayer("Bob", new Position(8, 4)))));
         else {
             int nbPlayer = tokens.length <= 2 ? 2:Integer.parseInt(tokens[2]);
             Board board = new Board(size);
