@@ -5,8 +5,11 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -18,7 +21,7 @@ import java.util.function.Function;
 
 /** Represents an Ai player with Minimax */
 public class MinimaxPlayer
-    extends Player { // MiniMax and IterativeDeepening are limited because it works with only 2
+    extends AiPlayer { // MiniMax and IterativeDeepening are limited because it works with only 2
   // players. They will not work if the number of players is larger.
 
   private int depth;
@@ -31,56 +34,99 @@ public class MinimaxPlayer
   private final boolean isIterativeDeepening;
   private final String heuristicName;
 
-  public MinimaxPlayer(
-      String name,
-      Position positionStart,
-      int depth,
-      int reflexionTime,
-      boolean isIterativeDeepening,
-      String h) {
-    super(name, positionStart);
-    this.depth = depth;
-    this.reflexionTime = reflexionTime;
-    this.isIterativeDeepening = isIterativeDeepening;
-    this.heuristicName = h;
-
+  private MinimaxPlayer(Builder builder) {
+    super(builder.name, builder.positionStart);
+    this.depth = builder.depth;
+    this.reflexionTime = builder.reflexionTime;
+    this.isIterativeDeepening = builder.isIterativeDeepening;
+    this.heuristicName = builder.heuristicName;
     if (isIterativeDeepening) {
       mode = (state) -> IterativeDeepening(state);
     } else {
       mode = (state) -> MiniMax(state, this.depth);
     }
-
-    setHeuristic(h);
+    setHeuristic(heuristicName);
   }
 
-  public MinimaxPlayer(String name, Position positionStart, int depth) {
-    this(name, positionStart, depth, 5, false, "h1");
+
+  public static class Builder {
+      private final String name;
+      private final Position positionStart;
+      private int depth = 2;
+      private int reflexionTime = 5;
+      private boolean isIterativeDeepening = false;
+      private String heuristicName = "h1";
+
+      public Builder(String name, Position pos) {
+          this.name = name;
+          this.positionStart = pos;
+      }
+
+      public Builder withDepth(int d) {
+          this.depth = d;
+          return this;
+      }
+
+      public Builder withReflexion(int t) {
+          this.reflexionTime = t;
+          return this;
+      }
+
+      public Builder withHeuristic(String h) {
+          this.heuristicName = h;
+          return this;
+      }
+
+      public Builder isIterativeDeepening(boolean val) {
+          this.isIterativeDeepening = val;
+          return this;
+      }
+
+      private boolean validHeuristic(String h){
+        List<String> valideName = new ArrayList<>(List.of("h1", "h2", "h3"));
+        for(String elt : valideName){
+          if(h.equals(elt)){
+            return true;
+          }
+        }
+        return false;
+      }
+
+      public MinimaxPlayer build() {
+          if(!validHeuristic(heuristicName)){
+            throw new IllegalArgumentException("Incorrect name for the heuristic, the " + heuristicName + " heuristic does not exist.");
+          }
+          if(depth<0){
+            throw new IllegalArgumentException("Illegal depth value ! Depth is greater than or equal to 0");
+          }
+
+          if(reflexionTime<=0){
+            throw new IllegalArgumentException("Illegal reflexionTime value ! reflexionTime is grater than 0");
+          }
+          return new MinimaxPlayer(this);
+      }
+  }
+
+  public static Builder builder(String name, Position pos) {
+      return new Builder(name, pos);
   }
 
   public void setHeuristic(String nameH) {
-    if (nameH == null) {
-      this.heuristic = (state) -> h1(state);
-    } else {
-      switch (nameH) {
-        case "h2":
-          this.heuristic = (state) -> h2(state);
-          break;
-        case "h3":
-          this.heuristic = (state) -> h3(state);
-          break;
-        case "h1":
-          this.heuristic = (state) -> h1(state);
-      }
+    switch (nameH) {
+      case "h2":
+        this.heuristic = (state) -> h2(state);
+        break;
+      case "h3":
+        this.heuristic = (state) -> h3(state);
+        break;
+      case "h1":
+        this.heuristic = (state) -> h1(state);
     }
   }
 
   @Override
   public Move getNextMove(GameState state) {
-
-    if (state.getPlayers().size() != 2) {
-      throw new IllegalArgumentException(" IA can only be used in a 1v1");
-    }
-
+    
     saveMove = null;
 
     Future<Move> futureMove = aiExecutor.submit(() -> mode.apply(state));
@@ -373,4 +419,21 @@ public class MinimaxPlayer
   public Boolean isAI() {
     return true;
   }
+
+
+  @Override
+  public Map<String, Object> getSettings() { 
+    Map<String, Object> settings = new HashMap<>();
+    if(isIterativeDeepening){
+      settings.put("mode", "minimax-iterative-deepening");
+    }
+    else{
+      settings.put("mode", "minimax");
+      settings.put("depth", depth);
+    }
+    settings.put("reflexion", reflexionTime);
+    settings.put("heuristic", heuristicName);
+    return settings;
+  }
+
 }

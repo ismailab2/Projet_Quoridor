@@ -29,12 +29,9 @@ public class DragAndDrop {
   private static void attachHandlers(GameEngine engine, BoardView boardView) {
     for (Node node : boardView.getChildren()) {
       if (!(node instanceof StackPane cell)) continue;
-
       int row = getIndex(cell, true);
       int col = getIndex(cell, false);
-
       installDropOnCell(engine, boardView, cell, row, col);
-
       for (Node child : cell.getChildren()) {
         if (child instanceof Rectangle pawn) installDragOnPawn(engine, pawn, row, col);
       }

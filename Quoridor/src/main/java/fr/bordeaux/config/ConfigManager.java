@@ -1,49 +1,82 @@
 package fr.bordeaux.config;
 
-import fr.bordeaux.gui.Action;
 import java.io.*;
-import java.util.Map;
+import java.nio.file.*;
 import java.util.Properties;
-import javafx.scene.input.KeyCombination;
 
 public class ConfigManager {
 
-  private static final ConfigManager INSTANCE = new ConfigManager();
-  private final File file = new File(System.getProperty("user.home"), ".quoridorrc");
-  private final Properties props = new Properties();
+    /** Singleton instance of ConfigManager */
+    private static ConfigManager INSTANCE;
 
-  private ConfigManager() {}
+    /** Path to the configuration file in the user's home directory */
+    private static final String FILE = System.getProperty("user.home") + File.separator + ".quoridorrc";
 
-  public static ConfigManager getInstance() {
-    return INSTANCE;
-  }
+    /** Stores all configuration properties and shortcuts */
+    private final Properties props = new Properties();
 
-  public void load() {
-    if (!file.exists()) return;
-    try (FileReader reader = new FileReader(file)) {
-      props.load(reader);
-    } catch (IOException ignored) {
+    /** Private constructor for singleton pattern */
+    private ConfigManager() {}
+
+    /**
+     * Returns the singleton instance of ConfigManager.
+     * If it doesn't exist yet, creates it.
+     */
+    public static ConfigManager getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ConfigManager();
+        }
+        return INSTANCE;
     }
-  }
 
-  public void save() {
-    try (FileWriter writer = new FileWriter(file)) {
-      props.store(writer, "Quoridor configuration");
-    } catch (IOException ignored) {
+    /**
+     * Loads the configuration file if it exists.
+     * If the file does not exist, initializes default values and saves them.
+     */
+    public void load() {
+        Path path = Paths.get(FILE);
+        if (Files.exists(path)) {
+            try (InputStream in = Files.newInputStream(path)) {
+                props.load(in);
+            } catch (IOException e) {
+                System.err.println("Warning: .quoridorrc is invalid, using default values.");
+            }
+        } else {
+            // Default configuration values
+            props.setProperty("verbose", "true");
+            props.setProperty("blitz", "false");
+            props.setProperty("timeout", "30");
+            save();
+        }
     }
-  }
 
-  public void applyShortcuts(Map<Action, KeyCombination> map) {
-    map.forEach(
-        (action, defaultCombo) -> {
-          String value = props.getProperty("shortcut." + action.name());
-          if (value != null) {
-            map.put(action, KeyCombination.valueOf(value));
-          }
-        });
-  }
+    /**
+     * Saves the current properties to the configuration file.
+     */
+    public void save() {
+        try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
+            props.store(out, "Quoridor configuration + shortcuts");
+        } catch (IOException e) {
+            System.err.println("Error saving .quoridorrc");
+        }
+    }
 
-  public void saveShortcut(Action action, KeyCombination combo) {
-    props.setProperty("shortcut." + action.name(), combo.getName());
-  }
+    /**
+     * Returns the value of a configuration option.
+     * @param key the name of the option
+     * @param defaultValue value to return if the key is not found
+     * @return the value of the option or defaultValue if missing
+     */
+    public String getOption(String key, String defaultValue) {
+        return props.getProperty(key, defaultValue);
+    }
+
+    /**
+     * Sets or updates a configuration option.
+     * @param key the name of the option
+     * @param value the value to store
+     */
+    public void setOption(String key, String value) {
+        props.setProperty(key, value);
+    }
 }

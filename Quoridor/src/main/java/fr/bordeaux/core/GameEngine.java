@@ -1,5 +1,8 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.persistence.GameSerializer;
+import java.io.IOException;
+
 public class GameEngine {
 
   private GameState state;
@@ -30,14 +33,19 @@ public class GameEngine {
   }
 
   public void saveGame(String filename) {
-    // state.saveGameJSON(filename);
-    System.out.println("jeu sauvegarde ! " + filename);
+    try {
+      state.saveGame(filename);
+    } catch (IOException e) {
+      System.err.println("Erreur sauvegarde : " + e.getMessage());
+    }
   }
 
   public void loadGame(String filename) {
-    /* GameState loaded = state.loadGameJSON(filename);
-    if (loaded != null) state = loaded; */
-    System.out.println("jeu load !");
+    try {
+      state = GameSerializer.loadGame(filename);
+    } catch (Exception e) {
+      System.err.println("Erreur chargement : " + e.getMessage());
+    }
   }
 
   public void undo() {
@@ -52,7 +60,6 @@ public class GameEngine {
 
   public void pause() {
     state.setPaused(true);
-    System.out.println("EN PAUSE ");
   }
 
   public void hint() {

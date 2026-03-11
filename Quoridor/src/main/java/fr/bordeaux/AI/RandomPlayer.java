@@ -4,10 +4,13 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
-public class RandomPlayer extends Player {
+public class RandomPlayer extends AiPlayer {
 
   public RandomPlayer(String name, Position positionStart) {
     super(name, positionStart);
@@ -43,4 +46,12 @@ public class RandomPlayer extends Player {
   public Boolean isAI() {
     return true;
   }
+
+  @Override
+  public Map<String, Object> getSettings() {
+    Map<String, Object> settings = new HashMap<>();
+    settings.put("mode", "random");
+    return settings;
+  }
+
 }
