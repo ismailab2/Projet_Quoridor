@@ -1,6 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.persistence.GameLoader;
 import java.io.IOException;
 
 public class GameEngine {
@@ -42,7 +41,7 @@ public class GameEngine {
 
   public void loadGame(String filename) {
     try {
-      state = GameLoader.loadGame(filename);
+      state = state.loadGame(filename);
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());
     }
@@ -50,16 +49,20 @@ public class GameEngine {
 
   public void undo() {
     state.undo();
-    // System.out.println("jeu undo !");
   }
 
   public void redo() {
     state.redo();
-    // System.out.println("jeu redo !");
   }
 
   public void pause() {
-    state.setPaused(true);
+    if (state.isPaused()) {
+      System.out.println("Resuming...");
+      state.setPaused(false);
+    } else {
+      System.out.println("Pausing...");
+      state.setPaused(true);
+    }
   }
 
   public void hint() {
