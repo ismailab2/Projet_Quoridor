@@ -1,9 +1,9 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
-import fr.bordeaux.AI.RandomPlayer;
+import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.NeuralNetPlayer;
+import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
@@ -53,8 +53,12 @@ public class GameLoader {
           "ERREUR_ENTETE", 1, "Expected [game] but found : " + lines.get(currentLine));
   }
 
-  // Checks that the first line is "[settings]"
-  // If not, throws GameLoadException with error type and line number
+  /**
+   * Checks that the first line of the save file contains the expected settings header.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @throws GameLoadException if the header is missing or incorrect.
+   */
   private static void validateSettingsHeader(List<String> lines) throws GameLoadException {
     if (!lines.get(0).equals("[settings] # Paramètres du programme"))
       throw new GameLoadException(
@@ -116,13 +120,30 @@ public class GameLoader {
     }
   }
 
-  private record PlayerAndLine(
-      Player player, int nextLine) {} // structure to return the player and the last line read
+  /**
+   * Internal record used to bundle a parsed player and the index of the next line to read.
+   *
+   * @param player The parsed player instance.
+   * @param nextLine The index of the next line in the file.
+   */
+  private record PlayerAndLine(Player player, int nextLine) {}
 
-  private record AllPlayerAndLine(
-      List<Player> players,
-      int nextLine) {} // structure to return the player and the last line read
+  /**
+   * Internal record used to bundle the list of all parsed players and the index of the next line.
+   *
+   * @param players The list of all parsed players.
+   * @param nextLine The index of the line where player and settings parsing stopped.
+   */
+  private record AllPlayerAndLine(List<Player> players, int nextLine) {}
 
+  /**
+   * Reads and parses all players (Human and AI) from the save file. Stops reading when it
+   * encounters the "[game]" section marker.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @return An {@link AllPlayerAndLine} object containing the list of players and the next line
+   *     index.
+   */
   private static AllPlayerAndLine readAllPlayer(List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
     int currentLine = 8; // 8 because its at the 9 lines that starts the informations about players
@@ -134,6 +155,15 @@ public class GameLoader {
     return new AllPlayerAndLine(lPlayers, currentLine);
   }
 
+  /**
+   * Reads a single player's basic information (type, name, starting position) and delegates to
+   * specific methods for AI configuration if necessary.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @param currentLine The index of the line where the player's information begins.
+   * @return A {@link PlayerAndLine} record containing the instantiated player and the updated line
+   *     index.
+   */
   private static PlayerAndLine readPlayer(List<String> lines, int currentLine) {
 
     String p = lines.get(currentLine);
@@ -149,6 +179,12 @@ public class GameLoader {
     }
   }
 
+  /**
+   * Parses the starting position coordinates from a formatted string.
+   *
+   * @param p The string containing the position data (e.g., "key=Position: 4, 0").
+   * @return A {@link Position} object representing the parsed coordinates.
+   */
   private static Position readPlayerStartPosition(String p) {
     String p_start_pos = p.split("=")[1];
     String p_start_pos_coord = p_start_pos.split(":")[1];
@@ -160,6 +196,18 @@ public class GameLoader {
     return new Position(x, y);
   }
 
+  /**
+   * Parses the configuration of an AI player and instantiates the correct AI type (Minimax, MCTS,
+   * Neural Network, etc.) based on its settings.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @param currentLine The current line index after reading basic player info.
+   * @param p_name The parsed name of the AI player.
+   * @param p_postion The parsed starting position of the AI.
+   * @return A {@link PlayerAndLine} record containing the fully configured AI player and the
+   *     updated line index.
+   * @throws IllegalArgumentException if the AI mode specified in the file is unknown.
+   */
   private static PlayerAndLine readAiPlayer(
       List<String> lines, int currentLine, String p_name, Position p_postion) {
     Map<String, String> aiSettings = new HashMap<>();
@@ -209,6 +257,13 @@ public class GameLoader {
     }
   }
 
+  /**
+   * Checks if the current line starts with the prefix "ai", indicating it contains an AI setting.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @param currentLine The index of the line to check.
+   * @return {@code true} if the line starts with "ai", {@code false} otherwise.
+   */
   private static boolean checkStartByAi(List<String> lines, int currentLine) {
     return lines.get(currentLine).startsWith("ai");
   }

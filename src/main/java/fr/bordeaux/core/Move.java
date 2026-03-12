@@ -3,7 +3,7 @@ package fr.bordeaux.core;
 import java.util.Objects;
 
 /** Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe */
-public class Move {
+public final class Move {
 
   public enum Type {
     PAWN,

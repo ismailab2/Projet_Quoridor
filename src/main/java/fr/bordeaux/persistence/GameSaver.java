@@ -1,6 +1,6 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.AI.AiPlayer;
+import fr.bordeaux.ai.AiPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
@@ -93,10 +93,25 @@ public class GameSaver {
     writer.println(line);
   }
 
+  /**
+   * Writes a single key-value pair to the output stream in the format "key=value".
+   *
+   * @param writer The {@link PrintWriter} used to write to the file.
+   * @param key The setting key.
+   * @param value The setting value.
+   */
   private static void writeLine(PrintWriter writer, String key, Object value) {
     writer.println(key + "=" + value);
   }
 
+  /**
+   * Saves the specific settings of an AI player to the output file.
+   *
+   * @param w The {@link PrintWriter} used to write to the file.
+   * @param g The current game state.
+   * @param new_p The AI player whose settings are being saved.
+   * @param i The index of the player (used for formatting the key).
+   */
   private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer new_p, int i) {
     writeLine(w, "ai-player-" + i + "-name", new_p.getName());
     writeLine(w, "ai-player-" + i + "-starting-position", new_p.getStartingPosition().toString());
@@ -106,6 +121,13 @@ public class GameSaver {
     }
   }
 
+  /**
+   * Saves the global game parameters and all players' information to the output file. Writes the
+   * "[settings]" header followed by game rules and player configurations.
+   *
+   * @param w The {@link PrintWriter} used to write to the file.
+   * @param g The current game state containing the parameters to save.
+   */
   private static void saveParameters(PrintWriter w, GameState g) {
     w.println("[settings] # Paramètres du programme");
 

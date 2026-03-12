@@ -51,8 +51,7 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
-  // Apply a move, needs to be a valid move because it won't be checked in this function.
-  // Check victory is not done here as well
+  // Apply a move, needs to be a valid move.
   public void applyMove(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
@@ -68,7 +67,7 @@ public class GameState {
     notifyListeners();
   }
 
-  private void applyMoveWithoutClearingRedo(Move move) {
+  public void applyMoveWithoutClearingRedo(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());

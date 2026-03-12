@@ -19,7 +19,7 @@
         <javafx.version>21.0.2</javafx.version>
         <tensorflow.version>0.5.0</tensorflow.version>
         <!-- default main class -->
-        <main.class>fr.bordeaux.MainApp</main.class>
+        <main.class>fr.bordeaux.Main</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
@@ -83,8 +83,6 @@
     <build>
         <plugins>
             <!-- Java 21 -->
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -101,15 +99,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
-                <configuration>
-                    <!-- Désactive l’exécution parallèle -->
-                    <parallel>none</parallel>
-                    <forkCount>1</forkCount>
-                    <reuseForks>false</reuseForks>
-                    <includes>
-                        <include>**/*Test.java</include>
-                    </includes>
-                </configuration>
             </plugin>
 
             <!-- JaCoCo -->
@@ -207,16 +196,25 @@
                 </configuration>
             </plugin>
 
+            <!-- PMD Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.1</version>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.26.0</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>fr.bordeaux.MainApp</mainClass>
-                        </manifest>
-                    </archive>
+                <rulesets>
+                    <!-- If you want to start small, take only this line -->
+                    <!-- <ruleset>/rulesets/java/quickstart.xml</ruleset> -->
+                    <!-- All the rulesets -->
+                    <ruleset>/category/java/bestpractices.xml</ruleset>
+                    <ruleset>/category/java/codestyle.xml</ruleset>
+                    <ruleset>/category/java/design.xml</ruleset>
+                    <ruleset>/category/java/documentation.xml</ruleset>
+                    <ruleset>/category/java/errorprone.xml</ruleset>
+                    <ruleset>/category/java/multithreading.xml</ruleset>
+                    <ruleset>/category/java/performance.xml</ruleset>
+                    <ruleset>/category/java/security.xml</ruleset>
+                </rulesets>
                 </configuration>
             </plugin>
 
