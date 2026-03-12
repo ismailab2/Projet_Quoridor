@@ -30,8 +30,8 @@ public class QuoridorApp extends Application {
 
     BoardView boardView = new BoardView(engine);
     root.setCenter(boardView);
-      // Attach drag-and-drop functionality
-      DragAndDrop.install(engine, boardView);
+    // Attach drag-and-drop functionality
+    DragAndDrop.install(engine, boardView);
 
     //
     Scene scene = new Scene(root, 900, 700);

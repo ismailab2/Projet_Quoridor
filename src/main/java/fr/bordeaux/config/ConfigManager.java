@@ -6,84 +6,83 @@ import java.util.Properties;
 
 public class ConfigManager {
 
-    private static ConfigManager INSTANCE;
+  private static ConfigManager INSTANCE;
 
-    private static final String FILE =
-            System.getProperty("user.home") + File.separator + ".qoridorrc";
+  private static final String FILE =
+      System.getProperty("user.home") + File.separator + ".qoridorrc";
 
-    private final Properties props = new Properties();
+  private final Properties props = new Properties();
 
-    private ConfigManager() {}
+  private ConfigManager() {}
 
-    public static ConfigManager getInstance() {
+  public static ConfigManager getInstance() {
 
-        if (INSTANCE == null) {
-            INSTANCE = new ConfigManager();
-        }
-
-        return INSTANCE;
+    if (INSTANCE == null) {
+      INSTANCE = new ConfigManager();
     }
 
-    public void load() {
+    return INSTANCE;
+  }
 
-        loadDefaults();
+  public void load() {
 
-        Path path = Paths.get(FILE);
+    loadDefaults();
 
-        if (Files.exists(path)) {
+    Path path = Paths.get(FILE);
 
-            try (InputStream in = Files.newInputStream(path)) {
+    if (Files.exists(path)) {
 
-                props.load(in);
+      try (InputStream in = Files.newInputStream(path)) {
 
-            } catch (IOException e) {
+        props.load(in);
 
-                System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
-            }
-        }
+      } catch (IOException e) {
+
+        System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
+      }
     }
+  }
 
-    private void loadDefaults() {
-        props.setProperty("verbose", "false");
-        props.setProperty("debug", "false");
-        props.setProperty("blitz", "false");
-        props.setProperty("timeout", "30");
+  private void loadDefaults() {
+    props.setProperty("verbose", "false");
+    props.setProperty("debug", "false");
+    props.setProperty("blitz", "false");
+    props.setProperty("timeout", "30");
+  }
+
+  public void save() {
+
+    try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
+
+      props.store(out, "Quoridor configuration");
+
+    } catch (IOException e) {
+
+      System.err.println("Error saving configuration file.");
     }
+  }
 
+  public String getOption(String key, String defaultValue) {
 
-    public void save() {
+    return props.getProperty(key, defaultValue);
+  }
 
-        try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
+  public void setOption(String key, String value) {
 
-            props.store(out, "Quoridor configuration");
+    props.setProperty(key, value);
+  }
 
-        } catch (IOException e) {
+  public boolean getBoolean(String key, boolean defaultValue) {
 
-            System.err.println("Error saving configuration file.");
-        }
+    return Boolean.parseBoolean(props.getProperty(key, String.valueOf(defaultValue)));
+  }
+
+  public int getInt(String key, int defaultValue) {
+
+    try {
+      return Integer.parseInt(props.getProperty(key));
+    } catch (Exception e) {
+      return defaultValue;
     }
-
-    public String getOption(String key, String defaultValue) {
-
-        return props.getProperty(key, defaultValue);
-    }
-
-    public void setOption(String key, String value) {
-
-        props.setProperty(key, value);
-    }
-
-    public boolean getBoolean(String key, boolean defaultValue) {
-
-        return Boolean.parseBoolean(props.getProperty(key, String.valueOf(defaultValue)));
-    }
-
-    public int getInt(String key, int defaultValue) {
-
-        try {
-            return Integer.parseInt(props.getProperty(key));
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
+  }
 }

@@ -55,15 +55,15 @@ public class GameEngine {
     state.redo();
   }
 
-    public void pause() {
-        if (state.isPaused()) {
-            System.out.println("Resuming...");
-            state.setPaused(false);
-        } else {
-            System.out.println("Pausing...");
-            state.setPaused(true);
-        }
+  public void pause() {
+    if (state.isPaused()) {
+      System.out.println("Resuming...");
+      state.setPaused(false);
+    } else {
+      System.out.println("Pausing...");
+      state.setPaused(true);
     }
+  }
 
   public void hint() {
     //  TODO

@@ -271,7 +271,6 @@ public class GameState {
     return res;
   }
 
-
   public boolean isDebug() {
     return debug;
   }
