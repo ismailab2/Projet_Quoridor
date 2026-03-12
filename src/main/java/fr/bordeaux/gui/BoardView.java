@@ -25,9 +25,7 @@ public class BoardView extends GridPane {
     this.engine = engine;
     int size = engine.getState().getBoard().getSize();
     cells = new StackPane[size][size];
-    pawns =
-        new Rectangle[engine.getState().getPlayers().size()]
-            [size]; // store only one dimension for example
+    pawns = new Rectangle[engine.getState().getPlayers().size()][size];
 
     engine.getState().addListener(this::drawBoard);
     drawBoard();
@@ -64,7 +62,7 @@ public class BoardView extends GridPane {
     highlightCurrentPlayer();
   }
 
-  private void drawPlayers() {
+  public void drawPlayers() {
     List<Player> players = engine.getState().getPlayers();
     for (int i = 0; i < players.size(); i++) {
       Player player = players.get(i);
@@ -93,7 +91,7 @@ public class BoardView extends GridPane {
     }
   }
 
-  private void drawWalls() {
+  public void drawWalls() {
     Board board = engine.getState().getBoard();
     int size = board.getSize();
     for (int row = 0; row < size - 1; row++) {
@@ -113,7 +111,7 @@ public class BoardView extends GridPane {
     }
   }
 
-  private void highlightCurrentPlayer() {
+  public void highlightCurrentPlayer() {
     Player current = engine.getState().getCurrentPlayer();
     Position pos = current.getPosition();
 
@@ -130,7 +128,7 @@ public class BoardView extends GridPane {
     ft.play();
   }
 
-  private void highlightAccessibleCells(Player player) {
+  public void highlightAccessibleCells(Player player) {
     for (StackPane[] row : cells)
       for (StackPane cell : row)
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
@@ -142,17 +140,21 @@ public class BoardView extends GridPane {
     }
   }
 
-  private void handleCellClick(int row, int col) {
+  public void handleCellClick(int row, int col) {
     Player current = engine.getState().getCurrentPlayer();
     Move move = Move.pawn(current.getPosition(), new Position(row, col));
     if (engine.play(move)) drawBoard();
   }
 
-  private void handleWallClick(int row, int col) {
+  public void handleWallClick(int row, int col) {
     Move wallMove = Move.wall(new Position(row, col), Orientation.HORIZONTAL);
     if (RuleChecker.isMoveLegal(engine.getState(), wallMove)) {
       engine.play(wallMove);
       drawBoard();
     }
+  }
+
+  public Rectangle[][] getPawns() {
+    return pawns;
   }
 }

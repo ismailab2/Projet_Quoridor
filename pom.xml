@@ -19,7 +19,7 @@
         <javafx.version>21.0.2</javafx.version>
         <tensorflow.version>0.5.0</tensorflow.version>
         <!-- default main class -->
-        <main.class>fr.bordeaux.Main</main.class>
+        <main.class>fr.bordeaux.MainApp</main.class>
     </properties>
 
     <!-- ================= DEPENDENCIES ================= -->
@@ -83,6 +83,8 @@
     <build>
         <plugins>
             <!-- Java 21 -->
+
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -99,6 +101,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <!-- Désactive l’exécution parallèle -->
+                    <parallel>none</parallel>
+                    <forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
             </plugin>
 
             <!-- JaCoCo -->
@@ -193,6 +204,19 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>fr.bordeaux.gui.QuoridorApp</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>fr.bordeaux.MainApp</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
 

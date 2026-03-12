@@ -4,111 +4,86 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
 
-/**
- * Manages application configuration using a singleton pattern. Configuration is stored in a file
- * located in the user's home directory.
- *
- * <p>Priority order for configuration values: 1. Default values 2. Values from the configuration
- * file (.qoridorrc) 3. Command-line arguments (highest priority)
- */
 public class ConfigManager {
 
-  private static ConfigManager INSTANCE;
+    private static ConfigManager INSTANCE;
 
-  private static final String FILE =
-      System.getProperty("user.home") + File.separator + ".qoridorrc";
+    private static final String FILE =
+            System.getProperty("user.home") + File.separator + ".qoridorrc";
 
-  private final Properties props = new Properties();
+    private final Properties props = new Properties();
 
-  private ConfigManager() {}
+    private ConfigManager() {}
 
-  public static ConfigManager getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new ConfigManager();
-    }
-    return INSTANCE;
-  }
+    public static ConfigManager getInstance() {
 
-  /**
-   * Loads configuration.
-   *
-   * <p>Steps: Load default values Override with configuration file if it exists
-   */
-  public void load() {
-
-    loadDefaults();
-
-    Path path = Paths.get(FILE);
-
-    if (Files.exists(path)) {
-      try (InputStream in = Files.newInputStream(path)) {
-        props.load(in);
-      } catch (IOException e) {
-        System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
-      }
-    }
-  }
-
-  /** Loads default configuration values. */
-  private void loadDefaults() {
-    props.setProperty("verbose", "true");
-    props.setProperty("blitz", "false");
-    props.setProperty("timeout", "30");
-  }
-
-  /**
-   * Overrides configuration using command-line arguments.
-   *
-   * <p>Expected format: --key=value
-   */
-  public void overrideWithCommandLine(String[] args) {
-
-    for (String arg : args) {
-
-      if (arg.startsWith("--")) {
-
-        String option = arg.substring(2);
-
-        String[] parts = option.split("=");
-
-        if (parts.length == 2) {
-
-          String key = parts[0];
-          String value = parts[1];
-
-          props.setProperty(key, value);
+        if (INSTANCE == null) {
+            INSTANCE = new ConfigManager();
         }
-      }
+
+        return INSTANCE;
     }
-  }
 
-  /** Saves the configuration to the .qoridorrc file. */
-  public void save() {
+    public void load() {
 
-    try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
+        loadDefaults();
 
-      props.store(out, "Quoridor configuration file");
+        Path path = Paths.get(FILE);
 
-    } catch (IOException e) {
+        if (Files.exists(path)) {
 
-      System.err.println("Error saving configuration file.");
+            try (InputStream in = Files.newInputStream(path)) {
+
+                props.load(in);
+
+            } catch (IOException e) {
+
+                System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
+            }
+        }
     }
-  }
 
-  /**
-   * Returns a configuration option value.
-   *
-   * @param key option name
-   * @param defaultValue value returned if option does not exist
-   */
-  public String getOption(String key, String defaultValue) {
+    private void loadDefaults() {
+        props.setProperty("verbose", "false");
+        props.setProperty("debug", "false");
+        props.setProperty("blitz", "false");
+        props.setProperty("timeout", "30");
+    }
 
-    return props.getProperty(key, defaultValue);
-  }
 
-  /** Updates or adds a configuration option. */
-  public void setOption(String key, String value) {
+    public void save() {
 
-    props.setProperty(key, value);
-  }
+        try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
+
+            props.store(out, "Quoridor configuration");
+
+        } catch (IOException e) {
+
+            System.err.println("Error saving configuration file.");
+        }
+    }
+
+    public String getOption(String key, String defaultValue) {
+
+        return props.getProperty(key, defaultValue);
+    }
+
+    public void setOption(String key, String value) {
+
+        props.setProperty(key, value);
+    }
+
+    public boolean getBoolean(String key, boolean defaultValue) {
+
+        return Boolean.parseBoolean(props.getProperty(key, String.valueOf(defaultValue)));
+    }
+
+    public int getInt(String key, int defaultValue) {
+
+        try {
+            return Integer.parseInt(props.getProperty(key));
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
 }
