@@ -29,9 +29,7 @@ public class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
-    for (Move m : history) {
-      gameState.applyMove(m);
-    }
+    gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
 
