@@ -127,19 +127,23 @@ public class MCTSPlayer extends AiPlayer {
     /** Simulates a random game from this node. */
     public int simulate() {
       final GameState temp = state.copy();
-      while (!temp.isGameOver()) {
+      final int totalPlayers = temp.getPlayers().size();
+      int winner = -1;
+
+      while (winner == -1) {
         final List<Move> moves = temp.generateLegalMoves();
         if (moves.isEmpty()) {
           break;
         }
-        temp.applyMove(moves.get((int) (Math.random() * moves.size())));
-      }
-      int winner = -1;
-      final List<Player> players = temp.getPlayers();
-      for (int i = 0; i < players.size(); i++) {
-        if (temp.hasReachedGoal(players.get(i))) {
-          winner = i;
-          break;
+
+        final Move randomMove = moves.get((int) (Math.random() * moves.size()));
+        temp.applyMoveWithoutClearingRedo(randomMove);
+
+        final int lastPlayerIdx = (temp.getCurrentIndexPlayer() - 1 + totalPlayers) % totalPlayers;
+        final Player lastPlayer = temp.getPlayers().get(lastPlayerIdx);
+
+        if (temp.hasReachedGoal(lastPlayer)) {
+          winner = lastPlayerIdx;
         }
       }
       return winner;
