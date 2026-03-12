@@ -21,7 +21,7 @@ public class MCTSPlayerTest {
     players = new ArrayList<>();
 
     // AI starts at the top (row 0, middle)
-    ai = new MCTSPlayer("MCTS_AI", new Position(0, 4));
+    ai = new MCTSPlayer("MCTS_AI", new Position(0, 4), 2000);
     // Opponent starts at the bottom (row 8, middle)
     HumanPlayer opponent = new HumanPlayer("Opponent", new Position(8, 4));
 
@@ -73,6 +73,8 @@ public class MCTSPlayerTest {
     Move winningMove = Move.pawn(new Position(7, 3), new Position(8, 3));
 
     Move chosenMove = ai.getNextMove(state);
+
+    assertTrue(chosenMove.isPawn());
 
     assertEquals(
         winningMove.getTo(),
