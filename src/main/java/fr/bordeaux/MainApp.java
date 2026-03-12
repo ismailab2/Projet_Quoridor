@@ -11,7 +11,6 @@ public class MainApp {
 
     ConfigManager config = ConfigManager.getInstance();
 
-    // Charger configuration (défauts + fichier)
     config.load();
 
     boolean gui = false;
