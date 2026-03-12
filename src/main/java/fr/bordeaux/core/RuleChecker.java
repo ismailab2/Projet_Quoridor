@@ -25,7 +25,6 @@ public class RuleChecker {
     Position to = move.getTo();
 
     int fromId = b.id(from.getX(), from.getY());
-    int toId = b.id(to.getX(), to.getY());
 
     for (Player otherPlayer : state.getPlayers()) {
       if (otherPlayer == CurrentPlay) {
@@ -45,29 +44,28 @@ public class RuleChecker {
       // System.out.println(dx + " " + dy);
 
       Position jump = new Position(posOtherPlayer.getX() + dx, posOtherPlayer.getY() + dy);
-      // System.out.println(jump.getX() + " " + jump.getY());
+      boolean jumpPossible = false;
 
       if (b.isInside(jump)) {
-        int jumpId = b.id(jump.getX(), jump.getY());
-
-        boolean canJumpStraight =
-            b.getGraph().hasEdge(fromId, opId) && b.getGraph().hasEdge(opId, jumpId);
-
-        if (canJumpStraight && to.equals(jump)) {
-          // System.out.println("jump straight");
-          return true;
-        }
+          int jumpId = b.id(jump.getX(), jump.getY());
+          if (b.getGraph().hasEdge(opId, jumpId) && b.getGraph().hasEdge(fromId, opId)) {
+              if (to.equals(jump)) return true;
+              jumpPossible = true;
+          }
+      } else {
+          jumpPossible = false;
       }
+      if(!jumpPossible){
+        for (Position diag : getDiagonalJumps(from, posOtherPlayer)) {
+          if (!b.isInside(diag)) continue;
 
-      for (Position diag : getDiagonalJumps(from, posOtherPlayer)) {
-        if (!b.isInside(diag)) continue;
+          int diagId = b.id(diag.getX(), diag.getY());
 
-        int diagId = b.id(diag.getX(), diag.getY());
+          boolean canSideStep =
+              b.getGraph().hasEdge(fromId, opId) && b.getGraph().hasEdge(opId, diagId);
 
-        boolean canSideStep =
-            b.getGraph().hasEdge(fromId, opId) && b.getGraph().hasEdge(opId, diagId);
-
-        if (canSideStep && to.equals(diag)) return true;
+          if (canSideStep && to.equals(diag)) return true;
+        }
       }
     }
     return false;
@@ -85,6 +83,10 @@ public class RuleChecker {
 
     int fromId = b.id(from.getX(), from.getY());
     int toId = b.id(to.getX(), to.getY());
+
+    for (Player p : state.getPlayers()) {
+        if (p.getPosition().equals(to)) return false;
+    }
 
     if (b.getGraph().hasEdge(fromId, toId)) return true;
 

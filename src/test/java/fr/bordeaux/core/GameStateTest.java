@@ -192,4 +192,29 @@ public class GameStateTest {
     assertEquals(2, newGame.getPlayers().size());
     assertEquals(9, newGame.getBoard().getSize());
   }
+
+  @Test
+  public void checkGenerateLegalMoves(){
+    board = new Board(3);
+    human = new HumanPlayer("Human", new Position(0, 1));
+    ia = MinimaxPlayer.builder("IA", new Position(2, 1)).build();
+    ia.setPosition(new Position(1, 1));
+    List<Player> players = new ArrayList<>();
+    players.add(human);
+    players.add(ia);
+
+    game = new GameState(board, players);
+    Position p = human.getPosition();
+    List<Move> moves = new ArrayList<>(List.of(Move.pawn(p, new Position(0, 0)), Move.pawn(p, new Position(0, 2)), Move.pawn(p, new Position(2, 1))));
+    for (int x = 0; x < board.getSize() - 1; x++) {
+      for (int y = 0; y < board.getSize() - 1; y++) {
+        Position pos_wall = new Position(x, y);
+
+        moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
+
+        moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
+      }
+    }
+    assertTrue(moves.containsAll( game.generateLegalMoves()));
+  }
 }

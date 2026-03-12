@@ -25,7 +25,7 @@ import java.util.function.Function;
  * limit. * Note: Minimax and Iterative Deepening are currently limited to 2-player scenarios. They
  * may not function correctly if the number of players is larger.
  */
-public class MinimaxPlayer extends AiPlayer {
+public final class MinimaxPlayer extends AiPlayer {
 
   private int depth;
   private int reflexionTime = 5; // In seconds
@@ -33,7 +33,7 @@ public class MinimaxPlayer extends AiPlayer {
   private volatile Move saveMove = null;
   private Function<GameState, Move> mode;
   private Function<GameState, Integer> heuristic; // h1 Default heuristic
-  private final Deque<Move> IAStack = new ArrayDeque<>();
+  private final Deque<Move> aiStack = new ArrayDeque<>();
   private final boolean isIterativeDeepening;
   private final String heuristicName;
 
@@ -49,9 +49,9 @@ public class MinimaxPlayer extends AiPlayer {
     this.isIterativeDeepening = builder.isIterativeDeepening;
     this.heuristicName = builder.heuristicName;
     if (isIterativeDeepening) {
-      mode = (state) -> IterativeDeepening(state);
+      mode = (state) -> iterativeDeepening(state);
     } else {
-      mode = (state) -> MiniMax(state, this.depth);
+      mode = (state) -> miniMax(state, this.depth);
     }
     setHeuristic(heuristicName);
   }
@@ -144,7 +144,7 @@ public class MinimaxPlayer extends AiPlayer {
    *
    * @param nameH The name of the heuristic ("h1", "h2", or "h3").
    */
-  public void setHeuristic(String nameH) {
+  private void setHeuristic(String nameH) {
     switch (nameH) {
       case "h2":
         this.heuristic = (state) -> h2(state);
@@ -176,7 +176,6 @@ public class MinimaxPlayer extends AiPlayer {
       return futureMove.get(reflexionTime, TimeUnit.SECONDS);
     } catch (TimeoutException e) {
       futureMove.cancel(true);
-      System.out.println("Fin du temps de réflexion");
       if (saveMove != null) {
         return saveMove;
       } else {
@@ -184,7 +183,6 @@ public class MinimaxPlayer extends AiPlayer {
       }
     } catch (InterruptedException | ExecutionException e) {
       futureMove.cancel(true);
-      System.out.println("Anomalie détecter !");
       e.printStackTrace();
       if (saveMove != null) {
         return saveMove;
@@ -201,11 +199,11 @@ public class MinimaxPlayer extends AiPlayer {
    * @param state The current game state.
    * @return The best move found at the maximum depth reached.
    */
-  private Move IterativeDeepening(GameState state) {
+  private Move iterativeDeepening(GameState state) {
     int currentdepth = 1;
     while (!Thread.currentThread().isInterrupted()) {
 
-      Move temp = MiniMax(state, currentdepth);
+      Move temp = miniMax(state, currentdepth);
       if (Thread.currentThread().isInterrupted()) {
         break;
       }
@@ -226,25 +224,25 @@ public class MinimaxPlayer extends AiPlayer {
    * @param d The search depth.
    * @return The best evaluated move.
    */
-  private Move MiniMax(GameState g, int d) {
+  private Move miniMax(GameState g, int d) {
 
-    Move best_move = null;
-    int best_score = Integer.MIN_VALUE;
+    Move bestMove = null;
+    int bestScore = Integer.MIN_VALUE;
     GameState state = g.copy();
     for (Move s : state.generateLegalMoves()) {
 
       if (Thread.currentThread().isInterrupted()) return null;
 
       push(state, s);
-      int score = MinMax(state, d - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
-      if (score > best_score || best_move == null) {
-        best_score = score;
-        best_move = s;
+      int score = minMax(state, d - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+      if (score > bestScore || bestMove == null) {
+        bestScore = score;
+        bestMove = s;
       }
       pop(state);
     }
 
-    return best_move;
+    return bestMove;
   }
 
   /**
@@ -257,21 +255,21 @@ public class MinimaxPlayer extends AiPlayer {
    * @param beta The best value guaranteed for MIN.
    * @return The maximized score.
    */
-  private int MaxMin(GameState g, int d, int alpha, int beta) {
+  private int maxMin(GameState g, int d, int alpha, int beta) {
 
     if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
       return heuristic.apply(g);
     }
-
+    int currentAlpha = alpha;
     for (Move s : g.generateLegalMoves()) {
       push(g, s);
-      alpha = Math.max(alpha, MinMax(g, d - 1, alpha, beta));
+      currentAlpha = Math.max(currentAlpha, minMax(g, d - 1, currentAlpha, beta));
       pop(g);
-      if (alpha >= beta) {
+      if (currentAlpha >= beta) {
         return beta;
       }
     }
-    return alpha;
+    return currentAlpha;
   }
 
   /**
@@ -284,21 +282,21 @@ public class MinimaxPlayer extends AiPlayer {
    * @param beta The best value guaranteed for MIN.
    * @return The minimized score.
    */
-  private int MinMax(GameState g, int d, int alpha, int beta) {
+  private int minMax(GameState g, int d, int alpha, int beta) {
 
     if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
       return heuristic.apply(g);
     }
-
+    int currentBeta = beta;
     for (Move s : g.generateLegalMoves()) {
       push(g, s);
-      beta = Math.min(beta, MaxMin(g, d - 1, alpha, beta));
+      currentBeta = Math.min(currentBeta, maxMin(g, d - 1, alpha, currentBeta));
       pop(g);
-      if (alpha >= beta) {
+      if (alpha >= currentBeta) {
         return alpha;
       }
     }
-    return beta;
+    return currentBeta;
   }
 
   /**
@@ -374,17 +372,17 @@ public class MinimaxPlayer extends AiPlayer {
     Position enemieActualPosition = enemie.getPosition();
 
     if (playerStartingPosition.getX() == 0) {
-      return (playerActualPosition.getX() - playerStartingPosition.getX())
-          - (enemieStartingPosition.getX() - enemieActualPosition.getX());
+      return playerActualPosition.getX() - playerStartingPosition.getX()
+          - enemieStartingPosition.getX() - enemieActualPosition.getX();
     } else if (playerStartingPosition.getX() == g.getBoard().getSize() - 1) {
-      return (playerStartingPosition.getX() - playerActualPosition.getX())
-          - (enemieActualPosition.getX() - enemieStartingPosition.getX());
+      return playerStartingPosition.getX() - playerActualPosition.getX()
+          - enemieActualPosition.getX() - enemieStartingPosition.getX();
     } else if (playerStartingPosition.getY() == 0) {
-      return (playerActualPosition.getY() - playerStartingPosition.getY())
-          - (enemieStartingPosition.getY() - enemieActualPosition.getY());
+      return playerActualPosition.getY() - playerStartingPosition.getY()
+          - enemieStartingPosition.getY() - enemieActualPosition.getY();
     } else {
-      return (playerStartingPosition.getY() - playerActualPosition.getY())
-          - (enemieActualPosition.getY() - enemieStartingPosition.getY());
+      return playerStartingPosition.getY() - playerActualPosition.getY()
+          - enemieActualPosition.getY() - enemieStartingPosition.getY();
     }
   }
 
@@ -412,38 +410,38 @@ public class MinimaxPlayer extends AiPlayer {
       }
     }
 
-    List<Integer> l_max =
+    List<Integer> lMax =
         g.getBoard()
             .getGraph()
             .findPathBFS(
                 g.getBoard().id(me.getPosition().getX(), me.getPosition().getY()),
                 g.getWinCondition(me));
 
-    List<Integer> l_min =
+    List<Integer> lMin =
         g.getBoard()
             .getGraph()
             .findPathBFS(
                 g.getBoard().id(enemie.getPosition().getX(), enemie.getPosition().getY()),
                 g.getWinCondition(enemie));
 
-    int nb_wall_player = me.getRemainingWalls();
-    int nb_wall_enemie = enemie.getRemainingWalls();
+    int nbWallPlayer = me.getRemainingWalls();
+    int nbWallEnemie = enemie.getRemainingWalls();
 
-    if (l_max.size() <= 1) {
+    if (lMax.size() <= 1) {
       return 10000;
     }
-    if (l_min.size() <= 1) {
+    if (lMin.size() <= 1) {
       return -10000;
     }
 
-    int scoreBFS = (l_min.size() - l_max.size()) * 10;
-    int scoreWall = (int) (nb_wall_player * k1 * 10 - nb_wall_enemie * k2 * 10);
+    int scoreBFS = (lMin.size() - lMax.size()) * 10;
+    int scoreWall = (int) (nbWallPlayer * k1 * 10 - nbWallEnemie * k2 * 10);
     return scoreBFS + scoreWall;
   }
 
   /**
    * Simulates a move (pawn movement or wall placement) and updates the game state. The move is
-   * pushed onto IAStack to allow for backtracking.
+   * pushed onto aiStack to allow for backtracking.
    *
    * @param g The current game state.
    * @param move The move to simulate.
@@ -457,19 +455,19 @@ public class MinimaxPlayer extends AiPlayer {
       player.useWall();
     }
 
-    IAStack.push(move);
+    aiStack.push(move);
     g.getNextPlayer();
   }
 
   /**
-   * Backtracks the last simulated move by popping from IAStack, restoring the previous game state.
+   * Backtracks the last simulated move by popping from aiStack, restoring the previous game state.
    *
    * @param g The game state to restore.
    */
   private void pop(GameState g) {
-    if (IAStack.isEmpty()) return;
+    if (aiStack.isEmpty()) return;
 
-    Move last = IAStack.pop();
+    Move last = aiStack.pop();
     g.previousPlayer();
     Player player = g.getCurrentPlayer();
     if (last.isPawn()) {
@@ -517,9 +515,9 @@ public class MinimaxPlayer extends AiPlayer {
     this.heuristicName = h;
 
     if (isIterativeDeepening) {
-      mode = (state) -> IterativeDeepening(state);
+      mode = (state) -> iterativeDeepening(state);
     } else {
-      mode = (state) -> MiniMax(state, this.depth);
+      mode = (state) -> miniMax(state, this.depth);
     }
     setHeuristic(h);
   }
