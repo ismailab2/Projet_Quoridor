@@ -1,116 +1,125 @@
 package fr.bordeaux.gui;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.GameEngine;
+import javafx.application.Platform;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
+/**
+ * @class ActionDispatcherTest
+ * @brief Unit tests for ActionDispatcher.
+ *     <p>This test class verifies that each ActionDispatcher action correctly calls the
+ *     corresponding method in the GameEngine or triggers the appropriate GUI dialog.
+ *     <p>Each dispatchable action (NEW_GAME, LOAD_GAME, SAVE_GAME, UNDO, REDO, PAUSE, HINT,
+ *     CONFIGURATION, INFO, QUIT) is tested to ensure proper delegation.
+ */
 class ActionDispatcherTest {
-  /*
 
-  @BeforeAll
-  static void initJavaFX() {
-      new JFXPanel();
+  private GameEngine engine;
+  private ActionDispatcher dispatcher;
+
+  @BeforeEach
+  void setUp() {
+    engine = mock(GameEngine.class);
+    dispatcher = new ActionDispatcher(engine);
   }
 
-  private ShortcutManager mockShortcutManager() {
-      ShortcutManager manager = mock(ShortcutManager.class);
-      for (Action a : Action.values()) {
-          when(manager.getShortcut(a))
-                  .thenReturn(new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_DOWN));
-      }
-      return manager;
-  }
-
-  @Test
-  void testDispatchActions() throws InterruptedException {
-      GameEngine engine = mock(GameEngine.class);
-
-      // Mock statique des dialogues et Platform.exit
-      try (MockedStatic<ConfigDialog> cfg = mockStatic(ConfigDialog.class);
-           MockedStatic<InfoDialog> info = mockStatic(InfoDialog.class);
-           MockedStatic<Platform> platform = mockStatic(Platform.class)) {
-
-          ActionDispatcher dispatcher = new ActionDispatcher(engine);
-
-          dispatcher.dispatch(Action.NEW_GAME);
-          verify(engine).newGame();
-
-          dispatcher.dispatch(Action.LOAD_GAME);
-          verify(engine).loadGame("save.txt");
-
-          dispatcher.dispatch(Action.SAVE_GAME);
-          verify(engine).saveGame("save.txt");
-
-          dispatcher.dispatch(Action.PAUSE);
-          verify(engine).pause();
-
-          dispatcher.dispatch(Action.UNDO);
-          verify(engine).undo();
-
-          dispatcher.dispatch(Action.REDO);
-          verify(engine).redo();
-
-          dispatcher.dispatch(Action.CONFIGURATION);
-          cfg.verify(ConfigDialog::show);
-
-          dispatcher.dispatch(Action.INFO);
-          info.verify(InfoDialog::show);
-
-          dispatcher.dispatch(Action.QUIT);
-          platform.verify(Platform::exit);
-
-          dispatcher.dispatch(Action.HINT);
-          verify(engine).hint();
-      }
-  }
-
-  @Test
-  void testMainMenuBar() throws InterruptedException {
-      GameEngine engine = mock(GameEngine.class);
-      ActionDispatcher dispatcher = new ActionDispatcher(engine);
-      ShortcutManager shortcutManager = mockShortcutManager();
-
-      try (MockedStatic<ShortcutManager> mocked = mockStatic(ShortcutManager.class)) {
-          mocked.when(ShortcutManager::getInstance).thenReturn(shortcutManager);
-
-          ActionDispatcher.MainMenuBar menuBar = new ActionDispatcher.MainMenuBar(dispatcher);
-
-          assertEquals(2, menuBar.getMenus().size());
-          Menu file = menuBar.getMenus().get(0);
-          Menu game = menuBar.getMenus().get(1);
-          assertEquals("File", file.getText());
-          assertEquals("Game", game.getText());
-
-          CountDownLatch latch = new CountDownLatch(1);
-          Platform.runLater(() -> {
-              for (MenuItem item : file.getItems()) {
-                  if (!(item instanceof SeparatorMenuItem)) item.fire();
-              }
-              for (MenuItem item : game.getItems()) {
-                  if (!(item instanceof SeparatorMenuItem)) item.fire();
-              }
-              latch.countDown();
-          });
-          latch.await(10, TimeUnit.SECONDS); // attend la fin sur FX thread
-
-          verify(engine).newGame();
-          verify(engine).loadGame("save.txt");
-          verify(engine).saveGame("save.txt");
-          verify(engine).undo();
-          verify(engine).redo();
-          verify(engine).pause();
-          verify(engine).hint();
-
-          for (Menu menu : menuBar.getMenus()) {
-              for (MenuItem item : menu.getItems()) {
-                  if (!(item instanceof SeparatorMenuItem)) {
-                      assertNotNull(item.getAccelerator());
-                  }
-              }
-          }
-      }
-  }
-
+  /**
+   * @brief Test that NEW_GAME action calls GameEngine.newGame().
    */
+  @Test
+  void testNewGameCallsEngine() {
+    dispatcher.dispatch(Action.NEW_GAME);
+    verify(engine, times(1)).newGame();
+  }
+
+  /**
+   * @brief Test that LOAD_GAME action calls GameEngine.loadGame("txt.txt").
+   */
+  @Test
+  void testLoadGameCallsEngine() {
+    dispatcher.dispatch(Action.LOAD_GAME);
+    verify(engine, times(1)).loadGame("txt.txt");
+  }
+
+  /**
+   * @brief Test that SAVE_GAME action calls GameEngine.saveGame("txt.txt").
+   */
+  @Test
+  void testSaveGameCallsEngine() {
+    dispatcher.dispatch(Action.SAVE_GAME);
+    verify(engine, times(1)).saveGame("txt.txt");
+  }
+
+  /**
+   * @brief Test that UNDO action calls GameEngine.undo().
+   */
+  @Test
+  void testUndoCallsEngine() {
+    dispatcher.dispatch(Action.UNDO);
+    verify(engine, times(1)).undo();
+  }
+
+  /**
+   * @brief Test that REDO action calls GameEngine.redo().
+   */
+  @Test
+  void testRedoCallsEngine() {
+    dispatcher.dispatch(Action.REDO);
+    verify(engine, times(1)).redo();
+  }
+
+  /**
+   * @brief Test that PAUSE action calls GameEngine.pause().
+   */
+  @Test
+  void testPauseCallsEngine() {
+    dispatcher.dispatch(Action.PAUSE);
+    verify(engine, times(1)).pause();
+  }
+
+  /**
+   * @brief Test that HINT action calls GameEngine.hint().
+   */
+  @Test
+  void testHintCallsEngine() {
+    dispatcher.dispatch(Action.HINT);
+    verify(engine, times(1)).hint();
+  }
+
+  /**
+   * @brief Test that CONFIGURATION action shows the ConfigDialog.
+   */
+  @Test
+  void testConfigDialogShows() {
+    try (MockedStatic<ConfigDialog> mockConfig = mockStatic(ConfigDialog.class)) {
+      dispatcher.dispatch(Action.CONFIGURATION);
+      mockConfig.verify(ConfigDialog::show, times(1));
+    }
+  }
+
+  /**
+   * @brief Test that INFO action shows the InfoDialog.
+   */
+  @Test
+  void testInfoDialogShows() {
+    try (MockedStatic<InfoDialog> mockInfo = mockStatic(InfoDialog.class)) {
+      dispatcher.dispatch(Action.INFO);
+      mockInfo.verify(InfoDialog::show, times(1));
+    }
+  }
+
+  /**
+   * @brief Test that QUIT action calls Platform.exit().
+   */
+  @Test
+  void testQuitCallsPlatformExit() {
+    try (MockedStatic<Platform> mockPlatform = mockStatic(Platform.class)) {
+      dispatcher.dispatch(Action.QUIT);
+      mockPlatform.verify(Platform::exit, times(1));
+    }
+  }
 }

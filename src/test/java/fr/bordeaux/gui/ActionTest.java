@@ -46,6 +46,5 @@ class ActionTest {
   void testInvalidValueOf() {
     Executable executable = () -> Action.valueOf("INVALID");
     assertThrows(IllegalArgumentException.class, executable);
-    // assertThrows(IllegalArgumentException.class, () -> Action.valueOf("INVALID"));
   }
 }

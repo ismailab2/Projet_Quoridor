@@ -28,15 +28,14 @@ public class QuoridorApp extends Application {
     MainMenuBar menuBar = new MainMenuBar(dispatcher);
     root.setTop(menuBar);
 
-    // BoardView in center
     BoardView boardView = new BoardView(engine);
     root.setCenter(boardView);
-    ;
+    // Attach drag-and-drop functionality
+    DragAndDrop.install(engine, boardView);
 
-    // Scene
+    //
     Scene scene = new Scene(root, 900, 700);
 
-    // Shortcuts
     ShortcutManager manager = ShortcutManager.getInstance();
     manager.setDispatcher(dispatcher);
     manager.register(scene);
