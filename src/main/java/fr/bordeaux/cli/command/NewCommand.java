@@ -1,6 +1,6 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.AI.*;
+import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
 import java.util.Arrays;
 import java.util.List;

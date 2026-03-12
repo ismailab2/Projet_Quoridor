@@ -1,9 +1,9 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
-import fr.bordeaux.AI.RandomPlayer;
+import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.NeuralNetPlayer;
+import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;

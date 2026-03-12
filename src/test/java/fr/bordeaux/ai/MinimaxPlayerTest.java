@@ -1,4 +1,4 @@
-package fr.bordeaux.AI;
+package fr.bordeaux.ai;
 
 import static org.junit.jupiter.api.Assertions.*;
 

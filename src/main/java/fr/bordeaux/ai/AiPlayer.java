@@ -1,4 +1,4 @@
-package fr.bordeaux.AI;
+package fr.bordeaux.ai;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
