@@ -2,18 +2,35 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 
+/**
+ * Command that displays help information for the CLI. It can show a global help message or detailed
+ * help for a specific command.
+ */
 public class HelpCommand implements Command {
 
   private String[] tokens;
 
+  /** Creates a HelpCommand without specific tokens. Used when no command arguments are provided. */
   public HelpCommand() {
     this.tokens = null;
   }
 
+  /**
+   * Creates a HelpCommand with the given command tokens.
+   *
+   * @param t the tokens entered by the user in the CLI
+   */
   public HelpCommand(String[] t) {
     this.tokens = t;
   }
 
+  /**
+   * Executes the help command. Displays the general help message or the help for a specific command
+   * depending on the provided tokens.
+   *
+   * @param engine the current game engine
+   * @return the unchanged game engine
+   */
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens == null) {
@@ -26,11 +43,13 @@ public class HelpCommand implements Command {
     return engine;
   }
 
+  /** Displays a short help description for this command. */
   @Override
   public void helpText() {
     System.out.println("Rien");
   }
 
+  /** Displays the global help message listing all available CLI commands. */
   public void helpCli() {
     System.out.println("/=== Quoridor Command Line Help ===/\n");
     System.out.println("Commands :\n");
@@ -64,6 +83,10 @@ public class HelpCommand implements Command {
     ;
   } */
 
+  /**
+   * Displays detailed help for a specific command based on the user input. The command is
+   * determined from the provided tokens.
+   */
   public void helpFetch() {
     if (this.tokens.length <= 1) System.out.println("Un truc à expliquer");
     else {

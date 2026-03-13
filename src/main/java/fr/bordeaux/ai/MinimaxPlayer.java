@@ -1,4 +1,4 @@
-package fr.bordeaux.AI;
+package fr.bordeaux.ai;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
@@ -19,10 +19,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-/** Represents an Ai player with Minimax */
-public class MinimaxPlayer
-    extends AiPlayer { // MiniMax and IterativeDeepening are limited because it works with only 2
-  // players. They will not work if the number of players is larger.
+/**
+ * Represents an AI player using the Minimax algorithm for the Quorridor game. Features advanced
+ * capabilities such as Alpha-Beta pruning, Iterative Deepening, and a configurable reflection time
+ * limit. * Note: Minimax and Iterative Deepening are currently limited to 2-player scenarios. They
+ * may not function correctly if the number of players is larger.
+ */
+public class MinimaxPlayer extends AiPlayer {
 
   private int depth;
   private int reflexionTime = 5; // In seconds
@@ -34,6 +37,11 @@ public class MinimaxPlayer
   private final boolean isIterativeDeepening;
   private final String heuristicName;
 
+  /**
+   * Private constructor used by the Builder to instantiate the AI.
+   *
+   * @param builder The builder containing configuration settings.
+   */
   private MinimaxPlayer(Builder builder) {
     super(builder.name, builder.positionStart);
     this.depth = builder.depth;
@@ -48,6 +56,10 @@ public class MinimaxPlayer
     setHeuristic(heuristicName);
   }
 
+  /**
+   * Utility class implementing the Builder design pattern to configure and instantiate a
+   * MinimaxPlayer.
+   */
   public static class Builder {
     private final String name;
     private final Position positionStart;
@@ -56,6 +68,12 @@ public class MinimaxPlayer
     private boolean isIterativeDeepening = false;
     private String heuristicName = "h1";
 
+    /**
+     * Initializes the Builder with mandatory parameters.
+     *
+     * @param name The AI's name.
+     * @param pos The starting position on the board.
+     */
     public Builder(String name, Position pos) {
       this.name = name;
       this.positionStart = pos;
@@ -91,6 +109,12 @@ public class MinimaxPlayer
       return false;
     }
 
+    /**
+     * Builds the final MinimaxPlayer instance.
+     *
+     * @return A new MinimaxPlayer instance.
+     * @throws IllegalArgumentException if the heuristic name, depth, or reflection time is invalid.
+     */
     public MinimaxPlayer build() {
       if (!validHeuristic(heuristicName)) {
         throw new IllegalArgumentException(
@@ -115,6 +139,11 @@ public class MinimaxPlayer
     return new Builder(name, pos);
   }
 
+  /**
+   * Sets the heuristic function used by the AI to evaluate game states.
+   *
+   * @param nameH The name of the heuristic ("h1", "h2", or "h3").
+   */
   public void setHeuristic(String nameH) {
     switch (nameH) {
       case "h2":
@@ -128,6 +157,14 @@ public class MinimaxPlayer
     }
   }
 
+  /**
+   * Computes and returns the best possible move within the allocated time. Uses an ExecutorService
+   * to interrupt the search if the time limit is reached.
+   *
+   * @param state The current game state.
+   * @return The best move found, or a random(alpha-beta pruning)/saved(Iterative Deepening) move if
+   *     interrupted.
+   */
   @Override
   public Move getNextMove(GameState state) {
 
@@ -157,6 +194,13 @@ public class MinimaxPlayer
     }
   }
 
+  /**
+   * Implements Iterative Deepening search. Repeatedly calls Minimax with increasing depth (starting
+   * from 1) until the thread is interrupted by a timeout.
+   *
+   * @param state The current game state.
+   * @return The best move found at the maximum depth reached.
+   */
   private Move IterativeDeepening(GameState state) {
     int currentdepth = 1;
     while (!Thread.currentThread().isInterrupted()) {
@@ -175,6 +219,13 @@ public class MinimaxPlayer
     return saveMove;
   }
 
+  /**
+   * Entry point for the Minimax algorithm. Explores the first level of legal moves.
+   *
+   * @param g The current game state.
+   * @param d The search depth.
+   * @return The best evaluated move.
+   */
   private Move MiniMax(GameState g, int d) {
 
     Move best_move = null;
@@ -196,6 +247,16 @@ public class MinimaxPlayer
     return best_move;
   }
 
+  /**
+   * MAX node of the Minimax algorithm with Alpha-Beta pruning. Maximize the score for the AI
+   * player.
+   *
+   * @param g The game state.
+   * @param d The remaining depth.
+   * @param alpha The best value guaranteed for MAX.
+   * @param beta The best value guaranteed for MIN.
+   * @return The maximized score.
+   */
   private int MaxMin(GameState g, int d, int alpha, int beta) {
 
     if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
@@ -213,6 +274,16 @@ public class MinimaxPlayer
     return alpha;
   }
 
+  /**
+   * MIN node of the Minimax algorithm with Alpha-Beta pruning. Minimize the AI's score
+   * (representing the opponent's best response).
+   *
+   * @param g The game state.
+   * @param d The remaining depth.
+   * @param alpha The best value guaranteed for MAX.
+   * @param beta The best value guaranteed for MIN.
+   * @return The minimized score.
+   */
   private int MinMax(GameState g, int d, int alpha, int beta) {
 
     if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
@@ -230,18 +301,26 @@ public class MinimaxPlayer
     return beta;
   }
 
-  private Move randomMove(
-      GameState
-          g) { // It is not planned to be able to launch it in the game, it will just be used for
-    // testing
+  /**
+   * Plays a random move. Used by the Minimax algorithm with Alpha-Beta pruning when reflexion time
+   * is over
+   *
+   * @param g The game state.
+   * @return A random legal move.
+   */
+  private Move randomMove(GameState g) {
     List<Move> l = g.generateLegalMoves();
     Random random = new Random();
     return l.get(random.nextInt(l.size()));
   }
 
-  // Simple heuristic that count the difference between the column current position and the column
-  // start position.
-  // If the player start at the first row, this heuristic compare row instead of columns
+  /**
+   * Heuristic 1 (Simple): Calculates the direct distance covered by the AI. Compares rows or
+   * columns based on the player's starting side.
+   *
+   * @param g The game state to evaluate.
+   * @return An integer score based on spatial progression.
+   */
   private int h1(GameState g) {
 
     List<Player> lp = g.getPlayers();
@@ -267,7 +346,13 @@ public class MinimaxPlayer
     }
   }
 
-  // Very similar than the previous one but now we also make importance at the enemie position
+  /**
+   * Heuristic 2 (Intermediate): Considers both the AI's and the opponent's positions. Calculates
+   * the difference between the AI's progress and the opponent's progress.
+   *
+   * @param g The game state to evaluate.
+   * @return A relative score favoring the AI's lead over the opponent.
+   */
   private int h2(GameState g) {
     List<Player> lp = g.getPlayers();
     Player enemie = null;
@@ -303,9 +388,16 @@ public class MinimaxPlayer
     }
   }
 
+  /**
+   * Heuristic 3 (Advanced): Uses Breadth-First Search (BFS) to find the actual shortest path to the
+   * goal and incorporates remaining wall counts weighted by coefficients K1 and K2. We will use a
+   * neuronal network to determine them.
+   *
+   * @param g The game state to evaluate.
+   * @return A comprehensive score combining pathfinding (BFS) and material advantage (walls).
+   */
   private int h3(GameState g) {
-    // K1 and K2 are the coefficients of wall remaining for the player and his enemie, at the end of
-    // the project we will use a neuronal network to determine them.
+
     float k1 = 1.2f;
     float k2 = 0.8f;
 
@@ -349,6 +441,13 @@ public class MinimaxPlayer
     return scoreBFS + scoreWall;
   }
 
+  /**
+   * Simulates a move (pawn movement or wall placement) and updates the game state. The move is
+   * pushed onto IAStack to allow for backtracking.
+   *
+   * @param g The current game state.
+   * @param move The move to simulate.
+   */
   private void push(GameState g, Move move) {
     Player player = g.getCurrentPlayer();
     if (move.isPawn()) {
@@ -362,6 +461,11 @@ public class MinimaxPlayer
     g.getNextPlayer();
   }
 
+  /**
+   * Backtracks the last simulated move by popping from IAStack, restoring the previous game state.
+   *
+   * @param g The game state to restore.
+   */
   private void pop(GameState g) {
     if (IAStack.isEmpty()) return;
 
@@ -395,6 +499,7 @@ public class MinimaxPlayer
         this.heuristicName);
   }
 
+  /** Private constructor used by the copy() method for cloning the AI player. */
   private MinimaxPlayer(
       String name,
       Position current,
@@ -417,11 +522,6 @@ public class MinimaxPlayer
       mode = (state) -> MiniMax(state, this.depth);
     }
     setHeuristic(h);
-  }
-
-  @Override
-  public Boolean isAI() {
-    return true;
   }
 
   @Override

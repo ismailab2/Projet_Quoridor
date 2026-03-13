@@ -10,7 +10,7 @@
     <artifactId>quoridor</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <!-- ================= PROPERTIES ================= -->
+    <!-- ================ PROPERTIES ================= -->
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -193,6 +193,28 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>fr.bordeaux.gui.QuoridorApp</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- PMD Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.26.0</version>
+                <configuration>
+                <rulesets>
+                    <!-- If you want to start small, take only this line -->
+                    <!-- <ruleset>/rulesets/java/quickstart.xml</ruleset> -->
+                    <!-- All the rulesets -->
+                    <ruleset>/category/java/bestpractices.xml</ruleset>
+                    <ruleset>/category/java/codestyle.xml</ruleset>
+                    <ruleset>/category/java/design.xml</ruleset>
+                    <ruleset>/category/java/documentation.xml</ruleset>
+                    <ruleset>/category/java/errorprone.xml</ruleset>
+                    <ruleset>/category/java/multithreading.xml</ruleset>
+                    <ruleset>/category/java/performance.xml</ruleset>
+                    <ruleset>/category/java/security.xml</ruleset>
+                </rulesets>
                 </configuration>
             </plugin>
 

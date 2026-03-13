@@ -4,7 +4,6 @@ import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.util.List;
-import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.completer.StringsCompleter;
@@ -14,21 +13,35 @@ import org.jline.terminal.TerminalBuilder;
 public class CliApp {
 
   private GameEngine engine;
-  private boolean running = true;
   private Terminal terminal;
   private LineReader reader;
-  private Completer completer;
+  private boolean running = true;
 
-  public CliApp(GameEngine e, Terminal t, LineReader r) {
-    engine = e;
-    terminal = t;
-    reader = r;
-    completer =
-        new StringsCompleter(
-            "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo", "set");
-    reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
+  /**
+   * Creates a CLI application with a specific game engine, terminal and reader.
+   *
+   * @param e the game engine used to run the game
+   * @param t the terminal used for input/output
+   * @param r the line reader used to read user commands
+   */
+  public CliApp(GameEngine engine, Terminal terminal, LineReader reader) {
+    this.engine = engine;
+    this.terminal = terminal;
+    this.reader = reader;
+    reader =
+        LineReaderBuilder.builder()
+            .terminal(terminal)
+            .completer(
+                new StringsCompleter(
+                    "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
+                    "set"))
+            .build();
   }
 
+  /**
+   * Creates a CLI application with a default game configuration. Initializes a board and two human
+   * players positioned on it.
+   */
   public CliApp() {
     this(
         new GameEngine(
@@ -39,40 +52,51 @@ public class CliApp {
                     new HumanPlayer("Bob", new Position(8, 4))))));
   }
 
+  /**
+   * Indicates whether the CLI application is still running.
+   *
+   * @return true if the application loop is active, false otherwise
+   */
   public boolean isRunning() {
     return running;
   }
 
+  /**
+   * Returns the current game engine used by the CLI.
+   *
+   * @return the current GameEngine instance
+   */
   public GameEngine getEngine() {
     return engine;
   }
 
-  public CliApp(GameEngine e) {
+  /**
+   * Creates a CLI application using the provided game engine. Initializes the terminal, command
+   * auto-completion and line reader.
+   *
+   * @param e the game engine used to run the game
+   */
+  public CliApp(GameEngine engine) {
     try {
       terminal = TerminalBuilder.builder().system(true).build();
-      completer =
-          new StringsCompleter(
-              "help",
-              "quit",
-              "new",
-              "save",
-              "load",
-              "show board",
-              "show time",
-              "show configurations",
-              "show history",
-              "hint",
-              "pause",
-              "undo",
-              "redo",
-              "set");
-      reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
+      reader =
+          LineReaderBuilder.builder()
+              .terminal(terminal)
+              .completer(
+                  new StringsCompleter(
+                      "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo",
+                      "redo", "set"))
+              .build();
     } catch (Exception exc) {
       exc.printStackTrace();
     }
-    this.engine = e;
+    this.engine = engine;
   }
 
+  /**
+   * Starts the CLI loop. Displays the board at startup and continuously reads user commands until
+   * the application is stopped.
+   */
   public void run() {
     if (engine != null) {
       ShowCommand show = new ShowCommand(new String[] {"show", "board"});
@@ -91,6 +115,12 @@ public class CliApp {
     }
   }
 
+  /**
+   * Parses the user input and executes the corresponding command. If the command is not recognized,
+   * it is interpreted as a move.
+   *
+   * @param input the raw command entered by the user
+   */
   public void fetch(String input) {
     String[] tokens = input.trim().split("\\s+");
     String command = tokens[0].toLowerCase();

@@ -1,29 +1,18 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.AI.AiPlayer;
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
-import fr.bordeaux.AI.RandomPlayer;
+import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.NeuralNetPlayer;
+import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
 
-public class GameSerializer {
+public class GameLoader {
   // Board size : always 9x9
   private static final int SIZE = 9;
 
   private static final int BOARD_START = 3;
-
-  // Saves the current game state to an ASCII file
-  public static void saveGame(GameState state, String filename) throws IOException {
-    try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-      saveParameters(writer, state); // write all parameters needed to play the game
-      writeHeader(writer, state); // writes [game], current player, comment
-      writeBoard(writer, state); // writes cells and walls
-      writeWalls(writer, state); // writes "walls: 10 10"
-    }
-  }
 
   // Loads a file and reconstructs the GameState
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
@@ -36,80 +25,14 @@ public class GameSerializer {
     Board board = new Board(SIZE); // creates empty 9x9 board
     readBoard(lines, board, players, currentLine); // places walls and players
     readRemainingWalls(lines, players, currentLine); // restores wall counts
-    return new GameState(board, players, readCurrentPlayer(lines, currentLine));
-  }
 
-  // Writes the 3 header lines : [game], current player, comment
-  private static void writeHeader(PrintWriter writer, GameState state) {
-    writer.println("[game]");
-    writer.println((state.getCurrentIndexPlayer() + 1) + "  # Current player color");
-    writer.println("# Board (" + state.getPlayers().size() + " players)");
-  }
-
-  // Writes all rows of the board : cell lines + wall lines
-  private static void writeBoard(PrintWriter writer, GameState state) {
-    Board board = state.getBoard();
-    for (int row = 0; row < SIZE; row++) {
-      writer.println(buildCellLine(row, board, state.getPlayers()));
-      // Write horizontal wall line between rows (not after last row)
-      if (row < SIZE - 1) writer.println(buildWallLine(row, board));
+    List<Move> history = new ArrayList<>();
+    readHistory(lines, history);
+    GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
+    for (Move m : history) {
+      gameState.applyMove(m);
     }
-  }
-
-  // Builds one cell line for a given row
-  // Example : ". . . . 1 . . . ." or ". . .|. . . . . ."
-  private static String buildCellLine(int row, Board board, List<Player> players) {
-    StringBuilder line = new StringBuilder();
-    for (int col = 0; col < SIZE; col++) {
-      // Add '|' if there is a vertical wall between col-1 and col
-      if (col > 0) line.append(hasVerticalWall(board, row, col) ? '|' : ' ');
-      // Add player number '1'/'2' or '.' if cell is empty
-      line.append(getCellChar(row, col, players));
-    }
-    return line.toString();
-  }
-
-  // Builds one horizontal wall line between two rows
-  private static String buildWallLine(int row, Board board) {
-    StringBuilder line = new StringBuilder();
-    for (int col = 0; col < SIZE; col++) {
-      if (col > 0) line.append(" ");
-      // Add '_' if there is a horizontal wall between row and row+1
-      line.append(hasHorizontalWall(board, row, col) ? '_' : ' ');
-    }
-    return line.toString();
-  }
-
-  // Returns the character to display for a given cell
-  // '1' for player 1, '2' for player 2, '.' for empty cell
-  private static char getCellChar(int row, int col, List<Player> players) {
-    for (int i = 0; i < players.size(); i++) {
-      Position position = players.get(i).getPosition();
-      if (position.getX() == row && position.getY() == col) {
-        return (char) ('1' + i);
-      }
-    }
-    return '.';
-  }
-
-  // Returns true if there is a vertical wall between col-1 and col
-  private static boolean hasVerticalWall(Board board, int row, int col) {
-    return !board.getGraph().hasEdge(board.id(row, col - 1), board.id(row, col));
-  }
-
-  // Returns true if there is a horizontal wall between row and row+1
-  private static boolean hasHorizontalWall(Board board, int row, int col) {
-    return !board.getGraph().hasEdge(board.id(row, col), board.id(row + 1, col));
-  }
-
-  // Writes the remaining walls for each player
-  // Example : "walls: 10 10"
-  private static void writeWalls(PrintWriter writer, GameState state) {
-    StringBuilder line = new StringBuilder("walls:");
-    for (Player player : state.getPlayers()) {
-      line.append(" ").append(player.getRemainingWalls());
-    }
-    writer.println(line);
+    return gameState;
   }
 
   // Opens the file and reads all lines into a list
@@ -130,8 +53,12 @@ public class GameSerializer {
           "ERREUR_ENTETE", 1, "Expected [game] but found : " + lines.get(currentLine));
   }
 
-  // Checks that the first line is "[settings]"
-  // If not, throws GameLoadException with error type and line number
+  /**
+   * Checks that the first line of the save file contains the expected settings header.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @throws GameLoadException if the header is missing or incorrect.
+   */
   private static void validateSettingsHeader(List<String> lines) throws GameLoadException {
     if (!lines.get(0).equals("[settings] # Paramètres du programme"))
       throw new GameLoadException(
@@ -193,54 +120,30 @@ public class GameSerializer {
     }
   }
 
-  private static void writeLine(PrintWriter writer, String key, Object value) {
-    writer.println(key + "=" + value);
-  }
+  /**
+   * Internal record used to bundle a parsed player and the index of the next line to read.
+   *
+   * @param player The parsed player instance.
+   * @param nextLine The index of the next line in the file.
+   */
+  private record PlayerAndLine(Player player, int nextLine) {}
 
-  private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer new_p, int i) {
-    writeLine(w, "ai-player-" + i + "-name", new_p.getName());
-    writeLine(w, "ai-player-" + i + "-starting-position", new_p.getStartingPosition().toString());
-    Map<String, Object> aiSettings = new_p.getSettings();
-    for (String s : aiSettings.keySet()) {
-      writeLine(w, s, aiSettings.get(s));
-    }
-  }
+  /**
+   * Internal record used to bundle the list of all parsed players and the index of the next line.
+   *
+   * @param players The list of all parsed players.
+   * @param nextLine The index of the line where player and settings parsing stopped.
+   */
+  private record AllPlayerAndLine(List<Player> players, int nextLine) {}
 
-  private static void saveParameters(PrintWriter w, GameState g) {
-    w.println("[settings] # Paramètres du programme");
-
-    writeLine(w, "verbose", g.isVerbose());
-    writeLine(w, "blitz", g.isBlitz());
-    writeLine(w, "constest", g.isContest());
-    writeLine(w, "ai", g.isAi());
-    writeLine(w, "turns-limit", g.getTurnLimit());
-    writeLine(w, "debug", g.isDebug());
-    writeLine(w, "nb-players", g.getPlayers().size());
-
-    int i = 1;
-    for (Player p : g.getPlayers()) {
-      if (p.isAI()) {
-        AiPlayer new_p = ((AiPlayer) p);
-        saveAiSettings(w, g, new_p, i);
-      } else {
-
-        // writeLine(w, "player-"+i+"-remaining-time" ,  p.getRemainingTime());
-
-        writeLine(w, "player-" + i + "-name", p.getName());
-
-        writeLine(w, "player-" + i + "-starting-position", p.getStartingPosition().toString());
-      }
-      i++;
-    }
-  }
-
-  private record PlayerAndLine(
-      Player player, int nextLine) {} // structure to return the player and the last line read
-
-  private record AllPlayerAndLine(
-      List<Player> players,
-      int nextLine) {} // structure to return the player and the last line read
-
+  /**
+   * Reads and parses all players (Human and AI) from the save file. Stops reading when it
+   * encounters the "[game]" section marker.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @return An {@link AllPlayerAndLine} object containing the list of players and the next line
+   *     index.
+   */
   private static AllPlayerAndLine readAllPlayer(List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
     int currentLine = 8; // 8 because its at the 9 lines that starts the informations about players
@@ -252,6 +155,15 @@ public class GameSerializer {
     return new AllPlayerAndLine(lPlayers, currentLine);
   }
 
+  /**
+   * Reads a single player's basic information (type, name, starting position) and delegates to
+   * specific methods for AI configuration if necessary.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @param currentLine The index of the line where the player's information begins.
+   * @return A {@link PlayerAndLine} record containing the instantiated player and the updated line
+   *     index.
+   */
   private static PlayerAndLine readPlayer(List<String> lines, int currentLine) {
 
     String p = lines.get(currentLine);
@@ -267,6 +179,12 @@ public class GameSerializer {
     }
   }
 
+  /**
+   * Parses the starting position coordinates from a formatted string.
+   *
+   * @param p The string containing the position data (e.g., "key=Position: 4, 0").
+   * @return A {@link Position} object representing the parsed coordinates.
+   */
   private static Position readPlayerStartPosition(String p) {
     String p_start_pos = p.split("=")[1];
     String p_start_pos_coord = p_start_pos.split(":")[1];
@@ -278,6 +196,18 @@ public class GameSerializer {
     return new Position(x, y);
   }
 
+  /**
+   * Parses the configuration of an AI player and instantiates the correct AI type (Minimax, MCTS,
+   * Neural Network, etc.) based on its settings.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @param currentLine The current line index after reading basic player info.
+   * @param p_name The parsed name of the AI player.
+   * @param p_postion The parsed starting position of the AI.
+   * @return A {@link PlayerAndLine} record containing the fully configured AI player and the
+   *     updated line index.
+   * @throws IllegalArgumentException if the AI mode specified in the file is unknown.
+   */
   private static PlayerAndLine readAiPlayer(
       List<String> lines, int currentLine, String p_name, Position p_postion) {
     Map<String, String> aiSettings = new HashMap<>();
@@ -327,7 +257,73 @@ public class GameSerializer {
     }
   }
 
+  /**
+   * Checks if the current line starts with the prefix "ai", indicating it contains an AI setting.
+   *
+   * @param lines The list of strings representing the lines of the save file.
+   * @param currentLine The index of the line to check.
+   * @return {@code true} if the line starts with "ai", {@code false} otherwise.
+   */
   private static boolean checkStartByAi(List<String> lines, int currentLine) {
     return lines.get(currentLine).startsWith("ai");
+  }
+
+  private static Position coordToPos(String coord) {
+    int y = coord.charAt(0) - 'a';
+    int x = Integer.parseInt(coord.substring(1)) - 1;
+    return new Position(x, y);
+  }
+
+  private static void readHistory(List<String> lines, List<Move> history) {
+    boolean inHistory = false;
+
+    for (String line : lines) {
+      String trimmed = line.trim();
+
+      // Detect section start
+      if (trimmed.equals("[History]")) {
+        inHistory = true;
+        continue;
+      }
+
+      // Skip until we reach the section
+      if (!inHistory) continue;
+
+      // Stop if a new section starts
+      if (trimmed.startsWith("[")) break;
+
+      // Skip empty lines
+      if (trimmed.isEmpty()) continue;
+
+      // Split line by ';' to get individual moves: "1 e2-e3"
+      String[] parts = trimmed.split(";");
+      for (String part : parts) {
+        String moveStr = part.trim();
+        if (moveStr.isEmpty()) continue;
+
+        // Split player number and move: ["1", "e2-e3"]
+        String[] tokens = moveStr.split(" ");
+        if (tokens.length < 2) continue;
+
+        String desc = tokens[1]; // e.g., "e2-e3" or "e3v"
+        Move move;
+
+        if (desc.contains("-")) {
+          // Handle Pawn Move: "e2-e3"
+          String[] coords = desc.split("-");
+          move = Move.pawn(coordToPos(coords[0]), coordToPos(coords[1]));
+        } else {
+          // Handle Wall Placement: "e3v"
+          String posStr = desc.substring(0, desc.length() - 1); // "e3"
+          char orientChar = desc.charAt(desc.length() - 1); // 'v' or 'h'
+
+          Orientation orient = (orientChar == 'h') ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+          move = Move.wall(coordToPos(posStr), orient);
+        }
+
+        // Add to list in chronological order
+        history.add(move);
+      }
+    }
   }
 }

@@ -1,4 +1,4 @@
-package fr.bordeaux.AI;
+package fr.bordeaux.ai;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
@@ -36,11 +36,6 @@ public class NeuralNetPlayer extends AiPlayer {
   @Override
   public String toString() {
     return "AI " + super.toString();
-  }
-
-  @Override
-  public Boolean isAI() {
-    return true;
   }
 
   @Override

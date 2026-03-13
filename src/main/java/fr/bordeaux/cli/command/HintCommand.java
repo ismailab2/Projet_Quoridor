@@ -1,6 +1,6 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.AI.MinimaxPlayer;
+import fr.bordeaux.ai.MinimaxPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Move.Type;

@@ -4,6 +4,13 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
 
+/**
+ * Manages application configuration using a singleton pattern. Configuration is stored in a file
+ * located in the user's home directory.
+ *
+ * <p>Priority order for configuration values: 1. Default values 2. Values from the configuration
+ * file (.qoridorrc) 3. Command-line arguments (highest priority)
+ */
 public class ConfigManager {
 
   /** Singleton instance of ConfigManager */

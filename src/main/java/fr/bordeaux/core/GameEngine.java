@@ -1,6 +1,6 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameLoader;
 import java.io.IOException;
 
 public class GameEngine {
@@ -42,7 +42,7 @@ public class GameEngine {
 
   public void loadGame(String filename) {
     try {
-      state = GameSerializer.loadGame(filename);
+      state = GameLoader.loadGame(filename);
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());
     }

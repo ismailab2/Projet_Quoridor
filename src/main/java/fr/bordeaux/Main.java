@@ -2,7 +2,6 @@ package fr.bordeaux;
 
 import static fr.bordeaux.core.Orientation.*;
 
-import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.core.*;
 import java.util.List;
 
@@ -20,8 +19,8 @@ public class Main {
     GameEngine engine = new GameEngine(state);
     engine.play(Move.wall(new Position(2, 4), HORIZONTAL));
     System.out.println(engine.getState().getPlayers());
-    CliApp cli = new CliApp(engine);
-    cli.run();
+    // CliApp cli = new CliApp(engine);
+    // cli.run();
 
     System.out.println("--- Début de la partie de Quoridor ---");
     System.out.println("Plateau de taille : " + board.getSize());

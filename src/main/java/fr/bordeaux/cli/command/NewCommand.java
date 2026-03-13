@@ -1,6 +1,6 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.AI.*;
+import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
 import java.util.Arrays;
 import java.util.List;
@@ -106,9 +106,8 @@ public class NewCommand implements Command {
           }
         }
       }
-      engine = new GameEngine(new GameState(board, Arrays.stream(players).toList()));
+      return new GameEngine(new GameState(board, Arrays.stream(players).toList()));
     }
-    return engine;
   }
 
   @Override

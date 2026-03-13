@@ -1,7 +1,8 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.persistence.GameLoadException;
-import fr.bordeaux.persistence.GameSerializer;
+import fr.bordeaux.persistence.GameLoader;
+import fr.bordeaux.persistence.GameSaver;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
@@ -50,8 +51,7 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
-  // Apply a move, needs to be a valid move because it won't be checked in this function.
-  // Check victory is not done here as well
+  // Apply a move, needs to be a valid move.
   public void applyMove(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
@@ -67,7 +67,7 @@ public class GameState {
     notifyListeners();
   }
 
-  private void applyMoveWithoutClearingRedo(Move move) {
+  public void applyMoveWithoutClearingRedo(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -172,11 +172,11 @@ public class GameState {
   }
 
   public void saveGame(String filename) throws IOException {
-    GameSerializer.saveGame(this, filename);
+    GameSaver.saveGame(this, filename);
   }
 
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    return GameSerializer.loadGame(filename);
+    return GameLoader.loadGame(filename);
   }
 
   public GameState reset() {
@@ -224,7 +224,7 @@ public class GameState {
 
     if (getCurrentPlayer().getRemainingWalls() > 0) {
       for (x = 0; x < board.getSize() - 1; x++) {
-        for (y = 1; y < board.getSize(); y++) {
+        for (y = 0; y < board.getSize() - 1; y++) {
           Position pos_wall = new Position(x, y);
 
           all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
