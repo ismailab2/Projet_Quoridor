@@ -2,6 +2,7 @@ package fr.bordeaux.cli;
 
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.function.Function;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import java.awt.Toolkit;
 
 public class CliApp {
 
