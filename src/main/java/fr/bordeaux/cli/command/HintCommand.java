@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MCTSPlayer.Node;
+import fr.bordeaux.AI.MinimaxPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
@@ -10,19 +9,17 @@ import fr.bordeaux.core.Move.Type;
 
 public class HintCommand implements Command {
 
-  public HintCommand() {
-    ;
-  }
+  public HintCommand() { }
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
+    MinimaxPlayer ia = MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition()).build();
     Move hint = ia.getNextMove(engine.getState());
     String bestMove = "";
     if (hint.getType() == Type.PAWN) {
       bestMove = posToString(hint.getFrom()) + "-" + posToString(hint.getTo());
     } else {
-      char orientationChar = (hint.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v');
+      char orientationChar = hint.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
       bestMove = posToString(hint.getTo()) + orientationChar;
     }
     System.out.println("Best move : " + bestMove);

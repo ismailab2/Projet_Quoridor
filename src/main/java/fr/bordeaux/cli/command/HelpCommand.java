@@ -52,9 +52,9 @@ public class HelpCommand implements Command {
     System.out.println("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
   }
 
-  public void helpMove() {
+  /* public void helpMove() {
     ;
-  }
+  } */
 
 
   public void helpFetch() {

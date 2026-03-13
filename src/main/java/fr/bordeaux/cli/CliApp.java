@@ -2,14 +2,6 @@ package fr.bordeaux.cli;
 
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
-import fr.bordeaux.graph.Graph;
-import fr.bordeaux.cli.command.*;
-import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.util.List;
 import org.jline.reader.Completer;
@@ -88,7 +80,7 @@ public class CliApp {
         }
       case "quit":
         {
-          cmd = new QuitCommand(terminal, reader);
+          cmd = new QuitCommand(reader);
           this.running = false;
           break;
         }

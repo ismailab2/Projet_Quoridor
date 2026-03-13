@@ -1,19 +1,14 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.AI.*;
-import fr.bordeaux.cli.CliApp;
-import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 
 public class NewCommand implements Command {
 
@@ -42,7 +37,7 @@ public class NewCommand implements Command {
         if (tokens.length == 1) return new GameEngine(new GameState(new Board(size+1), List.of(new HumanPlayer("Human", new Position(0, 4)), new HumanPlayer("Bob", new Position(8, 4)))));
         else {
             int nbPlayer = tokens.length <= 2 ? 2:Integer.parseInt(tokens[2]);
-            Board board = new Board(size);
+            Board board = new Board(size+1);
             Player[] players = new Player[nbPlayer];
             
             for (int i = 0; i < nbPlayer; i++) {

@@ -81,14 +81,14 @@ public class ShowCommand implements Command {
       for (int j = 0; j < boardSize; j++) {
         int id = 1;
         for (Player player : engine.getState().getPlayers()) {
-          if ((player.getPosition()).equals(new Position(i, j))) {
+          if (player.getPosition().equals(new Position(i, j))) {
             System.out.print(id + printWall(b, i, j, false));
             empty = false;
           } id++;
         }
         if (empty) System.out.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
         empty = true;
-        if (j == boardSize - 1) System.out.print((i + 1));
+        if (j == boardSize - 1) System.out.print(i + 1);
       }
       if (i == boardSize - 1) break;
       System.out.println("");

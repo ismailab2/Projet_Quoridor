@@ -4,20 +4,17 @@ import fr.bordeaux.core.GameEngine;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
-import org.jline.terminal.Terminal;
 
 public class QuitCommand implements Command {
 
-  private Terminal terminal;
   private LineReader reader;
 
-  public QuitCommand(Terminal t, LineReader r) {
-    terminal = t;
+  public QuitCommand(LineReader r) {
     reader = r;
   }
 
   public QuitCommand() {
-    this(null, null);
+    this(null);
   }
 
   @Override
