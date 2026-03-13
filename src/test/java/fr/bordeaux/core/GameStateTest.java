@@ -216,5 +216,15 @@ public class GameStateTest {
       }
     }
     assertTrue(moves.containsAll( game.generateLegalMoves()));
+
+    game.applyMove(Move.wall(new Position(0, 0), Orientation.HORIZONTAL));
+    p = game.getCurrentPlayer().getPosition();
+    List<Move> moves2 = new ArrayList<>(List.of(Move.pawn(p, new Position(1, 0)), Move.pawn(p, new Position(1, 2)), Move.pawn(p, new Position(2, 1))));
+
+    moves2.add(Move.wall(new Position(1, 0), Orientation.HORIZONTAL));
+    moves2.add(Move.wall(new Position(1, 0), Orientation.VERTICAL));
+    moves2.add(Move.wall(new Position(1, 1), Orientation.HORIZONTAL));
+
+    assertTrue(moves2.containsAll( game.generateLegalMoves()));
   }
 }

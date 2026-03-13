@@ -4,6 +4,11 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import main.java.fr.bordeaux.AI.AdvancedHeuristic;
+import main.java.fr.bordeaux.AI.HeuristicEvaluator;
+import main.java.fr.bordeaux.AI.MediumHeuristic;
+import main.java.fr.bordeaux.AI.SimpleHeuristic;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -17,24 +22,38 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
- * Represents an AI player using the Minimax algorithm for the Quorridor game. Features advanced
- * capabilities such as Alpha-Beta pruning, Iterative Deepening, and a configurable reflection time
- * limit. * Note: Minimax and Iterative Deepening are currently limited to 2-player scenarios. They
- * may not function correctly if the number of players is larger.
+ * Represents an AI player using the Minimax algorithm for the Quorridor game.
+ * Features advanced capabilities such as Alpha-Beta pruning, 
+ * Iterative Deepening, and a configurable reflection time limit. 
+ * Note: AI are currently limited to 2-player scenarios.
+ * They may not function correctly if the number of players is larger.
  */
 public final class MinimaxPlayer extends AiPlayer {
 
-  private int depth;
-  private int reflexionTime = 5; // In seconds
-  private final ExecutorService aiExecutor = Executors.newSingleThreadExecutor();
-  private volatile Move saveMove = null;
-  private Function<GameState, Move> mode;
-  private Function<GameState, Integer> heuristic; // h1 Default heuristic
+  /** The maximum depth the AI will search if iterative deepening is disabled. */
+  private final int searchDepth;
+
+  /** The maximum reflection time allowed for the AI in seconds. */
+  private final int reflexionTime;
+
+  /** The operational mode function applied to find the next move. */
+  private final BiFunction<GameState, Long, Move> mode;
+
+  /** The heuristic evaluation strategy. */
+  private final HeuristicEvaluator heuristicFunction;
+
+  /** Stack used to keep track of moves for backtracking. */
   private final Deque<Move> aiStack = new ArrayDeque<>();
-  private final boolean isIterativeDeepening;
+
+  /** Flag indicating whether iterative deepening is enabled. */
+  private final boolean useIterativeDeepening;
+
+  /** The name of the heuristic algorithm to use. */
   private final String heuristicName;
 
   /**
@@ -44,16 +63,43 @@ public final class MinimaxPlayer extends AiPlayer {
    */
   private MinimaxPlayer(Builder builder) {
     super(builder.name, builder.positionStart);
-    this.depth = builder.depth;
+    this.searchDepth = builder.searchDepth;
     this.reflexionTime = builder.reflexionTime;
-    this.isIterativeDeepening = builder.isIterativeDeepening;
+    this.useIterativeDeepening = builder.useIterativeDeepening;
     this.heuristicName = builder.heuristicName;
-    if (isIterativeDeepening) {
-      mode = (state) -> iterativeDeepening(state);
+
+    if (this.useIterativeDeepening) {
+      this.mode = this::iterativeDeepening;
     } else {
-      mode = (state) -> miniMax(state, this.depth);
+      this.mode = (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
-    setHeuristic(heuristicName);
+    
+    this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
+  }
+
+    /** Private constructor used by the copy() method for cloning the AI player. */
+  private MinimaxPlayer(
+      final String name,
+      final Position current,
+      final Position start,
+      final int walls,
+      final int score,
+      final int depth,
+      final int timeLimit,
+      final boolean iterativeDeepeningVal,
+      final String heuristicVal) {
+    super(name, current, start, walls, score);
+    this.searchDepth = depth;
+    this.reflexionTime = timeLimit;
+    this.useIterativeDeepening = iterativeDeepeningVal;
+    this.heuristicName = heuristicVal;
+
+    if (this.useIterativeDeepening) {
+      this.mode = this::iterativeDeepening;
+    } else {
+      this.mode = (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
+    }
+    this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
   }
 
   /**
@@ -63,9 +109,9 @@ public final class MinimaxPlayer extends AiPlayer {
   public static class Builder {
     private final String name;
     private final Position positionStart;
-    private int depth = 2;
+    private int searchDepth = 2;
     private int reflexionTime = 5;
-    private boolean isIterativeDeepening = false;
+    private boolean useIterativeDeepening = false;
     private String heuristicName = "h1";
 
     /**
@@ -78,42 +124,68 @@ public final class MinimaxPlayer extends AiPlayer {
       this.name = name;
       this.positionStart = pos;
     }
-
-    public Builder withDepth(int d) {
-      this.depth = d;
+    /**
+     * Sets the depth of the Minimax search.
+     * * @param depth The chosen depth.
+     * @return The builder instance.
+     */
+    public Builder withDepth(int depth) {
+      this.searchDepth = depth;
       return this;
     }
 
-    public Builder withReflexion(int t) {
-      this.reflexionTime = t;
+    /**
+     * Sets the reflection time limit in seconds.
+     * * @param t The chosen time limit.
+     * @return The builder instance.
+     */
+    public Builder withReflexion(int timeLimit) {
+      this.reflexionTime = timeLimit;
       return this;
     }
 
-    public Builder withHeuristic(String h) {
-      this.heuristicName = h;
+    /**
+     * Sets the heuristic name to be used.
+     * * @param h The name of the heuristic.
+     * @return The builder instance.
+     */
+    public Builder withHeuristic(String heuristic) {
+      this.heuristicName = heuristic;
       return this;
     }
 
-    public Builder isIterativeDeepening(boolean val) {
-      this.isIterativeDeepening = val;
+    /**
+     * Enables or disables iterative deepening.
+     * * @param useDeepening The boolean flag.
+     * @return The builder instance.
+     */
+    public Builder isIterativeDeepening(boolean useDeepening) {
+      this.useIterativeDeepening = useDeepening;
       return this;
     }
 
-    private boolean validHeuristic(String h) {
-      List<String> valideName = new ArrayList<>(List.of("h1", "h2", "h3"));
-      for (String elt : valideName) {
-        if (h.equals(elt)) {
-          return true;
+    /**
+     * Validates if the given heuristic name is known to the system.
+     * * @param heuristic The heuristic name to check.
+     * @return True if valid, false otherwise.
+     */
+    private boolean validHeuristic(String heuristic) {
+      boolean isValid = false;
+      final List<String> validNames = new ArrayList<>(List.of("h1", "h2", "h3"));
+      for (final String element : validNames) {
+        if (heuristic.equals(element)) {
+          isValid = true;
+          break;
         }
       }
-      return false;
+      return isValid;
     }
 
     /**
      * Builds the final MinimaxPlayer instance.
      *
      * @return A new MinimaxPlayer instance.
-     * @throws IllegalArgumentException if the heuristic name, depth, or reflection time is invalid.
+     * @throws IllegalArgumentException if the configuration is invalid.
      */
     public MinimaxPlayer build() {
       if (!validHeuristic(heuristicName)) {
@@ -122,7 +194,7 @@ public final class MinimaxPlayer extends AiPlayer {
                 + heuristicName
                 + " heuristic does not exist.");
       }
-      if (depth < 0) {
+      if (searchDepth < 0) {
         throw new IllegalArgumentException(
             "Illegal depth value ! Depth is greater than or equal to 0");
       }
@@ -135,346 +207,216 @@ public final class MinimaxPlayer extends AiPlayer {
     }
   }
 
+  /**
+   * Static factory method for the builder.
+   * * @param name The player name.
+   * @param pos  The starting position.
+   * @return A new Builder instance.
+   */
   public static Builder builder(String name, Position pos) {
     return new Builder(name, pos);
   }
 
   /**
-   * Sets the heuristic function used by the AI to evaluate game states.
+   * Sets the heuristic function based on the provided name.
    *
-   * @param nameH The name of the heuristic ("h1", "h2", or "h3").
+   * @param heuristicNameP The name of the heuristic ("h1", "h2", or "h3").
+   * @return The corresponding heuristic class.
    */
-  private void setHeuristic(String nameH) {
-    switch (nameH) {
+  private HeuristicEvaluator determineHeuristic(final String heuristicNameParam, final String aiName) {
+    HeuristicEvaluator chosenHeuristic;
+    switch (heuristicNameParam) {
       case "h2":
-        this.heuristic = (state) -> h2(state);
+        chosenHeuristic = new MediumHeuristic(aiName);
         break;
       case "h3":
-        this.heuristic = (state) -> h3(state);
+        chosenHeuristic = new AdvancedHeuristic(aiName);
         break;
       case "h1":
-        this.heuristic = (state) -> h1(state);
+      default:
+        chosenHeuristic = new SimpleHeuristic(aiName);
+        break;
     }
+    return chosenHeuristic;
   }
 
   /**
-   * Computes and returns the best possible move within the allocated time. Uses an ExecutorService
-   * to interrupt the search if the time limit is reached.
-   *
+   * Computes and returns the best possible move within the allocated time limit.
    * @param state The current game state.
-   * @return The best move found, or a random(alpha-beta pruning)/saved(Iterative Deepening) move if
-   *     interrupted.
+   * @return The best move found.
    */
   @Override
   public Move getNextMove(GameState state) {
 
-    saveMove = null;
-
-    Future<Move> futureMove = aiExecutor.submit(() -> mode.apply(state));
-
-    try {
-      return futureMove.get(reflexionTime, TimeUnit.SECONDS);
-    } catch (TimeoutException e) {
-      futureMove.cancel(true);
-      if (saveMove != null) {
-        return saveMove;
-      } else {
-        return randomMove(state);
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      futureMove.cancel(true);
-      e.printStackTrace();
-      if (saveMove != null) {
-        return saveMove;
-      } else {
-        return randomMove(state);
-      }
+    final long deadlineTime = System.currentTimeMillis() + (this.reflexionTime * 1000L);
+    Move bestMove = this.mode.apply(state, deadlineTime);
+    
+    if (bestMove == null) {
+      bestMove = randomMove(state);
     }
-  }
-
-  /**
-   * Implements Iterative Deepening search. Repeatedly calls Minimax with increasing depth (starting
-   * from 1) until the thread is interrupted by a timeout.
-   *
-   * @param state The current game state.
-   * @return The best move found at the maximum depth reached.
-   */
-  private Move iterativeDeepening(GameState state) {
-    int currentdepth = 1;
-    while (!Thread.currentThread().isInterrupted()) {
-
-      Move temp = miniMax(state, currentdepth);
-      if (Thread.currentThread().isInterrupted()) {
-        break;
-      }
-
-      if (temp != null) {
-        saveMove = temp;
-      }
-      currentdepth++;
-    }
-
-    return saveMove;
-  }
-
-  /**
-   * Entry point for the Minimax algorithm. Explores the first level of legal moves.
-   *
-   * @param g The current game state.
-   * @param d The search depth.
-   * @return The best evaluated move.
-   */
-  private Move miniMax(GameState g, int d) {
-
-    Move bestMove = null;
-    int bestScore = Integer.MIN_VALUE;
-    GameState state = g.copy();
-    for (Move s : state.generateLegalMoves()) {
-
-      if (Thread.currentThread().isInterrupted()) return null;
-
-      push(state, s);
-      int score = minMax(state, d - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
-      if (score > bestScore || bestMove == null) {
-        bestScore = score;
-        bestMove = s;
-      }
-      pop(state);
-    }
-
     return bestMove;
   }
 
   /**
-   * MAX node of the Minimax algorithm with Alpha-Beta pruning. Maximize the score for the AI
-   * player.
-   *
-   * @param g The game state.
-   * @param d The remaining depth.
-   * @param alpha The best value guaranteed for MAX.
-   * @param beta The best value guaranteed for MIN.
-   * @return The maximized score.
+   * Implements Iterative Deepening search safely within the main thread.
+   * @param state    The current game state.
+   * @param endTime  The timestamp when the search must abort.
+   * @return The best move found at the maximum depth reached before timeout.
    */
-  private int maxMin(GameState g, int d, int alpha, int beta) {
+  private Move iterativeDeepening(GameState state, long endTime) {
+    int currentDepth = 1;
+    Move lastBestMove = null;
 
-    if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
-      return heuristic.apply(g);
-    }
-    int currentAlpha = alpha;
-    for (Move s : g.generateLegalMoves()) {
-      push(g, s);
-      currentAlpha = Math.max(currentAlpha, minMax(g, d - 1, currentAlpha, beta));
-      pop(g);
-      if (currentAlpha >= beta) {
-        return beta;
-      }
-    }
-    return currentAlpha;
-  }
-
-  /**
-   * MIN node of the Minimax algorithm with Alpha-Beta pruning. Minimize the AI's score
-   * (representing the opponent's best response).
-   *
-   * @param g The game state.
-   * @param d The remaining depth.
-   * @param alpha The best value guaranteed for MAX.
-   * @param beta The best value guaranteed for MIN.
-   * @return The minimized score.
-   */
-  private int minMax(GameState g, int d, int alpha, int beta) {
-
-    if (g.isGameOver() || d == 0 || Thread.currentThread().isInterrupted()) {
-      return heuristic.apply(g);
-    }
-    int currentBeta = beta;
-    for (Move s : g.generateLegalMoves()) {
-      push(g, s);
-      currentBeta = Math.min(currentBeta, maxMin(g, d - 1, alpha, currentBeta));
-      pop(g);
-      if (alpha >= currentBeta) {
-        return alpha;
-      }
-    }
-    return currentBeta;
-  }
-
-  /**
-   * Plays a random move. Used by the Minimax algorithm with Alpha-Beta pruning when reflexion time
-   * is over
-   *
-   * @param g The game state.
-   * @return A random legal move.
-   */
-  private Move randomMove(GameState g) {
-    List<Move> l = g.generateLegalMoves();
-    Random random = new Random();
-    return l.get(random.nextInt(l.size()));
-  }
-
-  /**
-   * Heuristic 1 (Simple): Calculates the direct distance covered by the AI. Compares rows or
-   * columns based on the player's starting side.
-   *
-   * @param g The game state to evaluate.
-   * @return An integer score based on spatial progression.
-   */
-  private int h1(GameState g) {
-
-    List<Player> lp = g.getPlayers();
-    Player me = null;
-    for (Player p : lp) {
-      if (p.getName().equals(this.getName())) {
-        me = p;
+    while (System.currentTimeMillis() < endTime) {
+      final Move tempMove = miniMax(state, currentDepth, endTime);
+      
+      if (System.currentTimeMillis() >= endTime) {
         break;
       }
-    }
-
-    Position startingPosition = me.getStartingPosition();
-    Position actualPosition = me.getPosition();
-
-    if (startingPosition.getX() == 0) {
-      return actualPosition.getX() - startingPosition.getX();
-    } else if (startingPosition.getX() == g.getBoard().getSize() - 1) {
-      return startingPosition.getX() - actualPosition.getX();
-    } else if (startingPosition.getY() == 0) {
-      return actualPosition.getY() - startingPosition.getY();
-    } else {
-      return startingPosition.getY() - actualPosition.getY();
-    }
-  }
-
-  /**
-   * Heuristic 2 (Intermediate): Considers both the AI's and the opponent's positions. Calculates
-   * the difference between the AI's progress and the opponent's progress.
-   *
-   * @param g The game state to evaluate.
-   * @return A relative score favoring the AI's lead over the opponent.
-   */
-  private int h2(GameState g) {
-    List<Player> lp = g.getPlayers();
-    Player enemie = null;
-    Player me = null;
-    for (Player p : lp) {
-      if (p.getName().equals(this.getName())) {
-        me = p;
-      } else {
-        enemie = p;
+      if (tempMove != null) {
+        lastBestMove = tempMove;
       }
+      currentDepth++;
     }
-
-    Position playerStartingPosition = me.getStartingPosition();
-    Position playerActualPosition = me.getPosition();
-    if (enemie == null) {
-      throw new IllegalStateException("No enemie found !");
-    }
-    Position enemieStartingPosition = enemie.getStartingPosition();
-    Position enemieActualPosition = enemie.getPosition();
-
-    if (playerStartingPosition.getX() == 0) {
-      return playerActualPosition.getX() - playerStartingPosition.getX()
-          - enemieStartingPosition.getX() - enemieActualPosition.getX();
-    } else if (playerStartingPosition.getX() == g.getBoard().getSize() - 1) {
-      return playerStartingPosition.getX() - playerActualPosition.getX()
-          - enemieActualPosition.getX() - enemieStartingPosition.getX();
-    } else if (playerStartingPosition.getY() == 0) {
-      return playerActualPosition.getY() - playerStartingPosition.getY()
-          - enemieStartingPosition.getY() - enemieActualPosition.getY();
-    } else {
-      return playerStartingPosition.getY() - playerActualPosition.getY()
-          - enemieActualPosition.getY() - enemieStartingPosition.getY();
-    }
+    return lastBestMove;
   }
 
   /**
-   * Heuristic 3 (Advanced): Uses Breadth-First Search (BFS) to find the actual shortest path to the
-   * goal and incorporates remaining wall counts weighted by coefficients K1 and K2. We will use a
-   * neuronal network to determine them.
-   *
-   * @param g The game state to evaluate.
-   * @return A comprehensive score combining pathfinding (BFS) and material advantage (walls).
+   * Entry point for the Minimax algorithm. Explores the first level of legal moves.
+   * @param gameState The current game state.
+   * @param maxDepth  The search depth.
+   * @param endTime   The deadline for the search.
+   * @return The best evaluated move.
    */
-  private int h3(GameState g) {
+  private Move miniMax(GameState gameState, int maxDepth, long endTime) {
 
-    float k1 = 1.2f;
-    float k2 = 0.8f;
-
-    List<Player> lp = g.getPlayers();
-    Player enemie = null;
-    Player me = null;
-    for (Player p : lp) {
-      if (p.getName().equals(this.getName())) {
-        me = p;
-      } else {
-        enemie = p;
+    Move bestMove = null;
+    int bestScore = Integer.MIN_VALUE;
+    GameState searchState = gameState.copy();
+    for (Move currentMove : searchState.generateLegalMoves()) {
+      if (System.currentTimeMillis() >= endTime) {
+        break;
       }
+      push(searchState, currentMove);
+      int score = minMax(searchState, maxDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, endTime);
+      if (score > bestScore || bestMove == null) {
+        bestScore = score;
+        bestMove = currentMove;
+      }
+      pop(searchState);
     }
-
-    List<Integer> lMax =
-        g.getBoard()
-            .getGraph()
-            .findPathBFS(
-                g.getBoard().id(me.getPosition().getX(), me.getPosition().getY()),
-                g.getWinCondition(me));
-
-    List<Integer> lMin =
-        g.getBoard()
-            .getGraph()
-            .findPathBFS(
-                g.getBoard().id(enemie.getPosition().getX(), enemie.getPosition().getY()),
-                g.getWinCondition(enemie));
-
-    int nbWallPlayer = me.getRemainingWalls();
-    int nbWallEnemie = enemie.getRemainingWalls();
-
-    if (lMax.size() <= 1) {
-      return 10000;
-    }
-    if (lMin.size() <= 1) {
-      return -10000;
-    }
-
-    int scoreBFS = (lMin.size() - lMax.size()) * 10;
-    int scoreWall = (int) (nbWallPlayer * k1 * 10 - nbWallEnemie * k2 * 10);
-    return scoreBFS + scoreWall;
+    return bestMove;
   }
 
   /**
-   * Simulates a move (pawn movement or wall placement) and updates the game state. The move is
-   * pushed onto aiStack to allow for backtracking.
-   *
-   * @param g The current game state.
-   * @param move The move to simulate.
+   * MAX node of the Minimax algorithm with Alpha-Beta pruning.
+   * @param gameState The game state.
+   * @param currentDepth     The remaining depth.
+   * @param alpha     The best value guaranteed for MAX.
+   * @param beta      The best value guaranteed for MIN.
+   * @param endTime   The search deadline.
+   * @return The maximized score.
    */
-  private void push(GameState g, Move move) {
-    Player player = g.getCurrentPlayer();
+  private int maxMin(final GameState gameState, final int currentDepth, final int alpha, final int beta, final long endTime) {
+    int resultScore;
+    if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
+      resultScore = this.heuristicFunction.evaluate(gameState);
+    } else {
+      int currentAlpha = alpha;
+      for (final Move move : gameState.generateLegalMoves()) {
+        push(gameState, move);
+        currentAlpha = Math.max(currentAlpha, minMax(gameState, currentDepth - 1, currentAlpha, beta, endTime));
+        pop(gameState);
+        
+        if (currentAlpha >= beta) {
+          currentAlpha = beta;
+          break;
+        }
+      }
+      resultScore = currentAlpha;
+    }
+    return resultScore;
+  }
+
+
+  /**
+   * MIN node of the Minimax algorithm with Alpha-Beta pruning.
+   * @param gameState The game state.
+   * @param currentDepth     The remaining depth.
+   * @param alpha     The best value guaranteed for MAX.
+   * @param beta      The best value guaranteed for MIN.
+   * @param endTime   The search deadline.
+   * @return The minimized score.
+   */
+  private int minMax(final GameState gameState, final int currentDepth, final int alpha, final int beta, final long endTime) {
+    int resultScore;
+
+    if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
+      resultScore = this.heuristicFunction.evaluate(gameState);
+    } else {
+      int currentBeta = beta;
+      for (final Move move : gameState.generateLegalMoves()) {
+        push(gameState, move);
+        currentBeta = Math.min(currentBeta, maxMin(gameState, currentDepth - 1, alpha, currentBeta, endTime));
+        pop(gameState);
+        
+        if (alpha >= currentBeta) {
+          currentBeta = alpha;
+          break;
+        }
+      }
+      resultScore = currentBeta;
+    }
+    return resultScore;
+  }
+
+  /**
+   * Plays a random move if time limit expires before any valid evaluation.
+   *
+   * @param gameState The game state.
+   * @return A random legal move.
+   */
+  private Move randomMove(final GameState gameState) {
+    final List<Move> legalMoves = gameState.generateLegalMoves();
+    final Random randomGenerator = new Random();
+    return legalMoves.get(randomGenerator.nextInt(legalMoves.size()));
+  }
+
+  /**
+   * Simulates a move and updates the game state, pushing it to the stack for backtracking.
+   * @param gameState The current game state.
+   * @param move      The move to simulate.
+   */
+  private void push(final GameState gameState, final Move move) {
+    final Player currentPlayer = gameState.getCurrentPlayer();
     if (move.isPawn()) {
-      player.setPosition(move.getTo());
+      currentPlayer.setPosition(move.getTo());
     } else {
-      g.getBoard().addWall(move.getTo(), move.getOrientation());
-      player.useWall();
+      gameState.getBoard().addWall(move.getTo(), move.getOrientation());
+      currentPlayer.useWall();
     }
 
-    aiStack.push(move);
-    g.getNextPlayer();
+    this.aiStack.push(move);
+    gameState.getNextPlayer();
   }
 
   /**
-   * Backtracks the last simulated move by popping from aiStack, restoring the previous game state.
+   * Backtracks the last simulated move by restoring the previous game state.
    *
-   * @param g The game state to restore.
+   * @param gameState The game state to restore.
    */
-  private void pop(GameState g) {
-    if (aiStack.isEmpty()) return;
-
-    Move last = aiStack.pop();
-    g.previousPlayer();
-    Player player = g.getCurrentPlayer();
-    if (last.isPawn()) {
-      player.setPosition(last.getFrom());
-    } else {
-      g.getBoard().removeWall(last.getTo(), last.getOrientation());
-      player.giveBackWall();
+  private void pop(final GameState gameState) {
+    if (!this.aiStack.isEmpty()) {
+      final Move lastMove = this.aiStack.pop();
+      gameState.previousPlayer();
+      final Player currentPlayer = gameState.getCurrentPlayer();
+      
+      if (lastMove.isPawn()) {
+        currentPlayer.setPosition(lastMove.getFrom());
+      } else {
+        gameState.getBoard().removeWall(lastMove.getTo(), lastMove.getOrientation());
+        currentPlayer.giveBackWall();
+      }
     }
   }
 
@@ -483,7 +425,7 @@ public final class MinimaxPlayer extends AiPlayer {
     return "MiniMax AI " + super.toString();
   }
 
-  @Override
+@Override
   public Player copy() {
     return new MinimaxPlayer(
         this.getName(),
@@ -491,48 +433,24 @@ public final class MinimaxPlayer extends AiPlayer {
         this.getStartingPosition(),
         this.getRemainingWalls(),
         this.getScore(),
-        this.depth,
+        this.searchDepth,
         this.reflexionTime,
-        this.isIterativeDeepening,
+        this.useIterativeDeepening,
         this.heuristicName);
   }
 
-  /** Private constructor used by the copy() method for cloning the AI player. */
-  private MinimaxPlayer(
-      String name,
-      Position current,
-      Position start,
-      int walls,
-      int score,
-      int depth,
-      int reflexionTime,
-      boolean isIterativeDeepening,
-      String h) {
-    super(name, current, start, walls, score);
-    this.depth = depth;
-    this.reflexionTime = reflexionTime;
-    this.isIterativeDeepening = isIterativeDeepening;
-    this.heuristicName = h;
-
-    if (isIterativeDeepening) {
-      mode = (state) -> iterativeDeepening(state);
-    } else {
-      mode = (state) -> miniMax(state, this.depth);
-    }
-    setHeuristic(h);
-  }
 
   @Override
   public Map<String, Object> getSettings() {
     Map<String, Object> settings = new HashMap<>();
-    if (isIterativeDeepening) {
+    if (this.useIterativeDeepening) {
       settings.put("mode", "minimax-iterative-deepening");
     } else {
       settings.put("mode", "minimax");
-      settings.put("depth", depth);
+      settings.put("depth", this.searchDepth);
     }
-    settings.put("reflexion", reflexionTime);
-    settings.put("heuristic", heuristicName);
+    settings.put("reflexion", this.reflexionTime);
+    settings.put("heuristic", this.heuristicName);
     return settings;
   }
 }

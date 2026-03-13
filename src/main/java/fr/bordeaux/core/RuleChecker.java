@@ -52,8 +52,6 @@ public class RuleChecker {
               if (to.equals(jump)) return true;
               jumpPossible = true;
           }
-      } else {
-          jumpPossible = false;
       }
       if(!jumpPossible){
         for (Position diag : getDiagonalJumps(from, posOtherPlayer)) {
