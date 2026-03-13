@@ -20,8 +20,12 @@ public class Main {
     GameEngine engine = new GameEngine(state);
     engine.play(Move.wall(new Position(2, 4), HORIZONTAL));
     System.out.println(engine.getState().getPlayers());
-    CliApp cli = new CliApp(engine);
-    cli.run();
+    try {
+      CliApp cli = new CliApp(engine);
+      cli.run();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     System.out.println("--- Début de la partie de Quoridor ---");
     System.out.println("Plateau de taille : " + board.getSize());
