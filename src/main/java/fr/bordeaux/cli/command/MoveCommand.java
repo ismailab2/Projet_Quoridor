@@ -6,18 +6,36 @@ import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 
+/**
+ * Command that interprets and executes a player move entered in the CLI. A move can either be a
+ * pawn movement or a wall placement depending on the format of the input string.
+ */
 public class MoveCommand implements Command {
 
   private String move;
 
+  /**
+   * Creates a MoveCommand using the provided move string.
+   *
+   * @param m the move entered by the user
+   */
   public MoveCommand(String m) {
     move = m;
   }
 
+  /** Creates a MoveCommand with no predefined move. */
   public MoveCommand() {
     this(null);
   }
 
+  /**
+   * Executes the move command. Determines whether the input represents a pawn move or a wall
+   * placement and delegates the processing to the appropriate handler.
+   *
+   * @param engine the current game engine
+   * @return the updated game engine after the move is applied, or the unchanged engine if the move
+   *     is invalid
+   */
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
@@ -35,6 +53,10 @@ public class MoveCommand implements Command {
     }
   }
 
+  /**
+   * Displays help information about the move command, explaining how to move a pawn or place a wall
+   * in the CLI.
+   */
   @Override
   public void helpText() {
     System.out.println("=== Move Commands ===\n");
@@ -54,6 +76,14 @@ public class MoveCommand implements Command {
         "        You can't place a wall vertically if it's the top edge of the board. (row 1 on any board).\n");
   }
 
+  /**
+   * Parses a position string and converts it into a Position object. The expected format is a
+   * letter followed by a number (e.g., "e2").
+   *
+   * @param str the string representing the board position
+   * @return the corresponding Position object
+   * @throws IllegalArgumentException if the format is invalid
+   */
   public Position parsePosition(String str) {
     if (str.length() < 2) throw new IllegalArgumentException("Invalid position format");
 
@@ -63,6 +93,13 @@ public class MoveCommand implements Command {
     return new Position(row, col);
   }
 
+  /**
+   * Handles the execution of a pawn move. Validates the move format, converts the positions, and
+   * applies the move to the game engine.
+   *
+   * @param engine the current game engine
+   * @return the updated game engine after the move
+   */
   public GameEngine handleMove(GameEngine engine) {
     String[] moves = move.split("-");
     if (moves.length != 2) throw new IllegalArgumentException("Invalid move syntax");
@@ -78,6 +115,13 @@ public class MoveCommand implements Command {
     return engine;
   }
 
+  /**
+   * Handles the execution of a wall placement. Extracts the position and orientation from the move
+   * string and applies the wall placement to the game engine.
+   *
+   * @param engine the current game engine
+   * @return the updated game engine after the wall is placed
+   */
   public GameEngine handleWall(GameEngine engine) {
     Position pos = parsePosition(move.substring(0, move.length() - 1));
     Orientation orientation =

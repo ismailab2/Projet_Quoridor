@@ -23,7 +23,7 @@ public class GameState {
   private boolean ai = false;
   private int turnLimit = 100;
 
-  private transient List<Runnable> listeners = new ArrayList<>();
+  private final transient List<Runnable> listeners = new ArrayList<>();
 
   public GameState(Board board, List<Player> players, int currentIndexPlayer) {
     if (players.size() != 2 && players.size() != 4)
@@ -51,8 +51,7 @@ public class GameState {
     for (Runnable l : listeners) l.run();
   }
 
-  // Apply a move, needs to be a valid move because it won't be checked in this function.
-  // Check victory is not done here as well
+  // Apply a move, needs to be a valid move.
   public void applyMove(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
@@ -68,7 +67,7 @@ public class GameState {
     notifyListeners();
   }
 
-  private void applyMoveWithoutClearingRedo(Move move) {
+  public void applyMoveWithoutClearingRedo(Move move) {
     Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -176,7 +175,7 @@ public class GameState {
     GameSaver.saveGame(this, filename);
   }
 
-  public static GameState loadGame(String filename) throws IOException, GameLoadException {
+  public GameState loadGame(String filename) throws IOException, GameLoadException {
     return GameLoader.loadGame(filename);
   }
 
@@ -317,5 +316,15 @@ public class GameState {
 
   public void setTurnLimit(int turnLimit) {
     this.turnLimit = turnLimit;
+  }
+
+  /**
+   * Populates the history without applying the moves to the board. Useful for loading a saved game.
+   */
+  public void loadHistoryWithoutApplying(List<Move> history) {
+    this.undoStack.clear();
+    for (Move m : history) {
+      this.undoStack.push(m);
+    }
   }
 }

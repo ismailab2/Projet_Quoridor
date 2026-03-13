@@ -1,9 +1,9 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.AI.MCTSPlayer;
-import fr.bordeaux.AI.MinimaxPlayer;
-import fr.bordeaux.AI.NeuralNetPlayer;
-import fr.bordeaux.AI.RandomPlayer;
+import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.NeuralNetPlayer;
+import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
@@ -29,9 +29,7 @@ public class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
-    for (Move m : history) {
-      gameState.applyMove(m);
-    }
+    gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
 
@@ -248,7 +246,7 @@ public class GameLoader {
               MinimaxPlayer.builder(p_name, p_postion)
                   .withHeuristic(heuristicName)
                   .withReflexion(reflexion_time)
-                  .isIterativeDeepening(true)
+                  .withIterativeDeepening(true)
                   .build(),
               currentLine);
         }

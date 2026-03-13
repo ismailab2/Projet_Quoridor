@@ -4,22 +4,35 @@ import fr.bordeaux.core.GameEngine;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
-import org.jline.terminal.Terminal;
 
+/**
+ * Command that exits the CLI application. Before quitting, the user is prompted to optionally save
+ * the current game.
+ */
 public class QuitCommand implements Command {
 
-  private Terminal terminal;
   private LineReader reader;
 
-  public QuitCommand(Terminal t, LineReader r) {
-    terminal = t;
+  /**
+   * Creates a QuitCommand using the provided line reader to interact with the user.
+   *
+   * @param r the LineReader used to read user input
+   */
+  public QuitCommand(LineReader r) {
     reader = r;
   }
 
+  /** Creates a QuitCommand without a predefined reader. */
   public QuitCommand() {
-    this(null, null);
+    this(null);
   }
 
+  /**
+   * Executes the quit command. Asks the user whether they want to save the game before exiting.
+   *
+   * @param engine the current game engine
+   * @return the current game engine
+   */
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
@@ -44,6 +57,7 @@ public class QuitCommand implements Command {
     }
   }
 
+  /** Displays help information about the quit command, including its usage and behavior. */
   @Override
   public void helpText() {
     System.out.println("=== QUIT Command ===\n");

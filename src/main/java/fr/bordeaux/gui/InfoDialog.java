@@ -10,6 +10,5 @@ public class InfoDialog {
     alert.setGraphic(null);
     alert.setContentText("Version 1.0\nAuthors: Isma,...Students at Bordeaux University");
     alert.show();
-    // alert.showAndWait();
   }
 }
