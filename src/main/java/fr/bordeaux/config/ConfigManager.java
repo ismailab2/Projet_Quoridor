@@ -4,13 +4,6 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
 
-/**
- * Manages application configuration using a singleton pattern. Configuration is stored in a file
- * located in the user's home directory.
- *
- * <p>Priority order for configuration values: 1. Default values 2. Values from the configuration
- * file (.qoridorrc) 3. Command-line arguments (highest priority)
- */
 public class ConfigManager {
 
   /** Singleton instance of ConfigManager */
@@ -28,9 +21,11 @@ public class ConfigManager {
 
   /** Returns the singleton instance of ConfigManager. If it doesn't exist yet, creates it. */
   public static ConfigManager getInstance() {
+
     if (INSTANCE == null) {
       INSTANCE = new ConfigManager();
     }
+
     return INSTANCE;
   }
 
@@ -41,10 +36,14 @@ public class ConfigManager {
   public void load() {
     Path path = Paths.get(FILE);
     if (Files.exists(path)) {
+
       try (InputStream in = Files.newInputStream(path)) {
+
         props.load(in);
+
       } catch (IOException e) {
-        System.err.println("Warning: .quoridorrc is invalid, using default values.");
+
+        System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
       }
     } else {
       // Default configuration values
@@ -55,33 +54,42 @@ public class ConfigManager {
     }
   }
 
-  /** Saves the current properties to the configuration file. */
+  private void loadDefaults() {
+    props.setProperty("verbose", "false");
+    props.setProperty("debug", "false");
+    props.setProperty("blitz", "false");
+    props.setProperty("timeout", "30");
+  }
+
   public void save() {
     try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
-      props.store(out, "Quoridor configuration + shortcuts");
+
+      props.store(out, "Quoridor configuration");
+
     } catch (IOException e) {
       System.err.println("Error saving .quoridorrc");
     }
   }
 
-  /**
-   * Returns the value of a configuration option.
-   *
-   * @param key the name of the option
-   * @param defaultValue value to return if the key is not found
-   * @return the value of the option or defaultValue if missing
-   */
   public String getOption(String key, String defaultValue) {
     return props.getProperty(key, defaultValue);
   }
 
-  /**
-   * Sets or updates a configuration option.
-   *
-   * @param key the name of the option
-   * @param value the value to store
-   */
   public void setOption(String key, String value) {
     props.setProperty(key, value);
+  }
+
+  public boolean getBoolean(String key, boolean defaultValue) {
+
+    return Boolean.parseBoolean(props.getProperty(key, String.valueOf(defaultValue)));
+  }
+
+  public int getInt(String key, int defaultValue) {
+
+    try {
+      return Integer.parseInt(props.getProperty(key));
+    } catch (Exception e) {
+      return defaultValue;
+    }
   }
 }
