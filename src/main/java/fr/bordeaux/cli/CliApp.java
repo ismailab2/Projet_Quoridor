@@ -20,9 +20,9 @@ public class CliApp {
   /**
    * Creates a CLI application with a specific game engine, terminal and reader.
    *
-   * @param e the game engine used to run the game
-   * @param t the terminal used for input/output
-   * @param r the line reader used to read user commands
+   * @param engine the game engine used to run the game
+   * @param terminal the terminal used for input/output
+   * @param reader the line reader used to read user commands
    */
   public CliApp(GameEngine engine, Terminal terminal, LineReader reader) {
     this.engine = engine;
@@ -74,7 +74,7 @@ public class CliApp {
    * Creates a CLI application using the provided game engine. Initializes the terminal, command
    * auto-completion and line reader.
    *
-   * @param e the game engine used to run the game
+   * @param engine the game engine used to run the game
    */
   public CliApp(GameEngine engine) {
     try {

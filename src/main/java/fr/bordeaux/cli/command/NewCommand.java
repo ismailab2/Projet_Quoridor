@@ -9,26 +9,52 @@ import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 
+/**
+ * Command that starts a new game from the CLI. It allows configuring the board size and the number
+ * of players, and interactively asks for the type and name of each player.
+ */
 public class NewCommand implements Command {
 
   private String[] tokens;
   private Terminal terminal;
   private LineReader reader;
 
+  /**
+   * Creates a NewCommand with the given CLI tokens, terminal and line reader.
+   *
+   * @param t the tokens entered by the user
+   * @param term the terminal used for input/output
+   * @param r the line reader used to interact with the user
+   */
   public NewCommand(String[] t, Terminal term, LineReader r) {
     this.tokens = t;
     this.terminal = term;
     this.reader = r;
   }
 
+  /**
+   * Creates a NewCommand with default tokens and the provided terminal and reader.
+   *
+   * @param t the terminal used for input/output
+   * @param r the line reader used to read user input
+   */
   public NewCommand(Terminal t, LineReader r) {
     this(new String[] {"9", "2"}, t, r);
   }
 
+  /** Creates an empty NewCommand. Used mainly when only help information is needed. */
   public NewCommand() {
     this(null, null, null);
   }
 
+  /**
+   * Executes the new command. Initializes a new game engine with a board and players according to
+   * the provided tokens. If necessary, the user is prompted to choose player types and names
+   * interactively.
+   *
+   * @param engine the current game engine
+   * @return a new GameEngine instance representing the new game
+   */
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens.length > 5) {
@@ -110,6 +136,9 @@ public class NewCommand implements Command {
     }
   }
 
+  /**
+   * Displays help information about the new command, including its usage, arguments and examples.
+   */
   @Override
   public void helpText() {
     System.out.println("=== NEW Command ===\n");
