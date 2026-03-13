@@ -1,4 +1,3 @@
 package fr.bordeaux.gui;
 
-public class InfoDialogTest {
-}
+public class InfoDialogTest {}

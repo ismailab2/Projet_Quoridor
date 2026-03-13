@@ -8,10 +8,12 @@ public class LoadCommand implements Command {
   private String[] tokens;
 
   public LoadCommand(String p) {
-    this(new String[]{"load", p});
+    this(new String[] {"load", p});
   }
 
-  public LoadCommand(String[] t) { this.tokens = t; }
+  public LoadCommand(String[] t) {
+    this.tokens = t;
+  }
 
   @Override
   public GameEngine execute(GameEngine engine) {
@@ -19,7 +21,7 @@ public class LoadCommand implements Command {
       return new GameEngine(GameSerializer.loadGame(tokens[1]));
     } catch (Exception e) {
       System.err.println("Ca va pas du tout : " + e);
-    } 
+    }
     return engine;
   }
 

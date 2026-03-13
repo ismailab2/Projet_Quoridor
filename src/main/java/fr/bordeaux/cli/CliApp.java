@@ -28,18 +28,43 @@ public class CliApp {
             "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo", "set");
     reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
   }
+
   public CliApp() {
-        this(new GameEngine(new GameState(new Board(9), List.of(new HumanPlayer("Human", new Position(0, 4)), new HumanPlayer("Bob", new Position(8, 4))))));
+    this(
+        new GameEngine(
+            new GameState(
+                new Board(9),
+                List.of(
+                    new HumanPlayer("Human", new Position(0, 4)),
+                    new HumanPlayer("Bob", new Position(8, 4))))));
   }
-  public boolean isRunning() { return running; }
-  public GameEngine getEngine() { return engine; }
+
+  public boolean isRunning() {
+    return running;
+  }
+
+  public GameEngine getEngine() {
+    return engine;
+  }
 
   public CliApp(GameEngine e) {
     try {
-    terminal = TerminalBuilder.builder().system(true).build();
-    completer =
-      new StringsCompleter(
-              "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
+      terminal = TerminalBuilder.builder().system(true).build();
+      completer =
+          new StringsCompleter(
+              "help",
+              "quit",
+              "new",
+              "save",
+              "load",
+              "show board",
+              "show time",
+              "show configurations",
+              "show history",
+              "hint",
+              "pause",
+              "undo",
+              "redo",
               "set");
       reader = LineReaderBuilder.builder().terminal(terminal).completer(completer).build();
     } catch (Exception exc) {
@@ -49,14 +74,12 @@ public class CliApp {
   }
 
   public void run() {
-    System.out.println("Launching Command Line interface...");
     if (engine != null) {
-      ShowCommand show = new ShowCommand();
+      ShowCommand show = new ShowCommand(new String[] {"show", "board"});
       show.execute(engine);
     }
     while (running) {
       String line = reader.readLine(">> ");
-      System.out.println("\n"+line+"\n");
       fetch(line);
     }
     try {
@@ -121,7 +144,7 @@ public class CliApp {
         }
       case "show":
         {
-          cmd = new ShowCommand();
+          cmd = new ShowCommand(tokens);
           break;
         }
       case "set":

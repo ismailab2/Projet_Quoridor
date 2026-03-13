@@ -3,17 +3,18 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.AI.MinimaxPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Move.Type;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
-import fr.bordeaux.core.Move.Type;
 
 public class HintCommand implements Command {
 
-  public HintCommand() { }
+  public HintCommand() {}
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    MinimaxPlayer ia = MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition()).build();
+    MinimaxPlayer ia =
+        MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition()).build();
     Move hint = ia.getNextMove(engine.getState());
     String bestMove = "";
     if (hint.getType() == Type.PAWN) {
@@ -27,9 +28,9 @@ public class HintCommand implements Command {
   }
 
   private String posToString(Position p) {
-      char letter = (char) ('a' + p.getX());
-      int number = p.getY();
-      return "" + letter + number;
+    char letter = (char) ('a' + p.getX());
+    int number = p.getY();
+    return "" + letter + number;
   }
 
   @Override

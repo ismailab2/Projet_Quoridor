@@ -3,7 +3,6 @@ package fr.bordeaux.core;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.AI.MinimaxPlayer;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -171,7 +170,7 @@ public class GameStateTest {
 
   @Test
   public void save_and_load_json_works() {
-      /*
+    /*
     String filename = "test_save.json";
     game.saveGameJSON(filename);
 

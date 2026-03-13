@@ -53,7 +53,7 @@ public class GameEngineTest {
 
   @Test
   public void play_wall_move_blocks_path() {
-      /*
+    /*
     Move wall1 = Move.wall(new Position(3, 0), Orientation.HORIZONTAL);
     board.addWall(wall1.getTo(), wall1.getOrientation());
     Move wall2 = Move.wall(new Position(3, 2), Orientation.HORIZONTAL);

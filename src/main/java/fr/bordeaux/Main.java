@@ -4,7 +4,6 @@ import static fr.bordeaux.core.Orientation.*;
 
 import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.core.*;
-
 import java.util.List;
 
 public class Main {

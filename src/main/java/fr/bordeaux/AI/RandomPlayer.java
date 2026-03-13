@@ -4,7 +4,6 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,5 +52,4 @@ public class RandomPlayer extends AiPlayer {
     settings.put("mode", "random");
     return settings;
   }
-
 }

@@ -1,6 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.AI.MinimaxPlayer;
 import java.util.ArrayList;
 import java.util.List;
 

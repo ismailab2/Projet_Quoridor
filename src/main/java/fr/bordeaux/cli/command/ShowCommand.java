@@ -1,5 +1,6 @@
 package fr.bordeaux.cli.command;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Player;
@@ -7,13 +8,51 @@ import fr.bordeaux.core.Position;
 
 public class ShowCommand implements Command {
 
+  private String[] tokens;
+
   public ShowCommand() {
-    System.out.println("To implement");
+    this(new String[] {"show", "board"});
+  }
+
+  public ShowCommand(String[] t) {
+    this.tokens = t;
+  }
+
+  public ShowCommand(String t) {
+    this(new String[] {"show", t});
   }
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    printBoard(engine);
+    switch (tokens[1]) {
+      case "board":
+        {
+          printBoard(engine);
+          break;
+        }
+      case "configurations":
+      case "config":
+        {
+          String[] configs = new String[] {"verbose", "blitz", "timeout"};
+          for (String cf : configs) {
+            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, null));
+          }
+          break;
+        }
+      case "time":
+        {
+          System.out.println("time");
+          break;
+        }
+      case "history":
+        {
+          System.out.println("history");
+          break;
+        }
+      default:
+        System.out.println("The command  \"save " + tokens[1] + "\" doesn't exist...");
+        break;
+    }
     return engine;
   }
 
@@ -31,7 +70,8 @@ public class ShowCommand implements Command {
     System.out.println("  history       : Displays the list of moves played so far.");
     System.out.println("  configuration : Displays all the configuations set for the game.");
     System.out.println("  time          : Displays the remaining time for each player.\n");
-    System.out.println("If you want the help with an option, you can enter \"help show [option]\".\n");
+    System.out.println(
+        "If you want the help with an option, you can enter \"help show [option]\".\n");
   }
 
   public void helpBoard() {
@@ -41,6 +81,7 @@ public class ShowCommand implements Command {
     System.out.println("Description:");
     System.out.println("  Displays the current state of the board.\n");
   }
+
   public void helpHistory() {
     System.out.println("=== SHOW HISTORY ===\n");
     System.out.println("Usage:");
@@ -48,6 +89,7 @@ public class ShowCommand implements Command {
     System.out.println("Description:");
     System.out.println("  Displays the chronological list of all moves played.\n");
   }
+
   public void helpTime() {
     System.out.println("=== SHOW TIME ===\n");
     System.out.println("Usage:");
@@ -56,6 +98,7 @@ public class ShowCommand implements Command {
     System.out.println("  Displays the remaining time for each player.\n");
     System.out.println("  Only relevant if a timed mode is active.\n");
   }
+
   public void helpConfig() {
     System.out.println("=== SHOW CONFIGURATION ===\n");
     System.out.println("Usage:");
@@ -84,7 +127,8 @@ public class ShowCommand implements Command {
           if (player.getPosition().equals(new Position(i, j))) {
             System.out.print(id + printWall(b, i, j, false));
             empty = false;
-          } id++;
+          }
+          id++;
         }
         if (empty) System.out.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
         empty = true;

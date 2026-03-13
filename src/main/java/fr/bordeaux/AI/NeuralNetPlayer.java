@@ -1,12 +1,11 @@
 package fr.bordeaux.AI;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Represents an Ai player with MCTS */
 public class NeuralNetPlayer extends AiPlayer {

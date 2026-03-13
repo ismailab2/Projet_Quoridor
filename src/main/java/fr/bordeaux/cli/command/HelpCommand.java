@@ -36,26 +36,33 @@ public class HelpCommand implements Command {
     System.out.println("Commands :\n");
     System.out.println("new [ARGS] :          Start a new game with the given args");
     System.out.println("help [CMD] :          If no command is given, displays this message.");
-    System.out.println("                      Otherwise, displays a more detailed help for a specific command.");
+    System.out.println(
+        "                      Otherwise, displays a more detailed help for a specific command.");
     System.out.println("help move :           Shows you how to play a move.");
-    System.out.println("quit :                Quit the current game. It'll ask you if you want to save it before quitting.");
+    System.out.println(
+        "quit :                Quit the current game. It'll ask you if you want to save it before quitting.");
     System.out.println("load [filename] :     Load a game from the given file \"filename\".");
     System.out.println("save [filename] :     Save the current game to a file \"filename\".");
-    System.out.println("pause :               Pause the timer if you're in a blitz game, else it does nothing.");
+    System.out.println(
+        "pause :               Pause the timer if you're in a blitz game, else it does nothing.");
     System.out.println("hint :                Suggest you a move if you don't know what to play.");
-    System.out.println("undo [N] :            Unplays the N last move played. Just once if no N given.");
-    System.out.println("redo [N] :            Replays the N undone move played. Just once if no N given.");
+    System.out.println(
+        "undo [N] :            Unplays the N last move played. Just once if no N given.");
+    System.out.println(
+        "redo [N] :            Replays the N undone move played. Just once if no N given.");
     System.out.println("show board :          Displays the board of the current game.");
-    System.out.println("show history :        Displays all the moves that were played during the game. From older to the more recent.");
-    System.out.println("show time :           Displays the time you and your opponent(s) each remain.");
+    System.out.println(
+        "show history :        Displays all the moves that were played during the game. From older to the more recent.");
+    System.out.println(
+        "show time :           Displays the time you and your opponent(s) each remain.");
     System.out.println("show configuration :  Displays the configurations set on your game.");
-    System.out.println("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
+    System.out.println(
+        "set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
   }
 
   /* public void helpMove() {
     ;
   } */
-
 
   public void helpFetch() {
     if (this.tokens.length <= 1) System.out.println("Un truc à expliquer");

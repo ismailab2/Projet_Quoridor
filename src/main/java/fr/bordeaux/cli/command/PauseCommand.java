@@ -4,13 +4,12 @@ import fr.bordeaux.core.GameEngine;
 
 public class PauseCommand implements Command {
 
-  public PauseCommand() {
-    System.out.println("To implement");
-  }
+  public PauseCommand() {}
 
   @Override
   public GameEngine execute(GameEngine engine) {
-    System.out.println("To implement");
+    if (engine.getState().isBlitz()) engine.getState().setBlitz(false);
+    else System.out.println("Not in blitz mode, pause is doign nothing.");
     return engine;
   }
 
