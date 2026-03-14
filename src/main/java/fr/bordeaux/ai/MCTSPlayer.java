@@ -131,7 +131,11 @@ public class MCTSPlayer extends AiPlayer {
     public MctsNode expand() {
       final Move nextMove = untriedMoves.removeLast();
       final GameState nextState = state.copy();
+      Player currentPlayer = nextState.getCurrentPlayer();
       nextState.applyMove(nextMove);
+      if (nextState.hasReachedGoal(currentPlayer)) {
+        nextState.setGameOver(true);
+      }
       final MctsNode newNode = new MctsNode(nextState, nextMove, this);
       children.add(newNode);
       return newNode;
@@ -141,6 +145,9 @@ public class MCTSPlayer extends AiPlayer {
     public int simulate() {
       final GameState temp = state.copy();
       simNum++;
+      if (temp.isGameOver()) {
+        return temp.getPreviousIndexPlayer();
+      }
       final int totalPlayers = temp.getPlayers().size();
       final List<Player> allPlayers = temp.getPlayers();
       int winnerResult = -1;
@@ -173,7 +180,8 @@ public class MCTSPlayer extends AiPlayer {
           break;
         }
 
-        temp.applyMoveWithoutClearingRedo(legalMoves.get((int) (Math.random() * legalMoves.size())));
+        temp.applyMoveWithoutClearingRedo(
+            legalMoves.get((int) (Math.random() * legalMoves.size())));
 
         // Victory check
         final int lastIdx = (temp.getCurrentIndexPlayer() - 1 + totalPlayers) % totalPlayers;
@@ -225,45 +233,29 @@ public class MCTSPlayer extends AiPlayer {
   public Move getNextMove(final GameState state) {
     simNum = 0;
     final int myIdx = state.getPlayers().indexOf(this);
-    final Move chosenMove =
-        new MctsNode(state.copy()).getBestMoveAfterSearch(this.reflectionTime, myIdx, this);
-    System.out.println("Simulations performed: " + simNum);
-    return chosenMove;
+    return new MctsNode(state.copy()).getBestMoveAfterSearch(this.reflectionTime, myIdx, this);
   }
 
   /** Selects the best child node using the Upper Confidence Bound for Trees formula. */
-  protected MctsNode bestUCT(final MctsNode node, final int myIdx) {
-    final boolean isMyTurn = node.getPlayerIndex() == myIdx;
-    double bestScore = isMyTurn ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+  private MctsNode bestUCT(MctsNode node, int myIdx) {
     MctsNode bestChild = null;
+    double maxUct = Double.NEGATIVE_INFINITY;
+    boolean isAiTurn = node.state.getCurrentIndexPlayer() == myIdx;
 
-    for (final MctsNode child : node.getChildren()) {
-      final double score = calculateScore(node.getVisits(), child, isMyTurn);
-      if (isMyTurn) {
-        if (score > bestScore) {
-          bestScore = score;
-          bestChild = child;
-        }
-      } else if (score < bestScore) {
-        bestScore = score;
+    for (MctsNode child : node.children) {
+      double winRate = (double) child.wins / child.visits;
+      if (!isAiTurn) {
+        winRate = 1.0 - winRate;
+      }
+
+      double uctValue = winRate + 1.41 * Math.sqrt(Math.log(node.visits) / child.visits);
+
+      if (uctValue > maxUct) {
+        maxUct = uctValue;
         bestChild = child;
       }
     }
     return bestChild;
-  }
-
-  private double calculateScore(
-      final int parentVisits, final MctsNode child, final boolean isMyTurn) {
-    final double constantC = 1.41;
-    final double score;
-    if (child.getVisits() == 0) {
-      score = isMyTurn ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
-    } else {
-      final double exploit = (double) child.getWins() / child.getVisits();
-      final double explore = constantC * Math.sqrt(Math.log(parentVisits) / child.getVisits());
-      score = isMyTurn ? (exploit + explore) : (exploit - explore);
-    }
-    return score;
   }
 
   /** Backpropagates the simulation result up to the root. */
