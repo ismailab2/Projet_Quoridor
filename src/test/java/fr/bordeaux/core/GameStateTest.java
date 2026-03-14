@@ -30,7 +30,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void constructor_ok_2_players() {
+  public void constructorOk2Players() {
     assertNotNull(game);
     assertEquals(human, game.getCurrentPlayer());
   }
@@ -47,7 +47,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void listener_is_called_on_applyMove() {
+  public void listenerIsCalledOnApplyMove() {
     final boolean[] called = {false};
 
     game.addListener(() -> called[0] = true);
@@ -60,7 +60,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void applyMove_pawn_changes_position_and_switch_player() {
+  public void applyMovePawnChangesPositionAndSwitchPlayer() {
     Position newPos = new Position(1, 4);
     Position pos = game.getCurrentPlayer().getPosition();
 
@@ -72,7 +72,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void applyMove_wall_places_wall_and_switch_player() {
+  public void applyMoveWallPlacesWallAndSwitchPlayer() {
     Move move = Move.wall(new Position(4, 4), Orientation.HORIZONTAL);
 
     game.applyMove(move);
@@ -81,7 +81,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void undo_reverts_move() {
+  public void undoRevertsMove() {
     Position p1 = new Position(1, 4);
     Player player = game.getCurrentPlayer();
     game.applyMove(Move.pawn(player.getPosition(), p1));
@@ -93,7 +93,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void redo_reapplies_move() {
+  public void redoReappliesMove() {
     Position p1 = new Position(1, 4);
     Position pos = game.getCurrentPlayer().getPosition();
 
@@ -112,19 +112,19 @@ public class GameStateTest {
   }
 
   @Test
-  public void undo_does_nothing_if_stack_empty() {
+  public void undoDoesNothingIfStackEmpty() {
     game.undo();
     assertEquals(human, game.getCurrentPlayer());
   }
 
   @Test
-  public void redo_does_nothing_if_stack_empty() {
+  public void redoDoesNothingIfStackEmpty() {
     game.redo();
     assertEquals(human, game.getCurrentPlayer());
   }
 
   @Test
-  public void victory_is_detected() {
+  public void victoryIsDetected() {
     human.setPosition(new Position(8, 4));
     Position pos = game.getCurrentPlayer().getPosition();
     // System.out.println("1 " + human.getPosition());
@@ -135,14 +135,14 @@ public class GameStateTest {
   }
 
   @Test
-  public void win_condition_from_top_row() {
+  public void winConditionFromTopRow() {
     Predicate<Integer> predicate = game.getWinCondition(human);
     int id = board.id(8, 4);
     assertTrue(predicate.test(id));
   }
 
   @Test
-  public void win_condition_from_bottom_row() {
+  public void winConditionFromBottomRow() {
     Player p = new HumanPlayer("P", new Position(8, 4));
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
@@ -151,7 +151,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void win_condition_from_left_col() {
+  public void winConditionFromLeftCol() {
     Player p = new HumanPlayer("P", new Position(4, 0));
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
@@ -160,7 +160,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void win_condition_from_right_col() {
+  public void winConditionFromRightCol() {
     Player p = new HumanPlayer("P", new Position(4, 8));
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
@@ -169,7 +169,7 @@ public class GameStateTest {
   }
 
   @Test
-  public void save_and_load_json_works() {
+  public void saveAndLoadJsonWorks() {
     /*
     String filename = "test_save.json";
     game.saveGameJSON(filename);
@@ -185,12 +185,98 @@ public class GameStateTest {
   }
 
   @Test
-  public void reset_creates_new_game() {
+  public void resetCreatesNewGame() {
     GameState newGame = game.reset();
 
     assertNotSame(game, newGame);
     assertEquals(2, newGame.getPlayers().size());
     assertEquals(9, newGame.getBoard().getSize());
+  }
+
+  @Test
+  public void generateLegalMovesNoWallsLeftExcludesWallMoves() {
+    // Use all walls
+    for (int i = 0; i < 10; i++) {
+      human.useWall();
+    }
+
+    List<Move> legalMoves = game.generateLegalMoves();
+
+    // Should not contain any wall moves
+    boolean hasWallMove = legalMoves.stream().anyMatch(Move::isWall);
+    assertFalse(hasWallMove);
+
+    // But should still have pawn moves
+    Move pawnMove = Move.pawn(new Position(0, 4), new Position(1, 4));
+    assertTrue(legalMoves.contains(pawnMove));
+  }
+
+  @Test
+  public void generateLegalMovesWithOpponentBlockingIncludesJump() {
+    // Move human to position where IA is blocking
+    human.setPosition(new Position(6, 4));
+    ia.setPosition(new Position(7, 4));
+
+    List<Move> legalMoves = game.generateLegalMoves();
+
+    // Should include jump over IA
+    Move jumpMove = Move.pawn(new Position(6, 4), new Position(8, 4));
+    assertTrue(legalMoves.contains(jumpMove));
+
+    game.getBoard().addWall(new Position(7, 4), Orientation.HORIZONTAL);
+    legalMoves = game.generateLegalMoves();
+    Move diagJumpMove1 = Move.pawn(new Position(6, 4), new Position(7, 5));
+    Move diagJumpMove2 = Move.pawn(new Position(6, 4), new Position(7, 3));
+    assertTrue(legalMoves.contains(diagJumpMove1));
+    assertTrue(legalMoves.contains(diagJumpMove2));
+    assertFalse(legalMoves.contains(jumpMove));
+  }
+
+  @Test
+  public void generateLegalMovesWithWallsBlockingReducesMoves() {
+    // Add a wall that blocks some pawn moves
+    board.addWall(new Position(0, 4), Orientation.VERTICAL);
+
+    List<Move> legalMoves = game.generateLegalMoves();
+
+    // Should not include pawn move to the right if blocked
+    Move blockedMove = Move.pawn(new Position(0, 4), new Position(0, 5));
+
+    assertFalse(legalMoves.contains(blockedMove));
+  }
+
+  @Test
+  public void generateLegalMovesInitialPositionExactMoves() {
+    // Use a small board for exact verification
+    Board smallBoard = new Board(5);
+    Player p1 = new HumanPlayer("P1", new Position(0, 2));
+    p1.setPosition(new Position(1, 2));
+    Player p2 = new HumanPlayer("P2", new Position(4, 2));
+    GameState smallGame = new GameState(smallBoard, List.of(p1, p2));
+
+    List<Move> legalMoves = smallGame.generateLegalMoves();
+
+    // Expected: 3 pawn moves + 32 wall moves = 35
+    assertEquals(36, legalMoves.size());
+
+    // Check specific pawn moves
+    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(0, 2))));
+    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(1, 3))));
+    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(1, 1))));
+    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(2, 2))));
+
+    // Check that non-adjacent pawn moves are not included
+    assertFalse(legalMoves.contains(Move.pawn(new Position(0, 2), new Position(1, 1))));
+    assertFalse(legalMoves.contains(Move.pawn(new Position(0, 2), new Position(0, 0))));
+
+    // Check some wall moves are included
+    assertTrue(legalMoves.contains(Move.wall(new Position(0, 0), Orientation.HORIZONTAL)));
+    assertTrue(legalMoves.contains(Move.wall(new Position(2, 2), Orientation.VERTICAL)));
+
+    // Ensure no invalid wall positions
+    assertFalse(
+        legalMoves.contains(
+            Move.wall(new Position(4, 4), Orientation.HORIZONTAL))); // out of bounds for walls
   }
 
   @Test

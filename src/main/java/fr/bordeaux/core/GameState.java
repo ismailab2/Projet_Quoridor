@@ -147,6 +147,10 @@ public class GameState {
     currentIndexPlayer = (currentIndexPlayer - 1 + players.size()) % players.size();
   }
 
+  public int getPreviousIndexPlayer() {
+    return (currentIndexPlayer - 1 + players.size()) % players.size();
+  }
+
   public Player getCurrentPlayer() {
     return players.get(currentIndexPlayer);
   }
@@ -326,5 +330,9 @@ public class GameState {
     for (Move m : history) {
       this.undoStack.push(m);
     }
+  }
+
+  public void setGameOver(boolean b) {
+    this.gameOver = b;
   }
 }
