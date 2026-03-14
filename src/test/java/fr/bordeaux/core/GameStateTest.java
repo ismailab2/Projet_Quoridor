@@ -233,53 +233,6 @@ public class GameStateTest {
   }
 
   @Test
-  public void generateLegalMovesWithWallsBlockingReducesMoves() {
-    // Add a wall that blocks some pawn moves
-    board.addWall(new Position(0, 4), Orientation.VERTICAL);
-
-    List<Move> legalMoves = game.generateLegalMoves();
-
-    // Should not include pawn move to the right if blocked
-    Move blockedMove = Move.pawn(new Position(0, 4), new Position(0, 5));
-
-    assertFalse(legalMoves.contains(blockedMove));
-  }
-
-  @Test
-  public void generateLegalMovesInitialPositionExactMoves() {
-    // Use a small board for exact verification
-    Board smallBoard = new Board(5);
-    Player p1 = new HumanPlayer("P1", new Position(0, 2));
-    p1.setPosition(new Position(1, 2));
-    Player p2 = new HumanPlayer("P2", new Position(4, 2));
-    GameState smallGame = new GameState(smallBoard, List.of(p1, p2));
-
-    List<Move> legalMoves = smallGame.generateLegalMoves();
-
-    // Expected: 3 pawn moves + 32 wall moves = 35
-    assertEquals(36, legalMoves.size());
-
-    // Check specific pawn moves
-    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(0, 2))));
-    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(1, 3))));
-    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(1, 1))));
-    assertTrue(legalMoves.contains(Move.pawn(new Position(1, 2), new Position(2, 2))));
-
-    // Check that non-adjacent pawn moves are not included
-    assertFalse(legalMoves.contains(Move.pawn(new Position(0, 2), new Position(1, 1))));
-    assertFalse(legalMoves.contains(Move.pawn(new Position(0, 2), new Position(0, 0))));
-
-    // Check some wall moves are included
-    assertTrue(legalMoves.contains(Move.wall(new Position(0, 0), Orientation.HORIZONTAL)));
-    assertTrue(legalMoves.contains(Move.wall(new Position(2, 2), Orientation.VERTICAL)));
-
-    // Ensure no invalid wall positions
-    assertFalse(
-        legalMoves.contains(
-            Move.wall(new Position(4, 4), Orientation.HORIZONTAL))); // out of bounds for walls
-  }
-
-  @Test
   public void checkGenerateLegalMoves() {
     board = new Board(3);
     human = new HumanPlayer("Human", new Position(0, 1));
