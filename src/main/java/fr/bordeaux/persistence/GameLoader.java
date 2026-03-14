@@ -58,11 +58,10 @@ public class GameLoader {
    * @throws GameLoadException if the header is missing or incorrect.
    */
   private static void validateSettingsHeader(final List<String> lines) throws GameLoadException {
-    if (!"[settings]".equals(lines.get(0))){
+    if (!"[settings]".equals(lines.get(0))) {
       throw new GameLoadException(
           "ERREUR_ENTETE", 1, "Expected [settings] but found : " + lines.get(0));
     }
-      
   }
 
   // Reads the current player index from line 2
@@ -121,28 +120,28 @@ public class GameLoader {
   }
 
   /**
-   * Internal record used to bundle a parsed player 
-   * and the index of the next line to read.
+   * Internal record used to bundle a parsed player and the index of the next line to read.
+   *
    * @param player The parsed player instance.
    * @param nextLine The index of the next line in the file.
    */
   private record PlayerAndLine(Player player, int nextLine) {}
 
   /**
-   * Internal record used to bundle the list of all parsed players 
-   * and the index of the next line.
+   * Internal record used to bundle the list of all parsed players and the index of the next line.
+   *
    * @param players The list of all parsed players.
-   * @param nextLine The index of the line where player 
-   * and settings parsing stopped.
+   * @param nextLine The index of the line where player and settings parsing stopped.
    */
   private record AllPlayerAndLine(List<Player> players, int nextLine) {}
 
   /**
-   * Reads and parses all players (Human and AI) from the save file.
-   * Stops reading when it encounters the "[game]" section marker.
+   * Reads and parses all players (Human and AI) from the save file. Stops reading when it
+   * encounters the "[game]" section marker.
+   *
    * @param lines The list of strings representing the lines of the save file.
-   * @return An {@link AllPlayerAndLine} object containing the list of players
-   * and the next line index.
+   * @return An {@link AllPlayerAndLine} object containing the list of players and the next line
+   *     index.
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
@@ -156,19 +155,20 @@ public class GameLoader {
   }
 
   /**
-   * Reads a single player's basic information(type, name, starting position)
-   * and delegates to specific methods for AI configuration if necessary.
+   * Reads a single player's basic information(type, name, starting position) and delegates to
+   * specific methods for AI configuration if necessary.
+   *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line where the player's information begins.
-   * @return A {@link PlayerAndLine} record containing the instantiated player 
-   * and the updated line index.
+   * @return A {@link PlayerAndLine} record containing the instantiated player and the updated line
+   *     index.
    */
   private static PlayerAndLine readPlayer(List<String> lines, int currentLine) {
 
     String player = lines.get(currentLine);
     final String pType = player.split("=")[0].split("-")[0];
     final String pName = player.split("=")[1];
-    int myCurrentLine = currentLine +1;
+    int myCurrentLine = currentLine + 1;
     player = lines.get(myCurrentLine);
     final Position pPostion = readPlayerStartPosition(player);
 
@@ -207,7 +207,7 @@ public class GameLoader {
   private static PlayerAndLine readAiPlayer(
       final List<String> lines, int currentLine, final String pName, final Position pPostion) {
     Map<String, String> aiSettings = new HashMap<>();
-    int myCurrentLine = currentLine+1;
+    int myCurrentLine = currentLine + 1;
     while (checkStartByAi(lines, myCurrentLine)) {
       final String[] ls = lines.get(myCurrentLine).split("=");
       final String[] aiParameter = ls[0].split("-");
@@ -256,8 +256,8 @@ public class GameLoader {
   }
 
   /**
-   * Checks if the current line starts with the prefix "ai"
-   * indicating it contains an AI setting.
+   * Checks if the current line starts with the prefix "ai" indicating it contains an AI setting.
+   *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
    * @return {@code true} if the line starts with "ai", {@code false} otherwise.

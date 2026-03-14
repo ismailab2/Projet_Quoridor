@@ -1,25 +1,22 @@
 package fr.bordeaux.ai;
 
-
 import fr.bordeaux.core.Position;
-
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utility class implementing the Builder design pattern
- * to configure and instantiate a MinimaxPlayer.
+ * Utility class implementing the Builder design pattern to configure and instantiate a
+ * MinimaxPlayer.
  */
 public class MinimaxBuilder {
-  
+
   /** The player's unique name identifier. */
   private final String name;
 
   /** The starting position of the player on the game board. */
   private final Position positionStart;
 
-    /** The maximum depth the AI will search if iterative deepening is disabled. */
+  /** The maximum depth the AI will search if iterative deepening is disabled. */
   private int searchDepth = 2;
 
   /** The maximum reflection time allowed for the AI in seconds. */
@@ -28,7 +25,7 @@ public class MinimaxBuilder {
   /** Flag indicating whether iterative deepening is enabled. */
   private boolean useIterativeD;
 
-    /** The name of the heuristic algorithm to use. */
+  /** The name of the heuristic algorithm to use. */
   private String heuristicName = "simple";
 
   /**
@@ -41,9 +38,10 @@ public class MinimaxBuilder {
     this.name = name;
     this.positionStart = pos;
   }
+
   /**
-   * Sets the depth of the Minimax search.
-   * * @param depth The chosen depth.
+   * Sets the depth of the Minimax search. * @param depth The chosen depth.
+   *
    * @return The builder instance.
    */
   public MinimaxBuilder withDepth(final int depth) {
@@ -52,8 +50,8 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Sets the reflection time limit in seconds.
-   * * @param t The chosen time limit.
+   * Sets the reflection time limit in seconds. * @param t The chosen time limit.
+   *
    * @return The builder instance.
    */
   public MinimaxBuilder withReflexion(final int timeLimit) {
@@ -62,8 +60,8 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Sets the heuristic name to be used.
-   * * @param h The name of the heuristic.
+   * Sets the heuristic name to be used. * @param h The name of the heuristic.
+   *
    * @return The builder instance.
    */
   public MinimaxBuilder withHeuristic(final String heuristic) {
@@ -72,8 +70,8 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Enables or disables iterative deepening.
-   * * @param useDeepening The boolean flag.
+   * Enables or disables iterative deepening. * @param useDeepening The boolean flag.
+   *
    * @return The builder instance.
    */
   public MinimaxBuilder withIterativeDeepening(final boolean useDeepening) {
@@ -84,48 +82,49 @@ public class MinimaxBuilder {
   /**
    * @return The depth search value of Minimax
    */
-  public int getSearchDepth(){
-      return this.searchDepth;
+  public int getSearchDepth() {
+    return this.searchDepth;
   }
 
   /**
    * @return The reflexion time value of Minimax
    */
-  public int getLimitTime(){
-      return this.reflexionTime;
+  public int getLimitTime() {
+    return this.reflexionTime;
   }
 
   /**
    * @return The boolean representing if Minimax use Iterative Deepening
    */
-  public boolean isUseIterativeDeepening(){
-      return this.useIterativeD;
+  public boolean isUseIterativeDeepening() {
+    return this.useIterativeD;
   }
 
   /**
    * @return The name of the heuristic selected
    */
-  public String getHeuristicName(){
-      return this.heuristicName;
+  public String getHeuristicName() {
+    return this.heuristicName;
   }
 
   /**
    * @return The name the MiniMax Player
    */
-  public String getName(){
-      return this.name;
+  public String getName() {
+    return this.name;
   }
 
   /**
    * @return The starting position of the MiniMax Player
    */
-  public Position getStartingPosition(){
-      return this.positionStart;
+  public Position getStartingPosition() {
+    return this.positionStart;
   }
 
   /**
-   * Validates if the given heuristic name is known to the system.
-   * * @param heuristic The heuristic name to check.
+   * Validates if the given heuristic name is known to the system. * @param heuristic The heuristic
+   * name to check.
+   *
    * @return True if valid, false otherwise.
    */
   private boolean validHeuristic(final String heuristic) {
@@ -149,9 +148,7 @@ public class MinimaxBuilder {
   public MinimaxPlayer build() {
     if (!validHeuristic(heuristicName)) {
       throw new IllegalArgumentException(
-          "Incorrect name for the heuristic, the "
-              + heuristicName
-              + " heuristic does not exist.");
+          "Incorrect name for the heuristic, the " + heuristicName + " heuristic does not exist.");
     }
     if (searchDepth < 0) {
       throw new IllegalArgumentException(

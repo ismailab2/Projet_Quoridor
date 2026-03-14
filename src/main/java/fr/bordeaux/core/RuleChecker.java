@@ -47,13 +47,13 @@ public class RuleChecker {
       boolean jumpPossible = false;
 
       if (b.isInside(jump)) {
-          int jumpId = b.id(jump.getX(), jump.getY());
-          if (b.getGraph().hasEdge(opId, jumpId) && b.getGraph().hasEdge(fromId, opId)) {
-              if (to.equals(jump)) return true;
-              jumpPossible = true;
-          }
+        int jumpId = b.id(jump.getX(), jump.getY());
+        if (b.getGraph().hasEdge(opId, jumpId) && b.getGraph().hasEdge(fromId, opId)) {
+          if (to.equals(jump)) return true;
+          jumpPossible = true;
+        }
       }
-      if(!jumpPossible){
+      if (!jumpPossible) {
         for (Position diag : getDiagonalJumps(from, posOtherPlayer)) {
           if (!b.isInside(diag)) continue;
 
@@ -83,7 +83,7 @@ public class RuleChecker {
     int toId = b.id(to.getX(), to.getY());
 
     for (Player p : state.getPlayers()) {
-        if (p.getPosition().equals(to)) return false;
+      if (p.getPosition().equals(to)) return false;
     }
 
     if (b.getGraph().hasEdge(fromId, toId)) return true;

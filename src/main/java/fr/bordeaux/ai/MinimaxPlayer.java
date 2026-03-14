@@ -4,21 +4,19 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
 /**
- * Represents an AI player using the Minimax algorithm for the Quorridor game.
- * Features advanced capabilities such as Alpha-Beta pruning, 
- * Iterative Deepening, and a configurable reflection time limit. 
- * Note: AI are currently limited to 2-player scenarios.
- * They may not function correctly if the number of players is larger.
+ * Represents an AI player using the Minimax algorithm for the Quorridor game. Features advanced
+ * capabilities such as Alpha-Beta pruning, Iterative Deepening, and a configurable reflection time
+ * limit. Note: AI are currently limited to 2-player scenarios. They may not function correctly if
+ * the number of players is larger.
  */
 public final class MinimaxPlayer extends AiPlayer {
 
@@ -58,13 +56,14 @@ public final class MinimaxPlayer extends AiPlayer {
     if (this.useIterativeD) {
       this.mode = this::iterativeDeepening;
     } else {
-      this.mode = (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
+      this.mode =
+          (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
-    
+
     this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
   }
 
-    /** Private constructor used by the copy() method for cloning the AI player. */
+  /** Private constructor used by the copy() method for cloning the AI player. */
   private MinimaxPlayer(
       final String name,
       final Position current,
@@ -84,16 +83,16 @@ public final class MinimaxPlayer extends AiPlayer {
     if (this.useIterativeD) {
       this.mode = this::iterativeDeepening;
     } else {
-      this.mode = (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
+      this.mode =
+          (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
     this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
   }
 
-
   /**
-   * Static factory method for the builder.
-   * * @param name The player name.
-   * @param pos  The starting position.
+   * Static factory method for the builder. * @param name The player name.
+   *
+   * @param pos The starting position.
    * @return A new Builder instance.
    */
   public static MinimaxBuilder builder(final String name, final Position pos) {
@@ -103,8 +102,7 @@ public final class MinimaxPlayer extends AiPlayer {
   /**
    * Sets the heuristic function based on the provided name.
    *
-   * @param heuristicNameP The name of the heuristic 
-   * ("simple", "intermediate", or "advanced").
+   * @param heuristicNameP The name of the heuristic ("simple", "intermediate", or "advanced").
    * @return The corresponding heuristic class.
    */
   private HeuristicEvaluator determineHeuristic(final String heuristicNameP, final String aiName) {
@@ -126,6 +124,7 @@ public final class MinimaxPlayer extends AiPlayer {
 
   /**
    * Computes and returns the best possible move within the allocated time limit.
+   *
    * @param state The current game state.
    * @return The best move found.
    */
@@ -134,7 +133,7 @@ public final class MinimaxPlayer extends AiPlayer {
 
     final long deadlineTime = System.currentTimeMillis() + (this.reflexionTime * 1000L);
     Move bestMove = this.mode.apply(state, deadlineTime);
-    
+
     if (bestMove == null) {
       bestMove = randomMove(state);
     }
@@ -143,8 +142,9 @@ public final class MinimaxPlayer extends AiPlayer {
 
   /**
    * Implements Iterative Deepening search safely within the main thread.
-   * @param state    The current game state.
-   * @param endTime  The timestamp when the search must abort.
+   *
+   * @param state The current game state.
+   * @param endTime The timestamp when the search must abort.
    * @return The best move found at the maximum depth reached before timeout.
    */
   private Move iterativeDeepening(final GameState state, final long endTime) {
@@ -153,7 +153,7 @@ public final class MinimaxPlayer extends AiPlayer {
 
     while (System.currentTimeMillis() < endTime) {
       final Move tempMove = miniMax(state, currentDepth, endTime);
-      
+
       if (System.currentTimeMillis() >= endTime) {
         break;
       }
@@ -167,9 +167,10 @@ public final class MinimaxPlayer extends AiPlayer {
 
   /**
    * Entry point for the Minimax algorithm. Explores the first level of legal moves.
+   *
    * @param gameState The current game state.
-   * @param maxDepth  The search depth.
-   * @param endTime   The deadline for the search.
+   * @param maxDepth The search depth.
+   * @param endTime The deadline for the search.
    * @return The best evaluated move.
    */
   private Move miniMax(final GameState gameState, final int maxDepth, final long endTime) {
@@ -182,7 +183,8 @@ public final class MinimaxPlayer extends AiPlayer {
         break;
       }
       push(searchState, currentMove);
-      final int score = minMax(searchState, maxDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, endTime);
+      final int score =
+          minMax(searchState, maxDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, endTime);
       if (score > bestScore || bestMove == null) {
         bestScore = score;
         bestMove = currentMove;
@@ -194,13 +196,18 @@ public final class MinimaxPlayer extends AiPlayer {
 
   /**
    * @param gameState The game state.
-   * @param currentDepth     The remaining depth.
-   * @param alpha     The best value guaranteed for MAX.
-   * @param beta      The best value guaranteed for MIN.
-   * @param endTime   The search deadline.
+   * @param currentDepth The remaining depth.
+   * @param alpha The best value guaranteed for MAX.
+   * @param beta The best value guaranteed for MIN.
+   * @param endTime The search deadline.
    * @return The maximized score.
    */
-  private int maxMin(final GameState gameState, final int currentDepth, final int alpha, final int beta, final long endTime) {
+  private int maxMin(
+      final GameState gameState,
+      final int currentDepth,
+      final int alpha,
+      final int beta,
+      final long endTime) {
     final int resultScore;
     if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
       resultScore = this.heuristicFunction.evaluate(gameState);
@@ -208,9 +215,11 @@ public final class MinimaxPlayer extends AiPlayer {
       int currentAlpha = alpha;
       for (final Move move : gameState.generateLegalMoves()) {
         push(gameState, move);
-        currentAlpha = Math.max(currentAlpha, minMax(gameState, currentDepth - 1, currentAlpha, beta, endTime));
+        currentAlpha =
+            Math.max(
+                currentAlpha, minMax(gameState, currentDepth - 1, currentAlpha, beta, endTime));
         pop(gameState);
-        
+
         if (currentAlpha >= beta) {
           currentAlpha = beta;
           break;
@@ -221,16 +230,20 @@ public final class MinimaxPlayer extends AiPlayer {
     return resultScore;
   }
 
-
   /**
    * @param gameState The game state.
-   * @param currentDepth     The remaining depth.
-   * @param alpha     The best value guaranteed for MAX.
-   * @param beta      The best value guaranteed for MIN.
-   * @param endTime   The search deadline.
+   * @param currentDepth The remaining depth.
+   * @param alpha The best value guaranteed for MAX.
+   * @param beta The best value guaranteed for MIN.
+   * @param endTime The search deadline.
    * @return The minimized score.
    */
-  private int minMax(final GameState gameState, final int currentDepth, final int alpha, final int beta, final long endTime) {
+  private int minMax(
+      final GameState gameState,
+      final int currentDepth,
+      final int alpha,
+      final int beta,
+      final long endTime) {
     final int resultScore;
 
     if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
@@ -239,9 +252,10 @@ public final class MinimaxPlayer extends AiPlayer {
       int currentBeta = beta;
       for (final Move move : gameState.generateLegalMoves()) {
         push(gameState, move);
-        currentBeta = Math.min(currentBeta, maxMin(gameState, currentDepth - 1, alpha, currentBeta, endTime));
+        currentBeta =
+            Math.min(currentBeta, maxMin(gameState, currentDepth - 1, alpha, currentBeta, endTime));
         pop(gameState);
-        
+
         if (alpha >= currentBeta) {
           currentBeta = alpha;
           break;
@@ -265,10 +279,10 @@ public final class MinimaxPlayer extends AiPlayer {
   }
 
   /**
-   * Simulates a move and updates the game state,
-   * pushing it to the stack for backtracking.
+   * Simulates a move and updates the game state, pushing it to the stack for backtracking.
+   *
    * @param gameState The current game state.
-   * @param move      The move to simulate.
+   * @param move The move to simulate.
    */
   private void push(final GameState gameState, final Move move) {
     final Player currentPlayer = gameState.getCurrentPlayer();
@@ -293,7 +307,7 @@ public final class MinimaxPlayer extends AiPlayer {
       final Move lastMove = this.aiStack.pop();
       gameState.previousPlayer();
       final Player currentPlayer = gameState.getCurrentPlayer();
-      
+
       if (lastMove.isPawn()) {
         currentPlayer.setPosition(lastMove.getFrom());
       } else {
@@ -308,7 +322,7 @@ public final class MinimaxPlayer extends AiPlayer {
     return "MiniMax AI " + super.toString();
   }
 
-@Override
+  @Override
   public Player copy() {
     return new MinimaxPlayer(
         this.getName(),
@@ -321,7 +335,6 @@ public final class MinimaxPlayer extends AiPlayer {
         this.useIterativeD,
         this.heuristicName);
   }
-
 
   @Override
   public Map<String, Object> getSettings() {

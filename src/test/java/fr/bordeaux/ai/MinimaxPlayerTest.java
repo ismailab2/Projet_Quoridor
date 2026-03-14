@@ -107,7 +107,11 @@ public class MinimaxPlayerTest {
   @Test
   public void checkIterativeDeepening() {
     board = new Board(9);
-    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(2).withHeuristic("intermediate").build();
+    ia1 =
+        MinimaxPlayer.builder("IA1", new Position(8, 4))
+            .withDepth(2)
+            .withHeuristic("intermediate")
+            .build();
     ia2 = new RandomPlayer("IA2", new Position(0, 4));
     List<Player> players = new ArrayList<>();
     players.add(ia1);
