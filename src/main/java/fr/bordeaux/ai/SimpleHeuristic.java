@@ -23,8 +23,8 @@ public class SimpleHeuristic implements HeuristicEvaluator {
     }
 
     /**
-     * Evaluates progress by comparing the current position with the starting row or column.
-     *
+     * Evaluates progress by comparing the current position 
+     * with the starting row or column.
      * @param gameState The current game state.
      * @return An integer representing the steps taken toward the goal.
      * @throws IllegalStateException if the AI player is not found in the game state.
@@ -39,7 +39,9 @@ public class SimpleHeuristic implements HeuristicEvaluator {
                 break;
             }
         }
-        if (player == null) throw new IllegalStateException("AI player not found");
+        if (player == null){
+            throw new IllegalStateException("AI player not found");
+        } 
 
         final Position startPos = player.getStartingPosition();
         final Position actualPos = player.getPosition();

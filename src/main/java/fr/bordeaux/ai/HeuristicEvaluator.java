@@ -1,7 +1,6 @@
 package fr.bordeaux.ai;
 
 import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Player;
 
 /**
  * Functional interface for evaluating a game state in the Quoridor game.
@@ -14,7 +13,8 @@ public interface HeuristicEvaluator {
      * Evaluates the current game board and returns a numerical score.
      *
      * @param gameState The current state of the game to be evaluated.
-     * @return A score representing the advantage (positive for the AI, negative for the opponent).
+     * @return A score representing the advantage 
+     * (positive for the AI, negative for the opponent).
      */
     int evaluate(GameState gameState);
 }

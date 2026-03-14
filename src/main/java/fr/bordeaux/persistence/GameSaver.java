@@ -109,13 +109,13 @@ public class GameSaver {
    *
    * @param w The {@link PrintWriter} used to write to the file.
    * @param g The current game state.
-   * @param new_p The AI player whose settings are being saved.
+   * @param newP The AI player whose settings are being saved.
    * @param i The index of the player (used for formatting the key).
    */
-  private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer new_p, int i) {
-    writeLine(w, "ai-player-" + i + "-name", new_p.getName());
-    writeLine(w, "ai-player-" + i + "-starting-position", new_p.getStartingPosition().toString());
-    Map<String, Object> aiSettings = new_p.getSettings();
+  private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer newP, int i) {
+    writeLine(w, "ai-player-" + i + "-name", newP.getName());
+    writeLine(w, "ai-player-" + i + "-starting-position", newP.getStartingPosition().toString());
+    Map<String, Object> aiSettings = newP.getSettings();
     for (String s : aiSettings.keySet()) {
       writeLine(w, s, aiSettings.get(s));
     }
@@ -129,7 +129,7 @@ public class GameSaver {
    * @param g The current game state containing the parameters to save.
    */
   private static void saveParameters(PrintWriter w, GameState g) {
-    w.println("[settings] # Paramètres du programme");
+    w.println("[settings]");
 
     writeLine(w, "verbose", g.isVerbose());
     writeLine(w, "blitz", g.isBlitz());
@@ -142,8 +142,8 @@ public class GameSaver {
     int i = 1;
     for (Player p : g.getPlayers()) {
       if (p.isAI()) {
-        AiPlayer new_p = ((AiPlayer) p);
-        saveAiSettings(w, g, new_p, i);
+        AiPlayer newP = ((AiPlayer) p);
+        saveAiSettings(w, g, newP, i);
       } else {
 
         // writeLine(w, "player-"+i+"-remaining-time" ,  p.getRemainingTime());

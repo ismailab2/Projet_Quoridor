@@ -57,10 +57,12 @@ public class GameLoader {
    * @param lines The list of strings representing the lines of the save file.
    * @throws GameLoadException if the header is missing or incorrect.
    */
-  private static void validateSettingsHeader(List<String> lines) throws GameLoadException {
-    if (!lines.get(0).equals("[settings] # Paramètres du programme"))
+  private static void validateSettingsHeader(final List<String> lines) throws GameLoadException {
+    if (!"[settings]".equals(lines.get(0))){
       throw new GameLoadException(
           "ERREUR_ENTETE", 1, "Expected [settings] but found : " + lines.get(0));
+    }
+      
   }
 
   // Reads the current player index from line 2
@@ -119,34 +121,34 @@ public class GameLoader {
   }
 
   /**
-   * Internal record used to bundle a parsed player and the index of the next line to read.
-   *
+   * Internal record used to bundle a parsed player 
+   * and the index of the next line to read.
    * @param player The parsed player instance.
    * @param nextLine The index of the next line in the file.
    */
   private record PlayerAndLine(Player player, int nextLine) {}
 
   /**
-   * Internal record used to bundle the list of all parsed players and the index of the next line.
-   *
+   * Internal record used to bundle the list of all parsed players 
+   * and the index of the next line.
    * @param players The list of all parsed players.
-   * @param nextLine The index of the line where player and settings parsing stopped.
+   * @param nextLine The index of the line where player 
+   * and settings parsing stopped.
    */
   private record AllPlayerAndLine(List<Player> players, int nextLine) {}
 
   /**
-   * Reads and parses all players (Human and AI) from the save file. Stops reading when it
-   * encounters the "[game]" section marker.
-   *
+   * Reads and parses all players (Human and AI) from the save file.
+   * Stops reading when it encounters the "[game]" section marker.
    * @param lines The list of strings representing the lines of the save file.
-   * @return An {@link AllPlayerAndLine} object containing the list of players and the next line
-   *     index.
+   * @return An {@link AllPlayerAndLine} object containing the list of players
+   * and the next line index.
    */
-  private static AllPlayerAndLine readAllPlayer(List<String> lines) {
+  private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
     int currentLine = 8; // 8 because its at the 9 lines that starts the informations about players
     while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
-      PlayerAndLine res = readPlayer(lines, currentLine);
+      final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
       currentLine = res.nextLine + 1;
     }
@@ -154,26 +156,26 @@ public class GameLoader {
   }
 
   /**
-   * Reads a single player's basic information (type, name, starting position) and delegates to
-   * specific methods for AI configuration if necessary.
-   *
+   * Reads a single player's basic information(type, name, starting position)
+   * and delegates to specific methods for AI configuration if necessary.
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line where the player's information begins.
-   * @return A {@link PlayerAndLine} record containing the instantiated player and the updated line
-   *     index.
+   * @return A {@link PlayerAndLine} record containing the instantiated player 
+   * and the updated line index.
    */
   private static PlayerAndLine readPlayer(List<String> lines, int currentLine) {
 
-    String p = lines.get(currentLine);
-    String p_type = p.split("=")[0].split("-")[0];
-    String p_name = p.split("=")[1];
-    p = lines.get(++currentLine);
-    Position p_postion = readPlayerStartPosition(p);
+    String player = lines.get(currentLine);
+    final String pType = player.split("=")[0].split("-")[0];
+    final String pName = player.split("=")[1];
+    int myCurrentLine = currentLine +1;
+    player = lines.get(myCurrentLine);
+    final Position pPostion = readPlayerStartPosition(player);
 
-    if (p_type.equals("ai")) {
-      return readAiPlayer(lines, currentLine, p_name, p_postion);
+    if (pType.equals("ai")) {
+      return readAiPlayer(lines, myCurrentLine, pName, pPostion);
     } else {
-      return new PlayerAndLine(new HumanPlayer(p_name, p_postion), currentLine);
+      return new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine);
     }
   }
 
@@ -183,72 +185,70 @@ public class GameLoader {
    * @param p The string containing the position data (e.g., "key=Position: 4, 0").
    * @return A {@link Position} object representing the parsed coordinates.
    */
-  private static Position readPlayerStartPosition(String p) {
-    String p_start_pos = p.split("=")[1];
-    String p_start_pos_coord = p_start_pos.split(":")[1];
-    int x =
+  private static Position readPlayerStartPosition(final String p) {
+    final String pStartPos = p.split("=")[1];
+    final String pStartPosCoord = pStartPos.split(":")[1];
+    final int x =
         Integer.parseInt(
-            p_start_pos_coord.split(",")[0].replaceAll(
+            pStartPosCoord.split(",")[0].replaceAll(
                 " ", "")); // Spaces must be removed because ParseInt does not handle them.
-    int y = Integer.parseInt(p_start_pos_coord.split(",")[1].replaceAll(" ", ""));
+    final int y = Integer.parseInt(pStartPosCoord.split(",")[1].replaceAll(" ", ""));
     return new Position(x, y);
   }
 
   /**
-   * Parses the configuration of an AI player and instantiates the correct AI type (Minimax, MCTS,
-   * Neural Network, etc.) based on its settings.
-   *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The current line index after reading basic player info.
-   * @param p_name The parsed name of the AI player.
-   * @param p_postion The parsed starting position of the AI.
-   * @return A {@link PlayerAndLine} record containing the fully configured AI player and the
-   *     updated line index.
+   * @param pName The parsed name of the AI player.
+   * @param pPostion The parsed starting position of the AI.
+   * @return A {@link PlayerAndLine} record containing the fully configured AI player
    * @throws IllegalArgumentException if the AI mode specified in the file is unknown.
    */
   private static PlayerAndLine readAiPlayer(
-      List<String> lines, int currentLine, String p_name, Position p_postion) {
+      final List<String> lines, int currentLine, final String pName, final Position pPostion) {
     Map<String, String> aiSettings = new HashMap<>();
-    while (checkStartByAi(lines, ++currentLine)) {
-      String[] ls = lines.get(currentLine).split("=");
-      String[] aiParameter = ls[0].split("-");
+    int myCurrentLine = currentLine+1;
+    while (checkStartByAi(lines, myCurrentLine)) {
+      final String[] ls = lines.get(myCurrentLine).split("=");
+      final String[] aiParameter = ls[0].split("-");
       aiSettings.put(aiParameter[aiParameter.length - 1], ls[1]);
+      myCurrentLine++;
     }
 
     switch (aiSettings.get("mode")) {
       case "minimax":
         {
-          String heuristicName = aiSettings.get("heuristic");
-          int depth = Integer.parseInt(aiSettings.get("depth"));
-          int reflexion_time = Integer.parseInt(aiSettings.get("reflexion"));
+          final String heuristicName = aiSettings.get("heuristic");
+          final int depth = Integer.parseInt(aiSettings.get("depth"));
+          final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
           return new PlayerAndLine(
-              MinimaxPlayer.builder(p_name, p_postion)
+              MinimaxPlayer.builder(pName, pPostion)
                   .withHeuristic(heuristicName)
                   .withDepth(depth)
-                  .withReflexion(reflexion_time)
+                  .withReflexion(reflexionTime)
                   .build(),
-              currentLine);
+              myCurrentLine);
         }
       case "mcts":
-        return new PlayerAndLine(new MCTSPlayer(p_name, p_postion), currentLine);
+        return new PlayerAndLine(new MCTSPlayer(pName, pPostion), myCurrentLine);
 
       case "neural-network":
-        return new PlayerAndLine(new NeuralNetPlayer(p_name, p_postion), currentLine);
+        return new PlayerAndLine(new NeuralNetPlayer(pName, pPostion), myCurrentLine);
 
       case "random":
-        return new PlayerAndLine(new RandomPlayer(p_name, p_postion), currentLine);
+        return new PlayerAndLine(new RandomPlayer(pName, pPostion), myCurrentLine);
 
       case "minimax-iterative-deepening":
         {
-          String heuristicName = aiSettings.get("heuristic");
-          int reflexion_time = Integer.parseInt(aiSettings.get("reflexion"));
+          final String heuristicName = aiSettings.get("heuristic");
+          final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
           return new PlayerAndLine(
-              MinimaxPlayer.builder(p_name, p_postion)
+              MinimaxPlayer.builder(pName, pPostion)
                   .withHeuristic(heuristicName)
-                  .withReflexion(reflexion_time)
+                  .withReflexion(reflexionTime)
                   .withIterativeDeepening(true)
                   .build(),
-              currentLine);
+              myCurrentLine);
         }
       default:
         throw new IllegalArgumentException("Unknow Ai Type : " + aiSettings.get("mode"));
@@ -256,13 +256,13 @@ public class GameLoader {
   }
 
   /**
-   * Checks if the current line starts with the prefix "ai", indicating it contains an AI setting.
-   *
+   * Checks if the current line starts with the prefix "ai"
+   * indicating it contains an AI setting.
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
    * @return {@code true} if the line starts with "ai", {@code false} otherwise.
    */
-  private static boolean checkStartByAi(List<String> lines, int currentLine) {
+  private static boolean checkStartByAi(final List<String> lines, final int currentLine) {
     return lines.get(currentLine).startsWith("ai");
   }
 
