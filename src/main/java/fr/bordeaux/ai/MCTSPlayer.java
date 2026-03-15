@@ -305,7 +305,6 @@ public class MCTSPlayer extends AiPlayer {
     return hint(player, state, 2000, evaluator);
   }
 
-  /** Hint for best move. NOPMD - CommentSize */  // NOPMD
   /** @param player @param state @param reflectionTimeMs @param evaluator */
   public static Move hint(final Player player, final GameState state, final long reflectionTimeMs, final NeuralNetworkEvaluator evaluator) {
     final MCTSPlayer tempAiPlayer = new MCTSPlayer("TempAI", player.getPosition(), reflectionTimeMs, evaluator);
