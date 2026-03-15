@@ -81,15 +81,14 @@ public class NewCommand implements Command {
         try {
           System.out.println("Player's type available :");
           System.out.println(
-              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [nn] NeuralNetwork ia  - [r]andom ia");
+              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [r]andom ia");
           String typePlayer = reader.readLine("Player's type >> ");
           if (typePlayer == null) throw new EndOfFileException();
           if (!typePlayer.equals("h")
               && !typePlayer.equals("mcts")
               && !typePlayer.equals("mini")
-              && !typePlayer.equals("nn")
               && !typePlayer.equals("r")) {
-            System.out.println("Wrong type, please enter h / mcts / mini / nn / r");
+            System.out.println("Wrong type, please enter h / mcts / mini / r");
             i--;
             continue;
           }
@@ -109,11 +108,6 @@ public class NewCommand implements Command {
             case "mini":
               {
                 players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
-                break;
-              }
-            case "nn":
-              {
-                players[i] = new NeuralNetPlayer(inputName, positions[i]);
                 break;
               }
             default:
