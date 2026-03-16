@@ -125,7 +125,6 @@ public class GameState {
 
   public boolean hasReachedGoal(Player player) {
     int id = board.id(player.getPosition().getX(), player.getPosition().getY());
-    // System.out.println(getWinCondition(player).test(id));
     return getWinCondition(player).test(id);
   }
 
@@ -189,6 +188,7 @@ public class GameState {
     List<Player> newPlayers = new ArrayList<>();
     newPlayers.add(new HumanPlayer("Human", new Position(0, size / 2)));
     newPlayers.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
+    notifyListeners();
     return new GameState(newBoard, newPlayers);
   }
 
