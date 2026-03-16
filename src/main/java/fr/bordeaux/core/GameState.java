@@ -209,14 +209,15 @@ public class GameState {
 
   public List<Move> generateLegalMoves() {
     List<Move> res = new ArrayList<>();
+    List<Move> all_possible_moves = new ArrayList<>();
     Position player_pos = getCurrentPlayer().getPosition();
     int x = player_pos.getX();
     int y = player_pos.getY();
-    List<Move> all_possible_moves = new ArrayList<>();
+
     for (int i = -1; i < 2; i++) {
       for (int j = -1; j < 2; j++) {
         if (i != 0 || j != 0) {
-          all_possible_moves.add(Move.pawn(player_pos, new Position(x + i, y + j)));
+          all_possible_moves.add(Move.pawn(new Position(x, y), new Position(x + i, y + j)));
         }
       }
     }
@@ -248,29 +249,26 @@ public class GameState {
   }
 
   public List<Position> getLegalMoves(Player player) {
+
     List<Position> res = new ArrayList<>();
-    Position player_pos = player.getPosition();
-    int x = player_pos.getX();
-    int y = player_pos.getY();
-    List<Move> all_possible_moves = new ArrayList<>();
-    for (int i = -1; i < 2; i++) {
-      for (int j = -1; j < 2; j++) {
-        if (i != 0 || j != 0) {
-          all_possible_moves.add(Move.pawn(player_pos, new Position(x + i, y + j)));
-        }
-      }
-    }
 
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x + 2, y)));
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x - 2, y)));
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y + 2)));
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y - 2)));
+    Position pos = player.getPosition();
+    int x = pos.getX();
+    int y = pos.getY();
 
-    for (Move m : all_possible_moves) {
+    Position[] candidates = {
+      new Position(x + 1, y), new Position(x - 1, y), new Position(x, y + 1), new Position(x, y - 1)
+    };
+
+    for (Position p : candidates) {
+
+      Move m = Move.pawn(new Position(x, y), p);
+
       if (RuleChecker.isMoveLegal(this, m)) {
-        res.add(m.getTo());
+        res.add(p);
       }
     }
+
     return res;
   }
 
