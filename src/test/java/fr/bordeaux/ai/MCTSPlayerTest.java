@@ -71,8 +71,9 @@ public class MCTSPlayerTest {
 
     // The winning move is to go to row 8
     Move winningMove = Move.pawn(new Position(7, 3), new Position(8, 3));
-
+    System.out.println("Start algorithm");
     Move chosenMove = ai.getNextMove(state);
+    System.out.println("End algorithm");
 
     assertTrue(chosenMove.isPawn());
 

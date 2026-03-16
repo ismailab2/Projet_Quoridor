@@ -209,6 +209,15 @@ public class GameState {
 
   public List<Move> generateLegalMoves() {
     List<Move> res = new ArrayList<>();
+    for (Move m : generatePseudoLegalMoves()) {
+      if (RuleChecker.isMoveLegal(this, m)) {
+        res.add(m);
+      }
+    }
+    return res;
+  }
+
+  public List<Move> generatePseudoLegalMoves() {
     Position player_pos = getCurrentPlayer().getPosition();
     int x = player_pos.getX();
     int y = player_pos.getY();
@@ -238,13 +247,7 @@ public class GameState {
       }
     }
 
-    for (Move m : all_possible_moves) {
-      if (RuleChecker.isMoveLegal(this, m)) {
-        res.add(m);
-      }
-    }
-
-    return res;
+    return all_possible_moves;
   }
 
   public List<Position> getLegalMoves(Player player) {

@@ -46,7 +46,11 @@ public class MCTSPlayer extends AiPlayer {
   }
 
   /** Constructor with custom reflection time and neural network evaluator. */
-  public MCTSPlayer(final String name, final Position positionStart, final long reflectionTime, final NeuralNetworkEvaluator evaluator) {
+  public MCTSPlayer(
+      final String name,
+      final Position positionStart,
+      final long reflectionTime,
+      final NeuralNetworkEvaluator evaluator) {
     super(name, positionStart);
     this.reflectionTime = reflectionTime;
     this.evaluator = evaluator;
@@ -55,21 +59,21 @@ public class MCTSPlayer extends AiPlayer {
   @Override
   public Player copy() {
     return new MCTSPlayer(
-            this.getName(),
-            this.getPosition(),
-            this.getStartingPosition(),
-            this.getRemainingWalls(),
-            this.getScore(),
-            this.reflectionTime);
+        this.getName(),
+        this.getPosition(),
+        this.getStartingPosition(),
+        this.getRemainingWalls(),
+        this.getScore(),
+        this.reflectionTime);
   }
 
   private MCTSPlayer(
-          final String name,
-          final Position current,
-          final Position start,
-          final int walls,
-          final int score,
-          final long reflectionTime) {
+      final String name,
+      final Position current,
+      final Position start,
+      final int walls,
+      final int score,
+      final long reflectionTime) {
     super(name, current, start, walls, score);
     this.reflectionTime = reflectionTime;
     this.evaluator = null;
@@ -77,6 +81,9 @@ public class MCTSPlayer extends AiPlayer {
 
   /** Inner class representing a node within the MCTS search tree. */
   public static class MctsNode {
+
+    int simulations;
+
     /** The game state associated with this node. */
     private final GameState state;
 
@@ -108,24 +115,40 @@ public class MCTSPlayer extends AiPlayer {
       this.state = state;
       this.move = move;
       this.parent = parent;
-      this.untriedMoves = new ArrayList<>(state.generateLegalMoves());
+      this.untriedMoves = new ArrayList<>(state.generatePseudoLegalMoves());
       Collections.shuffle(this.untriedMoves);
+    }
+
+    public boolean hasUntriedLegalMoves() {
+      while (!untriedMoves.isEmpty()) {
+        if (RuleChecker.isMoveLegal(state, untriedMoves.getLast())) {
+          return true;
+        }
+        untriedMoves.removeLast();
+      }
+      return false;
     }
 
     /** Performs MCTS iterations until the reflection time limit is reached. */
     public Move getBestMoveAfterSearch(
-            final long limit, final int myIdx, final NeuralNetworkEvaluator evaluator) {
+        final long limit, final int myIdx, final NeuralNetworkEvaluator evaluator) {
       final long start = System.currentTimeMillis();
+      simulations = 0;
       while (System.currentTimeMillis() - start < limit) {
         MctsNode current = this;
-        while (!current.state.isGameOver() && current.untriedMoves.isEmpty()) {
+        while (!current.state.isGameOver() && !current.hasUntriedLegalMoves()) {
+          if (current.children.isEmpty()) break;
           current = bestUCT(current, myIdx, evaluator);
         }
-        if (!current.state.isGameOver()) {
+        if (!current.state.isGameOver() && current.hasUntriedLegalMoves()) {
           current = current.expand();
         }
-        backpropagate(current, current.simulate(), myIdx);
+        if (current != null) {
+          backpropagate(current, current.simulate(), myIdx);
+          simulations++;
+        }
       }
+      System.out.println("MCTS simulations: " + simulations);
       return this.extractBestMove();
     }
 
@@ -170,7 +193,7 @@ public class MCTSPlayer extends AiPlayer {
         winnerResult = -1;
         int turns = 0;
 
-        while (winnerResult == -1) {
+        while (winnerResult == -1 && turns < 200) {
           winnerResult = simulateOneStep(temp, allPlayers, totalPlayers);
           turns++;
         }
@@ -180,31 +203,29 @@ public class MCTSPlayer extends AiPlayer {
     }
 
     /** Simulates one step of the game. */
-    private int simulateOneStep(final GameState temp, final List<Player> allPlayers, final int totalPlayers) {
+    private int simulateOneStep(
+        final GameState temp, final List<Player> allPlayers, final int totalPlayers) {
       final Player currentPlayer = temp.getCurrentPlayer();
       final Position currentPos = currentPlayer.getPosition();
       final int curX = currentPos.getX();
       final int curY = currentPos.getY();
 
       final List<Move> legalMoves = new ArrayList<>(12);
-
-      // Pre-allocate position array for 12 possible moves
-      final Position[] positions = new Position[12];
       int posIndex = 0;
 
       // 4 orthogonal steps and jumps (8 moves)
       for (final int[] dir : DIRECTIONS) {
         // Step move (1 cell in direction)
-        positions[posIndex] = new Position(curX + dir[0], curY + dir[1]);
-        final Move stepMove = Move.pawn(currentPos, positions[posIndex]);
+        Position stepPos = new Position(curX + dir[0], curY + dir[1]);
+        final Move stepMove = Move.pawn(currentPos, stepPos);
         if (RuleChecker.isMoveLegal(temp, stepMove)) {
           legalMoves.add(stepMove);
         }
         posIndex++;
 
         // Jump move (2 cells in direction)
-        positions[posIndex] = new Position(curX + (dir[0] * 2), curY + (dir[1] * 2));
-        final Move jumpMove = Move.pawn(currentPos, positions[posIndex]);
+        Position jumpPos = new Position(curX + (dir[0] * 2), curY + (dir[1] * 2));
+        final Move jumpMove = Move.pawn(currentPos, jumpPos);
         if (RuleChecker.isMoveLegal(temp, jumpMove)) {
           legalMoves.add(jumpMove);
         }
@@ -213,12 +234,11 @@ public class MCTSPlayer extends AiPlayer {
 
       // 4 diagonal steps only (1 cell in diagonal direction)
       for (final int[] dir : DIAG_DIRS) {
-        positions[posIndex] = new Position(curX + dir[0], curY + dir[1]);
-        final Move diagonalStep = Move.pawn(currentPos, positions[posIndex]);
+        Position diagPos = new Position(curX + dir[0], curY + dir[1]);
+        final Move diagonalStep = Move.pawn(currentPos, diagPos);
         if (RuleChecker.isMoveLegal(temp, diagonalStep)) {
           legalMoves.add(diagonalStep);
         }
-        posIndex++;
       }
 
       if (legalMoves.isEmpty()) {
@@ -226,10 +246,10 @@ public class MCTSPlayer extends AiPlayer {
       }
 
       final Move selectedMove = legalMoves.get((int) (Math.random() * legalMoves.size()));
+      final int lastIdx = temp.getCurrentIndexPlayer();
       temp.applyMoveWithoutClearingRedo(selectedMove);
 
       // Victory check
-      final int lastIdx = (temp.getCurrentIndexPlayer() - 1 + totalPlayers) % totalPlayers;
       if (temp.hasReachedGoal(allPlayers.get(lastIdx))) {
         return lastIdx;
       }
@@ -266,12 +286,13 @@ public class MCTSPlayer extends AiPlayer {
   @Override
   public Move getNextMove(final GameState state) {
     final int myIdx = state.getPlayers().indexOf(this);
-    return new MctsNode(state.copy()).getBestMoveAfterSearch(this.reflectionTime, myIdx, this.evaluator);
+    return new MctsNode(state.copy())
+        .getBestMoveAfterSearch(this.reflectionTime, myIdx, this.evaluator);
   }
 
   /**
-   * Provides a hint for the best move for a given player in the given game state.
-   * Uses default reflection time of 2000ms and no state evaluator.
+   * Provides a hint for the best move for a given player in the given game state. Uses default
+   * reflection time of 2000ms and no state evaluator.
    *
    * @param player The player for whom to find the best move.
    * @param state The current game state.
@@ -305,25 +326,34 @@ public class MCTSPlayer extends AiPlayer {
     return hint(player, state, 2000, useNN);
   }
 
-  /** @param player @param state @param reflectionTimeMs @param useNN */
-  public static Move hint(final Player player, final GameState state, final long reflectionTimeMs, final boolean useNN) {
+  /**
+   * @param player @param state @param reflectionTimeMs @param useNN
+   */
+  public static Move hint(
+      final Player player,
+      final GameState state,
+      final long reflectionTimeMs,
+      final boolean useNN) {
     final int playerIdx = state.getPlayers().indexOf(player);
     NeuralNetworkEvaluator evalToUse = null;
     if (useNN) {
       evalToUse = new NeuralNetworkEvaluator();
     }
-    return new MctsNode(state.copy()).getBestMoveAfterSearch(reflectionTimeMs, playerIdx, evalToUse);
+    return new MctsNode(state.copy())
+        .getBestMoveAfterSearch(reflectionTimeMs, playerIdx, evalToUse);
   }
 
   /** Selects the best child node using NN evaluation or UCT formula. */
-  private static MctsNode bestUCT(final MctsNode node, final int myIdx, final NeuralNetworkEvaluator evaluator) {
+  private static MctsNode bestUCT(
+      final MctsNode node, final int myIdx, final NeuralNetworkEvaluator evaluator) {
     return evaluator != null
-            ? selectBestChildUsingNN(node, myIdx, evaluator)
-            : selectBestChildUsingUCT(node, myIdx);
+        ? selectBestChildUsingNN(node, myIdx, evaluator)
+        : selectBestChildUsingUCT(node, myIdx);
   }
 
   /** Selects the best child using neural network evaluation. */
-  private static MctsNode selectBestChildUsingNN(final MctsNode node, final int myIdx, final NeuralNetworkEvaluator evaluator) {
+  private static MctsNode selectBestChildUsingNN(
+      final MctsNode node, final int myIdx, final NeuralNetworkEvaluator evaluator) {
     MctsNode bestChild = null;
     double bestValue = Double.NEGATIVE_INFINITY;
     final int currentPlayerIdx = node.getCurrentIndexPlayer();
@@ -332,7 +362,7 @@ public class MCTSPlayer extends AiPlayer {
     for (final MctsNode child : node.getChildren()) {
       double value = evaluator.evaluate(child.state);
       if (!isAiTurn) {
-        value = -value;  // Minimize for opponent
+        value = -value; // Minimize for opponent
       }
       if (value > bestValue) {
         bestValue = value;
@@ -354,7 +384,8 @@ public class MCTSPlayer extends AiPlayer {
       if (!isAiTurn) {
         winRate = 1.0 - winRate;
       }
-      final double uctValue = winRate + UCT_CONSTANT * Math.sqrt(Math.log(node.visits) / child.visits);
+      final double uctValue =
+          winRate + UCT_CONSTANT * Math.sqrt(Math.log(node.visits) / child.visits);
       if (uctValue > maxUct) {
         maxUct = uctValue;
         bestChild = child;
