@@ -1,5 +1,6 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.ai.MinimaxPlayer;
 import java.io.IOException;
 
 public class GameEngine {
@@ -59,14 +60,41 @@ public class GameEngine {
     if (state.isPaused()) {
       System.out.println("Resuming...");
       state.setPaused(false);
+      state.setBlitz(false);
     } else {
       System.out.println("Pausing...");
       state.setPaused(true);
+      state.setBlitz(true);
     }
   }
 
   public void hint() {
-    //  TODO
+
+    Player current = state.getCurrentPlayer();
+
+    MinimaxPlayer ia = MinimaxPlayer.builder(current.getName(), current.getPosition()).build();
+
+    Move hint = ia.getNextMove(state);
+
+    System.out.println("Best move : " + moveToString(hint));
+  }
+
+  private String moveToString(Move move) {
+
+    if (move.getType() == Move.Type.PAWN) {
+
+      return posToString(move.getFrom()) + "-" + posToString(move.getTo());
+    }
+
+    char orientation = move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
+
+    return posToString(move.getTo()) + orientation;
+  }
+
+  private String posToString(Position p) {
+    char letter = (char) ('a' + p.getX());
+    int number = p.getY();
+    return "" + letter + number;
   }
 
   public GameState getState() {

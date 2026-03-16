@@ -54,13 +54,6 @@ public class ConfigManager {
     }
   }
 
-  private void loadDefaults() {
-    props.setProperty("verbose", "false");
-    props.setProperty("debug", "false");
-    props.setProperty("blitz", "false");
-    props.setProperty("timeout", "30");
-  }
-
   public void save() {
     try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
 
