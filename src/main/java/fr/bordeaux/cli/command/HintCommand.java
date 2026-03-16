@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.ai.MCTSPlayer;
-import fr.bordeaux.ai.MinimaxPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Move.Type;
@@ -27,10 +26,10 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-/*     MinimaxPlayer ia =
-        MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
-            .withHeuristic("advanced")
-            .build(); */
+    /*     MinimaxPlayer ia =
+    MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
+        .withHeuristic("advanced")
+        .build(); */
     MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
     System.out.println(RuleChecker.isMoveLegal(engine.getState(), hint));

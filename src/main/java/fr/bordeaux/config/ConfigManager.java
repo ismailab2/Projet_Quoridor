@@ -54,7 +54,6 @@ public class ConfigManager {
     }
   }
 
-
   public void save() {
     try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
 

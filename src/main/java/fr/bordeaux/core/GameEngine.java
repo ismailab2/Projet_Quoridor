@@ -1,7 +1,6 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.ai.MinimaxPlayer;
-
 import java.io.IOException;
 
 public class GameEngine {
@@ -69,39 +68,34 @@ public class GameEngine {
     }
   }
 
-    public void hint() {
+  public void hint() {
 
-        Player current = state.getCurrentPlayer();
+    Player current = state.getCurrentPlayer();
 
-        MinimaxPlayer ia =
-                MinimaxPlayer.builder(current.getName(), current.getPosition())
-                        .build();
+    MinimaxPlayer ia = MinimaxPlayer.builder(current.getName(), current.getPosition()).build();
 
-        Move hint = ia.getNextMove(state);
+    Move hint = ia.getNextMove(state);
 
-        System.out.println("Best move : " + moveToString(hint));
+    System.out.println("Best move : " + moveToString(hint));
+  }
+
+  private String moveToString(Move move) {
+
+    if (move.getType() == Move.Type.PAWN) {
+
+      return posToString(move.getFrom()) + "-" + posToString(move.getTo());
     }
 
-    private String moveToString(Move move) {
+    char orientation = move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
 
-        if (move.getType() == Move.Type.PAWN) {
+    return posToString(move.getTo()) + orientation;
+  }
 
-            return posToString(move.getFrom())
-                    + "-"
-                    + posToString(move.getTo());
-        }
-
-        char orientation =
-                move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
-
-        return posToString(move.getTo()) + orientation;
-    }
-
-    private String posToString(Position p) {
-        char letter = (char) ('a' + p.getX());
-        int number = p.getY();
-        return "" + letter + number;
-    }
+  private String posToString(Position p) {
+    char letter = (char) ('a' + p.getX());
+    int number = p.getY();
+    return "" + letter + number;
+  }
 
   public GameState getState() {
     return state;

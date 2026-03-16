@@ -1,20 +1,9 @@
 package fr.bordeaux.gui;
 
-
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
-import java.util.List;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 /**
  * @class BoardViewTest
@@ -23,7 +12,7 @@ import org.mockito.MockedStatic;
  *     wall drawing, highlighting accessible cells, and fade transition of the current player.
  */
 class BoardViewTest {
-    /*
+  /*
 
 
   private GameEngine engine;

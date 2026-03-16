@@ -5,10 +5,6 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
 
-import java.util.List;
-
-import static fr.bordeaux.core.Orientation.HORIZONTAL;
-
 public class MainApp {
 
   private static final String VERSION = "1.0.0";
@@ -56,10 +52,10 @@ public class MainApp {
           gui = true;
           break;
 
-          case "-c":
-          case "--cli":
-              cli = true;
-              break;
+        case "-c":
+        case "--cli":
+          cli = true;
+          break;
 
         case "-b":
         case "--blitz":
@@ -110,16 +106,16 @@ public class MainApp {
 
     if (cli) {
       System.out.println("CLI mode started");
-        int size = 9;
-        Board board = new Board(size);
-        GameState state = new GameState(board, Player.createDefaultPlayers());
-        GameEngine engine = new GameEngine(state);
-        try {
-            CliApp cli1 = new CliApp(engine);
-            cli1.run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+      int size = 9;
+      Board board = new Board(size);
+      GameState state = new GameState(board, Player.createDefaultPlayers());
+      GameEngine engine = new GameEngine(state);
+      try {
+        CliApp cli1 = new CliApp(engine);
+        cli1.run();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
