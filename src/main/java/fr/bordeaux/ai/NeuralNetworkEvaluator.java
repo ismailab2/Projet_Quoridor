@@ -4,11 +4,12 @@ import fr.bordeaux.core.*;
 import java.util.*;
 import java.util.function.Predicate;
 import org.tensorflow.*;
+import org.tensorflow.framework.optimizers.GradientDescent;
+import org.tensorflow.framework.optimizers.Optimizer;
 import org.tensorflow.ndarray.*;
 import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.*;
 import org.tensorflow.op.core.*;
-import org.tensorflow.op.train.*;
 import org.tensorflow.types.*;
 
 /**
@@ -37,7 +38,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     trainModel();
   }
 
-  /** Builds the computational graph using manual gradient descent. */
   private void initGraph() {
     graph = new Graph();
     Ops tf = Ops.create(graph);
@@ -63,13 +63,9 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     Operand<TFloat32> loss =
         tf.math.mean(tf.math.square(tf.math.sub(prediction, labelPlaceholder)), tf.constant(0));
 
-    // Manual backpropagation
-    Gradients gradients = tf.gradients(loss, Arrays.asList(weights, bias));
-    Op updateW =
-        tf.train.applyGradientDescent(weights, tf.constant(LEARNING_RATE), gradients.dy(0));
-    Op updateB = tf.train.applyGradientDescent(bias, tf.constant(LEARNING_RATE), gradients.dy(1));
-    trainOp = tf.withControlDependencies(Arrays.asList(updateW, updateB)).noOp();
-
+    // Built-in TensorFlow Optimizer
+    Optimizer optimizer = new GradientDescent(graph, LEARNING_RATE);
+    trainOp = optimizer.minimize(loss);
     session = new Session(graph);
     session.runner().addTarget(initWeights).addTarget(initBias).run();
   }

@@ -76,6 +76,11 @@
             <artifactId>tensorflow-core-platform</artifactId>
             <version>${tensorflow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-framework</artifactId>
+            <version>${tensorflow.version}</version>
+        </dependency>
 
     </dependencies>
 
