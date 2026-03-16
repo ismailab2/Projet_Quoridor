@@ -60,7 +60,7 @@ public final class MinimaxPlayer extends AiPlayer {
           (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
 
-    this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
+    this.heuristicFunction = determineHeuristic(this.heuristicName);
   }
 
   /** Private constructor used by the copy() method for cloning the AI player. */
@@ -86,7 +86,7 @@ public final class MinimaxPlayer extends AiPlayer {
       this.mode =
           (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
-    this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
+    this.heuristicFunction = determineHeuristic(this.heuristicName);
   }
 
   /**
@@ -105,18 +105,18 @@ public final class MinimaxPlayer extends AiPlayer {
    * @param heuristicNameP The name of the heuristic ("simple", "intermediate", or "advanced").
    * @return The corresponding heuristic class.
    */
-  private HeuristicEvaluator determineHeuristic(final String heuristicNameP, final String aiName) {
+  private HeuristicEvaluator determineHeuristic(final String heuristicNameP) {
     final HeuristicEvaluator chosenHeuristic;
     switch (heuristicNameP) {
       case "intermediate":
-        chosenHeuristic = new MediumHeuristic(aiName);
+        chosenHeuristic = new MediumHeuristic(this.getName());
         break;
       case "advanced":
-        chosenHeuristic = new AdvancedHeuristic(aiName);
+        chosenHeuristic = new AdvancedHeuristic(this.getName());
         break;
       case "simple":
       default:
-        chosenHeuristic = new SimpleHeuristic(aiName);
+        chosenHeuristic = new SimpleHeuristic(this.getName());
         break;
     }
     return chosenHeuristic;
