@@ -101,18 +101,6 @@ public class CliApp {
           } else if (matches.size() == 1) {
             candidates.add(new Candidate(matches.get(0)));
             firstTab = true;
-          } else {
-            if (firstTab) {
-              try {
-                Toolkit.getDefaultToolkit().beep(); // bip cross-platform
-              } catch (Exception ignored) {
-              }
-              firstTab = false;
-            } else {
-              // Second tab → proposer la liste
-              matches.forEach(m -> candidates.add(new Candidate(m)));
-              firstTab = true; // reset après affichage
-            }
           }
         };
 

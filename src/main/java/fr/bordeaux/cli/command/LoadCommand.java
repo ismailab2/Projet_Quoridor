@@ -12,15 +12,6 @@ public class LoadCommand implements Command {
   private String[] tokens;
 
   /**
-   * Creates a LoadCommand using a file path.
-   *
-   * @param p the path of the save file to load
-   */
-  public LoadCommand(String p) {
-    this(new String[] {"load", p});
-  }
-
-  /**
    * Creates a LoadCommand with the provided command tokens.
    *
    * @param t the tokens entered by the user in the CLI
@@ -46,7 +37,7 @@ public class LoadCommand implements Command {
     try {
       return new GameEngine(GameLoader.loadGame(tokens[1]));
     } catch (Exception e) {
-      System.err.println("Ca va pas du tout : " + e);
+      e.printStackTrace();
     }
     return engine;
   }

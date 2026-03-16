@@ -10,7 +10,7 @@ import java.util.*;
 
 public class GameLoader {
   // Board size : always 9x9
-  private static final int SIZE = 9;
+  private static int SIZE = 9;
 
   private static final int BOARD_START = 3;
 
@@ -22,6 +22,7 @@ public class GameLoader {
     List<Player> players = allp_l.players; // creates all players
     int currentLine = allp_l.nextLine; // Line after settings
     validateHeader(lines, currentLine); // checks [game] header
+    SIZE = readBoardSize(lines, currentLine);
     Board board = new Board(SIZE); // creates empty 9x9 board
     readBoard(lines, board, players, currentLine); // places walls and players
     readRemainingWalls(lines, players, currentLine); // restores wall counts
@@ -70,6 +71,10 @@ public class GameLoader {
     return Integer.parseInt(lines.get(currentLine + 1).trim().split("#")[0].trim()) - 1;
   }
 
+  private static int readBoardSize(List<String> lines, int currentLine) {
+    return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
+  }
+
   // Creates the 2 players with their default starting positions
   private static List<Player> createDefaultPlayers() {
     return new ArrayList<>(
@@ -111,7 +116,7 @@ public class GameLoader {
   private static void readRemainingWalls(
       List<String> lines, List<Player> players, int currentLine) {
     String[] parts =
-        lines.get(BOARD_START + currentLine + SIZE * 2 - 1).replace("walls:", "").trim().split(" ");
+        lines.get(BOARD_START + currentLine + SIZE * 2).replace("walls:", "").trim().split(" ");
     for (int i = 0; i < players.size(); i++) {
       int walls = Integer.parseInt(parts[i]);
       // Call useWall() until the player has the correct number of walls
