@@ -59,6 +59,10 @@ public abstract class Player {
     return remainingWalls;
   }
 
+  public void setRemainingWalls(int walls) {
+    this.remainingWalls = walls;
+  }
+
   public void useWall() {
     if (remainingWalls > 0) remainingWalls--;
   }

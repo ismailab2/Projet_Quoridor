@@ -82,8 +82,6 @@ public class MCTSPlayer extends AiPlayer {
   /** Inner class representing a node within the MCTS search tree. */
   public static class MctsNode {
 
-    int simulations;
-
     /** The game state associated with this node. */
     private final GameState state;
 
@@ -133,7 +131,6 @@ public class MCTSPlayer extends AiPlayer {
     public Move getBestMoveAfterSearch(
         final long limit, final int myIdx, final NeuralNetworkEvaluator evaluator) {
       final long start = System.currentTimeMillis();
-      simulations = 0;
       while (System.currentTimeMillis() - start < limit) {
         MctsNode current = this;
         while (!current.state.isGameOver() && !current.hasUntriedLegalMoves()) {
@@ -145,10 +142,8 @@ public class MCTSPlayer extends AiPlayer {
         }
         if (current != null) {
           backpropagate(current, current.simulate(), myIdx);
-          simulations++;
         }
       }
-      System.out.println("MCTS simulations: " + simulations);
       return this.extractBestMove();
     }
 
