@@ -1,7 +1,13 @@
 package fr.bordeaux;
 
+import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
+
+import java.util.List;
+
+import static fr.bordeaux.core.Orientation.HORIZONTAL;
 
 public class MainApp {
 
@@ -14,6 +20,7 @@ public class MainApp {
     config.load();
 
     boolean gui = false;
+    boolean cli = false;
 
     if (args.length == 0) {
       System.out.println("Le programme se lance...");
@@ -48,6 +55,11 @@ public class MainApp {
         case "--gui":
           gui = true;
           break;
+
+          case "-c":
+          case "--cli":
+              cli = true;
+              break;
 
         case "-b":
         case "--blitz":
@@ -94,8 +106,20 @@ public class MainApp {
 
     if (gui) {
       QuoridorApp.main(args);
-    } else {
+    }
+
+    if (cli) {
       System.out.println("CLI mode started");
+        int size = 9;
+        Board board = new Board(size);
+        GameState state = new GameState(board, Player.createDefaultPlayers());
+        GameEngine engine = new GameEngine(state);
+        try {
+            CliApp cli1 = new CliApp(engine);
+            cli1.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
   }
 
