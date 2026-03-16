@@ -1,11 +1,13 @@
 package fr.bordeaux.cli.command;
 
+import fr.bordeaux.ai.MCTSPlayer;
 import fr.bordeaux.ai.MinimaxPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Move.Type;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.core.RuleChecker;
 
 /**
  * Command that suggests the best possible move for the current player. The move is computed using a
@@ -25,9 +27,13 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    MinimaxPlayer ia =
-        MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition()).build();
+/*     MinimaxPlayer ia =
+        MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
+            .withHeuristic("advanced")
+            .build(); */
+    MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
+    System.out.println(RuleChecker.isMoveLegal(engine.getState(), hint));
     String bestMove = "";
     if (hint.getType() == Type.PAWN) {
       bestMove = posToString(hint.getFrom()) + "-" + posToString(hint.getTo());
@@ -47,8 +53,8 @@ public class HintCommand implements Command {
    * @return the string representation of the position
    */
   private String posToString(Position p) {
-    char letter = (char) ('a' + p.getX());
-    int number = p.getY();
+    char letter = (char) ('a' + p.getY());
+    int number = p.getX() + 1;
     return "" + letter + number;
   }
 

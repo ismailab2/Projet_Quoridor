@@ -232,7 +232,7 @@ public class MCTSPlayer extends AiPlayer {
   @Override
   public Move getNextMove(final GameState state) {
     simNum = 0;
-    final int myIdx = state.getPlayers().indexOf(this);
+    final int myIdx = state.getCurrentIndexPlayer();
     return new MctsNode(state.copy()).getBestMoveAfterSearch(this.reflectionTime, myIdx, this);
   }
 
