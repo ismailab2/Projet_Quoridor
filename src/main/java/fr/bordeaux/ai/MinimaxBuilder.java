@@ -19,11 +19,9 @@ public class MinimaxBuilder {
   /** The maximum depth the AI will search if iterative deepening is disabled. */
   private int searchDepth = 2;
 
-  /**
-  * Default reflection time in seconds for the AI engine.
-  */
+  /** Default reflection time in seconds for the AI engine. */
   private static final int DEFAULT_REFLEXION_TIME = 5;
-  
+
   /** The maximum reflection time allowed for the AI in seconds. */
   private int reflexionTime = DEFAULT_REFLEXION_TIME;
 

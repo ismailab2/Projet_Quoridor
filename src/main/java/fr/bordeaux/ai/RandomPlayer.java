@@ -69,7 +69,12 @@ public class RandomPlayer extends AiPlayer {
    * @param walls The number of remaining walls.
    * @param score The current score of the player.
    */
-  private RandomPlayer(final String name, final Position current, final Position start, final int walls, final int score) {
+  private RandomPlayer(
+      final String name,
+      final Position current,
+      final Position start,
+      final int walls,
+      final int score) {
     super(name, current, start, walls, score);
   }
 

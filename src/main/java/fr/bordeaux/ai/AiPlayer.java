@@ -31,7 +31,12 @@ public abstract class AiPlayer extends Player {
    * @param walls The number of walls remaining for this AI.
    * @param score The current score of the AI.
    */
-  protected AiPlayer(final String name, final Position current, final Position start, final int walls, final int score) {
+  protected AiPlayer(
+      final String name,
+      final Position current,
+      final Position start,
+      final int walls,
+      final int score) {
     super(name, current, start, walls, score);
   }
 
