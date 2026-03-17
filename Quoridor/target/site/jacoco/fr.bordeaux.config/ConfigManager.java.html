@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfigManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.config</a> &gt; <span class="el_source">ConfigManager.java</span></div><h1>ConfigManager.java</h1><pre class="source lang-java linenums">package fr.bordeaux.config;
+
+import fr.bordeaux.gui.Action;
+import java.io.*;
+import java.util.Map;
+import java.util.Properties;
+import javafx.scene.input.KeyCombination;
+
+public class ConfigManager {
+
+<span class="fc" id="L11">  private static final ConfigManager INSTANCE = new ConfigManager();</span>
+<span class="fc" id="L12">  private final File file = new File(System.getProperty(&quot;user.home&quot;), &quot;.quoridorrc&quot;);</span>
+<span class="fc" id="L13">  private final Properties props = new Properties();</span>
+
+<span class="fc" id="L15">  private ConfigManager() {}</span>
+
+  public static ConfigManager getInstance() {
+<span class="fc" id="L18">    return INSTANCE;</span>
+  }
+
+  public void load() {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">    if (!file.exists()) return;</span>
+<span class="nc" id="L23">    try (FileReader reader = new FileReader(file)) {</span>
+<span class="nc" id="L24">      props.load(reader);</span>
+<span class="nc" id="L25">    } catch (IOException ignored) {</span>
+<span class="nc" id="L26">    }</span>
+<span class="nc" id="L27">  }</span>
+
+  public void save() {
+<span class="nc" id="L30">    try (FileWriter writer = new FileWriter(file)) {</span>
+<span class="nc" id="L31">      props.store(writer, &quot;Quoridor configuration&quot;);</span>
+<span class="nc" id="L32">    } catch (IOException ignored) {</span>
+<span class="nc" id="L33">    }</span>
+<span class="nc" id="L34">  }</span>
+
+  public void applyShortcuts(Map&lt;Action, KeyCombination&gt; map) {
+<span class="fc" id="L37">    map.forEach(</span>
+        (action, defaultCombo) -&gt; {
+<span class="fc" id="L39">          String value = props.getProperty(&quot;shortcut.&quot; + action.name());</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">          if (value != null) {</span>
+<span class="nc" id="L41">            map.put(action, KeyCombination.valueOf(value));</span>
+          }
+<span class="fc" id="L43">        });</span>
+<span class="fc" id="L44">  }</span>
+
+  public void saveShortcut(Action action, KeyCombination combo) {
+<span class="nc" id="L47">    props.setProperty(&quot;shortcut.&quot; + action.name(), combo.getName());</span>
+<span class="nc" id="L48">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

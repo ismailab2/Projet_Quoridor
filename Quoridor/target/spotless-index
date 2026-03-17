@@ -1,0 +1,24 @@
+OI+0ZjLMsO9FpTNiVHmW2jd/pvyj7ydGmZjqI4TchNM=
+src\main\java\fr\bordeaux\AI\MCTSPlayer.java 2026-03-09T21:42:49.102335300Z
+src\main\java\fr\bordeaux\AI\MinimaxPlayer.java 2026-03-09T21:42:49.102335300Z
+src\main\java\fr\bordeaux\AI\NeuralNetPlayer.java 2026-03-09T21:42:49.103659700Z
+src\main\java\fr\bordeaux\AI\RandomPlayer.java 2026-03-09T21:42:49.103659700Z
+src\main\java\fr\bordeaux\cli\CliApp.java 2026-03-11T00:26:54.558073200Z
+src\main\java\fr\bordeaux\cli\command\Command.java 2026-03-11T00:09:52.731466500Z
+src\main\java\fr\bordeaux\cli\command\HelpCommand.java 2026-03-11T00:26:54.606863200Z
+src\main\java\fr\bordeaux\cli\command\HintCommand.java 2026-03-11T00:09:52.731971500Z
+src\main\java\fr\bordeaux\cli\command\LoadCommand.java 2026-03-11T00:09:52.732979200Z
+src\main\java\fr\bordeaux\cli\command\MoveCommand.java 2026-03-11T00:26:54.664488600Z
+src\main\java\fr\bordeaux\cli\command\NewCommand.java 2026-03-11T00:26:54.720675200Z
+src\main\java\fr\bordeaux\cli\command\PauseCommand.java 2026-03-11T00:09:52.733977900Z
+src\main\java\fr\bordeaux\cli\command\QuitCommand.java 2026-03-11T00:09:52.734978900Z
+src\main\java\fr\bordeaux\cli\command\RedoCommand.java 2026-03-11T00:26:54.760720700Z
+src\main\java\fr\bordeaux\cli\command\SaveCommand.java 2026-03-11T00:09:52.734978900Z
+src\main\java\fr\bordeaux\cli\command\SetCommand.java 2026-03-11T00:09:52.736111100Z
+src\main\java\fr\bordeaux\cli\command\ShowCommand.java 2026-03-11T00:26:54.813945600Z
+src\main\java\fr\bordeaux\cli\command\UndoCommand.java 2026-03-11T00:26:54.830577100Z
+src\main\java\fr\bordeaux\config\ConfigManager.java 2026-03-09T21:42:49.110141200Z
+src\main\java\fr\bordeaux\core\Board.java 2026-03-09T21:42:49.111215Z
+src\main\java\fr\bordeaux\core\GameEngine.java 2026-03-11T00:23:17.489848700Z
+src\main\java\fr\bordeaux\core\GameState.java 2026-03-11T00:26:54.918532900Z
+src\main\java\fr\bordeaux\core\HumanPlayer.java 2026-03-09T21:42:49.112235400Z
