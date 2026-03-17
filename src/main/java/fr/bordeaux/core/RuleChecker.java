@@ -10,6 +10,14 @@ import java.util.List;
 public class RuleChecker {
 
   /**
+   * Private constructor to prevent instantiation of this utility class. Throws an AssertionError if
+   * called internally.
+   */
+  private RuleChecker() {
+    throw new AssertionError("Utility class should not be instantiated");
+  }
+
+  /**
    * Checks if a given move is legal in the current game state.
    *
    * @param state The current {@link GameState}.

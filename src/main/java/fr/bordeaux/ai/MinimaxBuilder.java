@@ -19,8 +19,13 @@ public class MinimaxBuilder {
   /** The maximum depth the AI will search if iterative deepening is disabled. */
   private int searchDepth = 2;
 
+  /**
+  * Default reflection time in seconds for the AI engine.
+  */
+  private static final int DEFAULT_REFLEXION_TIME = 5;
+  
   /** The maximum reflection time allowed for the AI in seconds. */
-  private int reflexionTime = 5;
+  private int reflexionTime = DEFAULT_REFLEXION_TIME;
 
   /** Flag indicating whether iterative deepening is enabled. */
   private boolean useIterativeD;
@@ -31,11 +36,11 @@ public class MinimaxBuilder {
   /**
    * Initializes the Builder with mandatory parameters.
    *
-   * @param name The AI's name.
+   * @param nameParameter The AI's name.
    * @param pos The starting position on the board.
    */
-  public MinimaxBuilder(final String name, final Position pos) {
-    this.name = name;
+  public MinimaxBuilder(final String nameParameter, final Position pos) {
+    this.name = nameParameter;
     this.positionStart = pos;
   }
 
@@ -53,7 +58,7 @@ public class MinimaxBuilder {
   /**
    * Sets the reflection time limit in seconds.
    *
-   * @param t The chosen time limit.
+   * @param timeLimit The chosen time limit.
    * @return The builder instance.
    */
   public MinimaxBuilder withReflexion(final int timeLimit) {
@@ -64,7 +69,7 @@ public class MinimaxBuilder {
   /**
    * Sets the heuristic name to be used.
    *
-   * @param h The name of the heuristic.
+   * @param heuristic The name of the heuristic.
    * @return The builder instance.
    */
   public MinimaxBuilder withHeuristic(final String heuristic) {

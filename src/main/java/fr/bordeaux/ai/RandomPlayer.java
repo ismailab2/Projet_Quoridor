@@ -18,7 +18,7 @@ public class RandomPlayer extends AiPlayer {
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
    */
-  public RandomPlayer(String name, Position positionStart) {
+  public RandomPlayer(final String name, final Position positionStart) {
     super(name, positionStart);
   }
 
@@ -29,7 +29,7 @@ public class RandomPlayer extends AiPlayer {
    * @return A randomly selected legal {@link Move}.
    */
   @Override
-  public Move getNextMove(GameState state) {
+  public Move getNextMove(final GameState state) {
     List<Move> l = state.generateLegalMoves();
     Random random = new Random();
     return l.get(random.nextInt(l.size()));
@@ -69,7 +69,7 @@ public class RandomPlayer extends AiPlayer {
    * @param walls The number of remaining walls.
    * @param score The current score of the player.
    */
-  private RandomPlayer(String name, Position current, Position start, int walls, int score) {
+  private RandomPlayer(final String name, final Position current, final Position start, final int walls, final int score) {
     super(name, current, start, walls, score);
   }
 

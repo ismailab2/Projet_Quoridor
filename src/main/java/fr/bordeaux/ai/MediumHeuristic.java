@@ -18,10 +18,10 @@ public class MediumHeuristic implements HeuristicEvaluator {
   /**
    * Constructs a MediumHeuristic.
    *
-   * @param aiName The name of the AI player.
+   * @param aiNameParameter The name of the AI player.
    */
-  public MediumHeuristic(final String aiName) {
-    this.aiName = aiName;
+  public MediumHeuristic(final String aiNameParameter) {
+    this.aiName = aiNameParameter;
   }
 
   /**
