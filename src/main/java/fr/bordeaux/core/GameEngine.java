@@ -3,14 +3,30 @@ package fr.bordeaux.core;
 import fr.bordeaux.ai.MinimaxPlayer;
 import java.io.IOException;
 
+/**
+ * The core engine of the Quoridor game. This class coordinates the game logic, manages player
+ * turns, and handles actions such as saving, loading, and providing hints using AI.
+ */
 public class GameEngine {
 
   private GameState state;
 
+  /**
+   * Constructs a GameEngine with the specified initial game state.
+   *
+   * @param state The initial {@link GameState} to be managed by the engine.
+   */
   public GameEngine(GameState state) {
     this.state = state;
   }
 
+  /**
+   * Attempts to execute a move in the current game state. Validates the move according to game
+   * rules and checks if the game is paused or over.
+   *
+   * @param move The {@link Move} to be performed.
+   * @return {@code true} if the move was successfully applied, {@code false} otherwise.
+   */
   public boolean play(Move move) {
     if (state.isGameOver() || state.isPaused()) {
       System.out.println("GAME OVER OR  PAUSE");
@@ -27,11 +43,17 @@ public class GameEngine {
     return true;
   }
 
+  /** Resets the current game to its initial state and clears listeners. */
   public void newGame() {
     state.reset();
     state.addListener(() -> {});
   }
 
+  /**
+   * Saves the current game state to a file.
+   *
+   * @param filename The path to the file where the game will be saved.
+   */
   public void saveGame(String filename) {
     try {
       state.saveGame(filename);
@@ -40,6 +62,11 @@ public class GameEngine {
     }
   }
 
+  /**
+   * Loads a game state from a specified file.
+   *
+   * @param filename The path to the file to load.
+   */
   public void loadGame(String filename) {
     try {
       state = state.loadGame(filename);
@@ -48,14 +75,20 @@ public class GameEngine {
     }
   }
 
+  /** Reverts the last move made in the game. */
   public void undo() {
     state.undo();
   }
 
+  /** Re-applies the last move that was undone. */
   public void redo() {
     state.redo();
   }
 
+  /**
+   * Toggles the pause state of the game. When paused, it also enables a "blitz" or temporary state
+   * modification.
+   */
   public void pause() {
     if (state.isPaused()) {
       System.out.println("Resuming...");
@@ -68,6 +101,7 @@ public class GameEngine {
     }
   }
 
+  /** Provides a hint for the current player by calculating the best move using a Minimax AI. */
   public void hint() {
 
     Player current = state.getCurrentPlayer();
@@ -79,6 +113,12 @@ public class GameEngine {
     System.out.println("Best move : " + moveToString(hint));
   }
 
+  /**
+   * Converts a Move object into a human-readable string (e.g., "e2-e3" or "e2h").
+   *
+   * @param move The move to convert.
+   * @return A formatted string representation of the move.
+   */
   private String moveToString(Move move) {
 
     if (move.getType() == Move.Type.PAWN) {
@@ -91,12 +131,23 @@ public class GameEngine {
     return posToString(move.getTo()) + orientation;
   }
 
+  /**
+   * Converts a Position object into algebraic notation (e.g., "a0", "b1").
+   *
+   * @param p The position to convert.
+   * @return A string representing the coordinates.
+   */
   private String posToString(Position p) {
     char letter = (char) ('a' + p.getX());
     int number = p.getY();
     return "" + letter + number;
   }
 
+  /**
+   * Returns the current state of the game.
+   *
+   * @return The {@link GameState} managed by this engine.
+   */
   public GameState getState() {
     return state;
   }

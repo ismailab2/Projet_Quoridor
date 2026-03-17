@@ -90,8 +90,9 @@ public final class MinimaxPlayer extends AiPlayer {
   }
 
   /**
-   * Static factory method for the builder. * @param name The player name.
+   * Static factory method for the builder.
    *
+   * @param name The player name.
    * @param pos The starting position.
    * @return A new Builder instance.
    */

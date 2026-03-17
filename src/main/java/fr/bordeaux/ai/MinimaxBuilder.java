@@ -40,8 +40,9 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Sets the depth of the Minimax search. * @param depth The chosen depth.
+   * Sets the depth of the Minimax search.
    *
+   * @param depth The chosen depth.
    * @return The builder instance.
    */
   public MinimaxBuilder withDepth(final int depth) {
@@ -50,8 +51,9 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Sets the reflection time limit in seconds. * @param t The chosen time limit.
+   * Sets the reflection time limit in seconds.
    *
+   * @param t The chosen time limit.
    * @return The builder instance.
    */
   public MinimaxBuilder withReflexion(final int timeLimit) {
@@ -60,8 +62,9 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Sets the heuristic name to be used. * @param h The name of the heuristic.
+   * Sets the heuristic name to be used.
    *
+   * @param h The name of the heuristic.
    * @return The builder instance.
    */
   public MinimaxBuilder withHeuristic(final String heuristic) {
@@ -70,8 +73,9 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Enables or disables iterative deepening. * @param useDeepening The boolean flag.
+   * Enables or disables iterative deepening.
    *
+   * @param useDeepening The boolean flag.
    * @return The builder instance.
    */
   public MinimaxBuilder withIterativeDeepening(final boolean useDeepening) {
@@ -80,6 +84,8 @@ public class MinimaxBuilder {
   }
 
   /**
+   * Get the search depth of the MiniMax Player.
+   *
    * @return The depth search value of Minimax
    */
   public int getSearchDepth() {
@@ -87,6 +93,8 @@ public class MinimaxBuilder {
   }
 
   /**
+   * Get the limit time reflexiob of the MiniMax Player.
+   *
    * @return The reflexion time value of Minimax
    */
   public int getLimitTime() {
@@ -94,6 +102,8 @@ public class MinimaxBuilder {
   }
 
   /**
+   * Get if the MiniMax Player use iterative deepening.
+   *
    * @return The boolean representing if Minimax use Iterative Deepening
    */
   public boolean isUseIterativeDeepening() {
@@ -101,6 +111,8 @@ public class MinimaxBuilder {
   }
 
   /**
+   * Get the heuristicname of the MiniMax Player.
+   *
    * @return The name of the heuristic selected
    */
   public String getHeuristicName() {
@@ -108,6 +120,8 @@ public class MinimaxBuilder {
   }
 
   /**
+   * Get the Name of the MiniMax Player.
+   *
    * @return The name the MiniMax Player
    */
   public String getName() {
@@ -115,6 +129,8 @@ public class MinimaxBuilder {
   }
 
   /**
+   * Get the starting position of the MiniMax Player.
+   *
    * @return The starting position of the MiniMax Player
    */
   public Position getStartingPosition() {
@@ -122,9 +138,9 @@ public class MinimaxBuilder {
   }
 
   /**
-   * Validates if the given heuristic name is known to the system. * @param heuristic The heuristic
-   * name to check.
+   * Validates if the given heuristic name is known to the system.
    *
+   * @param heuristic The heuristic name to check.
    * @return True if valid, false otherwise.
    */
   private boolean validHeuristic(final String heuristic) {

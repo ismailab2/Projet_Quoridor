@@ -26,13 +26,24 @@ public class MCTSPlayer extends AiPlayer {
   /** Maximum number of turns allowed in a single simulation playout. */
   private static final int MAX_TURNS = 200;
 
-  /** Constructor with custom reflection time. */
+  /**
+   * Constructor with custom reflection time.
+   *
+   * @param name Name of the player.
+   * @param positionStart Starting position on the board.
+   * @param reflectionTime Maximum time in milliseconds allowed for MCTS search.
+   */
   public MCTSPlayer(final String name, final Position positionStart, final long reflectionTime) {
     super(name, positionStart);
     this.reflectionTime = reflectionTime;
   }
 
-  /** Default constructor with 2000ms reflection time. */
+  /**
+   * Default constructor with 2000ms reflection time.
+   *
+   * @param name Name of the player.
+   * @param positionStart Starting position on the board.
+   */
   public MCTSPlayer(final String name, final Position positionStart) {
     this(name, positionStart, 2000);
   }
@@ -48,6 +59,16 @@ public class MCTSPlayer extends AiPlayer {
         this.reflectionTime);
   }
 
+  /**
+   * Private constructor used for cloning or internal state management.
+   *
+   * @param name Name of the player.
+   * @param current Current position of the player.
+   * @param start Initial starting position.
+   * @param walls Number of walls remaining.
+   * @param score Current score or evaluation.
+   * @param reflectionTime Maximum reflection time in milliseconds.
+   */
   private MCTSPlayer(
       final String name,
       final Position current,
@@ -82,12 +103,22 @@ public class MCTSPlayer extends AiPlayer {
     /** Total number of times this node has been visited. */
     private int visits;
 
-    /** Constructor for the root node. */
+    /**
+     * Constructor for the root node of the MCTS tree.
+     *
+     * @param state The initial game state for this node.
+     */
     public MctsNode(final GameState state) {
       this(state, null, null);
     }
 
-    /** Constructor for child nodes. */
+    /**
+     * Constructor for child nodes.
+     *
+     * @param state The game state resulting from the move.
+     * @param move The move that led to this state.
+     * @param parent The parent node in the tree.
+     */
     public MctsNode(final GameState state, final Move move, final MctsNode parent) {
       this.state = state;
       this.move = move;
@@ -96,7 +127,14 @@ public class MCTSPlayer extends AiPlayer {
       Collections.shuffle(this.untriedMoves);
     }
 
-    /** Performs MCTS iterations until the reflection time limit is reached. */
+    /**
+     * Performs MCTS iterations until the reflection time limit is reached.
+     *
+     * @param limit The time limit in milliseconds for the search.
+     * @param myIdx The index of the current AI player.
+     * @param aiPlayer The AI player instance performing the search.
+     * @return The best move found after the simulation iterations.
+     */
     public Move getBestMoveAfterSearch(
         final long limit, final int myIdx, final MCTSPlayer aiPlayer) {
       final long start = System.currentTimeMillis();
@@ -113,6 +151,11 @@ public class MCTSPlayer extends AiPlayer {
       return this.extractBestMove();
     }
 
+    /**
+     * Extracts the best move from the current node's children based on visit count.
+     *
+     * @return The move associated with the most visited child node, or null if no children exist.
+     */
     private Move extractBestMove() {
       Move result = null;
       if (!children.isEmpty()) {
@@ -127,7 +170,11 @@ public class MCTSPlayer extends AiPlayer {
       return result;
     }
 
-    /** Expands the tree by creating a new child node from an untried move. */
+    /**
+     * Expands the tree by creating a new child node from an untried move.
+     *
+     * @return The newly created child node.
+     */
     public MctsNode expand() {
       final Move nextMove = untriedMoves.removeLast();
       final GameState nextState = state.copy();
@@ -141,7 +188,11 @@ public class MCTSPlayer extends AiPlayer {
       return newNode;
     }
 
-    /** Simulates a random game. Optimized for high simulation counts. */
+    /**
+     * Simulates a random game from the current state until a conclusion or turn limit.
+     *
+     * @return The index of the winning player, or -1 if no winner was determined.
+     */
     public int simulate() {
       final GameState temp = state.copy();
       simNum++;
@@ -193,27 +244,47 @@ public class MCTSPlayer extends AiPlayer {
       return winnerResult;
     }
 
-    /** Returns the player index for the current state. */
+    /**
+     * Returns the player index for the current state.
+     *
+     * @return The index of the player whose turn it is in this node.
+     */
     public int getPlayerIndex() {
       return state.getCurrentIndexPlayer();
     }
 
-    /** Returns the list of child nodes. */
+    /**
+     * Returns the list of child nodes.
+     *
+     * @return A list containing all expanded child nodes.
+     */
     public List<MctsNode> getChildren() {
       return children;
     }
 
-    /** Returns the parent node. */
+    /**
+     * Returns the parent node.
+     *
+     * @return The parent MctsNode, or null if this is the root.
+     */
     public MctsNode getParent() {
       return parent;
     }
 
-    /** Returns the visit count. */
+    /**
+     * Returns the total number of times this node has been visited.
+     *
+     * @return The visit count.
+     */
     public int getVisits() {
       return visits;
     }
 
-    /** Returns the win count. */
+    /**
+     * Returns the total number of wins tracked through this node.
+     *
+     * @return The win count.
+     */
     public int getWins() {
       return wins;
     }
@@ -236,7 +307,13 @@ public class MCTSPlayer extends AiPlayer {
     return new MctsNode(state.copy()).getBestMoveAfterSearch(this.reflectionTime, myIdx, this);
   }
 
-  /** Selects the best child node using the Upper Confidence Bound for Trees formula. */
+  /**
+   * Selects the best child node using the Upper Confidence Bound for Trees (UCT) formula.
+   *
+   * @param node The parent node from which to select the best child.
+   * @param myIdx The index of the AI player to determine if it's an advantage or disadvantage.
+   * @return The child node with the highest UCT value.
+   */
   private MctsNode bestUCT(MctsNode node, int myIdx) {
     MctsNode bestChild = null;
     double maxUct = Double.NEGATIVE_INFINITY;
@@ -258,7 +335,13 @@ public class MCTSPlayer extends AiPlayer {
     return bestChild;
   }
 
-  /** Backpropagates the simulation result up to the root. */
+  /**
+   * Backpropagates the simulation result from a leaf node up to the root.
+   *
+   * @param node The node where the simulation started.
+   * @param winnerIdx The index of the player who won the simulation.
+   * @param myIdx The index of the AI player to update win counts accordingly.
+   */
   protected void backpropagate(final MctsNode node, final int winnerIdx, final int myIdx) {
     MctsNode current = node;
     while (current != null) {
