@@ -1,27 +1,52 @@
 package fr.bordeaux.persistence;
 
-public class GameLoadException extends Exception {
+/**
+ * Exception thrown when an error occurs while loading a game.
+ */
+public final class GameLoadException extends Exception {
 
-  // Stores the type of error ex: "ERREUR_ENTETE"
-  private final String errorType;
+    /**
+     * Stores the type of error, for example: "ERREUR_ENTETE".
+     */
+    private final String errorType;
 
-  // Stores the line number where the error was found
-  private final int lineNumber;
+    /**
+     * Stores the line number where the error was found.
+     */
+    private final int lineNumber;
 
-  // Constructor : when we create the error we give 3 pieces of info
-  public GameLoadException(String errorType, int lineNumber, String message) {
-    super(message); // pass the message to the parent Exception class
-    this.errorType = errorType;
-    this.lineNumber = lineNumber;
-  }
+    /**
+     * Creates a load exception with the error type,
+     * the line number, and the associated message.
+     *
+     * @param errorTypeValue  type of detected error
+     * @param lineNumberValue line number where the error was found
+     * @param message         detailed error message
+     */
+    public GameLoadException(
+            final String errorTypeValue,
+            final int lineNumberValue,
+            final String message) {
+        super(message);
+        this.errorType = errorTypeValue;
+        this.lineNumber = lineNumberValue;
+    }
 
-  // Allows us to get the error type from outside
-  public String getErrorType() {
-    return errorType;
-  }
+    /**
+     * Returns the error type.
+     *
+     * @return the error type
+     */
+    public String getErrorType() {
+        return errorType;
+    }
 
-  // Allows us to get the line number from outside
-  public int getLineNumber() {
-    return lineNumber;
-  }
+    /**
+     * Returns the line number where the error was found.
+     *
+     * @return the line number
+     */
+    public int getLineNumber() {
+        return lineNumber;
+    }
 }

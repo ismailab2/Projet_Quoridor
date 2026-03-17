@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameSerializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.persistence</a> &gt; <span class="el_source">GameSerializer.java</span></div><h1>GameSerializer.java</h1><pre class="source lang-java linenums">package fr.bordeaux.persistence;
+
+import fr.bordeaux.core.*;
+import java.io.*;
+import java.util.*;
+
+<span class="nc" id="L7">public class GameSerializer {</span>
+    // Board size : always 9x9
+    private static final int SIZE = 9;
+    // Board starts at line index 3 in the file (after [game], player, comment)
+    private static final int BOARD_START = 3;
+
+    // Saves the current game state to an ASCII file
+    public static void saveGame(GameState state, String filename) throws IOException {
+<span class="fc" id="L15">        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {</span>
+<span class="fc" id="L16">            writeHeader(writer, state);  // writes [game], current player, comment</span>
+<span class="fc" id="L17">            writeBoard(writer, state);   // writes cells and walls</span>
+<span class="fc" id="L18">            writeWalls(writer, state);   // writes &quot;walls: 10 10&quot;</span>
+        }
+<span class="fc" id="L20">    }</span>
+
+    // Loads a file and reconstructs the GameState
+    public static GameState loadGame(String filename) throws IOException, GameLoadException {
+<span class="fc" id="L24">        List&lt;String&gt; lines = readAllLines(filename);       // reads all lines from file</span>
+<span class="fc" id="L25">        validateHeader(lines);                              // checks [game] header</span>
+<span class="fc" id="L26">        Board board = new Board(SIZE);                      // creates empty 9x9 board</span>
+<span class="fc" id="L27">        List&lt;Player&gt; players = createDefaultPlayers();      // creates 2 players</span>
+<span class="fc" id="L28">        readBoard(lines, board, players);                   // places walls and players</span>
+<span class="fc" id="L29">        readRemainingWalls(lines, players);                 // restores wall counts</span>
+<span class="fc" id="L30">        return new GameState(board, players, readCurrentPlayer(lines));</span>
+    }
+
+    // Writes the 3 header lines : [game], current player, comment
+    private static void writeHeader(PrintWriter writer, GameState state) {
+<span class="fc" id="L35">        writer.println(&quot;[game]&quot;);</span>
+<span class="fc" id="L36">        writer.println((state.getCurrentIndexPlayer() + 1) + &quot;  # Current player color&quot;);</span>
+<span class="fc" id="L37">        writer.println(&quot;# Board (&quot; + state.getPlayers().size() + &quot; players)&quot;);</span>
+<span class="fc" id="L38">    }</span>
+
+    // Writes all rows of the board : cell lines + wall lines
+    private static void writeBoard(PrintWriter writer, GameState state) {
+<span class="fc" id="L42">        Board board = state.getBoard();</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        for (int row = 0; row &lt; SIZE; row++) {</span>
+<span class="fc" id="L44">            writer.println(buildCellLine(row, board, state.getPlayers()));</span>
+            // Write horizontal wall line between rows (not after last row)
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (row &lt; SIZE - 1) writer.println(buildWallLine(row, board));</span>
+        }
+<span class="fc" id="L48">    }</span>
+
+    // Builds one cell line for a given row
+    // Example : &quot;. . . . 1 . . . .&quot; or &quot;. . .|. . . . . .&quot;
+    private static String buildCellLine(int row, Board board, List&lt;Player&gt; players) {
+<span class="fc" id="L53">        StringBuilder line = new StringBuilder();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (int col = 0; col &lt; SIZE; col++) {</span>
+            // Add '|' if there is a vertical wall between col-1 and col
+<span class="fc bfc" id="L56" title="All 4 branches covered.">            if (col &gt; 0) line.append(hasVerticalWall(board, row, col) ? '|' : ' ');</span>
+            // Add player number '1'/'2' or '.' if cell is empty
+<span class="fc" id="L58">            line.append(getCellChar(row, col, players));</span>
+        }
+<span class="fc" id="L60">        return line.toString();</span>
+    }
+
+    // Builds one horizontal wall line between two rows
+    private static String buildWallLine(int row, Board board) {
+<span class="fc" id="L65">        StringBuilder line = new StringBuilder();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (int col = 0; col &lt; SIZE; col++) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (col &gt; 0) line.append(&quot; &quot;);</span>
+            // Add '_' if there is a horizontal wall between row and row+1
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            line.append(hasHorizontalWall(board, row, col) ? '_' : ' ');</span>
+        }
+<span class="fc" id="L71">        return line.toString();</span>
+    }
+
+    // Returns the character to display for a given cell
+    // '1' for player 1, '2' for player 2, '.' for empty cell
+    private static char getCellChar(int row, int col, List&lt;Player&gt; players) {
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        for (int i = 0; i &lt; players.size(); i++) {</span>
+<span class="fc" id="L78">            Position position = players.get(i).getPosition();</span>
+<span class="fc bfc" id="L79" title="All 4 branches covered.">            if (position.getX() == row &amp;&amp; position.getY() == col) {</span>
+<span class="fc" id="L80">                return (char) ('1' + i);</span>
+            }
+        }
+<span class="fc" id="L83">        return '.';</span>
+    }
+
+    // Returns true if there is a vertical wall between col-1 and col
+    private static boolean hasVerticalWall(Board board, int row, int col) {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        return !board.getGraph().hasEdge(board.id(row, col - 1), board.id(row, col));</span>
+    }
+
+    // Returns true if there is a horizontal wall between row and row+1
+    private static boolean hasHorizontalWall(Board board, int row, int col) {
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        return !board.getGraph().hasEdge(board.id(row, col), board.id(row + 1, col));</span>
+    }
+
+    // Writes the remaining walls for each player
+    // Example : &quot;walls: 10 10&quot;
+    private static void writeWalls(PrintWriter writer, GameState state) {
+<span class="fc" id="L99">        StringBuilder line = new StringBuilder(&quot;walls:&quot;);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        for (Player player : state.getPlayers()) {</span>
+<span class="fc" id="L101">            line.append(&quot; &quot;).append(player.getRemainingWalls());</span>
+<span class="fc" id="L102">        }</span>
+<span class="fc" id="L103">        writer.println(line);</span>
+<span class="fc" id="L104">    }</span>
+
+    // Opens the file and reads all lines into a list
+    private static List&lt;String&gt; readAllLines(String filename) throws IOException {
+<span class="fc" id="L108">        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {</span>
+<span class="fc" id="L109">            List&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
+            String line;
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            while ((line = reader.readLine()) != null) lines.add(line);</span>
+<span class="fc" id="L112">            return lines;</span>
+        }
+    }
+
+    // Checks that the first line is &quot;[game]&quot;
+    // If not, throws GameLoadException with error type and line number
+    private static void validateHeader(List&lt;String&gt; lines) throws GameLoadException {
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (!lines.get(0).equals(&quot;[game]&quot;))</span>
+<span class="fc" id="L120">            throw new GameLoadException(&quot;ERREUR_ENTETE&quot;, 1,</span>
+<span class="fc" id="L121">                    &quot;Expected [game] but found : &quot; + lines.get(0));</span>
+<span class="fc" id="L122">    }</span>
+
+    // Reads the current player index from line 2
+    // Example : &quot;2  # Current player color&quot; , returns 1
+    private static int readCurrentPlayer(List&lt;String&gt; lines) {
+<span class="fc" id="L127">        return Integer.parseInt(lines.get(1).trim().split(&quot;#&quot;)[0].trim()) - 1;</span>
+    }
+
+    // Creates the 2 players with their default starting positions
+    private static List&lt;Player&gt; createDefaultPlayers() {
+<span class="fc" id="L132">        return new ArrayList&lt;&gt;(Arrays.asList(</span>
+                new HumanPlayer(&quot;Joueur1&quot;, new Position(0, 4)),
+                new HumanPlayer(&quot;Joueur2&quot;, new Position(8, 4))
+        ));
+    }
+
+    // Reads the full board, repositions players and places all walls
+    private static void readBoard(List&lt;String&gt; lines, Board board, List&lt;Player&gt; players) {
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        for (int row = 0; row &lt; SIZE; row++) {</span>
+<span class="fc" id="L141">            readCellLine(lines.get(BOARD_START + row * 2), row, board, players);</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">            if (row &lt; SIZE - 1)</span>
+<span class="fc" id="L143">                readHorizontalWalls(lines.get(BOARD_START + row * 2 + 1), row, board);</span>
+        }
+<span class="fc" id="L145">    }</span>
+
+    // Reads one cell line : repositions players and places vertical walls
+    private static void readCellLine(String line, int row, Board board, List&lt;Player&gt; players) {
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        for (int col = 0; col &lt; SIZE; col++) {</span>
+            // Each cell character is at index col*2 in the line
+<span class="fc" id="L151">            char cell = line.charAt(col * 2);</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            if (cell == '1') players.get(0).setPosition(new Position(row, col));</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">            else if (cell == '2') players.get(1).setPosition(new Position(row, col));</span>
+<span class="fc bfc" id="L154" title="All 4 branches covered.">            if (col &lt; SIZE - 1 &amp;&amp; line.charAt(col * 2 + 1) == '|')</span>
+<span class="fc" id="L155">                board.getGraph().removeEdge(board.id(row, col), board.id(row, col + 1));</span>
+        }
+<span class="fc" id="L157">    }</span>
+
+    // Reads one horizontal wall line and places horizontal walls on the board
+    private static void readHorizontalWalls(String line, int row, Board board) {
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        for (int col = 0; col &lt; SIZE; col++)</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">            if (line.charAt(col * 2) == '_')</span>
+<span class="fc" id="L163">                board.getGraph().removeEdge(board.id(row, col), board.id(row + 1, col));</span>
+<span class="fc" id="L164">    }</span>
+
+    // Reads &quot;walls: 10 10&quot; and restores the correct number of walls for each player
+    private static void readRemainingWalls(List&lt;String&gt; lines, List&lt;Player&gt; players) {
+<span class="fc" id="L168">        String[] parts = lines.get(BOARD_START + SIZE * 2 - 1)</span>
+<span class="fc" id="L169">                .replace(&quot;walls:&quot;, &quot;&quot;).trim().split(&quot; &quot;);</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        for (int i = 0; i &lt; players.size(); i++) {</span>
+<span class="fc" id="L171">            int walls = Integer.parseInt(parts[i]);</span>
+            // Call useWall() until the player has the correct number of walls
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">            while (players.get(i).getRemainingWalls() &gt; walls) players.get(i).useWall();</span>
+        }
+<span class="fc" id="L175">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
