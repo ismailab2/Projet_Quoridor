@@ -2,7 +2,6 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameSaver;
-import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +13,6 @@ public class SaveCommand implements Command {
 
   /** Logger to display informations */
   private static final Logger logger = LoggerFactory.getLogger(SaveCommand.class);
-
-  /** Stream where to display texts */
-  private final PrintStream writer = System.out;
 
   /**
    * Creates a SaveCommand using the specified file path.
