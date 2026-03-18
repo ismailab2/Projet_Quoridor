@@ -13,6 +13,11 @@ import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
+/**
+ * Main application class for the Command Line Interface (CLI) of the Quoridor game. This class
+ * handles the terminal interaction loop, command registration, and auto-completion features using
+ * the JLine library.
+ */
 public class CliApp {
 
   private GameEngine engine;
@@ -59,6 +64,7 @@ public class CliApp {
    * auto-completion and line reader.
    *
    * @param engine the game engine used to run the game
+   * @throws IOException if the terminal cannot be initialized
    */
   public CliApp(final GameEngine engine) throws IOException {
     // Initialisation du terminal
@@ -129,8 +135,10 @@ public class CliApp {
   }
 
   /**
-   * Creates a CLI application with a default game configuration. Initializes a board and two human
-   * players positioned on it.
+   * Creates a CLI application with a default game configuration. Initializes a 9x9 board with two
+   * human players.
+   *
+   * @throws IOException if the terminal setup fails
    */
   public CliApp() throws IOException {
     this(

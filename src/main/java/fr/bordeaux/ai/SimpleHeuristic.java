@@ -16,10 +16,10 @@ public class SimpleHeuristic implements HeuristicEvaluator {
   /**
    * Constructs a new SimpleHeuristic.
    *
-   * @param aiName The name used to identify the AI player in the game state.
+   * @param aiNameParameter The name used to identify the AI player in the game state.
    */
-  public SimpleHeuristic(final String aiName) {
-    this.aiName = aiName;
+  public SimpleHeuristic(final String aiNameParameter) {
+    this.aiName = aiNameParameter;
   }
 
   /**

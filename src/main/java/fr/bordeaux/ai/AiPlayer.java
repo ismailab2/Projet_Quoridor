@@ -18,7 +18,7 @@ public abstract class AiPlayer extends Player {
    * @param name The name of the AI player.
    * @param positionStart The starting position of the AI on the board.
    */
-  public AiPlayer(String name, Position positionStart) {
+  public AiPlayer(final String name, final Position positionStart) {
     super(name, positionStart);
   }
 
@@ -31,7 +31,12 @@ public abstract class AiPlayer extends Player {
    * @param walls The number of walls remaining for this AI.
    * @param score The current score of the AI.
    */
-  protected AiPlayer(String name, Position current, Position start, int walls, int score) {
+  protected AiPlayer(
+      final String name,
+      final Position current,
+      final Position start,
+      final int walls,
+      final int score) {
     super(name, current, start, walls, score);
   }
 

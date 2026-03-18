@@ -1,12 +1,30 @@
 package fr.bordeaux;
 
+import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
 
+/**
+ * Entry point of the Quoridor application. This class handles command-line argument parsing,
+ * configuration loading, and initializes either the Graphical User Interface (GUI) or the Command
+ * Line Interface (CLI) based on user input.
+ */
 public class MainApp {
+
+  /** Private constructor to prevent instantiation of the main application class. */
+  private MainApp() {
+    // This class is not intended to be instantiated.
+  }
 
   private static final String VERSION = "1.0.0";
 
+  /**
+   * Main entry point of the program. Parses command-line arguments to set game modes (GUI, CLI,
+   * Blitz) and configures global settings like verbosity and debug mode.
+   *
+   * @param args Command-line arguments provided at startup.
+   */
   public static void main(String[] args) {
 
     ConfigManager config = ConfigManager.getInstance();
@@ -14,6 +32,7 @@ public class MainApp {
     config.load();
 
     boolean gui = false;
+    boolean cli = false;
 
     if (args.length == 0) {
       System.out.println("Le programme se lance...");
@@ -47,6 +66,11 @@ public class MainApp {
         case "-g":
         case "--gui":
           gui = true;
+          break;
+
+        case "-c":
+        case "--cli":
+          cli = true;
           break;
 
         case "-b":
@@ -94,11 +118,27 @@ public class MainApp {
 
     if (gui) {
       QuoridorApp.main(args);
-    } else {
+    }
+
+    if (cli) {
       System.out.println("CLI mode started");
+      int size = 9;
+      Board board = new Board(size);
+      GameState state = new GameState(board, Player.createDefaultPlayers());
+      GameEngine engine = new GameEngine(state);
+      try {
+        CliApp cli1 = new CliApp(engine);
+        cli1.run();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
+  /**
+   * Displays the help message in the console. Lists all available options and command-line switches
+   * for the user.
+   */
   private static void printHelp() {
 
     System.out.println("Usage: qoridor [OPTIONS]");

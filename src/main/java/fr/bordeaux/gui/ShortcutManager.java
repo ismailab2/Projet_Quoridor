@@ -10,11 +10,11 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 
 /**
- * @class ShortcutManager
- * @brief Manages keyboard shortcuts for all actions in the Quoridor GUI.
- *     <p>This singleton class loads, stores, and updates keyboard shortcuts. It allows the user to
- *     customize shortcuts and persists them in the configuration file. It also registers shortcuts
- *     on a JavaFX Scene and triggers actions through an ActionDispatcher.
+ * Manages keyboard shortcuts for all actions in the Quoridor GUI.
+ *
+ * <p>This singleton class loads, stores, and updates keyboard shortcuts. It allows the user to
+ * customize shortcuts and persists them in the configuration file. It also registers shortcuts on a
+ * JavaFX Scene and triggers actions through an ActionDispatcher.
  */
 public class ShortcutManager {
 
@@ -27,20 +27,26 @@ public class ShortcutManager {
   private ActionDispatcher dispatcher;
 
   /**
-   * @brief Private constructor for singleton pattern. Loads default shortcuts and attempts to load
-   *     saved shortcuts from ConfigManager.
+   * Private constructor for singleton pattern. Loads default shortcuts and attempts to load saved
+   * shortcuts from ConfigManager.
    */
   private ShortcutManager() {
     loadDefaults();
     loadFromConfig();
   }
 
+  /**
+   * Returns the unique instance of the shortcut manager.
+   *
+   * @return the singleton instance of the shortcut manager
+   */
   public static ShortcutManager getInstance() {
     return INSTANCE;
   }
 
   /**
-   * @brief Sets the ActionDispatcher used to execute actions when a shortcut is pressed.
+   * Sets the ActionDispatcher used to execute actions when a shortcut is pressed.
+   *
    * @param dispatcher The ActionDispatcher instance
    */
   public void setDispatcher(ActionDispatcher dispatcher) {
@@ -48,7 +54,8 @@ public class ShortcutManager {
   }
 
   /**
-   * @brief Retrieves the keyboard shortcut for a given action.
+   * Retrieves the keyboard shortcut for a given action.
+   *
    * @param action The action to query
    * @return The KeyCombination associated with the action
    */
@@ -57,8 +64,9 @@ public class ShortcutManager {
   }
 
   /**
-   * @brief Sets or updates the shortcut for an action and saves it in the configuration. Ignores
-   *     shortcuts that consist only of modifier keys (Ctrl, Shift, Alt).
+   * Sets or updates the shortcut for an action and saves it in the configuration. Ignores shortcuts
+   * that consist only of modifier keys (Ctrl, Shift, Alt).
+   *
    * @param action The action to update
    * @param combination The new KeyCombination
    */
@@ -90,8 +98,8 @@ public class ShortcutManager {
   }
 
   /**
-   * @brief Loads previously saved shortcuts from the ConfigManager. If a saved value is invalid,
-   *     the default shortcut is retained.
+   * Loads previously saved shortcuts from the ConfigManager. If a saved value is invalid, the
+   * default shortcut is retained.
    */
   private void loadFromConfig() {
     ConfigManager config = ConfigManager.getInstance();
@@ -107,7 +115,8 @@ public class ShortcutManager {
   }
 
   /**
-   * @brief Parses a string (like "Ctrl+Shift+P") into a KeyCodeCombination.
+   * Parses a string (like "Ctrl+Shift+P") into a KeyCodeCombination.
+   *
    * @param value The string representation of the shortcut
    * @return A KeyCodeCombination object representing the shortcut
    */
@@ -145,8 +154,9 @@ public class ShortcutManager {
   }
 
   /**
-   * @brief Registers all shortcuts on a given JavaFX Scene. When a registered shortcut is pressed,
-   *     the corresponding action is dispatched.
+   * Registers all shortcuts on a given JavaFX Scene. When a registered shortcut is pressed, the
+   * corresponding action is dispatched.
+   *
    * @param scene The Scene to register the shortcuts on
    * @throws IllegalStateException if the ActionDispatcher is not set
    */

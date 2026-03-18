@@ -13,6 +13,11 @@ import javafx.stage.Stage;
  */
 public class QuoridorApp extends Application {
 
+  /** Creates a new Quoridor application instance. */
+  public QuoridorApp() {
+    super();
+  }
+
   @Override
   public void start(Stage stage) {
     ConfigManager.getInstance().load();
@@ -51,6 +56,11 @@ public class QuoridorApp extends Application {
     ConfigManager.getInstance().save();
   }
 
+  /**
+   * Launches the Quoridor application.
+   *
+   * @param args command-line arguments
+   */
   public static void main(String[] args) {
     launch(args);
   }

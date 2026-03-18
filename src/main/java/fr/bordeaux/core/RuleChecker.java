@@ -9,6 +9,21 @@ import java.util.List;
  */
 public class RuleChecker {
 
+  /**
+   * Private constructor to prevent instantiation of this utility class. Throws an AssertionError if
+   * called internally.
+   */
+  private RuleChecker() {
+    throw new AssertionError("Utility class should not be instantiated");
+  }
+
+  /**
+   * Checks if a given move is legal in the current game state.
+   *
+   * @param state The current {@link GameState}.
+   * @param move The {@link Move} to validate.
+   * @return {@code true} if the move is legal, {@code false} otherwise.
+   */
   public static boolean isMoveLegal(GameState state, Move move) {
     if (move.isPawn()) {
       return pawnMoveLegal(state, move);
@@ -17,6 +32,15 @@ public class RuleChecker {
     }
   }
 
+  /**
+   * Specifically checks if a jumping move is possible. A jump occurs when an opponent's pawn is
+   * adjacent and the cell behind it is free, or diagonal cells are reachable if the back is
+   * blocked.
+   *
+   * @param state The current {@link GameState}.
+   * @param move The {@link Move} containing the target jump position.
+   * @return {@code true} if the jump is valid, {@code false} otherwise.
+   */
   public static boolean canJump(GameState state, Move move) {
     // Jump gestion
     Player CurrentPlay = state.getCurrentPlayer();
@@ -69,6 +93,14 @@ public class RuleChecker {
     return false;
   }
 
+  /**
+   * Validates a pawn movement. Checks for boundaries, collisions with other players, and
+   * connectivity through the board graph.
+   *
+   * @param state The current game state.
+   * @param move The pawn move to check.
+   * @return {@code true} if the pawn can move to the target position.
+   */
   private static boolean pawnMoveLegal(GameState state, Move move) {
     Player CurrentPlay = state.getCurrentPlayer();
     Board b = state.getBoard();
@@ -91,6 +123,13 @@ public class RuleChecker {
     return RuleChecker.canJump(state, move);
   }
 
+  /**
+   * Determines if two positions are horizontally or vertically adjacent.
+   *
+   * @param a The first position.
+   * @param b The second position.
+   * @return {@code true} if the positions are neighbors.
+   */
   private static boolean isAdjacent(Position a, Position b) {
     int dx = Math.abs(a.getX() - b.getX());
     int dy = Math.abs(a.getY() - b.getY());
@@ -98,6 +137,13 @@ public class RuleChecker {
     return dx + dy == 1;
   }
 
+  /**
+   * Computes potential diagonal jump positions when a straight jump is blocked.
+   *
+   * @param from The current player's position.
+   * @param op The opponent's position.
+   * @return A list of candidate {@link Position}s for a diagonal jump.
+   */
   private static List<Position> getDiagonalJumps(Position from, Position op) {
     List<Position> diags = new ArrayList<>();
 
@@ -121,6 +167,14 @@ public class RuleChecker {
     return diags;
   }
 
+  /**
+   * Validates a wall placement move. Checks for remaining walls, collisions with existing walls,
+   * and path connectivity.
+   *
+   * @param state The current game state.
+   * @param move The wall placement move.
+   * @return {@code true} if the wall placement is legal.
+   */
   private static boolean wallMoveLegal(GameState state, Move move) {
     Player p = state.getCurrentPlayer();
     Board b = state.getBoard();
@@ -135,7 +189,14 @@ public class RuleChecker {
     return doesPathExist(state, move);
   }
 
-  // Check if a path still exists after applying a move, move must be a wall move.
+  /**
+   * Temporarily applies a wall move to verify if all players can still reach their respective goals
+   * using a BFS algorithm.
+   *
+   * @param state The current game state.
+   * @param move The wall move to test.
+   * @return {@code true} if a path still exists for every player.
+   */
   private static boolean doesPathExist(GameState state, Move move) {
     Board b = state.getBoard();
     b.addWall(move.getTo(), move.getOrientation());

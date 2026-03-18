@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Graph.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.graph</a> &gt; <span class="el_source">Graph.java</span></div><h1>Graph.java</h1><pre class="source lang-java linenums">package fr.bordeaux.graph;
+
+import java.util.*;
+import java.util.function.Predicate;
+
+public class Graph {
+
+  private final Map&lt;Integer, List&lt;Integer&gt;&gt; adjacencyList;
+
+<span class="fc" id="L10">  public Graph(Map&lt;Integer, List&lt;Integer&gt;&gt; adjacencyList) {</span>
+<span class="fc" id="L11">    this.adjacencyList = adjacencyList;</span>
+<span class="fc" id="L12">  }</span>
+
+  public List&lt;Integer&gt; getNeighbors(int vertex) {
+<span class="fc" id="L15">    return adjacencyList.get(vertex);</span>
+  }
+
+  public void removeEdge(int u, int v) {
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">    if (adjacencyList.containsKey(u)) adjacencyList.get(u).remove(Integer.valueOf(v));</span>
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">    if (adjacencyList.containsKey(v)) adjacencyList.get(v).remove(Integer.valueOf(u));</span>
+<span class="fc" id="L21">  }</span>
+
+  public boolean hasEdge(int currentId, int targetId) {
+<span class="fc" id="L24">    return adjacencyList.get(currentId).contains(targetId);</span>
+  }
+
+  public void addEdge(int u, int v) {
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    if (!adjacencyList.get(u).contains(v)) adjacencyList.get(u).add(v);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">    if (!adjacencyList.get(v).contains(u)) adjacencyList.get(v).add(u);</span>
+<span class="fc" id="L30">  }</span>
+
+  /**
+   * Finds the shortest path from a starting vertex to any vertex satisfying the goal condition.
+   * This method implements the Breadth-First Search (BFS) algorithm, which guarantees finding the
+   * shortest path in an unweighted graph. It is used to verify if a player can still reach their
+   * winning side and to calculate the necessary moves.
+   *
+   * @param startId The ID of the starting vertex (typically the player's current position).
+   * @param isGoal A predicate defining the victory condition (e.g., reaching the opposite
+   *     baseline).
+   * @return An ordered List of vertex IDs representing the path from start to goal (inclusive).
+   *     Returns an empty list if the destination is unreachable (e.g., player is blocked by walls).
+   */
+  public List&lt;Integer&gt; findPathBFS(int startId, Predicate&lt;Integer&gt; isGoal) {
+<span class="fc" id="L45">    Queue&lt;Integer&gt; queue = new LinkedList&lt;&gt;(); // vertices to visit</span>
+<span class="fc" id="L46">    queue.add(startId);</span>
+
+<span class="fc" id="L48">    Map&lt;Integer, Integer&gt; parentMap =</span>
+        new HashMap&lt;&gt;(); // Map representing the parents of each vertex
+<span class="fc" id="L50">    parentMap.put(startId, null);</span>
+
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    while (!queue.isEmpty()) { // While there are vertices to visit</span>
+<span class="fc" id="L53">      int current = queue.poll(); // Pop the next one</span>
+
+      // Check if there is a path to victory, if there is returns the path
+<span class="fc bfc" id="L56" title="All 2 branches covered.">      if (isGoal.test(current)) {</span>
+<span class="fc" id="L57">        List&lt;Integer&gt; path = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L58">        Integer parentId = current;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        while (parentId != null) {</span>
+<span class="fc" id="L60">          path.add(parentId);</span>
+<span class="fc" id="L61">          parentId = parentMap.get(parentId);</span>
+        }
+<span class="fc" id="L63">        Collections.reverse(path);</span>
+<span class="fc" id="L64">        return path;</span>
+      }
+
+      // Add next vertices to visit
+<span class="fc bfc" id="L68" title="All 2 branches covered.">      for (int neighbor : this.getNeighbors(current)) {</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (!parentMap.containsKey(neighbor)) {</span>
+<span class="fc" id="L70">          parentMap.put(neighbor, current);</span>
+<span class="fc" id="L71">          queue.add(neighbor);</span>
+        }
+<span class="fc" id="L73">      }</span>
+<span class="fc" id="L74">    }</span>
+<span class="fc" id="L75">    return new ArrayList&lt;&gt;(); // Returns empty list if path doesn't exist</span>
+  }
+
+  public Graph copy() {
+<span class="fc" id="L79">    Map&lt;Integer, List&lt;Integer&gt;&gt; newAdjacencyList = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">    for (Map.Entry&lt;Integer, List&lt;Integer&gt;&gt; entry : this.adjacencyList.entrySet()) {</span>
+<span class="fc" id="L82">      List&lt;Integer&gt; newList = new ArrayList&lt;&gt;(entry.getValue());</span>
+
+<span class="fc" id="L84">      newAdjacencyList.put(entry.getKey(), newList);</span>
+<span class="fc" id="L85">    }</span>
+<span class="fc" id="L86">    return new Graph(newAdjacencyList);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
