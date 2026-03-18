@@ -8,23 +8,34 @@ import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
 
-public class GameLoader {
+/** Utility class used to load a game state from a save file. */
+public final class GameLoader {
   // Board size : always 9x9
   private static final int SIZE = 9;
 
   private static final int BOARD_START = 3;
 
-  // Loads a file and reconstructs the GameState
+  /** Private constructor to prevent instantiation. */
+  private GameLoader() {}
+
+  /**
+   * Loads a saved game from a file and rebuilds the corresponding game state.
+   *
+   * @param filename path of the save file to load
+   * @return the reconstructed game state
+   * @throws IOException if an input/output error occurs while reading the file
+   * @throws GameLoadException if the file content is invalid or inconsistent
+   */
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    List<String> lines = readAllLines(filename); // reads all lines from file
-    validateSettingsHeader(lines); // checks [settings] header
-    AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
-    List<Player> players = allp_l.players; // creates all players
-    int currentLine = allp_l.nextLine; // Line after settings
-    validateHeader(lines, currentLine); // checks [game] header
-    Board board = new Board(SIZE); // creates empty 9x9 board
-    readBoard(lines, board, players, currentLine); // places walls and players
-    readRemainingWalls(lines, players, currentLine); // restores wall counts
+    List<String> lines = readAllLines(filename);
+    validateSettingsHeader(lines);
+    AllPlayerAndLine allp_l = readAllPlayer(lines);
+    List<Player> players = allp_l.players;
+    int currentLine = allp_l.nextLine;
+    validateHeader(lines, currentLine);
+    Board board = new Board(SIZE);
+    readBoard(lines, board, players, currentLine);
+    readRemainingWalls(lines, players, currentLine);
 
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
@@ -33,7 +44,13 @@ public class GameLoader {
     return gameState;
   }
 
-  // Opens the file and reads all lines into a list
+  /**
+   * Opens a file and reads all its lines into a list.
+   *
+   * @param filename path of the file to read
+   * @return list containing all lines of the file
+   * @throws IOException if an input/output error occurs
+   */
   private static List<String> readAllLines(String filename) throws IOException {
     try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
       List<String> lines = new ArrayList<>();

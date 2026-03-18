@@ -23,10 +23,10 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   /**
    * Constructs an AdvancedHeuristic.
    *
-   * @param aiName The name of the AI player.
+   * @param aiNameParameter The name of the AI player.
    */
-  public AdvancedHeuristic(final String aiName) {
-    this.aiName = aiName;
+  public AdvancedHeuristic(final String aiNameParameter) {
+    this.aiName = aiNameParameter;
   }
 
   /**

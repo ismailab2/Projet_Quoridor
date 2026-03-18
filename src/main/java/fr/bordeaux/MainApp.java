@@ -5,12 +5,28 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
 
+/**
+ * Entry point of the Quoridor application. This class handles command-line argument parsing,
+ * configuration loading, and initializes either the Graphical User Interface (GUI) or the Command
+ * Line Interface (CLI) based on user input.
+ */
 public class MainApp {
+
+  /** Private constructor to prevent instantiation of the main application class. */
+  private MainApp() {
+    // This class is not intended to be instantiated.
+  }
 
   private static final String VERSION = "1.0.0";
   public static final int  BOARD_SIZE = 9;
     public static final int PLAYER_SIZE = 2;
 
+  /**
+   * Main entry point of the program. Parses command-line arguments to set game modes (GUI, CLI,
+   * Blitz) and configures global settings like verbosity and debug mode.
+   *
+   * @param args Command-line arguments provided at startup.
+   */
   public static void main(String[] args) {
 
     ConfigManager config = ConfigManager.getInstance();
@@ -123,6 +139,10 @@ public class MainApp {
     }
   }
 
+  /**
+   * Displays the help message in the console. Lists all available options and command-line switches
+   * for the user.
+   */
   private static void printHelp() {
 
     System.out.println("Usage: qoridor [OPTIONS]");

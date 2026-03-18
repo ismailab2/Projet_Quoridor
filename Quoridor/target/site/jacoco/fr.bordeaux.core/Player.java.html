@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Player.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.core</a> &gt; <span class="el_source">Player.java</span></div><h1>Player.java</h1><pre class="source lang-java linenums">package fr.bordeaux.core;
+
+import fr.bordeaux.AI.MinimaxPlayer;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a player in Quoridor. A player has a name, a pawn position, a number of remaining
+ * walls, and a score.
+ */
+public abstract class Player {
+
+  private final String name;
+  private Position position;
+<span class="fc" id="L15">  private int remainingWalls = 10;</span>
+  private final Position startingPosition;
+<span class="fc" id="L17">  private int score = 0;</span>
+
+<span class="fc" id="L19">  public Player(String name, Position positionStart) {</span>
+<span class="fc" id="L20">    this.name = name;</span>
+<span class="fc" id="L21">    this.position = positionStart;</span>
+<span class="fc" id="L22">    this.startingPosition = positionStart;</span>
+<span class="fc" id="L23">  }</span>
+
+  // Constructor used for copy
+<span class="fc" id="L26">  protected Player(String name, Position currentPos, Position startPos, int walls, int score) {</span>
+<span class="fc" id="L27">    this.name = name;</span>
+<span class="fc" id="L28">    this.position = new Position(currentPos.getX(), currentPos.getY());</span>
+<span class="fc" id="L29">    this.startingPosition = startPos;</span>
+<span class="fc" id="L30">    this.remainingWalls = walls;</span>
+<span class="fc" id="L31">    this.score = score;</span>
+<span class="fc" id="L32">  }</span>
+
+  public static List&lt;Player&gt; createDefaultPlayers() {
+<span class="fc" id="L35">    List&lt;Player&gt; players = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L36">    Player p1 = new HumanPlayer(&quot;Human&quot;, new Position(0, 4));</span>
+<span class="fc" id="L37">    Player p2 = new MinimaxPlayer(&quot;Bob&quot;, new Position(8, 4), 2);</span>
+<span class="fc" id="L38">    players.add(p1);</span>
+<span class="fc" id="L39">    players.add(p2);</span>
+<span class="fc" id="L40">    return players;</span>
+  }
+
+  public String getName() {
+<span class="fc" id="L44">    return name;</span>
+  }
+
+  public Position getStartingPosition() {
+<span class="fc" id="L48">    return startingPosition;</span>
+  }
+
+  public Position getPosition() {
+<span class="fc" id="L52">    return position;</span>
+  }
+
+  public void setPosition(Position position) {
+<span class="fc" id="L56">    this.position = position;</span>
+<span class="fc" id="L57">  }</span>
+
+  public int getRemainingWalls() {
+<span class="fc" id="L60">    return remainingWalls;</span>
+  }
+
+  public void useWall() {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (remainingWalls &gt; 0) remainingWalls--;</span>
+<span class="fc" id="L65">  }</span>
+
+  public void giveBackWall() {
+<span class="fc" id="L68">    remainingWalls++;</span>
+<span class="fc" id="L69">  }</span>
+
+  public int getScore() {
+<span class="fc" id="L72">    return score;</span>
+  }
+
+  public void addScore(int points) {
+<span class="nc" id="L76">    score += points;</span>
+<span class="nc" id="L77">  }</span>
+
+  public void resetScore() {
+<span class="nc" id="L80">    score = 0;</span>
+<span class="nc" id="L81">  }</span>
+
+  public abstract Move getNextMove(GameState state);
+
+  public abstract Boolean isAI();
+
+  public abstract Player copy();
+
+  @Override
+  public String toString() {
+<span class="nc" id="L91">    return String.format(</span>
+<span class="nc" id="L92">        &quot;Player{name='%s', pos=%s, walls=%d, score=%d}&quot;, name, position, remainingWalls, score);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

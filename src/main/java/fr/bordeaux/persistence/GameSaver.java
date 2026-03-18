@@ -5,40 +5,68 @@ import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
 
+/** Utility class used to save a game state to a file. */
 public class GameSaver {
-  // Board size : always 9x9
+
+  /** Board size used by the save format. */
   private static final int SIZE = 9;
 
-  // Saves the current game state to an ASCII file
+  /** Private constructor to prevent instantiation. */
+  private GameSaver() {}
+
+  /**
+   * Saves the current game state to a file.
+   *
+   * @param state game state to save
+   * @param filename path of the destination file
+   * @throws IOException if an input/output error occurs while writing the file
+   */
   public static void saveGame(GameState state, String filename) throws IOException {
     try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-      saveParameters(writer, state); // write all parameters needed to play the game
-      writeHeader(writer, state); // writes [game], current player, comment
-      writeBoard(writer, state); // writes cells and walls
-      writeWalls(writer, state); // writes "walls: 10 10"
-      writeHistory(writer, state); // writes all moves since the beginning
+      saveParameters(writer, state);
+      writeHeader(writer, state);
+      writeBoard(writer, state);
+      writeWalls(writer, state);
+      writeHistory(writer, state);
     }
   }
 
-  // Writes the 3 header lines : [game], current player, comment
+  /**
+   * Writes the game section header to the save file.
+   *
+   * @param writer writer used to save the data
+   * @param state game state containing the current player information
+   */
   private static void writeHeader(PrintWriter writer, GameState state) {
     writer.println("[game]");
     writer.println((state.getCurrentIndexPlayer() + 1) + "  # Current player color");
     writer.println("# Board (" + state.getPlayers().size() + " players)");
   }
 
-  // Writes all rows of the board : cell lines + wall lines
+  /**
+   * Writes the full board representation to the save file.
+   *
+   * @param writer writer used to save the data
+   * @param state game state containing the board to write
+   */
   private static void writeBoard(PrintWriter writer, GameState state) {
     Board board = state.getBoard();
     for (int row = 0; row < SIZE; row++) {
       writer.println(buildCellLine(row, board, state.getPlayers()));
-      // Write horizontal wall line between rows (not after last row)
-      if (row < SIZE - 1) writer.println(buildWallLine(row, board));
+      if (row < SIZE - 1) {
+        writer.println(buildWallLine(row, board));
+      }
     }
   }
 
-  // Builds one cell line for a given row
-  // Example : ". . . . 1 . . . ." or ". . .|. . . . . ."
+  /**
+   * Builds the textual representation of one board row.
+   *
+   * @param row row index to build
+   * @param board board to inspect
+   * @param players list of players placed on the board
+   * @return string representing the row content
+   */
   private static String buildCellLine(int row, Board board, List<Player> players) {
     StringBuilder line = new StringBuilder();
     for (int col = 0; col < SIZE; col++) {
@@ -61,8 +89,14 @@ public class GameSaver {
     return line.toString();
   }
 
-  // Returns the character to display for a given cell
-  // '1' for player 1, '2' for player 2, '.' for empty cell
+  /**
+   * Returns the character used to represent the content of a board cell.
+   *
+   * @param row row of the cell
+   * @param col column of the cell
+   * @param players list of players to inspect
+   * @return '1' for player 1, '2' for player 2, or '.' if the cell is empty
+   */
   private static char getCellChar(int row, int col, List<Player> players) {
     for (int i = 0; i < players.size(); i++) {
       Position position = players.get(i).getPosition();
@@ -73,18 +107,36 @@ public class GameSaver {
     return '.';
   }
 
-  // Returns true if there is a vertical wall between col-1 and col
+  /**
+   * Checks whether a vertical wall exists between two adjacent cells.
+   *
+   * @param board board to inspect
+   * @param row row of the cell
+   * @param col column of the right cell
+   * @return true if a vertical wall is present, false otherwise
+   */
   private static boolean hasVerticalWall(Board board, int row, int col) {
     return !board.getGraph().hasEdge(board.id(row, col - 1), board.id(row, col));
   }
 
-  // Returns true if there is a horizontal wall between row and row+1
+  /**
+   * Checks whether a horizontal wall exists between two adjacent rows.
+   *
+   * @param board board to inspect
+   * @param row row of the upper cell
+   * @param col column of the cell
+   * @return true if a horizontal wall is present, false otherwise
+   */
   private static boolean hasHorizontalWall(Board board, int row, int col) {
     return !board.getGraph().hasEdge(board.id(row, col), board.id(row + 1, col));
   }
 
-  // Writes the remaining walls for each player
-  // Example : "walls: 10 10"
+  /**
+   * Writes the remaining wall count for each player.
+   *
+   * @param writer writer used to save the data
+   * @param state game state containing the players
+   */
   private static void writeWalls(PrintWriter writer, GameState state) {
     StringBuilder line = new StringBuilder("walls:");
     for (Player player : state.getPlayers()) {

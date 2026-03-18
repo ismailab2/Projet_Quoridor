@@ -10,6 +10,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+/**
+ * Graphical representation of the Quoridor board. It is responsible for drawing cells, pawns, walls
+ * and handling board interactions.
+ */
 public class BoardView extends GridPane {
 
   private final GameEngine engine;
@@ -19,6 +23,11 @@ public class BoardView extends GridPane {
   private StackPane[][] cells;
   private Rectangle[][] pawns;
 
+  /**
+   * Creates a board view linked to the given game engine.
+   *
+   * @param engine game engine used to read and update the game state
+   */
   public BoardView(GameEngine engine) {
     this.engine = engine;
 
@@ -30,6 +39,7 @@ public class BoardView extends GridPane {
     drawBoard();
   }
 
+  /** Redraws the complete board, including cells, players and walls. */
   public void drawBoard() {
     getChildren().clear();
 
@@ -66,6 +76,7 @@ public class BoardView extends GridPane {
     highlightCurrentPlayer();
   }
 
+  /** Draws all players on the board. */
   public void drawPlayers() {
 
     List<Player> players = engine.getState().getPlayers();
@@ -100,6 +111,7 @@ public class BoardView extends GridPane {
     }
   }
 
+  /** Draws all walls currently placed on the board. */
   public void drawWalls() {
 
     Board board = engine.getState().getBoard();
@@ -136,6 +148,7 @@ public class BoardView extends GridPane {
     }
   }
 
+  /** Highlights the pawn of the current player. */
   public void highlightCurrentPlayer() {
 
     Player current = engine.getState().getCurrentPlayer();
@@ -158,6 +171,11 @@ public class BoardView extends GridPane {
     ft.play();
   }
 
+  /**
+   * Highlights the cells accessible to the given player.
+   *
+   * @param player player whose available moves are highlighted
+   */
   public void highlightAccessibleCells(Player player) {
 
     for (StackPane[] row : cells)
@@ -173,6 +191,12 @@ public class BoardView extends GridPane {
     }
   }
 
+  /**
+   * Handles a click on a board cell.
+   *
+   * @param row clicked row
+   * @param col clicked column
+   */
   public void handleCellClick(int row, int col) {
 
     Player current = engine.getState().getCurrentPlayer();
@@ -184,6 +208,13 @@ public class BoardView extends GridPane {
     }
   }
 
+  /**
+   * Handles a click on a wall placement area.
+   *
+   * @param row clicked row
+   * @param col clicked column
+   * @param button mouse button used for the click
+   */
   public void handleWallClick(int row, int col, MouseButton button) {
 
     Orientation orientation;
@@ -203,6 +234,11 @@ public class BoardView extends GridPane {
     }
   }
 
+  /**
+   * Returns the array containing the pawn shapes displayed on the board.
+   *
+   * @return two-dimensional array of pawn rectangles
+   */
   public Rectangle[][] getPawns() {
     return pawns;
   }

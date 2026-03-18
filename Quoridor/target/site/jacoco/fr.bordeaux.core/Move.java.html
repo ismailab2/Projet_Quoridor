@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Move.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">quoridor</a> &gt; <a href="index.source.html" class="el_package">fr.bordeaux.core</a> &gt; <span class="el_source">Move.java</span></div><h1>Move.java</h1><pre class="source lang-java linenums">package fr.bordeaux.core;
+
+/** Represents a move in Quoridor: either a pawn movement or a wall placement. Immutable and safe */
+public class Move {
+
+<span class="fc" id="L6">  public enum Type {</span>
+<span class="fc" id="L7">    PAWN,</span>
+<span class="fc" id="L8">    WALL</span>
+  }
+
+  private final Type type;
+  private final Position from;
+  private final Position to;
+  private final Orientation orientation;
+
+<span class="fc" id="L16">  private Move(Type type, Position from, Position to, Orientation orientation) {</span>
+<span class="fc" id="L17">    this.type = type;</span>
+<span class="fc" id="L18">    this.from = from;</span>
+<span class="fc" id="L19">    this.to = to;</span>
+<span class="fc" id="L20">    this.orientation = orientation;</span>
+<span class="fc" id="L21">  }</span>
+
+  public static Move pawn(Position from, Position to) {
+<span class="fc" id="L24">    System.out.println(&quot;\n\n\n&quot; + from + &quot;\n\n&quot;);</span>
+<span class="fc" id="L25">    return new Move(Type.PAWN, from, to, null);</span>
+  }
+
+  public static Move wall(Position to, Orientation orientation) {
+<span class="fc" id="L29">    return new Move(Type.WALL, null, to, orientation);</span>
+  }
+
+  public Position getFrom() {
+<span class="fc" id="L33">    return from;</span>
+  }
+
+  public Position getTo() {
+<span class="fc" id="L37">    return to;</span>
+  }
+
+  public Orientation getOrientation() {
+<span class="fc" id="L41">    return orientation;</span>
+  }
+
+  public Type getType() {
+<span class="fc" id="L45">    return type;</span>
+  }
+
+  public boolean isWall() {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    return type == Type.WALL;</span>
+  }
+
+  public boolean isPawn() {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    return type == Type.PAWN;</span>
+  }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L58">        return &quot;Move{&quot; +</span>
+                &quot;type=&quot; + type +
+                &quot;, from=&quot; + from +
+                &quot;, to=&quot; + to +
+                &quot;, orientation=&quot; + orientation +
+                '}';
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
