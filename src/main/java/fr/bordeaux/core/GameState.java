@@ -159,10 +159,6 @@ public class GameState {
     return currentIndexPlayer;
   }
 
-  public Position getCurrentPlayerPosition() {
-    return this.getCurrentPlayer().getPosition();
-  }
-
   public Board getBoard() {
     return board;
   }

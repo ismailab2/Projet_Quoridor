@@ -188,9 +188,9 @@ public class MctsNode {
    * @return the index of the winner if the move results in a win, or -1 otherwise
    */
   @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.LawOfDemeter"})
-  /** Negligible overhead for MCTS and LOD can't be satisfied */
+  /* Negligible overhead for MCTS and LOD can't be satisfied */
   private int simulateOneStep(final GameState temp, final List<Player> allPlayers) {
-    final Position currentPos = temp.getCurrentPlayerPosition();
+    final Position currentPos = temp.getCurrentPlayer().getPosition();
     final int curX = currentPos.getX();
     final int curY = currentPos.getY();
 
