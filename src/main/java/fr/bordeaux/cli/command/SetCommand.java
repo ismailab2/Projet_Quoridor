@@ -22,7 +22,9 @@ public class SetCommand implements Command {
     this.tokens = null;
   }
 
-  /** Creates a SetCommand. Currently not implemented. */
+  /**Creates a SetCommand. Currently not implemented
+   * @param s SetCommand with the provided
+   */
   public SetCommand(String s) {
     this(new String[] {"set", s});
   }
