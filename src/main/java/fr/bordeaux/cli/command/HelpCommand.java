@@ -33,7 +33,8 @@ public class HelpCommand implements Command {
   /**
    * Creates a HelpCommand with the given command tokens.
    *
-   * @param t the tokens entered by the user in the CLI
+   * @param userTokens the tokens entered by the user in the CLI
+   * @param registryCli the CLI command registry
    */
   public HelpCommand(String[] userTokens, Map<String, Function<String[], Command>> registryCli) {
     this.tokens = userTokens;

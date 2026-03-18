@@ -217,6 +217,12 @@ public class ShowCommand implements Command {
     return "" + letter + number;
   }
 
+  /**
+   * Displays the history of moves played in the game. Each move is printed with the player number
+   * and move details.
+   *
+   * @param engine the game engine containing the current game state and move history
+   */
   public void showHistory(GameEngine engine) {
     int nbPlayers = engine.getState().getPlayers().size();
     int count = 0;
