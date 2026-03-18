@@ -2,7 +2,6 @@ package fr.bordeaux.cli;
 
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
-import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -35,13 +34,14 @@ public class CliApp {
    * @param reader the line reader used to read user commands
    */
   public CliApp(final GameEngine engine, final Terminal terminal, final LineReader reader) {
+
     this.engine = engine;
     this.terminal = terminal;
     this.reader = reader;
     commandRegistry = new HashMap<>();
 
     // Register commands
-    commandRegistry.put("help", HelpCommand::new);
+    commandRegistry.put("help", tokens -> new HelpCommand(tokens, commandRegistry));
     commandRegistry.put(
         "quit",
         tokens -> {
@@ -116,7 +116,7 @@ public class CliApp {
 
     // Initialisation du registre de commandes
     this.commandRegistry = new HashMap<>();
-    commandRegistry.put("help", HelpCommand::new);
+    commandRegistry.put("help", tokens -> new HelpCommand(tokens, commandRegistry));
     commandRegistry.put(
         "quit",
         tokens -> {

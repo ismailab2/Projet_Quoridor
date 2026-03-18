@@ -26,13 +26,24 @@ public class MainApp {
    * @param args Command-line arguments provided at startup.
    */
   public static void main(String[] args) {
+    // Logger configurations before using
+    // Display only message level (ex: [INFO] Message / [DEBUG] Message)
+    System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
+    System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
+    System.setProperty("org.slf4j.simpleLogger.showDateTime", "false");
+    System.setProperty(
+        "org.slf4j.simpleLogger.showThreadName", "false"); // Hide file of main() method
+    System.setProperty("org.slf4j.simpleLogger.showLogName", "false"); // Hide class name
+    System.setProperty("org.slf4j.simpleLogger.showShortLogName", "false");
+    System.setProperty("org.slf4j.simpleLogger.levelInBrackets", "true");
 
     ConfigManager config = ConfigManager.getInstance();
 
     config.load();
+    System.out.println(config.getOption("verbose", "default"));
 
     boolean gui = false;
-    boolean cli = false;
+    boolean cli = true;
 
     if (args.length == 0) {
       System.out.println("Le programme se lance...");
