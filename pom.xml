@@ -256,25 +256,5 @@
         </plugins>
     </build>
 
-    <!-- ================= PROFILES ================= -->
-    <profiles>
-
-        <!-- CLI PROFILE -->
-        <profile>
-            <id>cli</id>
-            <properties>
-                <main.class>${main.class}</main.class>
-            </properties>
-        </profile>
-
-        <!-- GUI PROFILE -->
-        <profile>
-            <id>gui</id>
-            <properties>
-                <main.class>${main.class}</main.class>
-            </properties>
-        </profile>
-
-    </profiles>
 
 </project>
