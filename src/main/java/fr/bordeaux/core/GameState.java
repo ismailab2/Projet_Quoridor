@@ -347,6 +347,7 @@ public class GameState {
 
   /**
    * Generates all potential move candidates without rule validation.
+   *
    * @return A list of pseudo-legal {@link Move} objects.
    */
   public List<Move> generatePseudoLegalMoves() {
