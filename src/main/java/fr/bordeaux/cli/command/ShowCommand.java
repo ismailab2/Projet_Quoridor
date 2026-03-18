@@ -217,6 +217,13 @@ public class ShowCommand implements Command {
     return "" + letter + number;
   }
 
+  /**
+   * Displays the complete history of moves played during the game.
+   * Format: [Player Number] - [StartPos]-[EndPos] for pawns, 
+   * or [Player Number] - [Pos][Orientation] for walls.
+   *
+   * @param engine The game engine containing the current state and move history.
+   */
   public void showHistory(GameEngine engine) {
     int nbPlayers = engine.getState().getPlayers().size();
     int count = 0;

@@ -8,12 +8,22 @@ import fr.bordeaux.gui.QuoridorApp;
 /** Entry point of the Quoridor application. */
 public class MainApp {
 
+  /** 
+  * Private constructor to prevent instantiation of this utility class.
+  */
   private MainApp() {}
 
   private static final String VERSION = "1.0.0";
+  /** The standard size of the Quoridor board (9x9). */
   public static final int BOARD_SIZE = 9;
+  /** The supported number of players for this version. */
   public static final int PLAYER_SIZE = 2;
 
+  /**
+   * Main entry point. Parses command line arguments and launches either the GUI or CLI.
+   *
+   * @param args Command line arguments.
+   */
   public static void main(String[] args) {
     // Logger configurations before using
     // Display only message level (ex: [INFO] Message / [DEBUG] Message)
