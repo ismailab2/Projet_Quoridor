@@ -345,6 +345,10 @@ public class GameState {
     return res;
   }
 
+  /**
+   * Generates all potential move candidates without rule validation.
+   * @return A list of pseudo-legal {@link Move} objects.
+   */
   public List<Move> generatePseudoLegalMoves() {
     List<Move> all_possible_moves = new ArrayList<>();
     Position player_pos = getCurrentPlayer().getPosition();
