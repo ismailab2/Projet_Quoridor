@@ -148,6 +148,8 @@ public class NewCommand implements Command {
           }
         }
       }
+      String setNbPlayers = "nb-players=" + nbPlayer;
+      new SetCommand(setNbPlayers).execute(engine);
       return new GameEngine(new GameState(board, Arrays.stream(players).toList()));
     }
   }

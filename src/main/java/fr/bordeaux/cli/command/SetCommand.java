@@ -2,7 +2,6 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +22,11 @@ public class SetCommand implements Command {
     this.tokens = null;
   }
 
+  /** Creates a SetCommand. Currently not implemented. */
+  public SetCommand(String s) {
+    this(new String[] {"set", s});
+  }
+
   /**
    * Creates a SetCommand with the provided CLI tokens.
    *
@@ -41,7 +45,7 @@ public class SetCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens == null || tokens.length < 2) {
-      logger.info("Usage: set PARAM=VALUE");
+      logger.info("? Usage: set PARAM=VALUE");
       return engine;
     }
 
@@ -63,14 +67,14 @@ public class SetCommand implements Command {
 
     try {
       ConfigManager config = ConfigManager.getInstance();
-      
+
       // Update the option in memory
       config.setOption(key, value);
-      
+
       // Persist the change to the file (.quoridorrc)
       config.save();
-      
-      logger.info("Configuration updated: {} set to {}", key, value);
+
+      logger.debug("Configuration updated: {} set to {}", key, value);
     } catch (Exception e) {
       logger.error("Failed to update configuration for key: {}", key, e);
     }

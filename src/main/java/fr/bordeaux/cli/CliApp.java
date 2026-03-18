@@ -167,7 +167,7 @@ public class CliApp {
     commandRegistry.put("undo", UndoCommand::new);
     commandRegistry.put("redo", RedoCommand::new);
     commandRegistry.put("show", ShowCommand::new);
-    commandRegistry.put("set", tokens -> new SetCommand());
+    commandRegistry.put("set", SetCommand::new);
   }
 
   /**
