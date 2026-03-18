@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.MainApp;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import javafx.application.Application;
@@ -13,16 +14,19 @@ import javafx.stage.Stage;
  */
 public class QuoridorApp extends Application {
 
-  /** Creates a new Quoridor application instance. */
-  public QuoridorApp() {
-    super();
-  }
-
   @Override
   public void start(Stage stage) {
     ConfigManager.getInstance().load();
 
-    GameState state = new GameState(new Board(9), Player.createDefaultPlayers());
+    int boardSize = MainApp.BOARD_SIZE;
+    int playerSize = MainApp.PLAYER_SIZE;
+    GameState state;
+    if (playerSize == 2) {
+      state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
+    } else {
+      System.out.println("le gui est configurable pour de 2 joueurs uniquement");
+      state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
+    }
     GameEngine engine = new GameEngine(state);
 
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
@@ -56,11 +60,6 @@ public class QuoridorApp extends Application {
     ConfigManager.getInstance().save();
   }
 
-  /**
-   * Launches the Quoridor application.
-   *
-   * @param args command-line arguments
-   */
   public static void main(String[] args) {
     launch(args);
   }
