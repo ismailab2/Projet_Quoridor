@@ -102,7 +102,7 @@ public class NewCommand implements Command {
               }
             case "mcts":
               {
-                players[i] = new MCTSPlayer(inputName, positions[i]);
+                players[i] = new MctsPlayer(inputName, positions[i]);
                 break;
               }
             case "mini":

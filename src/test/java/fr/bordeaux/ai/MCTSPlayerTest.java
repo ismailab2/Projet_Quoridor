@@ -12,7 +12,7 @@ public class MCTSPlayerTest {
 
   private Board board;
   private List<Player> players;
-  private MCTSPlayer ai;
+  private MctsPlayer ai;
 
   @BeforeEach
   public void setUp() {
@@ -21,7 +21,7 @@ public class MCTSPlayerTest {
     players = new ArrayList<>();
 
     // AI starts at the top (row 0, middle)
-    ai = new MCTSPlayer("MCTS_AI", new Position(0, 4), 2000);
+    ai = new MctsPlayer("MCTS_AI", new Position(0, 4), 2000);
     // Opponent starts at the bottom (row 8, middle)
     HumanPlayer opponent = new HumanPlayer("Opponent", new Position(8, 4));
 
@@ -44,7 +44,7 @@ public class MCTSPlayerTest {
     assertEquals(ai.getName(), copy.getName());
     assertEquals(ai.getPosition(), copy.getPosition());
     assertEquals(ai.getRemainingWalls(), copy.getRemainingWalls());
-    assertInstanceOf(MCTSPlayer.class, copy, "Copy should also be an instance of MCTSPlayer");
+    assertInstanceOf(MctsPlayer.class, copy, "Copy should also be an instance of MCTSPlayer");
   }
 
   @Test
@@ -76,7 +76,7 @@ public class MCTSPlayerTest {
 
     // The winning move is to go to row 8
     Move winningMove = Move.pawn(new Position(7, 3), new Position(8, 3));
-    Move chosenMove = MCTSPlayer.hint(ai, state, 1000, false);
+    Move chosenMove = MctsPlayer.hint(ai, state, 1000, false);
 
     assertEquals(
         winningMove.getTo(),

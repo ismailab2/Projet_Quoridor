@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /** Represents an AI player using the Monte Carlo Tree Search algorithm. */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.LawOfDemeter"})
-public class MCTSPlayer extends AiPlayer {
+public class MctsPlayer extends AiPlayer {
 
   /** Reflection time allowed for the AI in milliseconds. */
   private final long reflectionTime;
@@ -34,19 +34,19 @@ public class MCTSPlayer extends AiPlayer {
   private static final double UCT_CONSTANT = 1.41;
 
   /** Constructor with custom reflection time. */
-  public MCTSPlayer(final String name, final Position positionStart, final long reflectionTime) {
+  public MctsPlayer(final String name, final Position positionStart, final long reflectionTime) {
     super(name, positionStart);
     this.reflectionTime = reflectionTime;
     this.evaluator = null;
   }
 
   /** Default constructor with 2000ms reflection time. */
-  public MCTSPlayer(final String name, final Position positionStart) {
+  public MctsPlayer(final String name, final Position positionStart) {
     this(name, positionStart, 2000);
   }
 
   /** Constructor with custom reflection time and neural network evaluator. */
-  public MCTSPlayer(
+  public MctsPlayer(
       final String name,
       final Position positionStart,
       final long reflectionTime,
@@ -58,7 +58,7 @@ public class MCTSPlayer extends AiPlayer {
 
   @Override
   public Player copy() {
-    return new MCTSPlayer(
+    return new MctsPlayer(
         this.getName(),
         this.getPosition(),
         this.getStartingPosition(),
@@ -67,7 +67,7 @@ public class MCTSPlayer extends AiPlayer {
         this.reflectionTime);
   }
 
-  private MCTSPlayer(
+  private MctsPlayer(
       final String name,
       final Position current,
       final Position start,
@@ -342,23 +342,21 @@ public class MCTSPlayer extends AiPlayer {
   private static MctsNode bestUCT(
       final MctsNode node, final int myIdx, final NeuralNetworkEvaluator evaluator) {
     return evaluator != null
-        ? selectBestChildUsingNN(node, myIdx, evaluator)
+        ? selectBestChildUsingNN(node, evaluator)
         : selectBestChildUsingUCT(node, myIdx);
   }
 
   /** Selects the best child using neural network evaluation. */
   private static MctsNode selectBestChildUsingNN(
-      final MctsNode node, final int myIdx, final NeuralNetworkEvaluator evaluator) {
+      final MctsNode node, final NeuralNetworkEvaluator evaluator) {
     MctsNode bestChild = null;
     double bestValue = Double.NEGATIVE_INFINITY;
-    final int currentPlayerIdx = node.getCurrentIndexPlayer();
-    final boolean isAiTurn = currentPlayerIdx == myIdx;
 
     for (final MctsNode child : node.getChildren()) {
-      double value = evaluator.evaluate(child.state);
-      if (!isAiTurn) {
-        value = -value; // Minimize for opponent
-      }
+      // The evaluator returns the score for the player whose turn it is in child.state.
+      // Since child.state is the opponent's turn relative to 'node', the selection
+      // player's reward is the negative of the evaluator's output.
+      final double value = -evaluator.evaluate(child.state);
       if (value > bestValue) {
         bestValue = value;
         bestChild = child;
