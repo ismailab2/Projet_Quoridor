@@ -8,6 +8,7 @@ import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.io.PrintStream;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,6 +236,8 @@ public class ShowCommand implements Command {
    * @param engine The game engine containing the current state and move history.
    */
   public void showHistory(GameEngine engine) {
+    writer.println("Oldest move");
+    List<Player> players = engine.getState().getPlayers();
     int nbPlayers = engine.getState().getPlayers().size();
     int count = 0;
     Move[] moves = engine.getState().getMovesPlayed();
@@ -243,15 +246,25 @@ public class ShowCommand implements Command {
       if (move.isPawn()) {
         Position from = move.getFrom();
         strMove +=
-            (count % nbPlayers) + 1 + " - " + posToString(from) + '-' + posToString(move.getTo());
+            "Player "
+                + players.get(count % nbPlayers).getName()
+                + " - "
+                + posToString(from)
+                + '-'
+                + posToString(move.getTo());
       } else {
         Orientation orientation = move.getOrientation();
         strMove +=
-            (count % nbPlayers) + 1 + " - " + posToString(move.getTo()) + orientation.toString();
+            "Player "
+                + players.get(count % nbPlayers).getName()
+                + " - "
+                + posToString(move.getTo())
+                + orientation.toString();
       }
       count++;
       strMove += ";";
       writer.println(strMove);
     }
+    writer.println("Newest move");
   }
 }

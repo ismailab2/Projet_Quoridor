@@ -52,7 +52,7 @@ public class MoveCommand implements Command {
         logger.debug("You played: {}", this.move);
         return handleWall(engine);
       } else {
-        logger.debug("Move should look like : a3-b3 / a3h / a3v");
+        logger.debug("Please use help to see how to give a valid command");
         return engine;
       }
     } catch (Exception e) {
