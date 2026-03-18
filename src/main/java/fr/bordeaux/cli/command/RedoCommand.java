@@ -1,14 +1,23 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that replays moves that were previously undone. The user can redo a single move or
  * multiple moves.
  */
 public class RedoCommand implements Command {
-
+  /** Command tokens. */
   private String[] tokens;
+
+  /** Logger to trace redo actions. */
+  private static final Logger logger = LoggerFactory.getLogger(RedoCommand.class);
+
+  /** Stream where to display texts. */
+  private final PrintStream writer = System.out;
 
   /** Creates a RedoCommand that replays one move by default. */
   public RedoCommand() {
@@ -32,28 +41,32 @@ public class RedoCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    if (tokens.length == 1) engine.getState().redo();
-    else if (tokens.length >= 3) {
-      System.out.println("Redo command should look like : redo [N] with N an integer");
+    if (tokens.length >= 3) {
+      logger.info("Usage: redo [N]");
+      return engine;
     }
-    for (int i = 0; i < (tokens.length > 1 ? Integer.parseInt(tokens[1]) : 1); i++)
+    int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
+    logger.info("Redoing {} move(s)...", count);
+
+    for (int i = 0; i < count; i++) {
       engine.getState().redo();
+    }
     return engine;
   }
 
   /** Displays help information about the redo command, including its usage and examples. */
   @Override
   public void helpText() {
-    System.out.println("=== REDO Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  redo");
-    System.out.println("  redo [N]\n");
-    System.out.println("Description:");
-    System.out.println("  Replays previously undone moves.\n");
-    System.out.println("  - If no number is specified, one move is redone.");
-    System.out.println("  - If N is specified, N moves are redone.\n");
-    System.out.println("Examples:");
-    System.out.println("  redo      -> redo one move");
-    System.out.println("  redo 3    -> redo three moves\n");
+    logger.info("=== REDO Command ===\n");
+    logger.info("Usage:");
+    logger.info("  redo");
+    logger.info("  redo [N]");
+    logger.info("Description:");
+    logger.info("  Replays N previously undone moves.\n");
+    logger.debug("  - If no number is specified, one move is redone.");
+    logger.debug("  - If N is specified, N moves are redone.\n");
+    logger.debug("Examples:");
+    logger.debug("  redo      -> redo one move");
+    logger.debug("  redo 3    -> redo three moves\n");
   }
 }

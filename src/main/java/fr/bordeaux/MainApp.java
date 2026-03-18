@@ -15,12 +15,23 @@ public class MainApp {
   public static final int PLAYER_SIZE = 2;
 
   public static void main(String[] args) {
+    // Logger configurations before using
+    // Display only message level (ex: [INFO] Message / [DEBUG] Message)
+    System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
+    System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
+    System.setProperty("org.slf4j.simpleLogger.showDateTime", "false");
+    System.setProperty(
+        "org.slf4j.simpleLogger.showThreadName", "false"); // Hide file of main() method
+    System.setProperty("org.slf4j.simpleLogger.showLogName", "false"); // Hide class name
+    System.setProperty("org.slf4j.simpleLogger.showShortLogName", "false");
+    System.setProperty("org.slf4j.simpleLogger.levelInBrackets", "true");
 
     ConfigManager config = ConfigManager.getInstance();
     config.load();
+    System.out.println(config.getOption("verbose", "default"));
 
     boolean gui = false;
-    boolean cli = false;
+    boolean cli = true;
 
     for (int i = 0; i < args.length; i++) {
 

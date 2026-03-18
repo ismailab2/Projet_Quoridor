@@ -3,6 +3,8 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 
@@ -55,9 +57,12 @@ public class ShowCommand implements Command {
       case "configurations":
       case "config":
         {
-          String[] configs = new String[] {"verbose", "blitz", "timeout"};
+          String[] configs =
+              new String[] {
+                "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
+              };
           for (String cf : configs) {
-            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, null));
+            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));
           }
           break;
         }
@@ -68,7 +73,7 @@ public class ShowCommand implements Command {
         }
       case "history":
         {
-          System.out.println("history");
+          showHistory(engine);
           break;
         }
       default:
@@ -196,6 +201,40 @@ public class ShowCommand implements Command {
       if (j >= b.getSize() - 1) return "X";
       if (b.getGraph().hasEdge(b.id(i, j), b.id(i, j + 1))) return " ";
       else return "X";
+    }
+  }
+
+  /**
+   * Converts a board position into a human-readable string. The format follows the CLI coordinate
+   * notation (e.g., a0, b3).
+   *
+   * @param p the position to convert
+   * @return the string representation of the position
+   */
+  private String posToString(Position p) {
+    char letter = (char) ('a' + p.getY());
+    int number = p.getX() + 1;
+    return "" + letter + number;
+  }
+
+  public void showHistory(GameEngine engine) {
+    int nbPlayers = engine.getState().getPlayers().size();
+    int count = 0;
+    Move[] moves = engine.getState().getMovesPlayed();
+    for (Move move : moves) {
+      String strMove = "";
+      if (move.isPawn()) {
+        Position from = move.getFrom();
+        strMove +=
+            (count % nbPlayers) + 1 + " - " + posToString(from) + '-' + posToString(move.getTo());
+      } else {
+        Orientation orientation = move.getOrientation();
+        strMove +=
+            (count % nbPlayers) + 1 + " - " + posToString(move.getTo()) + orientation.toString();
+      }
+      count++;
+      strMove += ";";
+      System.out.println(strMove);
     }
   }
 }

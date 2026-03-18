@@ -19,8 +19,8 @@ public class PauseCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    if (engine.getState().isBlitz()) engine.getState().setBlitz(false);
-    else System.out.println("Not in blitz mode, pause is doign nothing.");
+    if (engine.getState().isBlitz()) engine.getState().setPaused(true);
+    else System.out.println("Not in blitz mode, pause is doing nothing.");
     return engine;
   }
 

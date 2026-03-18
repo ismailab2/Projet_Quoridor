@@ -2,11 +2,21 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameSaver;
+import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Command that saves the current game state to a file. */
 public class SaveCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
+
+  /** Logger to display informations */
+  private static final Logger logger = LoggerFactory.getLogger(SaveCommand.class);
+
+  /** Stream where to display texts */
+  private final PrintStream writer = System.out;
 
   /**
    * Creates a SaveCommand using the specified file path.
@@ -34,10 +44,16 @@ public class SaveCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
+    if (tokens.length < 2) {
+      logger.info("Usage: save FILE");
+      return engine;
+    }
     try {
+      logger.info("Attempting to save game to: {}", tokens[1]);
       GameSaver.saveGame(engine.getState(), tokens[1]);
+      logger.info("Game saved successfully.");
     } catch (Exception e) {
-      System.err.println("Ca va pas du tout : " + e);
+      logger.error("Failed to save game at path: {}", tokens[1], e);
     }
     return engine;
   }
@@ -45,14 +61,14 @@ public class SaveCommand implements Command {
   /** Displays help information about the save command, including its usage and example. */
   @Override
   public void helpText() {
-    System.out.println("=== SAVE Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  save FILE\n");
-    System.out.println("Description:");
-    System.out.println("  Saves the current game state into the specified file FILE.\n");
-    System.out.println("Arguments:");
-    System.out.println("  FILE   : Destination file path (required).\n");
-    System.out.println("Example:");
-    System.out.println("  save mygame.txt\n");
+    logger.info("=== SAVE Command ===\n");
+    logger.info("Usage:");
+    logger.info("  save FILE\n");
+    logger.info("Description:");
+    logger.info("  Saves the current game state into the specified file FILE.\n");
+    logger.debug("Arguments:");
+    logger.debug("  FILE   : Destination file path (required).\n");
+    logger.debug("Example:");
+    logger.debug("  save mygame.txt\n");
   }
 }

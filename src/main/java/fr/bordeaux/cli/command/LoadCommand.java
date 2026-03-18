@@ -2,6 +2,9 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameLoader;
+import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that loads a saved game from a file. The loaded game replaces the current game engine
@@ -9,16 +12,14 @@ import fr.bordeaux.persistence.GameLoader;
  */
 public class LoadCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
 
-  /**
-   * Creates a LoadCommand using a file path.
-   *
-   * @param p the path of the save file to load
-   */
-  public LoadCommand(String p) {
-    this(new String[] {"load", p});
-  }
+  /** Logger to display informations */
+  private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
+
+  /** Stream where to display texts */
+  private final PrintStream writer = System.out;
 
   /**
    * Creates a LoadCommand with the provided command tokens.
@@ -40,13 +41,15 @@ public class LoadCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens.length < 2) {
-      System.out.println("Usage: load FILE");
+      logger.info("Usage: load FILE");
       return engine;
     }
     try {
+      logger.info("Loading game state from file: {}", tokens[1]);
       return new GameEngine(GameLoader.loadGame(tokens[1]));
     } catch (Exception e) {
-      System.err.println("Ca va pas du tout : " + e);
+      e.printStackTrace();
+      logger.error("Error while loading file {}", tokens[1], e);
     }
     return engine;
   }
@@ -57,14 +60,14 @@ public class LoadCommand implements Command {
    */
   @Override
   public void helpText() {
-    System.out.println("=== LOAD Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  load FILE\n");
-    System.out.println("Description:");
-    System.out.println("  Loads a saved game from the specified FILE.\n");
-    System.out.println("Arguments:");
-    System.out.println("  FILE   : Path to the save file (required).\n");
-    System.out.println("Example:");
-    System.out.println("  load savegame.txt\n");
+    logger.info("=== LOAD Command ===\n");
+    logger.info("Usage:");
+    logger.info("  load FILE\n");
+    logger.info("Description:");
+    logger.info("  Loads a saved game from the specified FILE.\n");
+    logger.info("Arguments:");
+    logger.info("  FILE   : Path to the save file (required).\n");
+    logger.info("Example:");
+    logger.info("  load savegame.txt\n");
   }
 }

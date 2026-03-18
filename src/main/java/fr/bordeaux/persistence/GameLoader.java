@@ -11,7 +11,7 @@ import java.util.*;
 /** Utility class used to load a game state from a save file. */
 public final class GameLoader {
   // Board size : always 9x9
-  private static final int SIZE = 9;
+  private static int SIZE = 9;
 
   private static final int BOARD_START = 3;
 
@@ -27,15 +27,16 @@ public final class GameLoader {
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    List<String> lines = readAllLines(filename);
-    validateSettingsHeader(lines);
-    AllPlayerAndLine allp_l = readAllPlayer(lines);
-    List<Player> players = allp_l.players;
-    int currentLine = allp_l.nextLine;
-    validateHeader(lines, currentLine);
-    Board board = new Board(SIZE);
-    readBoard(lines, board, players, currentLine);
-    readRemainingWalls(lines, players, currentLine);
+    List<String> lines = readAllLines(filename); // reads all lines from file
+    validateSettingsHeader(lines); // checks [settings] header
+    AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
+    List<Player> players = allp_l.players; // creates all players
+    int currentLine = allp_l.nextLine; // Line after settings
+    validateHeader(lines, currentLine); // checks [game] header
+    SIZE = readBoardSize(lines, currentLine);
+    Board board = new Board(SIZE); // creates empty 9x9 board
+    readBoard(lines, board, players, currentLine); // places walls and players
+    readRemainingWalls(lines, players, currentLine); // restores wall counts
 
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
@@ -87,6 +88,10 @@ public final class GameLoader {
     return Integer.parseInt(lines.get(currentLine + 1).trim().split("#")[0].trim()) - 1;
   }
 
+  private static int readBoardSize(List<String> lines, int currentLine) {
+    return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
+  }
+
   // Creates the 2 players with their default starting positions
   private static List<Player> createDefaultPlayers() {
     return new ArrayList<>(
@@ -128,7 +133,7 @@ public final class GameLoader {
   private static void readRemainingWalls(
       List<String> lines, List<Player> players, int currentLine) {
     String[] parts =
-        lines.get(BOARD_START + currentLine + SIZE * 2 - 1).replace("walls:", "").trim().split(" ");
+        lines.get(BOARD_START + currentLine + SIZE * 2).replace("walls:", "").trim().split(" ");
     for (int i = 0; i < players.size(); i++) {
       int walls = Integer.parseInt(parts[i]);
       // Call useWall() until the player has the correct number of walls

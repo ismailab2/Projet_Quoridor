@@ -7,9 +7,8 @@ import java.util.*;
 
 /** Utility class used to save a game state to a file. */
 public class GameSaver {
-
-  /** Board size used by the save format. */
-  private static final int SIZE = 9;
+  // Board size : always 9x9
+  private static int SIZE = 9;
 
   /** Private constructor to prevent instantiation. */
   private GameSaver() {}
@@ -23,11 +22,12 @@ public class GameSaver {
    */
   public static void saveGame(GameState state, String filename) throws IOException {
     try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-      saveParameters(writer, state);
-      writeHeader(writer, state);
-      writeBoard(writer, state);
-      writeWalls(writer, state);
-      writeHistory(writer, state);
+      SIZE = state.getBoard().getSize();
+      saveParameters(writer, state); // write all parameters needed to play the game
+      writeHeader(writer, state); // writes [game], current player, comment
+      writeBoard(writer, state); // writes cells and walls
+      writeWalls(writer, state); // writes "walls: 10 10"
+      writeHistory(writer, state); // writes all moves since the beginning
     }
   }
 
@@ -40,6 +40,7 @@ public class GameSaver {
   private static void writeHeader(PrintWriter writer, GameState state) {
     writer.println("[game]");
     writer.println((state.getCurrentIndexPlayer() + 1) + "  # Current player color");
+    writer.println(state.getBoard().getSize() + "  # Board size");
     writer.println("# Board (" + state.getPlayers().size() + " players)");
   }
 
