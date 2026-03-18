@@ -35,6 +35,11 @@ public class ShortcutManager {
     loadFromConfig();
   }
 
+  /**
+   * Returns the unique instance of the shortcut manager.
+   *
+   * @return the singleton instance of the shortcut manager
+   */
   public static ShortcutManager getInstance() {
     return INSTANCE;
   }

@@ -2,7 +2,13 @@ package fr.bordeaux.gui;
 
 import javafx.scene.control.Alert;
 
-public class InfoDialog {
+/** Utility class used to display the application information dialog. */
+public final class InfoDialog {
+
+  /** Private constructor to prevent instantiation. */
+  private InfoDialog() {}
+
+  /** Displays the information dialog of the application. */
   public static void show() {
     Alert alert = new Alert(Alert.AlertType.INFORMATION);
     alert.setTitle("Info du jeu Quoridor");
