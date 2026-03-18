@@ -14,19 +14,18 @@ import javafx.stage.Stage;
  */
 public class QuoridorApp extends Application {
 
-    @Override
+  @Override
   public void start(Stage stage) {
     ConfigManager.getInstance().load();
 
     int boardSize = MainApp.BOARD_SIZE;
     int playerSize = MainApp.PLAYER_SIZE;
-        GameState state;
-    if(playerSize == 2){
-         state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
-    }
-    else {
-        System.out.println("le gui est configurable pour de 2 joueurs uniquement");
-        state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
+    GameState state;
+    if (playerSize == 2) {
+      state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
+    } else {
+      System.out.println("le gui est configurable pour de 2 joueurs uniquement");
+      state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
     }
     GameEngine engine = new GameEngine(state);
 

@@ -5,40 +5,22 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
 
-/**
- * Entry point of the Quoridor application. This class handles command-line argument parsing,
- * configuration loading, and initializes either the Graphical User Interface (GUI) or the Command
- * Line Interface (CLI) based on user input.
- */
+/** Entry point of the Quoridor application. */
 public class MainApp {
 
-  /** Private constructor to prevent instantiation of the main application class. */
-  private MainApp() {
-    // This class is not intended to be instantiated.
-  }
+  private MainApp() {}
 
   private static final String VERSION = "1.0.0";
-  public static final int  BOARD_SIZE = 9;
-    public static final int PLAYER_SIZE = 2;
+  public static final int BOARD_SIZE = 9;
+  public static final int PLAYER_SIZE = 2;
 
-  /**
-   * Main entry point of the program. Parses command-line arguments to set game modes (GUI, CLI,
-   * Blitz) and configures global settings like verbosity and debug mode.
-   *
-   * @param args Command-line arguments provided at startup.
-   */
   public static void main(String[] args) {
 
     ConfigManager config = ConfigManager.getInstance();
-
     config.load();
 
     boolean gui = false;
     boolean cli = false;
-
-    if (args.length == 0) {
-      System.out.println("Le programme se lance...");
-    }
 
     for (int i = 0; i < args.length; i++) {
 
@@ -83,21 +65,30 @@ public class MainApp {
         case "-t":
         case "--time":
           if (i + 1 < args.length) {
-
             String value = args[++i];
             config.setOption("timeout", value);
-
           } else {
             System.err.println("Erreur : --time nécessite une valeur.");
+            printHelp();
             System.exit(1);
           }
           break;
 
         default:
-          System.err.println("Option invalide : " + arg);
+          System.err.println("Erreur : option invalide -> " + arg);
           printHelp();
           System.exit(1);
       }
+    }
+
+    if (gui && cli) {
+      System.err.println("Erreur : --gui et --cli sont incompatibles.");
+      printHelp();
+      System.exit(1);
+    }
+
+    if (!gui && !cli) {
+      cli = true;
     }
 
     boolean verbose = config.getBoolean("verbose", false);
@@ -106,61 +97,68 @@ public class MainApp {
     int timeout = config.getInt("timeout", 30);
 
     if (verbose) {
-      System.out.println("Verbose mode activé");
+      System.out.println("Mode verbeux activé");
     }
 
     if (debug) {
-      System.out.println("Debug mode activé");
+      System.err.println("Mode debug activé");
     }
 
     if (blitz) {
       System.out.println("Mode blitz : " + timeout + " minutes");
     }
 
-    if (gui) {
-        Board board = new Board(BOARD_SIZE);
-      QuoridorApp.main(args);
-    }
+    try {
 
-    if (cli) {
-      System.out.println("CLI mode started");
-      Board board = new Board(BOARD_SIZE);
-      GameState state;
-      if(PLAYER_SIZE == 2){
-          state  = new GameState(board, Player.createDefaultPlayers());
+      if (gui) {
+        QuoridorApp.main(args);
       }
-      GameEngine engine = new GameEngine(state);
-      try {
-        CliApp cli1 = new CliApp(engine);
-        cli1.run();
-      } catch (Exception e) {
-        e.printStackTrace();
+
+      if (cli) {
+        Board board = new Board(BOARD_SIZE);
+
+        GameState state;
+        if (PLAYER_SIZE == 2) {
+          state = new GameState(board, Player.createDefaultPlayers());
+        } else {
+          System.err.println("Erreur : nombre de joueurs invalide.");
+          System.exit(1);
+          return;
+        }
+
+        GameEngine engine = new GameEngine(state);
+        CliApp cliApp = new CliApp(engine);
+        cliApp.run();
       }
+
+      System.exit(0);
+
+    } catch (Exception e) {
+      System.err.println("Erreur d'exécution : " + e.getMessage());
+      System.exit(1);
     }
   }
 
-  /**
-   * Displays the help message in the console. Lists all available options and command-line switches
-   * for the user.
-   */
+  /** print the help to use programme */
   private static void printHelp() {
 
     System.out.println("Usage: qoridor [OPTIONS]");
     System.out.println();
 
     System.out.println("Options générales :");
-    System.out.println("  -h --help        Affiche l'aide");
-    System.out.println("  -V --version     Affiche la version");
-    System.out.println("  -v --verbose     Mode verbeux");
-    System.out.println("  -d --debug       Mode debug");
+    System.out.println("  -h, --help        Affiche l'aide");
+    System.out.println("  -V, --version     Affiche la version");
+    System.out.println("  -v, --verbose     Mode verbeux");
+    System.out.println("  -d, --debug       Mode debug");
 
     System.out.println();
     System.out.println("Modes :");
-    System.out.println("  -g --gui         Interface graphique");
-    System.out.println("  -b --blitz       Mode blitz");
+    System.out.println("  -g, --gui         Interface graphique");
+    System.out.println("  -c, --cli         Mode ligne de commande (défaut)");
 
     System.out.println();
     System.out.println("Options blitz :");
-    System.out.println("  -t --time N      Temps en minutes (défaut 30)");
+    System.out.println("  -b, --blitz       Active le mode blitz");
+    System.out.println("  -t, --time N      Temps en minutes (défaut 30)");
   }
 }
