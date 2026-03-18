@@ -9,19 +9,24 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 /**
- * Main JavaFX application class for Quoridor. Shows the board in the center, player 1 walls on
- * right, player 2 walls on left.
+ * Main JavaFX application class for Quoridor.
+ *
+ * <p>Displays the game board in the center, player 1 walls on the right, and player 2 walls on the
+ * left. Handles initializing the game state, setting up the scene, and attaching GUI components.
  */
 public class QuoridorApp extends Application {
 
-  /**
-   * Default constructor for the Quoridor application. Required by JavaFX to instantiate the
-   * application via {@code launch()}.
-   */
+  /** Default constructor for the Quoridor JavaFX application. */
   public QuoridorApp() {
     super();
   }
 
+  /**
+   * Called when the JavaFX application is started. Sets up the main window, game board, menu, and
+   * GUI event handling.
+   *
+   * @param stage the primary stage for this application
+   */
   @Override
   public void start(Stage stage) {
     ConfigManager.getInstance().load();
@@ -50,7 +55,6 @@ public class QuoridorApp extends Application {
     // Attach drag-and-drop functionality
     DragAndDrop.install(engine, boardView);
 
-    //
     Scene scene = new Scene(root, 900, 700);
 
     ShortcutManager manager = ShortcutManager.getInstance();
@@ -63,15 +67,18 @@ public class QuoridorApp extends Application {
     stage.show();
   }
 
+  /**
+   * Called when the JavaFX application is stopped. Saves configuration or performs cleanup tasks.
+   */
   @Override
   public void stop() {
     ConfigManager.getInstance().save();
   }
 
   /**
-   * Launcher for the JavaFX application.
+   * Main entry point for launching the JavaFX application.
    *
-   * @param args Command-line arguments.
+   * @param args command-line arguments
    */
   public static void main(String[] args) {
     launch(args);
