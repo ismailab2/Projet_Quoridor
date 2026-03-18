@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +14,6 @@ public class RedoCommand implements Command {
 
   /** Logger to trace redo actions. */
   private static final Logger logger = LoggerFactory.getLogger(RedoCommand.class);
-
-  /** Stream where to display texts. */
-  private final PrintStream writer = System.out;
 
   /** Creates a RedoCommand that replays one move by default. */
   public RedoCommand() {
