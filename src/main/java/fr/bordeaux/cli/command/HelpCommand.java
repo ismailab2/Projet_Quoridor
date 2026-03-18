@@ -79,10 +79,8 @@ public class HelpCommand implements Command {
     logger.info(
         "pause :               Pause the timer if you're in a blitz game, else it does nothing.");
     logger.info("hint :                Suggest you a move if you don't know what to play.");
-    logger.info(
-        "undo [N] :            Unplays the N last move played. Just once if no N given.");
-    logger.info(
-        "redo [N] :            Replays the N undone move played. Just once if no N given.");
+    logger.info("undo [N] :            Unplays the N last move played. Just once if no N given.");
+    logger.info("redo [N] :            Replays the N undone move played. Just once if no N given.");
     logger.info("show board :          Displays the board of the current game.");
     logger.info(
         "show history :        Displays all the moves that were played during the game. From older to the more recent.");

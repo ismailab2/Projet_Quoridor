@@ -8,6 +8,8 @@ import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that starts a new game from the CLI. It allows configuring the board size and the number
@@ -15,9 +17,20 @@ import org.jline.terminal.Terminal;
  */
 public class NewCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
+
+  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
   private Terminal terminal;
+
+  /**
+   * The line reader responsible for text editing, history management, and tab-completion
+   * interaction.
+   */
   private LineReader reader;
+
+  /** Logger to display informations */
+  private static final Logger logger = LoggerFactory.getLogger(NewCommand.class);
 
   /**
    * Creates a NewCommand with the given CLI tokens, terminal and line reader.
@@ -57,9 +70,8 @@ public class NewCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    if (tokens.length > 5) {
-      System.out.println("wrong amount of arguments...");
-    }
+    if (tokens.length > 5) logger.error("wrong amount of arguments...");
+
     int size = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9) - 1;
     Position[] positions = {
       new Position(0, size / 2), new Position(size, size / 2),
@@ -79,8 +91,8 @@ public class NewCommand implements Command {
 
       for (int i = 0; i < nbPlayer; i++) {
         try {
-          System.out.println("Player's type available :");
-          System.out.println(
+          logger.info("Player's type available :");
+          logger.info(
               "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [nn] NeuralNetwork ia  - [r]andom ia");
           String typePlayer = reader.readLine("Player's type >> ");
           if (typePlayer == null) throw new EndOfFileException();
@@ -89,12 +101,15 @@ public class NewCommand implements Command {
               && !typePlayer.equals("mini")
               && !typePlayer.equals("nn")
               && !typePlayer.equals("r")) {
-            System.out.println("Wrong type, please enter h / mcts / mini / nn / r");
+            logger.error("Wrong type, please enter h / mcts / mini / nn / r");
             i--;
             continue;
           }
           String inputName = reader.readLine("Player's name >> ");
-          if (inputName == null) throw new EndOfFileException();
+          if (inputName == null) {
+            logger.error("Should give a name to the player...");
+            throw new EndOfFileException();
+          }
           switch (typePlayer) {
             case "h":
               {
@@ -123,11 +138,12 @@ public class NewCommand implements Command {
               }
           }
         } catch (EndOfFileException | UserInterruptException e) {
-          System.err.println("Tout va bien, je m'arrête !\n");
+          logger.debug("You choose to interrupt the interaction.");
           try {
             terminal.close();
           } catch (Exception exc) {
-            System.err.println("Terminal fermé");
+            logger.error("Terminal closed.");
+          } finally {
             return engine;
           }
         }
@@ -141,19 +157,19 @@ public class NewCommand implements Command {
    */
   @Override
   public void helpText() {
-    System.out.println("=== NEW Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  new");
-    System.out.println("  new [boardSize] [nbPlayer]\n");
-    System.out.println("Description:");
-    System.out.println("  Starts a new game.\n");
-    System.out.println("Arguments (optional):");
-    System.out.println("  boardSize    : An odd integer greater than or equal to 3.");
-    System.out.println("  playerCount  : Must be either 2 or 4.\n");
-    System.out.println("If no arguments are provided, default settings are used.\n");
-    System.out.println("Examples:");
-    System.out.println("  new       -> 9x9 board with 2 players");
-    System.out.println("  new 5     -> 5x5 board with 2 players");
-    System.out.println("  new 7 4   -> 7x7 board with 4 players\n");
+    logger.info("=== NEW Command ===\n");
+    logger.info("Usage:");
+    logger.info("  new");
+    logger.info("  new [boardSize] [nbPlayer]\n");
+    logger.info("Description:");
+    logger.info("  Starts a new game.\n");
+    logger.info("Arguments (optional):");
+    logger.info("  boardSize    : An odd integer greater than or equal to 3.");
+    logger.info("  playerCount  : Must be either 2 or 4.\n");
+    logger.info("If no arguments are provided, default settings are used.\n");
+    logger.debug("Examples:");
+    logger.debug("  new       -> 9x9 board with 2 players");
+    logger.debug("  new 5     -> 5x5 board with 2 players");
+    logger.debug("  new 7 4   -> 7x7 board with 4 players\n");
   }
 }
