@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class HintCommand implements Command {
 
   /** Logger for AI calculation messages. */
-  private static final Logger logger = LoggerFactory.getLogger(HintCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HintCommand.class);
 
   /** Creates a new HintCommand. */
   public HintCommand() {}
@@ -30,7 +30,7 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    logger.info("Calculating best move...");
+    LOGGER.info("Calculating best move...");
     /*     MinimaxPlayer ia =
     MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
         .withHeuristic("advanced")
@@ -38,10 +38,11 @@ public class HintCommand implements Command {
     MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
 
-    logger.debug("Move legality check: {}", RuleChecker.isMoveLegal(engine.getState(), hint));
-
+    if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
+      LOGGER.error("Suggested move: {} isn't legal", hint);
+    }
     String bestMove = formatMove(hint);
-    logger.info("Best move : {}", bestMove);
+    LOGGER.info("Best move : {}", bestMove);
     return engine;
   }
 
@@ -74,15 +75,15 @@ public class HintCommand implements Command {
   /** Displays help information about the hint command, including its usage and description. */
   @Override
   public void helpText() {
-    logger.info("=== HINT Command ===\n");
-    logger.info("Usage:");
-    logger.info("  hint\n");
-    logger.info("Description:");
-    logger.info("  Provides a suggestion for the next move.\n");
-    logger.info("  The suggested move is computed based on the current game state.\n");
-    logger.debug("Displays:");
-    logger.debug("  Should display a legal pawn or wall move.\n  Example:");
-    logger.debug("    Pawn move -> b3-b4");
-    logger.debug("    Wall move -> b3v / b3h");
+    LOGGER.info("=== HINT Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  hint\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Provides a suggestion for the next move.\n");
+    LOGGER.info("  The suggested move is computed based on the current game state.\n");
+    LOGGER.debug("Displays:");
+    LOGGER.debug("  Should display a legal pawn or wall move.\n  Example:");
+    LOGGER.debug("    Pawn move -> b3-b4");
+    LOGGER.debug("    Wall move -> b3v / b3h");
   }
 }

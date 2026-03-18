@@ -30,7 +30,7 @@ public class NewCommand implements Command {
   private LineReader reader;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(NewCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NewCommand.class);
 
   /**
    * Creates a NewCommand with the given CLI tokens, terminal and line reader.
@@ -70,7 +70,7 @@ public class NewCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    if (tokens.length > 5) logger.error("wrong amount of arguments...");
+    if (tokens.length > 5) LOGGER.error("wrong amount of arguments...");
 
     int size = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9) - 1;
     Position[] positions = {
@@ -91,8 +91,8 @@ public class NewCommand implements Command {
 
       for (int i = 0; i < nbPlayer; i++) {
         try {
-          logger.info("Player's type available :");
-          logger.info(
+          LOGGER.info("Player's type available :");
+          LOGGER.info(
               "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [nn] NeuralNetwork ia  - [r]andom ia");
           String typePlayer = reader.readLine("Player's type >> ");
           if (typePlayer == null) throw new EndOfFileException();
@@ -101,13 +101,13 @@ public class NewCommand implements Command {
               && !typePlayer.equals("mini")
               && !typePlayer.equals("nn")
               && !typePlayer.equals("r")) {
-            logger.error("Wrong type, please enter h / mcts / mini / nn / r");
+            LOGGER.error("Wrong type, please enter h / mcts / mini / nn / r");
             i--;
             continue;
           }
           String inputName = reader.readLine("Player's name >> ");
           if (inputName == null) {
-            logger.error("Should give a name to the player...");
+            LOGGER.error("Should give a name to the player...");
             throw new EndOfFileException();
           }
           switch (typePlayer) {
@@ -138,11 +138,11 @@ public class NewCommand implements Command {
               }
           }
         } catch (EndOfFileException | UserInterruptException e) {
-          logger.debug("You choose to interrupt the interaction.");
+          LOGGER.debug("You choose to interrupt the interaction.");
           try {
             terminal.close();
           } catch (Exception exc) {
-            logger.error("Terminal closed.");
+            LOGGER.error("Terminal closed.");
           } finally {
             return engine;
           }
@@ -159,19 +159,19 @@ public class NewCommand implements Command {
    */
   @Override
   public void helpText() {
-    logger.info("=== NEW Command ===\n");
-    logger.info("Usage:");
-    logger.info("  new");
-    logger.info("  new [boardSize] [nbPlayer]\n");
-    logger.info("Description:");
-    logger.info("  Starts a new game.\n");
-    logger.info("Arguments (optional):");
-    logger.info("  boardSize    : An odd integer greater than or equal to 3.");
-    logger.info("  playerCount  : Must be either 2 or 4.\n");
-    logger.info("If no arguments are provided, default settings are used.\n");
-    logger.debug("Examples:");
-    logger.debug("  new       -> 9x9 board with 2 players");
-    logger.debug("  new 5     -> 5x5 board with 2 players");
-    logger.debug("  new 7 4   -> 7x7 board with 4 players\n");
+    LOGGER.info("=== NEW Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  new");
+    LOGGER.info("  new [boardSize] [nbPlayer]\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Starts a new game.\n");
+    LOGGER.info("Arguments (optional):");
+    LOGGER.info("  boardSize    : An odd integer greater than or equal to 3.");
+    LOGGER.info("  playerCount  : Must be either 2 or 4.\n");
+    LOGGER.info("If no arguments are provided, default settings are used.\n");
+    LOGGER.debug("Examples:");
+    LOGGER.debug("  new       -> 9x9 board with 2 players");
+    LOGGER.debug("  new 5     -> 5x5 board with 2 players");
+    LOGGER.debug("  new 7 4   -> 7x7 board with 4 players\n");
   }
 }

@@ -14,7 +14,7 @@ public class QuitCommand implements Command {
   private final LineReader reader;
 
   /** Logger to display closing information. */
-  private static final Logger logger = LoggerFactory.getLogger(QuitCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(QuitCommand.class);
 
   /**
    * Creates a QuitCommand using the provided line reader to interact with the user.
@@ -44,10 +44,10 @@ public class QuitCommand implements Command {
         String path = reader.readLine("File path >> ");
         new SaveCommand(path).execute(engine);
       }
-      logger.info("Exiting Quoridor...");
+      LOGGER.info("Exiting Quoridor...");
       return engine;
     } catch (Exception e) {
-      logger.error("Error during quit process", e);
+      LOGGER.error("Error during quit process", e);
     }
     return engine;
   }
@@ -55,12 +55,12 @@ public class QuitCommand implements Command {
   /** Displays help information about the quit command, including its usage and behavior. */
   @Override
   public void helpText() {
-    logger.info("=== QUIT Command ===\n");
-    logger.info("Usage:");
-    logger.info("  quit\n");
-    logger.info("Description:");
-    logger.info("  Exits the application.\n");
-    logger.debug("Information:");
-    logger.debug("  This command will ask you if you want to save before quitting.\n");
+    LOGGER.info("=== QUIT Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  quit\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Exits the application.\n");
+    LOGGER.debug("Information:");
+    LOGGER.debug("  This command will ask you if you want to save before quitting.\n");
   }
 }

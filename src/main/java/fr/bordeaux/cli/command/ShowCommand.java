@@ -22,7 +22,7 @@ public class ShowCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(ShowCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ShowCommand.class);
 
   /** Where the show command will write */
   private final PrintStream writer = System.out;
@@ -73,13 +73,13 @@ public class ShowCommand implements Command {
                 "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
               };
           for (String cf : configs) {
-            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));
+            writer.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));
           }
           break;
         }
       case "time":
         {
-          System.out.println("time");
+          writer.println("time");
           break;
         }
       case "history":
@@ -88,7 +88,7 @@ public class ShowCommand implements Command {
           break;
         }
       default:
-        logger.error("The command  \"show " + tokens[1] + "\" doesn't exist...");
+        LOGGER.error("The command  \"show {}\" doesn't exist...", tokens[1]);
         break;
     }
     return engine;
@@ -97,65 +97,65 @@ public class ShowCommand implements Command {
   /** Displays general help information for the show command. */
   @Override
   public void helpText() {
-    logger.info("=== SHOW Command ===\n");
-    logger.info("Usage:");
-    logger.info("  show board");
-    logger.info("  show history");
-    logger.info("  show configuration");
-    logger.info("  show time\n");
-    logger.info("Description:");
-    logger.info("  Displays information about the current game.\n");
-    logger.debug("  If any option is given, displays the board by default");
-    logger.debug("Options:");
-    logger.debug("  board         : Displays the current board state.");
-    logger.debug("  history       : Displays the list of moves played so far.");
-    logger.debug("  configuration : Displays all the configuations set for the game.");
-    logger.debug("  time          : Displays the remaining time for each player.\n");
-    logger.debug("If you want the help with an option, you can enter \"help show [option]\".\n");
+    LOGGER.info("=== SHOW Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show board");
+    LOGGER.info("  show history");
+    LOGGER.info("  show configuration");
+    LOGGER.info("  show time\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays information about the current game.\n");
+    LOGGER.debug("  If any option is given, displays the board by default");
+    LOGGER.debug("Options:");
+    LOGGER.debug("  board         : Displays the current board state.");
+    LOGGER.debug("  history       : Displays the list of moves played so far.");
+    LOGGER.debug("  configuration : Displays all the configuations set for the game.");
+    LOGGER.debug("  time          : Displays the remaining time for each player.\n");
+    LOGGER.debug("If you want the help with an option, you can enter \"help show [option]\".\n");
   }
 
   /** Displays help information for the "show board" option. */
   public void helpBoard() {
-    logger.info("=== SHOW BOARD ===\n");
-    logger.info("Usage:");
-    logger.info("  show board\n");
-    logger.info("Description:");
-    logger.info("  Displays the current state of the board.\n");
+    LOGGER.info("=== SHOW BOARD ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show board\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the current state of the board.\n");
   }
 
   /** Displays help information for the "show history" option. */
   public void helpHistory() {
-    logger.info("=== SHOW HISTORY ===\n");
-    logger.info("Usage:");
-    logger.info("  show history\n");
-    logger.info("Description:");
-    logger.info("  Displays the chronological list of all moves played.\n");
+    LOGGER.info("=== SHOW HISTORY ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show history\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the chronological list of all moves played.\n");
   }
 
   /** Displays help information for the "show time" option. */
   public void helpTime() {
-    logger.info("=== SHOW TIME ===\n");
-    logger.info("Usage:");
-    logger.info("  show time\n");
-    logger.info("Description:");
-    logger.info("  Displays the remaining time for each player.\n");
-    logger.info("  Only relevant if a timed mode is active.\n");
+    LOGGER.info("=== SHOW TIME ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show time\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the remaining time for each player.\n");
+    LOGGER.info("  Only relevant if a timed mode is active.\n");
   }
 
   /** Displays help information for the "show configuration" option. */
   public void helpConfig() {
-    logger.info("=== SHOW CONFIGURATION ===\n");
-    logger.info("Usage:");
-    logger.info("  show configuration\n");
-    logger.info("Description:");
-    logger.info("  Displays the current game configuration.\n");
-    logger.debug("  This includes all active settings such as:");
-    logger.debug("    - Board size");
-    logger.debug("    - Number of players");
-    logger.debug("    - Game mode (e.g., Blitz)");
-    logger.debug("    - Debug mode");
-    logger.debug("    - Any other configurable parameters\n");
-    logger.debug("This command does not modify the game state.\n");
+    LOGGER.info("=== SHOW CONFIGURATION ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show configuration\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the current game configuration.\n");
+    LOGGER.debug("  This includes all active settings such as:");
+    LOGGER.debug("    - Board size");
+    LOGGER.debug("    - Number of players");
+    LOGGER.debug("    - Game mode (e.g., Blitz)");
+    LOGGER.debug("    - Debug mode");
+    LOGGER.debug("    - Any other configurable parameters\n");
+    LOGGER.debug("This command does not modify the game state.\n");
   }
 
   /**

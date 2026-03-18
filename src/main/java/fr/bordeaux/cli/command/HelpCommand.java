@@ -16,7 +16,7 @@ public class HelpCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(HelpCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HelpCommand.class);
 
   /** Reference from the CliApp command registry */
   private final Map<String, Function<String[], Command>> registry;
@@ -47,12 +47,12 @@ public class HelpCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens == null) {
-      logger.debug("Any command has been given.");
+      LOGGER.debug("Any command has been given.");
     } else if (tokens.length == 1) {
-      logger.debug("Showing all commands help.");
+      LOGGER.debug("Showing all commands help.");
       helpCli();
     } else {
-      logger.debug("Displaying help for the command {}", tokens[1]);
+      LOGGER.debug("Displaying help for the command {}", tokens[1]);
       helpFetch();
     }
     return engine;
@@ -61,33 +61,33 @@ public class HelpCommand implements Command {
   /** Displays a short help description for this command. */
   @Override
   public void helpText() {
-    logger.info("Rien");
+    LOGGER.info("Rien");
   }
 
   /** Displays the global help message listing all available CLI commands. */
   public void helpCli() {
-    logger.info("/=== Quoridor Command Line Help ===/\n");
-    logger.info("Commands :\n");
-    logger.info("new [ARGS] :          Start a new game with the given args");
-    logger.info("help [CMD] :          If no command is given, displays this message.");
-    logger.info(
+    LOGGER.info("/=== Quoridor Command Line Help ===/\n");
+    LOGGER.info("Commands :\n");
+    LOGGER.info("new [ARGS] :          Start a new game with the given args");
+    LOGGER.info("help [CMD] :          If no command is given, displays this message.");
+    LOGGER.info(
         "                      Otherwise, displays a more detailed help for a specific command.");
-    logger.info("help move :           Shows you how to play a move.");
-    logger.info(
+    LOGGER.info("help move :           Shows you how to play a move.");
+    LOGGER.info(
         "quit :                Quit the current game. It'll ask you if you want to save it before quitting.");
-    logger.info("load [filename] :     Load a game from the given file \"filename\".");
-    logger.info("save [filename] :     Save the current game to a file \"filename\".");
-    logger.info(
+    LOGGER.info("load [filename] :     Load a game from the given file \"filename\".");
+    LOGGER.info("save [filename] :     Save the current game to a file \"filename\".");
+    LOGGER.info(
         "pause :               Pause the timer if you're in a blitz game, else it does nothing.");
-    logger.info("hint :                Suggest you a move if you don't know what to play.");
-    logger.info("undo [N] :            Unplays the N last move played. Just once if no N given.");
-    logger.info("redo [N] :            Replays the N undone move played. Just once if no N given.");
-    logger.info("show board :          Displays the board of the current game.");
-    logger.info(
+    LOGGER.info("hint :                Suggest you a move if you don't know what to play.");
+    LOGGER.info("undo [N] :            Unplays the N last move played. Just once if no N given.");
+    LOGGER.info("redo [N] :            Replays the N undone move played. Just once if no N given.");
+    LOGGER.info("show board :          Displays the board of the current game.");
+    LOGGER.info(
         "show history :        Displays all the moves that were played during the game. From older to the more recent.");
-    logger.info("show time :           Displays the time you and your opponent(s) each remain.");
-    logger.info("show configuration :  Displays the configurations set on your game.");
-    logger.info("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
+    LOGGER.info("show time :           Displays the time you and your opponent(s) each remain.");
+    LOGGER.info("show configuration :  Displays the configurations set on your game.");
+    LOGGER.info("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
   }
 
   /* public void helpMove() {
@@ -100,7 +100,7 @@ public class HelpCommand implements Command {
    */
   public void helpFetch() {
     if (this.tokens.length <= 1) {
-      logger.info("Usage: help [CMD]");
+      LOGGER.info("Usage: help [CMD]");
       return;
     } else {
       if (registry.containsKey(tokens[1])) {
@@ -108,8 +108,8 @@ public class HelpCommand implements Command {
         Command cmd = registry.get(tokens[1]).apply(new String[] {tokens[1]});
         cmd.helpText();
       } else {
-        logger.debug("Unknown command : " + tokens[1]);
-        logger.info("Usage : help [CMD]");
+        LOGGER.debug("Unknown command : {}", tokens[1]);
+        LOGGER.info("Usage : help [CMD]");
       }
     }
   }

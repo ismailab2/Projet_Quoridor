@@ -18,7 +18,7 @@ public class MoveCommand implements Command {
   private String move;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(MoveCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MoveCommand.class);
 
   /**
    * Creates a MoveCommand using the provided move string.
@@ -46,17 +46,17 @@ public class MoveCommand implements Command {
   public GameEngine execute(GameEngine engine) {
     try {
       if (move.contains("-") && (move.length() == 5 || move.length() == 7)) {
-        logger.debug("You played: {}", this.move);
+        LOGGER.debug("You played: {}", this.move);
         return handleMove(engine);
       } else if ((move.contains("v") || move.contains("h")) && move.length() == 3) {
-        logger.debug("You played: {}", this.move);
+        LOGGER.debug("You played: {}", this.move);
         return handleWall(engine);
       } else {
-        logger.debug("Please use help to see how to give a valid command");
+        LOGGER.debug("Please use help to see how to give a valid command");
         return engine;
       }
     } catch (Exception e) {
-      logger.error("Error while reading the move {}", this.move);
+      LOGGER.error("Error while reading the move {}", this.move);
       return engine;
     }
   }
@@ -67,18 +67,18 @@ public class MoveCommand implements Command {
    */
   @Override
   public void helpText() {
-    logger.info("=== Move Commands ===\n");
-    logger.info("Usage:");
-    logger.info("To move a pawn : e2-e3 (if it's legal).");
-    logger.info(
+    LOGGER.info("=== Move Commands ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("To move a pawn : e2-e3 (if it's legal).");
+    LOGGER.info(
         "        Remember that you can't neither move diagonally nor jump over a wall nor exit the board.");
-    logger.info("To place a wall : e2h (if it's legal).");
-    logger.info("        It place the wall horizontally under the case e2 and under the case f2.");
-    logger.info(
+    LOGGER.info("To place a wall : e2h (if it's legal).");
+    LOGGER.info("        It place the wall horizontally under the case e2 and under the case f2.");
+    LOGGER.info(
         "        You can't place a wall horizontally if it's the right edge of the board (colonne E for a 5x5 board).");
-    logger.info("                : e2v (if it's legal).");
-    logger.info("        It place the wall vertically next to the case e2 and next to the case e1");
-    logger.info(
+    LOGGER.info("                : e2v (if it's legal).");
+    LOGGER.info("        It place the wall vertically next to the case e2 and next to the case e1");
+    LOGGER.info(
         "        You can't place a wall vertically if it's the top edge of the board. (row 1 on any board).\n");
   }
 
@@ -92,7 +92,7 @@ public class MoveCommand implements Command {
    */
   public Position parsePosition(String str) {
     if (str.length() < 2) {
-      logger.error("Usage: c3-c4 / c3h / c3v");
+      LOGGER.error("Usage: c3-c4 / c3h / c3v");
       throw new IllegalArgumentException("Invalid position format");
     }
     int row = Integer.parseInt(str.substring(1)) - 1;
@@ -111,7 +111,7 @@ public class MoveCommand implements Command {
   public GameEngine handleMove(GameEngine engine) {
     String[] moves = move.split("-");
     if (moves.length != 2) {
-      logger.error("Usage: c3-c4 / c3h / c3v");
+      LOGGER.error("Usage: c3-c4 / c3h / c3v");
       throw new IllegalArgumentException("Invalid move syntax");
     }
     Position from = parsePosition(moves[0]);
@@ -119,7 +119,7 @@ public class MoveCommand implements Command {
 
     Player current = engine.getState().getCurrentPlayer();
     if (!current.getPosition().equals(from)) {
-      logger.error("There is no pawn on the case you want to play");
+      LOGGER.error("There is no pawn on the case you want to play");
       throw new IllegalArgumentException("No pawn at " + moves[0]);
     }
     engine.play(Move.pawn(from, to));

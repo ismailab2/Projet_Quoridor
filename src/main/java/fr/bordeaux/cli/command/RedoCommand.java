@@ -13,7 +13,7 @@ public class RedoCommand implements Command {
   private String[] tokens;
 
   /** Logger to trace redo actions. */
-  private static final Logger logger = LoggerFactory.getLogger(RedoCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RedoCommand.class);
 
   /** Creates a RedoCommand that replays one move by default. */
   public RedoCommand() {
@@ -38,11 +38,11 @@ public class RedoCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens.length >= 3) {
-      logger.info("Usage: redo [N]");
+      LOGGER.info("Usage: redo [N]");
       return engine;
     }
     int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
-    logger.info("Redoing {} move(s)...", count);
+    LOGGER.info("Redoing {} move(s)...", count);
 
     for (int i = 0; i < count; i++) {
       engine.getState().redo();
@@ -53,16 +53,16 @@ public class RedoCommand implements Command {
   /** Displays help information about the redo command, including its usage and examples. */
   @Override
   public void helpText() {
-    logger.info("=== REDO Command ===\n");
-    logger.info("Usage:");
-    logger.info("  redo");
-    logger.info("  redo [N]");
-    logger.info("Description:");
-    logger.info("  Replays N previously undone moves.\n");
-    logger.debug("  - If no number is specified, one move is redone.");
-    logger.debug("  - If N is specified, N moves are redone.\n");
-    logger.debug("Examples:");
-    logger.debug("  redo      -> redo one move");
-    logger.debug("  redo 3    -> redo three moves\n");
+    LOGGER.info("=== REDO Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  redo");
+    LOGGER.info("  redo [N]");
+    LOGGER.info("Description:");
+    LOGGER.info("  Replays N previously undone moves.\n");
+    LOGGER.debug("  - If no number is specified, one move is redone.");
+    LOGGER.debug("  - If N is specified, N moves are redone.\n");
+    LOGGER.debug("Examples:");
+    LOGGER.debug("  redo      -> redo one move");
+    LOGGER.debug("  redo 3    -> redo three moves\n");
   }
 }

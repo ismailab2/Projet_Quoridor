@@ -15,7 +15,7 @@ public class SetCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(SetCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SetCommand.class);
 
   /** Creates a SetCommand. Currently not implemented. */
   public SetCommand() {
@@ -45,13 +45,13 @@ public class SetCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens == null || tokens.length < 2) {
-      logger.info("? Usage: set PARAM=VALUE");
+      LOGGER.info("? Usage: set PARAM=VALUE");
       return engine;
     }
 
     String argument = tokens[1];
     if (!argument.contains("=")) {
-      logger.error("Invalid format. Use PARAM=VALUE (e.g., set debug=true)");
+      LOGGER.error("Invalid format. Use PARAM=VALUE (e.g., set debug=true)");
       return engine;
     }
 
@@ -61,7 +61,7 @@ public class SetCommand implements Command {
     String value = parts[1].trim();
 
     if (key.isEmpty() || value.isEmpty()) {
-      logger.error("Key or value cannot be empty.");
+      LOGGER.error("Key or value cannot be empty.");
       return engine;
     }
 
@@ -74,9 +74,9 @@ public class SetCommand implements Command {
       // Persist the change to the file (.quoridorrc)
       config.save();
 
-      logger.debug("Configuration updated: {} set to {}", key, value);
+      LOGGER.debug("Configuration updated: {} set to {}", key, value);
     } catch (Exception e) {
-      logger.error("Failed to update configuration for key: {}", key, e);
+      LOGGER.error("Failed to update configuration for key: {}", key, e);
     }
 
     return engine;
@@ -85,15 +85,15 @@ public class SetCommand implements Command {
   /** Displays help information about the set command, including its usage and an example. */
   @Override
   public void helpText() {
-    logger.info("=== SET Command ===\n");
-    logger.info("Usage:");
-    logger.info("  set PARAM=VALUE\n");
-    logger.info("Description:");
-    logger.info("  Updates a configuration parameter of the game.\n");
-    logger.debug("Arguments:");
-    logger.debug("  PARAM   : Name of the configuration option.");
-    logger.debug("  VALUE   : New value to assign.\n");
-    logger.debug("Example:");
-    logger.debug("  set debug=true\n");
+    LOGGER.info("=== SET Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  set PARAM=VALUE\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Updates a configuration parameter of the game.\n");
+    LOGGER.debug("Arguments:");
+    LOGGER.debug("  PARAM   : Name of the configuration option.");
+    LOGGER.debug("  VALUE   : New value to assign.\n");
+    LOGGER.debug("Example:");
+    LOGGER.debug("  set debug=true\n");
   }
 }

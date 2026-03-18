@@ -15,11 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Main application class for the Command Line Interface (CLI) of the Quoridor game. This class
- * handles the terminal interaction loop, command registration, and auto-completion features using
- * the JLine library.
+ * Manages the Quoridor CLI, handling the terminal loop, command registration, and JLine-based
+ * auto-completion.
  */
 public class CliApp {
+  
+  /** Constant representing a single unique match for command completion. */
+  private static final int UNIQUE_MATCH = 1;
 
   /** The core engine managing the game logic, board state, and Quoridor rules. */
   private GameEngine engine;
@@ -43,7 +45,7 @@ public class CliApp {
   private boolean firstTab = true;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(CliApp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CliApp.class);
 
   /**
    * A registry mapping command names to functions that instantiate specific Command objects based
@@ -130,8 +132,8 @@ public class CliApp {
 
           if (matches.isEmpty()) {
             // CAS 1 : Aucun match -> Bip
-            beep(reader);
-          } else if (matches.size() == 1) {
+            beep();
+          } else if (matches.size() == UNIQUE_MATCH) {
             // CAS 2 : Un seul match -> Complétion directe
             candidates.add(new Candidate(matches.get(0)));
             firstTab = true;
@@ -139,11 +141,11 @@ public class CliApp {
             // CAS 3 : Plusieurs matchs
             if (firstTab) {
               // Premier Tab : on bip pour prévenir qu'il y a plusieurs choix
-              beep(reader);
+              beep();
               firstTab = false;
             } else {
               // Deuxième Tab : on remplit les candidates pour que JLine les affiche
-              for (String match : matches) {
+              for (final String match : matches) {
                 candidates.add(new Candidate(match));
               }
               firstTab = true;
@@ -192,15 +194,12 @@ public class CliApp {
   }
 
   /**
-   * Make the beep from the terminal
-   *
-   * @param reader the line reader used to read user commands
+   * Triggers an audible alert (beep) through the terminal.
    */
-  private void beep(LineReader reader) {
-    try {
-      reader.getTerminal().writer().print("\007");
-      reader.getTerminal().flush();
-    } catch (Exception ignored) {
+  private void beep() {
+    if (this.terminal != null) {
+      this.terminal.writer().print("\007");
+      this.terminal.flush();
     }
   }
 
@@ -228,17 +227,17 @@ public class CliApp {
    */
   public void run() {
     if (engine != null) {
-      ShowCommand show = new ShowCommand(new String[] {"show", "board"});
+      final ShowCommand show = new ShowCommand(new String[] {"show", "board"});
       show.execute(engine);
     }
     while (running) {
-      String line = reader.readLine(">> ");
+      final String line = reader.readLine(">> ");
       fetch(line);
     }
     try {
       terminal.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      LOGGER.error("Terminal has been brutally closed...");
     }
   }
 
@@ -248,13 +247,15 @@ public class CliApp {
    *
    * @param input the raw command entered by the user
    */
-  public void fetch(String input) {
+  public void fetch(final String input) {
     firstTab = true;
-    String[] tokens = input.trim().split("\\s+");
-    if (tokens.length == 0 || tokens[0].isEmpty()) return;
+    final String[] tokens = input.trim().split("\\s+");
+    if (tokens.length == 0 || tokens[0].isEmpty()) {
+      return;
+    }
 
-    String command = tokens[0].toLowerCase(Locale.US);
-    Command cmd;
+    final String command = tokens[0].toLowerCase(Locale.US);
+    final Command cmd;
 
     if (commandRegistry.containsKey(command)) {
       cmd = commandRegistry.get(command).apply(tokens);
@@ -263,8 +264,8 @@ public class CliApp {
       String suggestion = null;
       int bestDistance = 3; // Only suggest if the mistake is small (1 or 2 chars)
 
-      for (String registered : commandRegistry.keySet()) {
-        int dist = calculateDistance(command, registered);
+      for (final String registered : commandRegistry.keySet()) {
+        final int dist = calculateDistance(command, registered);
         if (dist < bestDistance) {
           bestDistance = dist;
           suggestion = registered;
@@ -272,8 +273,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        logger.debug("Unknown command: '" + command + "'.");
-        logger.info("Did you mean '" + suggestion + "'?");
+        LOGGER.debug("Unknown command: '{}'", command);
+        LOGGER.info("Did you mean '{}' ?", suggestion);
       }
 
       // Default behavior (interpret as move)
@@ -282,20 +283,22 @@ public class CliApp {
     engine = cmd.execute(engine);
   }
 
-  private int calculateDistance(String s1, String s2) {
-    int[][] dp = new int[s1.length() + 1][s2.length() + 1];
-    for (int i = 0; i <= s1.length(); i++) {
-      for (int j = 0; j <= s2.length(); j++) {
-        if (i == 0) dp[i][j] = j;
-        else if (j == 0) dp[i][j] = i;
-        else {
-          dp[i][j] =
+  private int calculateDistance(final String userCmd, final String command) {
+    final int[][] distance = new int[userCmd.length() + 1][command.length() + 1];
+    for (int i = 0; i <= userCmd.length(); i++) {
+      for (int j = 0; j <= command.length(); j++) {
+        if (i == 0) {
+          distance[i][j] = j;
+        } else if (j == 0) {
+          distance[i][j] = i;
+        } else {
+          distance[i][j] =
               Math.min(
-                  dp[i - 1][j - 1] + (s1.charAt(i - 1) == s2.charAt(j - 1) ? 0 : 1),
-                  Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1));
+                  distance[i - 1][j - 1] + (userCmd.charAt(i - 1) == command.charAt(j - 1) ? 0 : 1),
+                  Math.min(distance[i - 1][j] + 1, distance[i][j - 1] + 1));
         }
       }
     }
-    return dp[s1.length()][s2.length()];
+    return distance[userCmd.length()][command.length()];
   }
 }
