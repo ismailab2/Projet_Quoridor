@@ -19,11 +19,31 @@ import org.jline.terminal.TerminalBuilder;
  */
 public class CliApp {
 
+  /** The core engine managing the game logic, board state, and Quoridor rules. */
   private GameEngine engine;
+
+  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
   private Terminal terminal;
+
+  /**
+   * The line reader responsible for text editing, history management, and tab-completion
+   * interaction.
+   */
   private LineReader reader;
+
+  /** State flag that controls the main execution loop of the CLI application. */
   private boolean running = true;
+
+  /**
+   * Internal state used to track the "Tab" key behavior, toggling between an error beep and showing
+   * suggestions.
+   */
   private boolean firstTab = true;
+
+  /**
+   * A registry mapping command names to functions that instantiate specific Command objects based
+   * on user input tokens.
+   */
   private Map<String, Function<String[], Command>> commandRegistry;
 
   /**
@@ -73,12 +93,15 @@ public class CliApp {
     this.running = true;
 
     // Création du Completer intelligent
+    // Création du Completer intelligent
     Completer smartCompleter =
         (reader, line, candidates) -> {
           String buffer = line.line();
+          // On utilise line.word() ou on split pour trouver le token actuel
           String[] tokens = buffer.trim().split("\\s+");
-          if (tokens.length == 0 || buffer.isEmpty()) {
-            firstTab = true; // reset si vide
+
+          if (buffer.isEmpty()) {
+            firstTab = true;
             return;
           }
 
@@ -90,23 +113,36 @@ public class CliApp {
 
           List<String> matches;
 
-          // Sous-commandes "show"
-          if (tokens[0].equals("show") && tokens.length == 2) {
-            matches = showOptions.stream().filter(opt -> opt.startsWith(tokens[1])).toList();
+          // Logique de filtrage
+          if (tokens.length >= 1 && tokens[0].equals("show")) {
+            String subToken = (tokens.length == 2) ? tokens[1] : "";
+            matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
           } else {
             matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();
           }
 
+          // --- LOGIQUE DES 3 CAS ---
+
           if (matches.isEmpty()) {
-            try {
-              reader.getTerminal().writer().print("\007"); // bip
-              reader.getTerminal().flush();
-            } catch (Exception ignored) {
-            }
-            firstTab = true;
+            // CAS 1 : Aucun match -> Bip
+            beep(reader);
           } else if (matches.size() == 1) {
+            // CAS 2 : Un seul match -> Complétion directe
             candidates.add(new Candidate(matches.get(0)));
             firstTab = true;
+          } else {
+            // CAS 3 : Plusieurs matchs
+            if (firstTab) {
+              // Premier Tab : on bip pour prévenir qu'il y a plusieurs choix
+              beep(reader);
+              firstTab = false;
+            } else {
+              // Deuxième Tab : on remplit les candidates pour que JLine les affiche
+              for (String match : matches) {
+                candidates.add(new Candidate(match));
+              }
+              firstTab = true;
+            }
           }
         };
 
@@ -131,7 +167,7 @@ public class CliApp {
     commandRegistry.put("undo", UndoCommand::new);
     commandRegistry.put("redo", RedoCommand::new);
     commandRegistry.put("show", ShowCommand::new);
-    commandRegistry.put("set", tokens -> new SetCommand());
+    commandRegistry.put("set", SetCommand::new);
   }
 
   /**
@@ -148,6 +184,19 @@ public class CliApp {
                 List.of(
                     new HumanPlayer("Human", new Position(0, 4)),
                     new HumanPlayer("Bob", new Position(8, 4))))));
+  }
+
+  /**
+   * Make the beep from the terminal
+   *
+   * @param reader the line reader used to read user commands
+   */
+  private void beep(LineReader reader) {
+    try {
+      reader.getTerminal().writer().print("\007");
+      reader.getTerminal().flush();
+    } catch (Exception ignored) {
+    }
   }
 
   /**
