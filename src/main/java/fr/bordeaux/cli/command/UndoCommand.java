@@ -2,6 +2,8 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that cancels previously played moves. The user can undo a single move or multiple moves.

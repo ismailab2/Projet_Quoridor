@@ -7,6 +7,8 @@ import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
 import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that suggests the best possible move for the current player. The move is computed using a
@@ -70,7 +72,7 @@ public class HintCommand implements Command {
    * @return the string representation of the position
    */
   private String posToString(Position p) {
-    return (char) ('a' + p.getY()) + "" + number;
+    return (char) ('a' + p.getY()) + "" + (p.getX() + 1);
   }
 
   /** Displays help information about the hint command, including its usage and description. */

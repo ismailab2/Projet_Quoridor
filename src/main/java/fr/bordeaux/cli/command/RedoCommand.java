@@ -2,6 +2,8 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that replays moves that were previously undone. The user can redo a single move or

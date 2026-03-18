@@ -3,6 +3,8 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import java.io.PrintStream;
 import org.jline.reader.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command that exits the CLI application. Before quitting, the user is prompted to optionally save
