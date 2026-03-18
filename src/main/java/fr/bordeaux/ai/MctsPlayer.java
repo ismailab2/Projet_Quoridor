@@ -120,6 +120,7 @@ public class MctsPlayer extends AiPlayer {
    * @param state s
    * @param reflectionTimeMs t
    * @param useNN nn @return best move or null.
+   * @return the best move for the player, or null.
    */
   public static Move hint(
       final Player player,
