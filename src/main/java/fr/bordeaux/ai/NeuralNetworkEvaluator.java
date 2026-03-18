@@ -2,6 +2,8 @@ package fr.bordeaux.ai;
 
 import fr.bordeaux.core.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 import org.tensorflow.*;
@@ -14,17 +16,19 @@ import org.tensorflow.op.*;
 import org.tensorflow.op.core.*;
 import org.tensorflow.types.*;
 
-/**
- * Heuristic evaluator using a TensorFlow-based Logistic Regression model. Trained via random game
- * simulations during initialization.
- */
+/** Heuristic evaluator using a TensorFlow-based Logistic Regression model. */
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.TooManyMethods"})
+/* High coupling is inherent to TensorFlow graph construction and integrated training simulations. */
 public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable {
+
+  /** PMD string for suppressing Law of Demeter violations. */
+  private static final String SUPPRESS_LOD = "PMD.LawOfDemeter";
 
   /** The number of input features for the neural network. */
   private static final int NUM_FEATURES = 4;
 
   /** The default number of games to simulate for training. */
-  private static final int DEFAULT_TRAIN_GAMES = 1000;
+  private static final int TRAIN_GAMES = 1000;
 
   /** The learning rate for the gradient descent optimizer. */
   private static final float LEARNING_RATE = 0.01f;
@@ -32,8 +36,11 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   /** The default number of training epochs. */
   private static final int DEFAULT_EPOCHS = 150;
 
+  /** The probability of choosing a random move (epsilon-greedy). */
+  private static final double EXPLORATION_PROB = 0.1;
+
   /** Number of training games to simulate. */
-  private final int numTrainingGames;
+  private final int numGames;
 
   /** Number of training epochs. */
   private final int epochs;
@@ -68,60 +75,62 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   /** Operation to assign values to the bias variable. */
   private Op biasAssign;
 
-  /**
-   * Initializes the graph and trains the model using the default number of training games ({@value
-   * DEFAULT_TRAIN_GAMES}) and epochs ({@value DEFAULT_EPOCHS}).
-   */
+  /** Default constructor. Uses 1000 games and 150 epochs. */
   public NeuralNetworkEvaluator() {
-    this(DEFAULT_TRAIN_GAMES, DEFAULT_EPOCHS);
+    this(TRAIN_GAMES, DEFAULT_EPOCHS);
   }
 
   /**
-   * Initializes the graph and trains the model for the given number of epochs, using the default
-   * number of training games ({@value DEFAULT_TRAIN_GAMES}).
+   * Initializes training with custom epochs.
    *
-   * @param epochs number of gradient-descent passes over the training data
+   * @param epochs Number of training iterations.
    */
   public NeuralNetworkEvaluator(final int epochs) {
-    this(DEFAULT_TRAIN_GAMES, epochs);
+    this(TRAIN_GAMES, epochs);
   }
 
   /**
-   * Initializes the graph and trains the model with full control over both hyperparameters.
+   * Full constructor for training from scratch.
    *
-   * @param numTrainingGames number of random games to simulate for training data
-   * @param epochs number of gradient-descent passes over the training data
+   * @param numGames Number of simulations to run.
+   * @param epochs Gradient descent passes.
    */
-  public NeuralNetworkEvaluator(final int numTrainingGames, final int epochs) {
-    this.numTrainingGames = numTrainingGames;
+  public NeuralNetworkEvaluator(final int numGames, final int epochs) {
+    this.numGames = numGames;
     this.epochs = epochs;
     initGraph();
     trainModel();
   }
 
   /**
-   * Initializes the evaluator by loading a pre-trained model from the specified file.
+   * Constructor for inference using a saved model.
    *
-   * @param modelPath the path to the pre-trained model file
-   * @throws IOException if an error occurs while reading the model file
+   * @param path Path to the .bin model file.
+   * @throws IOException If file is missing or corrupt.
    */
-  public NeuralNetworkEvaluator(final String modelPath) throws IOException {
-    this.numTrainingGames = 0;
+  public NeuralNetworkEvaluator(final String path) throws IOException {
+    this.numGames = 0;
     this.epochs = 0;
     initGraph(); // Create the graph structure
-    loadModel(modelPath); // Replace random weights with the loaded ones
+    loadModel(path); // Replace random weights with the loaded ones
   }
 
   /**
-   * Initializes the TensorFlow computation graph. This method defines the model architecture
-   * (Logistic Regression), the loss function (Binary Cross-Entropy), and the optimization strategy
-   * (Gradient Descent).
+   * Defines the Logistic Regression graph: Z = Sigmoid(WX + B).
+   *
+   * <p>Sets up loss (BCE) and optimizer (SGD).
    */
+  @SuppressWarnings(SUPPRESS_LOD)
+  /* Impossible to satisfy LOD */
   private void initGraph() {
     // Initialize the computation graph container
     graph = new Graph();
     // Create an operations builder associated with the graph
     final Ops tfOps = Ops.create(graph);
+
+    final MathOps math = tfOps.math;
+    final LinalgOps linalg = tfOps.linalg;
+    final RandomOps random = tfOps.random;
 
     // Define entry points for data: Input features [Batch Size, 4]
     inputPlaceholder =
@@ -133,7 +142,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     // symmetry.
     // Weights range [-2.0, 2.0], mean 0, std 1.0.
     final Operand<TFloat32> randomWeights =
-        tfOps.random.truncatedNormal(tfOps.constant(Shape.of(NUM_FEATURES, 1)), TFloat32.class);
+        random.truncatedNormal(tfOps.constant(Shape.of(NUM_FEATURES, 1)), TFloat32.class);
     // Create a trainable variable for weights (W)
     final Variable<TFloat32> weights = tfOps.withName("weights").variable(randomWeights);
     // Create a trainable variable for bias (b), initialized to zero
@@ -147,11 +156,10 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     biasAssign = tfOps.assign(bias, bPlaceholder);
 
     // Linear Transformation: Compute logits as (Input * Weights) + Bias
-    final Operand<TFloat32> logits =
-        tfOps.math.add(tfOps.linalg.matMul(inputPlaceholder, weights), bias);
+    final Operand<TFloat32> logits = math.add(linalg.matMul(inputPlaceholder, weights), bias);
 
     // Activation: Apply Sigmoid function to squish logits into probabilities [0, 1]
-    prediction = tfOps.math.sigmoid(logits);
+    prediction = math.sigmoid(logits);
 
     // Loss Function: Initialize Binary Cross-Entropy for classification
     final BinaryCrossentropy bce = new BinaryCrossentropy(true);
@@ -169,10 +177,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     session.runner().addTarget(weights).addTarget(bias).run();
   }
 
-  /**
-   * Performs training over specified epochs. This method generates training data via simulation and
-   * then optimizes the weights using Gradient Descent.
-   */
+  /** Core training loop. Prepares tensors and runs SGD Target. */
   private void trainModel() {
     final List<TrainingData> dataList = generateTrainingData();
     if (dataList.isEmpty()) {
@@ -200,10 +205,10 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /**
-   * Evaluates the current game state using the trained Neural Network model.
+   * Scores a state between -1000 (Loss) and 1000 (Win).
    *
-   * @param state the current game state to evaluate
-   * @return an integer score in the range [-1000, 1000] mapping to the predicted probability
+   * @param state The board state to analyze.
+   * @return Evaluation score.
    */
   @Override
   public int evaluate(final GameState state) {
@@ -219,20 +224,20 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /**
-   * Extracts quantitative features from the game state for the Neural Network. Features:
-   * [distance_current_player, distance_opponent, remaining_walls_current,
-   * remaining_walls_opponent].
+   * Normalizes features: distances [0,1] and walls [0,1].
    *
-   * @param state the current game state
-   * @return an array of float features
+   * @param state Game state.
+   * @return Feature vector.
    */
+  @SuppressWarnings(SUPPRESS_LOD)
+  /* Prevents cluttering GameState API with too many specific delegation methods. */
   private float[] getFeatures(final GameState state) {
     final Player curr = state.getCurrentPlayer();
     final Player opp = state.getPlayers().get(1 - state.getPlayers().indexOf(curr));
     final float boardSize = state.getBoard().getSize();
     return new float[] {
-      (float) computeDistanceToWin(state, curr) / (boardSize - 1.0f),
-      (float) computeDistanceToWin(state, opp) / (boardSize - 1.0f),
+      computeDistanceToWin(state, curr) / (boardSize - 1.0f),
+      computeDistanceToWin(state, opp) / (boardSize - 1.0f),
       curr.getRemainingWalls() / 10f,
       opp.getRemainingWalls() / 10f
     };
@@ -246,16 +251,20 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
    */
   private TFloat32 prepareInputTensor(final List<TrainingData> data) {
     final float[][] matrix = new float[data.size()][NUM_FEATURES];
+
     for (int i = 0; i < data.size(); i++) {
+      final TrainingData sample = data.get(i);
+      final double[] featArray = sample.getFeatures();
+
       for (int j = 0; j < NUM_FEATURES; j++) {
-        matrix[i][j] = (float) data.get(i).features[j];
+        matrix[i][j] = (float) featArray[j];
       }
     }
     return TFloat32.tensorOf(StdArrays.ndCopyOf(matrix));
   }
 
   /**
-   * Prepares a 2D float tensor representing the batch labels (outcomes) for training.
+   * Prepares a 2D float tensor representing the batch labels for training.
    *
    * @param data the list of {@link TrainingData} generated from simulations
    * @return a {@link TFloat32} tensor containing the target labels
@@ -280,20 +289,16 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /**
-   * Simulates random games to build a training dataset. Players take random legal moves until the
-   * game ends or a turn limit is reached.
+   * Simulates random games to build a training dataset.
    *
-   * @return a list of {@link TrainingData} containing feature arrays and game outcomes
+   * @return a list of {@link TrainingData}.
    */
   private List<TrainingData> generateTrainingData() {
     final List<TrainingData> trainingData = new ArrayList<>();
     final Random random = new Random(42);
 
-    for (int game = 0; game < numTrainingGames; game++) {
+    for (int game = 0; game < numGames; game++) {
       simulateAndRecordGame(trainingData, random);
-      if ((game + 1) % 100 == 0) {
-        // Log periodically
-      }
     }
 
     Collections.shuffle(trainingData);
@@ -301,7 +306,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /**
-   * Simulates a single game and adds the resulting training data if there is a decisive winner.
+   * Simulates a single game and adds the resulting training data.
    *
    * @param trainingData the list to append training samples to
    * @param random the random number generator for exploration
@@ -336,50 +341,60 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /** Records the features of the current state for the player who is about to move. */
+  @SuppressWarnings(SUPPRESS_LOD)
+  /* Prevents GameState API bloat over strict LoD. */
   private void recordState(
       final GameState state,
-      final Player p1,
-      final Player p2,
+      final Player player1,
+      final Player player2,
       final List<double[]> p1History,
       final List<double[]> p2History) {
     final float[] features = getFeatures(state);
-    final double[] featuresD = new double[] {features[0], features[1], features[2], features[3]};
+    final double[] featuresD = {features[0], features[1], features[2], features[3]};
     final Player curr = state.getCurrentPlayer();
 
-    if (curr.equals(p1)) {
+    if (curr.equals(player1)) {
       p1History.add(featuresD);
-    } else {
+    } else if (curr.equals(player2)) {
       p2History.add(featuresD);
     }
   }
 
   /** Selects a move using epsilon-greedy exploration. */
+  @SuppressWarnings(SUPPRESS_LOD)
+  /* LoD suppressed to avoid GameState bloat. */
   private Move selectExploratoryMove(final GameState state, final Random random) {
-    if (random.nextDouble() < 0.1) {
+    final Move selectedMove;
+
+    if (random.nextDouble() < EXPLORATION_PROB) {
       final List<Move> legalMoves = state.generateLegalMoves();
-      return legalMoves.get(random.nextInt(legalMoves.size()));
+      final int randomIndex = random.nextInt(legalMoves.size());
+      selectedMove = legalMoves.get(randomIndex);
+    } else {
+      selectedMove = state.getCurrentPlayer().getNextMove(state);
     }
-    return state.getCurrentPlayer().getNextMove(state);
+
+    return selectedMove;
   }
 
   /** Processes the game result and adds training samples to the dataset. */
   private void recordGameOutcome(
       final GameState state,
-      final Player p1,
-      final Player p2,
+      final Player player1,
+      final Player player2,
       final List<double[]> p1History,
       final List<double[]> p2History,
       final List<TrainingData> trainingData) {
-    if (state.hasReachedGoal(p1)) {
+    if (state.hasReachedGoal(player1)) {
       addSamples(trainingData, p1History, 1.0);
       addSamples(trainingData, p2History, 0.0);
-    } else if (state.hasReachedGoal(p2)) {
+    } else if (state.hasReachedGoal(player2)) {
       addSamples(trainingData, p1History, 0.0);
       addSamples(trainingData, p2History, 1.0);
     }
   }
 
-  /** Adds all states from a history list to the training dataset with a common outcome. */
+  /** Adds all states from a history list to the training dataset. */
   private void addSamples(
       final List<TrainingData> data, final List<double[]> history, final double outcome) {
     for (final double[] features : history) {
@@ -388,15 +403,17 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /**
-   * Computes the distance (number of steps) a player must take to reach their winning row using a
-   * Breadth-First Search (BFS) algorithm.
+   * BFS distance to the goal line. Returns 99 if blocked.
    *
    * @param state the current game state
    * @param player the player whose distance to goal is being calculated
    * @return the number of steps required to win, or 99 if no path is found
    */
+  @SuppressWarnings(SUPPRESS_LOD)
+  /* LoD suppressed to avoid GameState bloat. */
   private int computeDistanceToWin(final GameState state, final Player player) {
-    final fr.bordeaux.graph.Graph gameGraph = state.getBoard().getGraph();
+    final Board board = state.getBoard();
+    final fr.bordeaux.graph.Graph gameGraph = board.getGraph();
     final int startNode =
         state.getBoard().id(player.getPosition().getX(), player.getPosition().getY());
     final Predicate<Integer> winCond = state.getWinCondition(player);
@@ -405,7 +422,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /** Internal data structure representing a single training example. */
-  private static class TrainingData {
+  private static final class TrainingData {
     /** The feature array corresponding to a specific game state. */
     private final double[] features;
 
@@ -418,9 +435,13 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
      * @param features an array of numerical features evaluating the position
      * @param outcome the float outcome representing win/loss
      */
-    TrainingData(double[] features, double outcome) {
+    private TrainingData(final double[] features, final double outcome) {
       this.features = features;
       this.outcome = outcome;
+    }
+
+    private double[] getFeatures() {
+      return features;
     }
   }
 
@@ -435,7 +456,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
         TFloat32 wTensor = (TFloat32) wRes.get(0);
         Result bRes = session.runner().fetch("bias").run();
         TFloat32 bTensor = (TFloat32) bRes.get(0);
-        DataOutputStream dos = new DataOutputStream(new FileOutputStream(filePath))) {
+        DataOutputStream dos = new DataOutputStream(Files.newOutputStream(Paths.get(filePath)))) {
 
       for (int i = 0; i < NUM_FEATURES; i++) {
         dos.writeFloat(wTensor.getFloat(i, 0));
@@ -451,7 +472,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
    * @throws IOException if an error occurs while reading the file
    */
   public final void loadModel(final String filePath) throws IOException {
-    try (DataInputStream dis = new DataInputStream(new FileInputStream(filePath))) {
+    try (DataInputStream dis = new DataInputStream(Files.newInputStream(Paths.get(filePath)))) {
       final float[] wArray = new float[NUM_FEATURES];
       for (int i = 0; i < NUM_FEATURES; i++) {
         wArray[i] = dis.readFloat();
@@ -465,16 +486,14 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
 
       try (TFloat32 wTensor = TFloat32.tensorOf(StdArrays.ndCopyOf(matrix4x1));
           TFloat32 bTensor = TFloat32.tensorOf(StdArrays.ndCopyOf(new float[] {biasVal}));
-          Result result =
+          Result ignored =
               session
                   .runner()
                   .feed(wPlaceholder, wTensor)
                   .feed(bPlaceholder, bTensor)
                   .addTarget(weightsAssign)
                   .addTarget(biasAssign)
-                  .run()) {
-        // Runner executed
-      }
+                  .run()) {}
     }
   }
 }
