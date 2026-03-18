@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +13,6 @@ public class UndoCommand implements Command {
 
   /** Logger to trace undo actions. */
   private static final Logger logger = LoggerFactory.getLogger(UndoCommand.class);
-
-  /** Stream where to display texts. */
-  private final PrintStream writer = System.out;
 
   /** Creates an UndoCommand that undoes one move by default. */
   public UndoCommand() {

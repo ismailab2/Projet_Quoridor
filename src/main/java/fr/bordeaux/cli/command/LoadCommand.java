@@ -2,7 +2,6 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameLoader;
-import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +16,6 @@ public class LoadCommand implements Command {
 
   /** Logger to display informations */
   private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
-
-  /** Stream where to display texts */
-  private final PrintStream writer = System.out;
 
   /**
    * Creates a LoadCommand with the provided command tokens.
@@ -65,9 +61,9 @@ public class LoadCommand implements Command {
     logger.info("  load FILE\n");
     logger.info("Description:");
     logger.info("  Loads a saved game from the specified FILE.\n");
-    logger.info("Arguments:");
-    logger.info("  FILE   : Path to the save file (required).\n");
-    logger.info("Example:");
-    logger.info("  load savegame.txt\n");
+    logger.debug("Arguments:");
+    logger.debug("  FILE   : Path to the save file (required).\n");
+    logger.debug("Example:");
+    logger.debug("  load savegame.txt\n");
   }
 }

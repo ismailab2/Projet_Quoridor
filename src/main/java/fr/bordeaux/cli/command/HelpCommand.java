@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -19,9 +18,6 @@ public class HelpCommand implements Command {
   /** Logger to display informations */
   private static final Logger logger = LoggerFactory.getLogger(HelpCommand.class);
 
-  /** Stream where to display texts */
-  private final PrintStream writer = System.out;
-
   /** Reference from the CliApp command registry */
   private final Map<String, Function<String[], Command>> registry;
 
@@ -31,10 +27,10 @@ public class HelpCommand implements Command {
   }
 
   /**
-   * Creates a HelpCommand with the given command tokens.
+   * Creates a HelpCommand with the given command tokens and the command registry.
    *
    * @param userTokens the tokens entered by the user in the CLI
-   * @param registryCli the CLI command registry
+   * @param registryCli the mapping of command names to their respective factory functions
    */
   public HelpCommand(String[] userTokens, Map<String, Function<String[], Command>> registryCli) {
     this.tokens = userTokens;
@@ -65,35 +61,33 @@ public class HelpCommand implements Command {
   /** Displays a short help description for this command. */
   @Override
   public void helpText() {
-    writer.println("Rien");
+    logger.info("Rien");
   }
 
   /** Displays the global help message listing all available CLI commands. */
   public void helpCli() {
-    writer.println("/=== Quoridor Command Line Help ===/\n");
-    writer.println("Commands :\n");
-    writer.println("new [ARGS] :          Start a new game with the given args");
-    writer.println("help [CMD] :          If no command is given, displays this message.");
-    writer.println(
+    logger.info("/=== Quoridor Command Line Help ===/\n");
+    logger.info("Commands :\n");
+    logger.info("new [ARGS] :          Start a new game with the given args");
+    logger.info("help [CMD] :          If no command is given, displays this message.");
+    logger.info(
         "                      Otherwise, displays a more detailed help for a specific command.");
-    writer.println("help move :           Shows you how to play a move.");
-    writer.println(
+    logger.info("help move :           Shows you how to play a move.");
+    logger.info(
         "quit :                Quit the current game. It'll ask you if you want to save it before quitting.");
-    writer.println("load [filename] :     Load a game from the given file \"filename\".");
-    writer.println("save [filename] :     Save the current game to a file \"filename\".");
-    writer.println(
+    logger.info("load [filename] :     Load a game from the given file \"filename\".");
+    logger.info("save [filename] :     Save the current game to a file \"filename\".");
+    logger.info(
         "pause :               Pause the timer if you're in a blitz game, else it does nothing.");
-    writer.println("hint :                Suggest you a move if you don't know what to play.");
-    writer.println(
-        "undo [N] :            Unplays the N last move played. Just once if no N given.");
-    writer.println(
-        "redo [N] :            Replays the N undone move played. Just once if no N given.");
-    writer.println("show board :          Displays the board of the current game.");
-    writer.println(
+    logger.info("hint :                Suggest you a move if you don't know what to play.");
+    logger.info("undo [N] :            Unplays the N last move played. Just once if no N given.");
+    logger.info("redo [N] :            Replays the N undone move played. Just once if no N given.");
+    logger.info("show board :          Displays the board of the current game.");
+    logger.info(
         "show history :        Displays all the moves that were played during the game. From older to the more recent.");
-    writer.println("show time :           Displays the time you and your opponent(s) each remain.");
-    writer.println("show configuration :  Displays the configurations set on your game.");
-    writer.println("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
+    logger.info("show time :           Displays the time you and your opponent(s) each remain.");
+    logger.info("show configuration :  Displays the configurations set on your game.");
+    logger.info("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
   }
 
   /* public void helpMove() {
@@ -114,8 +108,8 @@ public class HelpCommand implements Command {
         Command cmd = registry.get(tokens[1]).apply(new String[] {tokens[1]});
         cmd.helpText();
       } else {
-        writer.println("Unknown command : " + tokens[1]);
-        logger.debug("Usage : help [CMD]");
+        logger.debug("Unknown command : " + tokens[1]);
+        logger.info("Usage : help [CMD]");
       }
     }
   }

@@ -6,7 +6,6 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
-import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +17,6 @@ public class HintCommand implements Command {
 
   /** Logger for AI calculation messages. */
   private static final Logger logger = LoggerFactory.getLogger(HintCommand.class);
-
-  /** Stream where to display texts. */
-  private final PrintStream writer = System.out;
 
   /** Creates a new HintCommand. */
   public HintCommand() {}

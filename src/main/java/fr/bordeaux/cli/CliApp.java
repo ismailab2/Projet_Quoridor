@@ -11,6 +11,8 @@ import java.util.function.Function;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main application class for the Command Line Interface (CLI) of the Quoridor game. This class
@@ -19,11 +21,34 @@ import org.jline.terminal.TerminalBuilder;
  */
 public class CliApp {
 
+  /** The core engine managing the game logic, board state, and Quoridor rules. */
   private GameEngine engine;
+
+  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
   private Terminal terminal;
+
+  /**
+   * The line reader responsible for text editing, history management, and tab-completion
+   * interaction.
+   */
   private LineReader reader;
+
+  /** State flag that controls the main execution loop of the CLI application. */
   private boolean running = true;
+
+  /**
+   * Internal state used to track the "Tab" key behavior, toggling between an error beep and showing
+   * suggestions.
+   */
   private boolean firstTab = true;
+
+  /** Logger to display informations */
+  private static final Logger logger = LoggerFactory.getLogger(CliApp.class);
+
+  /**
+   * A registry mapping command names to functions that instantiate specific Command objects based
+   * on user input tokens.
+   */
   private Map<String, Function<String[], Command>> commandRegistry;
 
   /**
@@ -73,12 +98,15 @@ public class CliApp {
     this.running = true;
 
     // Création du Completer intelligent
+    // Création du Completer intelligent
     Completer smartCompleter =
         (reader, line, candidates) -> {
           String buffer = line.line();
+          // On utilise line.word() ou on split pour trouver le token actuel
           String[] tokens = buffer.trim().split("\\s+");
-          if (tokens.length == 0 || buffer.isEmpty()) {
-            firstTab = true; // reset si vide
+
+          if (buffer.isEmpty()) {
+            firstTab = true;
             return;
           }
 
@@ -90,23 +118,36 @@ public class CliApp {
 
           List<String> matches;
 
-          // Sous-commandes "show"
-          if (tokens[0].equals("show") && tokens.length == 2) {
-            matches = showOptions.stream().filter(opt -> opt.startsWith(tokens[1])).toList();
+          // Logique de filtrage
+          if (tokens.length >= 1 && tokens[0].equals("show")) {
+            String subToken = (tokens.length == 2) ? tokens[1] : "";
+            matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
           } else {
             matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();
           }
 
+          // --- LOGIQUE DES 3 CAS ---
+
           if (matches.isEmpty()) {
-            try {
-              reader.getTerminal().writer().print("\007"); // bip
-              reader.getTerminal().flush();
-            } catch (Exception ignored) {
-            }
-            firstTab = true;
+            // CAS 1 : Aucun match -> Bip
+            beep(reader);
           } else if (matches.size() == 1) {
+            // CAS 2 : Un seul match -> Complétion directe
             candidates.add(new Candidate(matches.get(0)));
             firstTab = true;
+          } else {
+            // CAS 3 : Plusieurs matchs
+            if (firstTab) {
+              // Premier Tab : on bip pour prévenir qu'il y a plusieurs choix
+              beep(reader);
+              firstTab = false;
+            } else {
+              // Deuxième Tab : on remplit les candidates pour que JLine les affiche
+              for (String match : matches) {
+                candidates.add(new Candidate(match));
+              }
+              firstTab = true;
+            }
           }
         };
 
@@ -131,7 +172,7 @@ public class CliApp {
     commandRegistry.put("undo", UndoCommand::new);
     commandRegistry.put("redo", RedoCommand::new);
     commandRegistry.put("show", ShowCommand::new);
-    commandRegistry.put("set", tokens -> new SetCommand());
+    commandRegistry.put("set", SetCommand::new);
   }
 
   /**
@@ -148,6 +189,19 @@ public class CliApp {
                 List.of(
                     new HumanPlayer("Human", new Position(0, 4)),
                     new HumanPlayer("Bob", new Position(8, 4))))));
+  }
+
+  /**
+   * Make the beep from the terminal
+   *
+   * @param reader the line reader used to read user commands
+   */
+  private void beep(LineReader reader) {
+    try {
+      reader.getTerminal().writer().print("\007");
+      reader.getTerminal().flush();
+    } catch (Exception ignored) {
+    }
   }
 
   /**
@@ -195,15 +249,53 @@ public class CliApp {
    * @param input the raw command entered by the user
    */
   public void fetch(String input) {
-    firstTab = true; // reset Tab state
+    firstTab = true;
     String[] tokens = input.trim().split("\\s+");
+    if (tokens.length == 0 || tokens[0].isEmpty()) return;
+
     String command = tokens[0].toLowerCase(Locale.US);
     Command cmd;
+
     if (commandRegistry.containsKey(command)) {
       cmd = commandRegistry.get(command).apply(tokens);
     } else {
+      // --- Suggestion Logic ---
+      String suggestion = null;
+      int bestDistance = 3; // Only suggest if the mistake is small (1 or 2 chars)
+
+      for (String registered : commandRegistry.keySet()) {
+        int dist = calculateDistance(command, registered);
+        if (dist < bestDistance) {
+          bestDistance = dist;
+          suggestion = registered;
+        }
+      }
+
+      if (suggestion != null) {
+        logger.debug("Unknown command: '" + command + "'.");
+        logger.info("Did you mean '" + suggestion + "'?");
+      }
+
+      // Default behavior (interpret as move)
       cmd = new MoveCommand(input);
     }
     engine = cmd.execute(engine);
+  }
+
+  private int calculateDistance(String s1, String s2) {
+    int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+    for (int i = 0; i <= s1.length(); i++) {
+      for (int j = 0; j <= s2.length(); j++) {
+        if (i == 0) dp[i][j] = j;
+        else if (j == 0) dp[i][j] = i;
+        else {
+          dp[i][j] =
+              Math.min(
+                  dp[i - 1][j - 1] + (s1.charAt(i - 1) == s2.charAt(j - 1) ? 0 : 1),
+                  Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1));
+        }
+      }
+    }
+    return dp[s1.length()][s2.length()];
   }
 }
