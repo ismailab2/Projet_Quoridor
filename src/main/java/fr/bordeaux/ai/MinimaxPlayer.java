@@ -332,6 +332,42 @@ public final class MinimaxPlayer extends AiPlayer {
     }
   }
 
+  /**
+   * Get the search depth of the MiniMax Player.
+   *
+   * @return The depth search value of Minimax
+   */
+  public int getSearchDepth() {
+    return this.searchDepth;
+  }
+
+  /**
+   * Get the limit time reflexion of the MiniMax Player.
+   *
+   * @return The reflexion time value of Minimax
+   */
+  public int getLimitTime() {
+    return this.reflexionTime;
+  }
+
+  /**
+   * Get if the MiniMax Player use iterative deepening.
+   *
+   * @return The boolean representing if Minimax use Iterative Deepening
+   */
+  public boolean isUseIterativeDeepening() {
+    return this.useIterativeD;
+  }
+
+  /**
+   * Get the heuristicname of the MiniMax Player.
+   *
+   * @return The name of the heuristic selected
+   */
+  public String getHeuristicName() {
+    return this.heuristicName;
+  }
+
   @Override
   public String toString() {
     return "MiniMax AI " + super.toString();

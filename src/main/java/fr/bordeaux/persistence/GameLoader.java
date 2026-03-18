@@ -41,6 +41,7 @@ public final class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
+    applyMode(gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
@@ -171,7 +172,7 @@ public final class GameLoader {
     while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
-      currentLine = res.nextLine + 1;
+      currentLine = res.nextLine;
     }
     return new AllPlayerAndLine(lPlayers, currentLine);
   }
@@ -197,7 +198,7 @@ public final class GameLoader {
     if (pType.equals("ai")) {
       return readAiPlayer(lines, myCurrentLine, pName, pPostion);
     } else {
-      return new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine);
+      return new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine + 1);
     }
   }
 
@@ -230,7 +231,8 @@ public final class GameLoader {
       final List<String> lines, int currentLine, final String pName, final Position pPostion) {
     Map<String, String> aiSettings = new HashMap<>();
     int myCurrentLine = currentLine + 1;
-    while (checkStartByAi(lines, myCurrentLine)) {
+    int index = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
+    while (checkSameIndex(lines, myCurrentLine, index)) {
       final String[] ls = lines.get(myCurrentLine).split("=");
       final String[] aiParameter = ls[0].split("-");
       aiSettings.put(aiParameter[aiParameter.length - 1], ls[1]);
@@ -278,14 +280,67 @@ public final class GameLoader {
   }
 
   /**
-   * Checks if the current line starts with the prefix "ai" indicating it contains an AI setting.
+   * Checks if the current line index player is the same of the index parameter.
    *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
-   * @return {@code true} if the line starts with "ai", {@code false} otherwise.
+   * @param index The index of a player
+   * @return {@code true} if the line has the same index player, {@code false} otherwise.
    */
-  private static boolean checkStartByAi(final List<String> lines, final int currentLine) {
-    return lines.get(currentLine).startsWith("ai");
+  private static boolean checkSameIndex(
+      final List<String> lines, final int currentLine, final int index) {
+    if (!lines.get(currentLine).contains("-")) {
+      return false;
+    }
+    return Integer.parseInt(lines.get(currentLine).split("-")[1]) == index;
+  }
+
+  /**
+   * Applies the game configuration modes (verbose, blitz, etc.) from the save file to the provided
+   * game state. *
+   *
+   * <p>This method modifies the {@code gameState} object directly by reference. It expects the
+   * settings to be located at specific line indices following the [settings] header, using a
+   * "key=value" format.
+   *
+   * @param gameState the game state to configure
+   * @param lines the list of strings representing the save file content
+   * @throws IllegalArgumentException if the number of players defined in settings mismatches the
+   *     actual players list size
+   * @throws IndexOutOfBoundsException if the file is shorter than expected
+   * @throws NumberFormatException if a numeric value (turnLimit, nbPlayers) is improperly formatted
+   */
+  private static void applyMode(GameState gameState, final List<String> lines) {
+    int startLineMode = 1;
+    final boolean isVerbose = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isBlitz = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isContest = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isAi = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final int turnLimit = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isDebug = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final int nbPlayers = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
+
+    gameState.setAi(isAi);
+    gameState.setBlitz(isBlitz);
+    gameState.setContest(isContest);
+    gameState.setDebug(isDebug);
+    gameState.setVerbose(isVerbose);
+    gameState.setTurnLimit(turnLimit);
+
+    if (gameState.getPlayers().size() != nbPlayers) {
+      throw new IllegalArgumentException(
+          "The number of players read from the file ("
+              + nbPlayers
+              + ") and the actual players in the game ("
+              + gameState.getPlayers().size()
+              + ") are different");
+    }
   }
 
   private static Position coordToPos(String coord) {

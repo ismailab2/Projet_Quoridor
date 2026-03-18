@@ -166,11 +166,11 @@ public class GameSaver {
    * @param i The index of the player (used for formatting the key).
    */
   private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer newP, int i) {
-    writeLine(w, "ai-player-" + i + "-name", newP.getName());
-    writeLine(w, "ai-player-" + i + "-starting-position", newP.getStartingPosition().toString());
+    writeLine(w, "ai-" + i + "-name", newP.getName());
+    writeLine(w, "ai-" + i + "-starting-position", newP.getStartingPosition().toString());
     Map<String, Object> aiSettings = newP.getSettings();
     for (String s : aiSettings.keySet()) {
-      writeLine(w, s, aiSettings.get(s));
+      writeLine(w, "ai-" + i + "-" + s, aiSettings.get(s));
     }
   }
 

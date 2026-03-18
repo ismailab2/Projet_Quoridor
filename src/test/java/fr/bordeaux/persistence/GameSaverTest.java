@@ -3,6 +3,7 @@ package fr.bordeaux.persistence;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -80,5 +81,52 @@ public class GameSaverTest {
         fullHistory.contains("2 c3h;"), "Second move (Player 2 wall) is missing or incorrect");
     assertTrue(
         fullHistory.contains("1 e2-f2;"), "Third move (Player 1 pawn) is missing or incorrect");
+  }
+
+  @Test
+  public void testSaveGameParameters() throws IOException {
+    // Setup board and players
+    Board board = new Board(9);
+    List<Player> players = new ArrayList<>();
+    players.add(new HumanPlayer("Player1", new Position(0, 4))); // e1
+    players.add(MinimaxPlayer.builder("Ai1", new Position(8, 4)).withDepth(3).build()); // e9
+    GameState state = new GameState(board, players, 0);
+
+    state.setBlitz(true);
+    state.setAi(true);
+
+    // Save the game to a file
+    String filename = "test_parameters.txt";
+    GameSaver.saveGame(state, filename);
+
+    // Verify file existence and content
+    File file = new File(filename);
+    assertTrue(file.exists(), "The save file should be created");
+
+    // Read file and verify the [settings] section
+    List<String> lines = Files.readAllLines(file.toPath());
+    boolean settingsFound = false;
+    List<String> settingsLines = new ArrayList<>();
+
+    for (String line : lines) {
+      if (line.trim().equals("[settings]")) {
+        settingsFound = true;
+        continue;
+      }
+      if (settingsFound) {
+        if (line.startsWith("[") || line.trim().isEmpty()) break;
+        settingsLines.add(line.trim());
+      }
+    }
+
+    assertTrue(settingsFound, "The [settings] section header is missing");
+    assertFalse(settingsLines.isEmpty(), "The [settings] section should not be empty");
+
+    assertTrue(settingsLines.contains("blitz=true"), "Mode blitz incorrect");
+    assertTrue(settingsLines.contains("ai=true"), "Mode ai incorrect");
+    assertTrue(
+        settingsLines.contains("player-1-name=Player1"), "Incorrect name for the first Player");
+    assertTrue(settingsLines.contains("ai-2-name=Ai1"), "Incorrect name for the second Player");
+    assertTrue(settingsLines.contains("ai-2-depth=3"), "Incorrect depth for the second Player");
   }
 }
