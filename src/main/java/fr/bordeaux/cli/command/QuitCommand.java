@@ -1,17 +1,22 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import org.jline.reader.EndOfFileException;
+import java.io.PrintStream;
 import org.jline.reader.LineReader;
-import org.jline.reader.UserInterruptException;
 
 /**
  * Command that exits the CLI application. Before quitting, the user is prompted to optionally save
  * the current game.
  */
 public class QuitCommand implements Command {
+  /** Reader used for user interaction. */
+  private final LineReader reader;
 
-  private LineReader reader;
+  /** Logger to display closing information. */
+  private static final Logger logger = LoggerFactory.getLogger(QuitCommand.class);
+
+  /** Stream where to display texts. */
+  private final PrintStream writer = System.out;
 
   /**
    * Creates a QuitCommand using the provided line reader to interact with the user.
@@ -36,36 +41,28 @@ public class QuitCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
-      String line = reader.readLine("Save the game before quitting? [y/N] >> ");
-      if (line.toLowerCase().equals("y") || line.toLowerCase().equals("yes")) {
-        String save = reader.readLine("Path where you want to save it >> ");
-        SaveCommand cmd = new SaveCommand(save);
-        return cmd.execute(engine);
-      } else {
-        if (line.toLowerCase().equals("n") || line.toLowerCase().equals("no")) {
-          System.out.println("You choose to not save...");
-        } else {
-          System.out.println("Unrecognizable answer... Game not saved.");
-        }
-        return engine;
+      String response = reader.readLine("Save before quitting? [y/N] >> ");
+      if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes")) {
+        String path = reader.readLine("File path >> ");
+        new SaveCommand(path).execute(engine);
       }
-    } catch (UserInterruptException e) {
-      System.err.println("Tout va bien, je m'arrête !\n");
+      logger.info("Exiting Quoridor...");
       return engine;
-    } catch (EndOfFileException e) {
-      return engine;
+    } catch (Exception e) {
+      logger.error("Error during quit process", e);
     }
+    return engine;
   }
 
   /** Displays help information about the quit command, including its usage and behavior. */
   @Override
   public void helpText() {
-    System.out.println("=== QUIT Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  quit\n");
-    System.out.println("Description:");
-    System.out.println("  Exits the application.\n");
-    System.out.println("Information:");
-    System.out.println("  This command will ask you if you want to save before quitting.\n");
+    logger.info("=== QUIT Command ===\n");
+    logger.info("Usage:");
+    logger.info("  quit\n");
+    logger.info("Description:");
+    logger.info("  Exits the application.\n");
+    logger.debug("Information:");
+    logger.debug("  This command will ask you if you want to save before quitting.\n");
   }
 }

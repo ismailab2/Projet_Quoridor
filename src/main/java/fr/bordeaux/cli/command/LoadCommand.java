@@ -12,8 +12,13 @@ import org.slf4j.LoggerFactory;
  */
 public class LoadCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
+
+  /** Logger to display informations */
   private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
+
+  /** Stream where to display texts */
   private final PrintStream writer = System.out;
 
   /**
@@ -36,7 +41,7 @@ public class LoadCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens.length < 2) {
-      writer.println("Usage: load FILE");
+      logger.info("Usage: load FILE");
       return engine;
     }
     try {

@@ -57,9 +57,12 @@ public class ShowCommand implements Command {
       case "configurations":
       case "config":
         {
-          String[] configs = new String[] {"verbose", "blitz", "timeout"};
+          String[] configs =
+              new String[] {
+                "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
+              };
           for (String cf : configs) {
-            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, null));
+            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));
           }
           break;
         }
@@ -222,10 +225,12 @@ public class ShowCommand implements Command {
       String strMove = "";
       if (move.isPawn()) {
         Position from = move.getFrom();
-        strMove += (count%nbPlayers)+1 + " - " + posToString(from) + '-' + posToString(move.getTo());
+        strMove +=
+            (count % nbPlayers) + 1 + " - " + posToString(from) + '-' + posToString(move.getTo());
       } else {
         Orientation orientation = move.getOrientation();
-        strMove += (count%nbPlayers)+1 + " - " + posToString(move.getTo()) + orientation.toString();
+        strMove +=
+            (count % nbPlayers) + 1 + " - " + posToString(move.getTo()) + orientation.toString();
       }
       count++;
       strMove += ";";
