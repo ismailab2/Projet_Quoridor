@@ -95,8 +95,7 @@ public class NewCommand implements Command {
           System.out.println(
               "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [r]andom ia");
           logger.info("Player's type available :");
-          logger.info(
-              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia   - [r]andom ia");
+          logger.info("- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia   - [r]andom ia");
           String typePlayer = reader.readLine("Player's type >> ");
           if (typePlayer == null) throw new EndOfFileException();
           if (!typePlayer.equals("h")
