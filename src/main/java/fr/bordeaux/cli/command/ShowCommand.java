@@ -218,9 +218,8 @@ public class ShowCommand implements Command {
   }
 
   /**
-   * Displays the complete history of moves played during the game.
-   * Format: [Player Number] - [StartPos]-[EndPos] for pawns, 
-   * or [Player Number] - [Pos][Orientation] for walls.
+   * Displays the complete history of moves played during the game. Format: [Player Number] -
+   * [StartPos]-[EndPos] for pawns, or [Player Number] - [Pos][Orientation] for walls.
    *
    * @param engine The game engine containing the current state and move history.
    */

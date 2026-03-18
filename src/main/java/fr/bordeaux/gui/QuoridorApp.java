@@ -15,8 +15,8 @@ import javafx.stage.Stage;
 public class QuoridorApp extends Application {
 
   /**
-   * Default constructor for the Quoridor application.
-   * Required by JavaFX to instantiate the application via {@code launch()}.
+   * Default constructor for the Quoridor application. Required by JavaFX to instantiate the
+   * application via {@code launch()}.
    */
   public QuoridorApp() {
     super();
@@ -73,7 +73,6 @@ public class QuoridorApp extends Application {
    *
    * @param args Command-line arguments.
    */
-
   public static void main(String[] args) {
     launch(args);
   }

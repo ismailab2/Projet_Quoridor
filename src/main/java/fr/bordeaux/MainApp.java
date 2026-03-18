@@ -8,14 +8,14 @@ import fr.bordeaux.gui.QuoridorApp;
 /** Entry point of the Quoridor application. */
 public class MainApp {
 
-  /** 
-  * Private constructor to prevent instantiation of this utility class.
-  */
+  /** Private constructor to prevent instantiation of this utility class. */
   private MainApp() {}
 
   private static final String VERSION = "1.0.0";
+
   /** The standard size of the Quoridor board (9x9). */
   public static final int BOARD_SIZE = 9;
+
   /** The supported number of players for this version. */
   public static final int PLAYER_SIZE = 2;
 
