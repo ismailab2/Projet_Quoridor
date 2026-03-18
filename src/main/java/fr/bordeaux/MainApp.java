@@ -8,6 +8,8 @@ import fr.bordeaux.gui.QuoridorApp;
 public class MainApp {
 
   private static final String VERSION = "1.0.0";
+  public static final int  BOARD_SIZE = 9;
+    public static final int PLAYER_SIZE = 2;
 
   public static void main(String[] args) {
 
@@ -70,7 +72,6 @@ public class MainApp {
             config.setOption("timeout", value);
 
           } else {
-
             System.err.println("Erreur : --time nécessite une valeur.");
             System.exit(1);
           }
@@ -101,14 +102,17 @@ public class MainApp {
     }
 
     if (gui) {
+        Board board = new Board(BOARD_SIZE);
       QuoridorApp.main(args);
     }
 
     if (cli) {
       System.out.println("CLI mode started");
-      int size = 9;
-      Board board = new Board(size);
-      GameState state = new GameState(board, Player.createDefaultPlayers());
+      Board board = new Board(BOARD_SIZE);
+      GameState state;
+      if(PLAYER_SIZE == 2){
+          state  = new GameState(board, Player.createDefaultPlayers());
+      }
       GameEngine engine = new GameEngine(state);
       try {
         CliApp cli1 = new CliApp(engine);
