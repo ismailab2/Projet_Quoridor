@@ -26,7 +26,7 @@ public final class GameLoader {
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-      List<String> lines = GameLoaderComment.readCleanLines(filename);
+    List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
     List<Player> players = allp_l.players; // creates all players
@@ -43,7 +43,6 @@ public final class GameLoader {
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
-
 
   // Checks that the first line is "[game]"
   // If not, throws GameLoadException with error type and line number
@@ -75,7 +74,6 @@ public final class GameLoader {
   private static int readBoardSize(List<String> lines, int currentLine) {
     return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
   }
-
 
   // Reads the full board, repositions players and places all walls
   private static void readBoard(
