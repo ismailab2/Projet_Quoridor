@@ -63,7 +63,21 @@ public final class MinimaxPlayer extends AiPlayer {
     this.heuristicFunction = determineHeuristic(this.heuristicName);
   }
 
-  /** Private constructor used by the copy() method for cloning the AI player. */
+  /**
+   * Private constructor used by the copy() method for cloning the AI player. This constructor
+   * allows for a complete state transfer including Minimax specific configurations like search
+   * depth and heuristic type.
+   *
+   * @param name The name of the AI player.
+   * @param current The current position of the pawn.
+   * @param start The starting position of the pawn.
+   * @param walls The number of remaining walls.
+   * @param score The current player score.
+   * @param depth The maximum search depth for the Minimax algorithm.
+   * @param timeLimit The maximum time allowed for reflection in seconds.
+   * @param iterativeDeepVal Whether to use iterative deepening during search.
+   * @param heuristicVal The name of the heuristic function to be used.
+   */
   private MinimaxPlayer(
       final String name,
       final Position current,
@@ -90,8 +104,9 @@ public final class MinimaxPlayer extends AiPlayer {
   }
 
   /**
-   * Static factory method for the builder. * @param name The player name.
+   * Static factory method for the builder.
    *
+   * @param name The player name.
    * @param pos The starting position.
    * @return A new Builder instance.
    */

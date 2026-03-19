@@ -5,6 +5,7 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that interprets and executes a player move entered in the CLI. A move can either be a
@@ -12,7 +13,11 @@ import fr.bordeaux.core.Position;
  */
 public class MoveCommand implements Command {
 
+  /** Move that has been entered by the user */
   private String move;
+
+  /** Logger to display informations */
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a MoveCommand using the provided move string.
@@ -39,16 +44,18 @@ public class MoveCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
-      if (move.contains("-") && (move.length() == 5 || move.length() == 7))
+      if (move.contains("-") && (move.length() == 5 || move.length() == 7)) {
+        LOGGER.debug("You played: " + this.move);
         return handleMove(engine);
-      else if ((move.contains("v") || move.contains("h")) && move.length() == 3)
+      } else if ((move.contains("v") || move.contains("h")) && move.length() == 3) {
+        LOGGER.debug("You played: " + this.move);
         return handleWall(engine);
-      else {
-        System.out.println("Invalid move format");
+      } else {
+        LOGGER.debug("Please use help to see how to give a valid command");
         return engine;
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      LOGGER.error("Error while reading the move " + this.move);
       return engine;
     }
   }
@@ -59,20 +66,18 @@ public class MoveCommand implements Command {
    */
   @Override
   public void helpText() {
-    System.out.println("=== Move Commands ===\n");
-    System.out.println("Usage:");
-    System.out.println("To move a pawn : e2-e3 (if it's legal).");
-    System.out.println(
+    LOGGER.info("=== Move Commands ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("To move a pawn : e2-e3 (if it's legal).");
+    LOGGER.info(
         "        Remember that you can't neither move diagonally nor jump over a wall nor exit the board.");
-    System.out.println("To place a wall : e2h (if it's legal).");
-    System.out.println(
-        "        It place the wall horizontally under the case e2 and under the case f2.");
-    System.out.println(
+    LOGGER.info("To place a wall : e2h (if it's legal).");
+    LOGGER.info("        It place the wall horizontally under the case e2 and under the case f2.");
+    LOGGER.info(
         "        You can't place a wall horizontally if it's the right edge of the board (colonne E for a 5x5 board).");
-    System.out.println("                : e2v (if it's legal).");
-    System.out.println(
-        "        It place the wall vertically next to the case e2 and next to the case e1");
-    System.out.println(
+    LOGGER.info("                : e2v (if it's legal).");
+    LOGGER.info("        It place the wall vertically next to the case e2 and next to the case e1");
+    LOGGER.info(
         "        You can't place a wall vertically if it's the top edge of the board. (row 1 on any board).\n");
   }
 
@@ -85,8 +90,10 @@ public class MoveCommand implements Command {
    * @throws IllegalArgumentException if the format is invalid
    */
   public Position parsePosition(String str) {
-    if (str.length() < 2) throw new IllegalArgumentException("Invalid position format");
-
+    if (str.length() < 2) {
+      LOGGER.error("Usage: c3-c4 / c3h / c3v");
+      throw new IllegalArgumentException("Invalid position format");
+    }
     int row = Integer.parseInt(str.substring(1)) - 1;
     int col = str.charAt(0) - 'a';
 
@@ -102,15 +109,18 @@ public class MoveCommand implements Command {
    */
   public GameEngine handleMove(GameEngine engine) {
     String[] moves = move.split("-");
-    if (moves.length != 2) throw new IllegalArgumentException("Invalid move syntax");
-
+    if (moves.length != 2) {
+      LOGGER.error("Usage: c3-c4 / c3h / c3v");
+      throw new IllegalArgumentException("Invalid move syntax");
+    }
     Position from = parsePosition(moves[0]);
     Position to = parsePosition(moves[1]);
 
     Player current = engine.getState().getCurrentPlayer();
-    if (!current.getPosition().equals(from))
+    if (!current.getPosition().equals(from)) {
+      LOGGER.error("There is no pawn on the case you want to play");
       throw new IllegalArgumentException("No pawn at " + moves[0]);
-
+    }
     engine.play(Move.pawn(from, to));
     return engine;
   }

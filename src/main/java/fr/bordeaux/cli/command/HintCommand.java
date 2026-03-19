@@ -1,18 +1,21 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Move.Type;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that suggests the best possible move for the current player. The move is computed using a
  * Minimax AI based on the current game state.
  */
 public class HintCommand implements Command {
+
+  /** Logger for AI calculation messages. */
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a new HintCommand. */
   public HintCommand() {}
@@ -26,22 +29,31 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    /*     MinimaxPlayer ia =
-    MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
-        .withHeuristic("advanced")
-        .build(); */
-    MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
+    LOGGER.info("Calculating best move...");
+    MctsPlayer ia = new MctsPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
-    System.out.println(RuleChecker.isMoveLegal(engine.getState(), hint));
-    String bestMove = "";
-    if (hint.getType() == Type.PAWN) {
-      bestMove = posToString(hint.getFrom()) + "-" + posToString(hint.getTo());
-    } else {
-      char orientationChar = hint.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
-      bestMove = posToString(hint.getTo()) + orientationChar;
+
+    if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
+      LOGGER.error("Suggested move: " + hint + " isn't legal");
     }
-    System.out.println("Best move : " + bestMove);
+    String bestMove = formatMove(hint);
+    LOGGER.info("Best move : " + bestMove);
     return engine;
+  }
+
+  /**
+   * Formats a Move object into a readable string (e.g., e2-e3 or a1h).
+   *
+   * @param m the move to format
+   * @return the string representation of the move
+   */
+  private String formatMove(Move m) {
+    if (m.getType() == Move.Type.PAWN) {
+      return posToString(m.getFrom()) + "-" + posToString(m.getTo());
+    } else {
+      char orientationChar = m.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
+      return posToString(m.getTo()) + orientationChar;
+    }
   }
 
   /**
@@ -52,19 +64,22 @@ public class HintCommand implements Command {
    * @return the string representation of the position
    */
   private String posToString(Position p) {
-    char letter = (char) ('a' + p.getY());
-    int number = p.getX() + 1;
-    return "" + letter + number;
+    return (char) ('a' + p.getY()) + "" + (p.getX() + 1);
   }
 
   /** Displays help information about the hint command, including its usage and description. */
   @Override
   public void helpText() {
-    System.out.println("=== HINT Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  hint\n");
-    System.out.println("Description:");
-    System.out.println("  Provides a suggestion for the next move.\n");
-    System.out.println("  The suggested move is computed based on the current game state.\n");
+    LOGGER.info("=== HINT Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  hint\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Provides a suggestion for the next move.\n");
+    LOGGER.info("  The suggested move is computed based on the current game state.\n");
+    LOGGER.verbose("Displays:");
+    LOGGER.verbose("  Should display a legal pawn or wall move.");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  Pawn move -> b3-b4");
+    LOGGER.verbose("  Wall move -> b3v / b3h");
   }
 }

@@ -2,11 +2,16 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameSaver;
+import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
 public class SaveCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
+
+  /** Logger to display informations */
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a SaveCommand using the specified file path.
@@ -34,10 +39,16 @@ public class SaveCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
+    if (tokens.length < 2) {
+      LOGGER.info("Usage: save FILE");
+      return engine;
+    }
     try {
+      LOGGER.info("Attempting to save game to: " + tokens[1]);
       GameSaver.saveGame(engine.getState(), tokens[1]);
+      LOGGER.info("Game saved successfully.");
     } catch (Exception e) {
-      System.err.println("Ca va pas du tout : " + e);
+      LOGGER.error("Failed to save game at path: " + tokens[1], e);
     }
     return engine;
   }
@@ -45,14 +56,14 @@ public class SaveCommand implements Command {
   /** Displays help information about the save command, including its usage and example. */
   @Override
   public void helpText() {
-    System.out.println("=== SAVE Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  save FILE\n");
-    System.out.println("Description:");
-    System.out.println("  Saves the current game state into the specified file FILE.\n");
-    System.out.println("Arguments:");
-    System.out.println("  FILE   : Destination file path (required).\n");
-    System.out.println("Example:");
-    System.out.println("  save mygame.txt\n");
+    LOGGER.info("=== SAVE Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  save FILE\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Saves the current game state into the specified file FILE.\n");
+    LOGGER.verbose("Arguments:");
+    LOGGER.verbose("  FILE   : Destination file path (required).\n");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  save mygame.txt\n");
   }
 }
