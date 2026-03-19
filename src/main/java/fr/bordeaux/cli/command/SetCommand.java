@@ -22,8 +22,10 @@ public class SetCommand implements Command {
     this.tokens = null;
   }
 
-  /**Creates a SetCommand. Currently not implemented
-   * @param s SetCommand with the provided
+  /**
+   * Creates a SetCommand. Currently not implemented.
+   *
+   * @param s name of the command
    */
   public SetCommand(String s) {
     this(new String[] {"set", s});

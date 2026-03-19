@@ -1,6 +1,6 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
@@ -35,7 +35,7 @@ public class HintCommand implements Command {
     MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
         .withHeuristic("advanced")
         .build(); */
-    MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
+    MctsPlayer ia = new MctsPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
 
     logger.debug("Move legality check: {}", RuleChecker.isMoveLegal(engine.getState(), hint));

@@ -1,8 +1,7 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.ai.MinimaxPlayer;
-import fr.bordeaux.ai.NeuralNetPlayer;
 import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
@@ -230,10 +229,7 @@ public final class GameLoader {
               myCurrentLine);
         }
       case "mcts":
-        return new PlayerAndLine(new MCTSPlayer(pName, pPostion), myCurrentLine);
-
-      case "neural-network":
-        return new PlayerAndLine(new NeuralNetPlayer(pName, pPostion), myCurrentLine);
+        return new PlayerAndLine(new MctsPlayer(pName, pPostion), myCurrentLine);
 
       case "random":
         return new PlayerAndLine(new RandomPlayer(pName, pPostion), myCurrentLine);
