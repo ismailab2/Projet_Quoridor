@@ -2,6 +2,7 @@ package fr.bordeaux.cli;
 
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +12,6 @@ import java.util.function.Function;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manages the Quoridor CLI, handling the terminal loop, command registration, and JLine-based
@@ -45,7 +44,7 @@ public class CliApp {
   private boolean firstTab = true;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(CliApp.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * A registry mapping command names to functions that instantiate specific Command objects based
@@ -271,8 +270,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        LOGGER.debug("Unknown command: '{}'", command);
-        LOGGER.info("Did you mean '{}' ?", suggestion);
+        LOGGER.debug("Unknown command: '" + command + "'");
+        LOGGER.info("Did you mean: " + suggestion + " ? ");
       }
 
       // Default behavior (interpret as move)

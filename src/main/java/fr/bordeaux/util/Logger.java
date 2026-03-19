@@ -38,9 +38,9 @@ public class Logger {
   private boolean verbose;
 
   /**
-   * Private constructor for file-based logging.
-   * Initializes settings from {@link ConfigManager} and attempts to create a log file
-   * in the user's home directory.
+   * Private constructor for file-based logging. Initializes settings from {@link ConfigManager} and
+   * attempts to create a log file in the user's home directory.
+   *
    * @param logFile The name of the file where logs should be saved.
    */
   private Logger(String logFile) {
@@ -57,8 +57,8 @@ public class Logger {
   }
 
   /**
-   * Private constructor for console-based logging.
-   * Initializes settings from {@link ConfigManager} and sets output to System.out.
+   * Private constructor for console-based logging. Initializes settings from {@link ConfigManager}
+   * and sets output to System.out.
    */
   private Logger() {
     this.writer = System.out;
@@ -69,8 +69,9 @@ public class Logger {
   }
 
   /**
-   * Provides access to the Singleton instance. If no instance exists, 
-   * it creates one using the default console constructor.
+   * Provides access to the Singleton instance. If no instance exists, it creates one using the
+   * default console constructor.
+   *
    * @return The unique instance of the Logger.
    */
   public static Logger getInstance() {
@@ -81,8 +82,9 @@ public class Logger {
   }
 
   /**
-   * Provides access to the Singleton instance with file output. 
-   * If no instance exists, it creates one targeting the specified file.
+   * Provides access to the Singleton instance with file output. If no instance exists, it creates
+   * one targeting the specified file.
+   *
    * @param logFile The filename for the log output.
    * @return The unique instance of the Logger.
    */
@@ -95,6 +97,7 @@ public class Logger {
 
   /**
    * Logs an informational message.
+   *
    * @param message The message to be logged.
    */
   public void info(String message) {
@@ -103,6 +106,7 @@ public class Logger {
 
   /**
    * Logs an error message along with the exception details.
+   *
    * @param message The error description.
    * @param e The exception associated with the error.
    */
@@ -112,6 +116,7 @@ public class Logger {
 
   /**
    * Logs a simple error message.
+   *
    * @param message The error message to be logged.
    */
   public void error(String message) {
@@ -119,8 +124,9 @@ public class Logger {
   }
 
   /**
-   * Logs a debug message if the "debug" option is enabled in the configuration.
-   * Re-checks configuration settings before logging.
+   * Logs a debug message if the "debug" option is enabled in the configuration. Re-checks
+   * configuration settings before logging.
+   *
    * @param message The debug message.
    */
   public void debug(String message) {
@@ -132,8 +138,9 @@ public class Logger {
   }
 
   /**
-   * Logs a verbose message if the "verbose" option is enabled in the configuration.
-   * Re-checks configuration settings before logging.
+   * Logs a verbose message if the "verbose" option is enabled in the configuration. Re-checks
+   * configuration settings before logging.
+   *
    * @param message The detailed verbose message.
    */
   public void verbose(String message) {
@@ -145,9 +152,10 @@ public class Logger {
   }
 
   /**
-   * Core internal method that formats and writes the log message to the 
-   * defined {@code writer}. Applies ANSI colors based on the log level.
-   * @param level   The log level prefix (e.g., [INFO], [ERROR]).
+   * Core internal method that formats and writes the log message to the defined {@code writer}.
+   * Applies ANSI colors based on the log level.
+   *
+   * @param level The log level prefix (e.g., [INFO], [ERROR]).
    * @param message The actual content of the log.
    */
   private void log(String level, String message) {

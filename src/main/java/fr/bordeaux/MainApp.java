@@ -7,7 +7,9 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.gui.QuoridorApp;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
+import java.util.Locale;
 
 /** Entry point of the Quoridor application. */
 public class MainApp {
@@ -32,6 +34,10 @@ public class MainApp {
    * @param args Command-line arguments
    */
   public static void main(String[] args) {
+
+    LOGGER.info(I18n.get("test"));
+    I18n.setLocale(Locale.ENGLISH);
+    LOGGER.info(I18n.get("test"));
 
     ConfigManager config = ConfigManager.getInstance();
     config.load();
