@@ -2,8 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import org.jline.reader.LineReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that exits the CLI application. Before quitting, the user is prompted to optionally save
@@ -14,7 +13,7 @@ public class QuitCommand implements Command {
   private final LineReader reader;
 
   /** Logger to display closing information. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(QuitCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a QuitCommand using the provided line reader to interact with the user.
@@ -60,7 +59,7 @@ public class QuitCommand implements Command {
     LOGGER.info("  quit\n");
     LOGGER.info("Description:");
     LOGGER.info("  Exits the application.\n");
-    LOGGER.debug("Information:");
-    LOGGER.debug("  This command will ask you if you want to save before quitting.\n");
+    LOGGER.verbose("Information:");
+    LOGGER.verbose("  This command will ask you if you want to save before quitting.\n");
   }
 }

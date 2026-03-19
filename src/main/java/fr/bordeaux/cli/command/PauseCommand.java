@@ -1,8 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that pauses the game timer when the game is in Blitz mode. If the game is not in Blitz
@@ -11,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class PauseCommand implements Command {
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(PauseCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a PauseCommand. */
   public PauseCommand() {}
@@ -39,6 +38,6 @@ public class PauseCommand implements Command {
     LOGGER.info("  pause\n");
     LOGGER.info("Description:");
     LOGGER.info("  Pauses the game timer if the game mode is Blitz.\n");
-    LOGGER.debug("  If the game is not in Blitz mode, this command has no effect.\n");
+    LOGGER.verbose("  If the game is not in Blitz mode, this command has no effect.\n");
   }
 }

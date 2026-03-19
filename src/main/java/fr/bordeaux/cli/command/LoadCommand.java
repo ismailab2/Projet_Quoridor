@@ -2,8 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that loads a saved game from a file. The loaded game replaces the current game engine
@@ -15,7 +14,7 @@ public class LoadCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(LoadCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a LoadCommand with the provided command tokens.
@@ -41,11 +40,11 @@ public class LoadCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info("Loading game state from file: {}", tokens[1]);
+      LOGGER.info("Loading game state from file: "+tokens[1]);
       return new GameEngine(GameLoader.loadGame(tokens[1]));
     } catch (Exception e) {
       e.printStackTrace();
-      LOGGER.error("Error while loading file {}", tokens[1], e);
+      LOGGER.error("Error while loading file "+tokens[1], e);
     }
     return engine;
   }
@@ -61,9 +60,9 @@ public class LoadCommand implements Command {
     LOGGER.info("  load FILE\n");
     LOGGER.info("Description:");
     LOGGER.info("  Loads a saved game from the specified FILE.\n");
-    LOGGER.debug("Arguments:");
-    LOGGER.debug("  FILE   : Path to the save file (required).\n");
-    LOGGER.debug("Example:");
-    LOGGER.debug("  load savegame.txt\n");
+    LOGGER.verbose("Arguments:");
+    LOGGER.verbose("  FILE   : Path to the save file (required).\n");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  load savegame.txt\n");
   }
 }

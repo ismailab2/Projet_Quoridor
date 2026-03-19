@@ -8,8 +8,7 @@ import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that starts a new game from the CLI. It allows configuring the board size and the number
@@ -30,7 +29,7 @@ public class NewCommand implements Command {
   private LineReader reader;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(NewCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a NewCommand with the given CLI tokens, terminal and line reader.
@@ -169,9 +168,9 @@ public class NewCommand implements Command {
     LOGGER.info("  boardSize    : An odd integer greater than or equal to 3.");
     LOGGER.info("  playerCount  : Must be either 2 or 4.\n");
     LOGGER.info("If no arguments are provided, default settings are used.\n");
-    LOGGER.debug("Examples:");
-    LOGGER.debug("  new       -> 9x9 board with 2 players");
-    LOGGER.debug("  new 5     -> 5x5 board with 2 players");
-    LOGGER.debug("  new 7 4   -> 7x7 board with 4 players\n");
+    LOGGER.verbose("Examples:");
+    LOGGER.verbose("  new       -> 9x9 board with 2 players");
+    LOGGER.verbose("  new 5     -> 5x5 board with 2 players");
+    LOGGER.verbose("  new 7 4   -> 7x7 board with 4 players\n");
   }
 }

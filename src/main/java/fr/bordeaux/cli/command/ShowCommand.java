@@ -7,10 +7,9 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.util.Logger;
 import java.io.PrintStream;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Command that displays various information about the current game, such as the board state,
@@ -22,7 +21,7 @@ public class ShowCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(ShowCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Where the show command will write */
   private final PrintStream writer = System.out;
@@ -88,7 +87,7 @@ public class ShowCommand implements Command {
           break;
         }
       default:
-        LOGGER.error("The command  \"show {}\" doesn't exist...", tokens[1]);
+        LOGGER.error("The command  \"show"+tokens[1]+"\" doesn't exist...");
         break;
     }
     return engine;
@@ -105,13 +104,13 @@ public class ShowCommand implements Command {
     LOGGER.info("  show time\n");
     LOGGER.info("Description:");
     LOGGER.info("  Displays information about the current game.\n");
-    LOGGER.debug("  If any option is given, displays the board by default");
-    LOGGER.debug("Options:");
-    LOGGER.debug("  board         : Displays the current board state.");
-    LOGGER.debug("  history       : Displays the list of moves played so far.");
-    LOGGER.debug("  configuration : Displays all the configuations set for the game.");
-    LOGGER.debug("  time          : Displays the remaining time for each player.\n");
-    LOGGER.debug("If you want the help with an option, you can enter \"help show [option]\".\n");
+    LOGGER.verbose("  If any option is given, displays the board by default");
+    LOGGER.verbose("Options:");
+    LOGGER.verbose("  board         : Displays the current board state.");
+    LOGGER.verbose("  history       : Displays the list of moves played so far.");
+    LOGGER.verbose("  configuration : Displays all the configuations set for the game.");
+    LOGGER.verbose("  time          : Displays the remaining time for each player.\n");
+    LOGGER.verbose("If you want the help with an option, you can enter \"help show [option]\".\n");
   }
 
   /** Displays help information for the "show board" option. */
@@ -149,13 +148,13 @@ public class ShowCommand implements Command {
     LOGGER.info("  show configuration\n");
     LOGGER.info("Description:");
     LOGGER.info("  Displays the current game configuration.\n");
-    LOGGER.debug("  This includes all active settings such as:");
-    LOGGER.debug("    - Board size");
-    LOGGER.debug("    - Number of players");
-    LOGGER.debug("    - Game mode (e.g., Blitz)");
-    LOGGER.debug("    - Debug mode");
-    LOGGER.debug("    - Any other configurable parameters\n");
-    LOGGER.debug("This command does not modify the game state.\n");
+    LOGGER.verbose("  This includes all active settings such as:");
+    LOGGER.verbose("    - Board size");
+    LOGGER.verbose("    - Number of players");
+    LOGGER.verbose("    - Game mode (e.g., Blitz)");
+    LOGGER.verbose("    - Debug mode");
+    LOGGER.verbose("    - Any other configurable parameters\n");
+    LOGGER.verbose("This command does not modify the game state.\n");
   }
 
   /**

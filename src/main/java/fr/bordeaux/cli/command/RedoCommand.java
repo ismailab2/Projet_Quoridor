@@ -1,8 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that replays moves that were previously undone. The user can redo a single move or
@@ -13,7 +12,7 @@ public class RedoCommand implements Command {
   private String[] tokens;
 
   /** Logger to trace redo actions. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(RedoCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a RedoCommand that replays one move by default. */
   public RedoCommand() {
@@ -42,7 +41,7 @@ public class RedoCommand implements Command {
       return engine;
     }
     int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
-    LOGGER.info("Redoing {} move(s)...", count);
+    LOGGER.info("Redoing "+count+" move(s)...");
 
     for (int i = 0; i < count; i++) {
       engine.getState().redo();
@@ -59,10 +58,10 @@ public class RedoCommand implements Command {
     LOGGER.info("  redo [N]");
     LOGGER.info("Description:");
     LOGGER.info("  Replays N previously undone moves.\n");
-    LOGGER.debug("  - If no number is specified, one move is redone.");
-    LOGGER.debug("  - If N is specified, N moves are redone.\n");
-    LOGGER.debug("Examples:");
-    LOGGER.debug("  redo      -> redo one move");
-    LOGGER.debug("  redo 3    -> redo three moves\n");
+    LOGGER.verbose("  - If no number is specified, one move is redone.");
+    LOGGER.verbose("  - If N is specified, N moves are redone.\n");
+    LOGGER.verbose("Examples:");
+    LOGGER.verbose("  redo      -> redo one move");
+    LOGGER.verbose("  redo 3    -> redo three moves\n");
   }
 }

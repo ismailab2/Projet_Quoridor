@@ -3,8 +3,7 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import java.util.Map;
 import java.util.function.Function;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that displays help information for the CLI. It can show a global help message or detailed
@@ -16,7 +15,7 @@ public class HelpCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(HelpCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Reference from the CliApp command registry */
   private final Map<String, Function<String[], Command>> registry;
@@ -52,7 +51,7 @@ public class HelpCommand implements Command {
       LOGGER.debug("Showing all commands help.");
       helpCli();
     } else {
-      LOGGER.debug("Displaying help for the command {}", tokens[1]);
+      LOGGER.debug("Displaying help for the command "+tokens[1]);
       helpFetch();
     }
     return engine;
@@ -108,7 +107,7 @@ public class HelpCommand implements Command {
         Command cmd = registry.get(tokens[1]).apply(new String[] {tokens[1]});
         cmd.helpText();
       } else {
-        LOGGER.debug("Unknown command : {}", tokens[1]);
+        LOGGER.debug("Unknown command : "+tokens[1]);
         LOGGER.info("Usage : help [CMD]");
       }
     }

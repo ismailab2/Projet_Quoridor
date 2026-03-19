@@ -4,9 +4,12 @@ import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
+import fr.bordeaux.util.Logger;
 
 /** Entry point of the Quoridor application. */
 public class MainApp {
+
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Private constructor to prevent instantiation of this utility class. */
   private MainApp() {}
@@ -25,20 +28,10 @@ public class MainApp {
    * @param args Command line arguments.
    */
   public static void main(String[] args) {
-    // Logger configurations before using
-    // Display only message level (ex: [INFO] Message / [DEBUG] Message)
-    System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
-    System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
-    System.setProperty("org.slf4j.simpleLogger.showDateTime", "false");
-    System.setProperty(
-        "org.slf4j.simpleLogger.showThreadName", "false"); // Hide file of main() method
-    System.setProperty("org.slf4j.simpleLogger.showLogName", "false"); // Hide class name
-    System.setProperty("org.slf4j.simpleLogger.showShortLogName", "false");
-    System.setProperty("org.slf4j.simpleLogger.levelInBrackets", "true");
 
     ConfigManager config = ConfigManager.getInstance();
     config.load();
-    System.out.println(config.getOption("verbose", "default"));
+    LOGGER.debug("verbose mode: "+config.getOption("verbose", "default"));
 
     boolean gui = false;
     boolean cli = true;
@@ -55,7 +48,7 @@ public class MainApp {
 
         case "-V":
         case "--version":
-          System.out.println("Qoridor version " + VERSION);
+          LOGGER.info("Qoridor version " + VERSION);
           System.exit(0);
 
         case "-v":
@@ -89,21 +82,21 @@ public class MainApp {
             String value = args[++i];
             config.setOption("timeout", value);
           } else {
-            System.err.println("Erreur : --time nécessite une valeur.");
+            LOGGER.error(" --time nécessite une valeur.");
             printHelp();
             System.exit(1);
           }
           break;
 
         default:
-          System.err.println("Erreur : option invalide -> " + arg);
+          LOGGER.error(" option invalide -> " + arg);
           printHelp();
           System.exit(1);
       }
     }
 
     if (gui && cli) {
-      System.err.println("Erreur : --gui et --cli sont incompatibles.");
+      LOGGER.error(" --gui et --cli sont incompatibles.");
       printHelp();
       System.exit(1);
     }
@@ -118,15 +111,15 @@ public class MainApp {
     int timeout = config.getInt("timeout", 30);
 
     if (verbose) {
-      System.out.println("Mode verbeux activé");
+      LOGGER.info("Mode verbeux activé");
     }
 
     if (debug) {
-      System.err.println("Mode debug activé");
+      LOGGER.info("Mode debug activé");
     }
 
     if (blitz) {
-      System.out.println("Mode blitz : " + timeout + " minutes");
+      LOGGER.info("Mode blitz : " + timeout + " minutes");
     }
 
     try {
@@ -139,10 +132,10 @@ public class MainApp {
         Board board = new Board(BOARD_SIZE);
 
         GameState state;
-        if (PLAYER_SIZE == 2) {
+        if (PLAYER_SIZE == 2 || PLAYER_SIZE == 4) {
           state = new GameState(board, Player.createDefaultPlayers());
         } else {
-          System.err.println("Erreur : nombre de joueurs invalide.");
+          LOGGER.error(" Invalid number of players.");
           System.exit(1);
           return;
         }
@@ -155,7 +148,7 @@ public class MainApp {
       System.exit(0);
 
     } catch (Exception e) {
-      System.err.println("Erreur d'exécution : " + e.getMessage());
+      LOGGER.error(" Brutal interruption. Cause: " + e.getClass().getSimpleName());
       System.exit(1);
     }
   }
@@ -163,23 +156,23 @@ public class MainApp {
   /** print the help to use programme */
   private static void printHelp() {
 
-    System.out.println("Usage: qoridor [OPTIONS]");
-    System.out.println();
+    LOGGER.info("Usage: qoridor [OPTIONS]");
+    LOGGER.info("");
 
-    System.out.println("Options générales :");
-    System.out.println("  -h, --help        Affiche l'aide");
-    System.out.println("  -V, --version     Affiche la version");
-    System.out.println("  -v, --verbose     Mode verbeux");
-    System.out.println("  -d, --debug       Mode debug");
+    LOGGER.info("Options générales :");
+    LOGGER.info("  -h, --help        Affiche l'aide");
+    LOGGER.info("  -V, --version     Affiche la version");
+    LOGGER.info("  -v, --verbose     Mode verbeux");
+    LOGGER.info("  -d, --debug       Mode debug");
 
-    System.out.println();
-    System.out.println("Modes :");
-    System.out.println("  -g, --gui         Interface graphique");
-    System.out.println("  -c, --cli         Mode ligne de commande (défaut)");
+    LOGGER.info("");
+    LOGGER.info("Modes :");
+    LOGGER.info("  -g, --gui         Interface graphique");
+    LOGGER.info("  -c, --cli         Mode ligne de commande (défaut)");
 
-    System.out.println();
-    System.out.println("Options blitz :");
-    System.out.println("  -b, --blitz       Active le mode blitz");
-    System.out.println("  -t, --time N      Temps en minutes (défaut 30)");
+    LOGGER.info("");
+    LOGGER.info("Options blitz :");
+    LOGGER.info("  -b, --blitz       Active le mode blitz");
+    LOGGER.info("  -t, --time N      Temps en minutes (défaut 30)");
   }
 }

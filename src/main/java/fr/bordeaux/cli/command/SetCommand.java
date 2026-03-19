@@ -2,8 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that modifies a configuration parameter of the game. The command expects an assignment in
@@ -15,7 +14,7 @@ public class SetCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(SetCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a SetCommand. Currently not implemented. */
   public SetCommand() {
@@ -45,7 +44,7 @@ public class SetCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens == null || tokens.length < 2) {
-      LOGGER.info("? Usage: set PARAM=VALUE");
+      LOGGER.info("Usage: set PARAM=VALUE");
       return engine;
     }
 
@@ -74,9 +73,9 @@ public class SetCommand implements Command {
       // Persist the change to the file (.quoridorrc)
       config.save();
 
-      LOGGER.debug("Configuration updated: {} set to {}", key, value);
+      LOGGER.debug("Configuration updated: "+key+" set to "+value);
     } catch (Exception e) {
-      LOGGER.error("Failed to update configuration for key: {}", key, e);
+      LOGGER.error("Failed to update configuration for key: "+key, e);
     }
 
     return engine;
@@ -90,10 +89,10 @@ public class SetCommand implements Command {
     LOGGER.info("  set PARAM=VALUE\n");
     LOGGER.info("Description:");
     LOGGER.info("  Updates a configuration parameter of the game.\n");
-    LOGGER.debug("Arguments:");
-    LOGGER.debug("  PARAM   : Name of the configuration option.");
-    LOGGER.debug("  VALUE   : New value to assign.\n");
-    LOGGER.debug("Example:");
-    LOGGER.debug("  set debug=true\n");
+    LOGGER.verbose("Arguments:");
+    LOGGER.verbose("  PARAM   : Name of the configuration option.");
+    LOGGER.verbose("  VALUE   : New value to assign.\n");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  set debug=true\n");
   }
 }

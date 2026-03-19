@@ -6,8 +6,7 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that suggests the best possible move for the current player. The move is computed using a
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class HintCommand implements Command {
 
   /** Logger for AI calculation messages. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(HintCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a new HintCommand. */
   public HintCommand() {}
@@ -31,18 +30,14 @@ public class HintCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     LOGGER.info("Calculating best move...");
-    /*     MinimaxPlayer ia =
-    MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
-        .withHeuristic("advanced")
-        .build(); */
     MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
 
     if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
-      LOGGER.error("Suggested move: {} isn't legal", hint);
+      LOGGER.error("Suggested move: "+hint+" isn't legal");
     }
     String bestMove = formatMove(hint);
-    LOGGER.info("Best move : {}", bestMove);
+    LOGGER.info("Best move : "+bestMove);
     return engine;
   }
 
@@ -81,9 +76,10 @@ public class HintCommand implements Command {
     LOGGER.info("Description:");
     LOGGER.info("  Provides a suggestion for the next move.\n");
     LOGGER.info("  The suggested move is computed based on the current game state.\n");
-    LOGGER.debug("Displays:");
-    LOGGER.debug("  Should display a legal pawn or wall move.\n  Example:");
-    LOGGER.debug("    Pawn move -> b3-b4");
-    LOGGER.debug("    Wall move -> b3v / b3h");
+    LOGGER.verbose("Displays:");
+    LOGGER.verbose("  Should display a legal pawn or wall move.");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  Pawn move -> b3-b4");
+    LOGGER.verbose("  Wall move -> b3v / b3h");
   }
 }

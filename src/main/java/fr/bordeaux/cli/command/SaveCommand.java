@@ -2,8 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameSaver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
 public class SaveCommand implements Command {
@@ -12,7 +11,7 @@ public class SaveCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger LOGGER = LoggerFactory.getLogger(SaveCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a SaveCommand using the specified file path.
@@ -45,11 +44,11 @@ public class SaveCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info("Attempting to save game to: {}", tokens[1]);
+      LOGGER.info("Attempting to save game to: "+tokens[1]);
       GameSaver.saveGame(engine.getState(), tokens[1]);
       LOGGER.info("Game saved successfully.");
     } catch (Exception e) {
-      LOGGER.error("Failed to save game at path: {}", tokens[1], e);
+      LOGGER.error("Failed to save game at path: "+tokens[1], e);
     }
     return engine;
   }
@@ -62,9 +61,9 @@ public class SaveCommand implements Command {
     LOGGER.info("  save FILE\n");
     LOGGER.info("Description:");
     LOGGER.info("  Saves the current game state into the specified file FILE.\n");
-    LOGGER.debug("Arguments:");
-    LOGGER.debug("  FILE   : Destination file path (required).\n");
-    LOGGER.debug("Example:");
-    LOGGER.debug("  save mygame.txt\n");
+    LOGGER.verbose("Arguments:");
+    LOGGER.verbose("  FILE   : Destination file path (required).\n");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  save mygame.txt\n");
   }
 }
