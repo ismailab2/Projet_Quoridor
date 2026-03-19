@@ -18,7 +18,7 @@ import javafx.scene.input.KeyEvent;
  */
 public class ShortcutManager {
 
-  private static final ShortcutManager INSTANCE = new ShortcutManager();
+  private static ShortcutManager INSTANCE = new ShortcutManager();
 
   /** Maps each action to its keyboard shortcut */
   private final Map<Action, KeyCombination> shortcuts = new HashMap<>();
@@ -71,13 +71,7 @@ public class ShortcutManager {
    * @param combination The new KeyCombination
    */
   public void setShortcut(Action action, KeyCombination combination) {
-    if (combination instanceof KeyCodeCombination) {
-      KeyCode code = ((KeyCodeCombination) combination).getCode();
-      if (code == KeyCode.CONTROL || code == KeyCode.SHIFT || code == KeyCode.ALT) return;
-    }
-
     shortcuts.put(action, combination);
-
     ConfigManager config = ConfigManager.getInstance();
     config.setOption("shortcut." + action.name(), combination.getName());
     config.save();
