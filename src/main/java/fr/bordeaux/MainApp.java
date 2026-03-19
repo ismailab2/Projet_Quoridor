@@ -2,7 +2,10 @@ package fr.bordeaux;
 
 import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.config.ConfigManager;
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.Board;
+import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Player;
 import fr.bordeaux.gui.QuoridorApp;
 import fr.bordeaux.util.Logger;
 
@@ -11,21 +14,22 @@ public class MainApp {
 
   private static final Logger LOGGER = Logger.getInstance();
 
+  private static final String VERSION = "1.0.0";
+
+  /** Size of the game board (number of rows/columns). */
+  public static final int BOARD_SIZE = 9;
+
+  /** Number of players in the game. */
+  public static final int PLAYER_SIZE = 2;
+
   /** Private constructor to prevent instantiation of this utility class. */
   private MainApp() {}
 
-  private static final String VERSION = "1.0.0";
-
-  /** The standard size of the Quoridor board (9x9). */
-  public static final int BOARD_SIZE = 9;
-
-  /** The supported number of players for this version. */
-  public static final int PLAYER_SIZE = 2;
-
   /**
-   * Main entry point. Parses command line arguments and launches either the GUI or CLI.
+   * Main method. Entry point of the application. Handles command-line arguments, initializes
+   * logging, and launches GUI or CLI.
    *
-   * @param args Command line arguments.
+   * @param args Command-line arguments
    */
   public static void main(String[] args) {
 
@@ -34,48 +38,39 @@ public class MainApp {
     LOGGER.debug("verbose mode: "+config.getOption("verbose", "default"));
 
     boolean gui = false;
-    boolean cli = true;
+    boolean cli = false;
 
     for (int i = 0; i < args.length; i++) {
-
       String arg = args[i];
-
       switch (arg) {
         case "-h":
         case "--help":
           printHelp();
           System.exit(0);
-
         case "-V":
         case "--version":
           LOGGER.info("Qoridor version " + VERSION);
           System.exit(0);
-
         case "-v":
         case "--verbose":
           config.setOption("verbose", "true");
           break;
-
         case "-d":
         case "--debug":
           config.setOption("debug", "true");
           break;
-
         case "-g":
         case "--gui":
           gui = true;
           break;
-
         case "-c":
         case "--cli":
           cli = true;
           break;
-
         case "-b":
         case "--blitz":
           config.setOption("blitz", "true");
           break;
-
         case "-t":
         case "--time":
           if (i + 1 < args.length) {
@@ -87,7 +82,6 @@ public class MainApp {
             System.exit(1);
           }
           break;
-
         default:
           LOGGER.error(" option invalide -> " + arg);
           printHelp();
@@ -101,9 +95,7 @@ public class MainApp {
       System.exit(1);
     }
 
-    if (!gui && !cli) {
-      cli = true;
-    }
+    if (!gui && !cli) cli = true;
 
     boolean verbose = config.getBoolean("verbose", false);
     boolean debug = config.getBoolean("debug", false);
@@ -123,14 +115,14 @@ public class MainApp {
     }
 
     try {
-
       if (gui) {
+        LOGGER.debug("Lancement GUI");
         QuoridorApp.main(args);
       }
 
       if (cli) {
+        LOGGER.debug("Lancement CLI");
         Board board = new Board(BOARD_SIZE);
-
         GameState state;
         if (PLAYER_SIZE == 2 || PLAYER_SIZE == 4) {
           state = new GameState(board, Player.createDefaultPlayers());
@@ -139,10 +131,13 @@ public class MainApp {
           System.exit(1);
           return;
         }
-
         GameEngine engine = new GameEngine(state);
-        CliApp cliApp = new CliApp(engine);
-        cliApp.run();
+        try {
+          CliApp cliApp = new CliApp(engine);
+          cliApp.run();
+        } catch (Exception e) {
+          LOGGER.error("CLI. Cause: "+e.getClass().getSimpleName());
+        }
       }
 
       System.exit(0);
@@ -153,9 +148,8 @@ public class MainApp {
     }
   }
 
-  /** print the help to use programme */
+  /** Prints the command-line help information. */
   private static void printHelp() {
-
     LOGGER.info("Usage: qoridor [OPTIONS]");
     LOGGER.info("");
 

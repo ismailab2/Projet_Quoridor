@@ -337,11 +337,24 @@ public class GameState {
    */
   public List<Move> generateLegalMoves() {
     List<Move> res = new ArrayList<>();
+    for (Move m : generatePseudoLegalMoves()) {
+      if (RuleChecker.isMoveLegal(this, m)) {
+        res.add(m);
+      }
+    }
+    return res;
+  }
+
+  /**
+   * Generates all potential move candidates without rule validation.
+   *
+   * @return A list of pseudo-legal {@link Move} objects.
+   */
+  public List<Move> generatePseudoLegalMoves() {
     List<Move> all_possible_moves = new ArrayList<>();
     Position player_pos = getCurrentPlayer().getPosition();
     int x = player_pos.getX();
     int y = player_pos.getY();
-
     for (int i = -1; i < 2; i++) {
       for (int j = -1; j < 2; j++) {
         if (i != 0 || j != 0) {
@@ -367,13 +380,7 @@ public class GameState {
       }
     }
 
-    for (Move m : all_possible_moves) {
-      if (RuleChecker.isMoveLegal(this, m)) {
-        res.add(m);
-      }
-    }
-
-    return res;
+    return all_possible_moves;
   }
 
   /**

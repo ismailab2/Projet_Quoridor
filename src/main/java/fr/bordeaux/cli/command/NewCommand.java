@@ -98,7 +98,6 @@ public class NewCommand implements Command {
           if (!typePlayer.equals("h")
               && !typePlayer.equals("mcts")
               && !typePlayer.equals("mini")
-              && !typePlayer.equals("nn")
               && !typePlayer.equals("r")) {
             LOGGER.error("Wrong type, please enter h / mcts / mini / nn / r");
             i--;
@@ -117,17 +116,12 @@ public class NewCommand implements Command {
               }
             case "mcts":
               {
-                players[i] = new MCTSPlayer(inputName, positions[i]);
+                players[i] = new MctsPlayer(inputName, positions[i]);
                 break;
               }
             case "mini":
               {
                 players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
-                break;
-              }
-            case "nn":
-              {
-                players[i] = new NeuralNetPlayer(inputName, positions[i]);
                 break;
               }
             default:
