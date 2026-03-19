@@ -87,7 +87,7 @@ public class ShowCommand implements Command {
           break;
         }
       default:
-        LOGGER.error("The command  \"show"+tokens[1]+"\" doesn't exist...");
+        LOGGER.error("The command  \"show" + tokens[1] + "\" doesn't exist...");
         break;
     }
     return engine;

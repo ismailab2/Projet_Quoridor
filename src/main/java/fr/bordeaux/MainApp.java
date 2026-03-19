@@ -35,7 +35,7 @@ public class MainApp {
 
     ConfigManager config = ConfigManager.getInstance();
     config.load();
-    LOGGER.debug("verbose mode: "+config.getOption("verbose", "default"));
+    LOGGER.debug("verbose mode: " + config.getOption("verbose", "default"));
 
     boolean gui = false;
     boolean cli = false;
@@ -136,7 +136,7 @@ public class MainApp {
           CliApp cliApp = new CliApp(engine);
           cliApp.run();
         } catch (Exception e) {
-          LOGGER.error("CLI. Cause: "+e.getClass().getSimpleName());
+          LOGGER.error("CLI. Cause: " + e.getClass().getSimpleName());
         }
       }
 

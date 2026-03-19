@@ -34,10 +34,10 @@ public class HintCommand implements Command {
     Move hint = ia.getNextMove(engine.getState());
 
     if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
-      LOGGER.error("Suggested move: "+hint+" isn't legal");
+      LOGGER.error("Suggested move: " + hint + " isn't legal");
     }
     String bestMove = formatMove(hint);
-    LOGGER.info("Best move : "+bestMove);
+    LOGGER.info("Best move : " + bestMove);
     return engine;
   }
 

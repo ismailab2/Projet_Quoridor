@@ -2,13 +2,13 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
+import fr.bordeaux.util.Logger;
 import java.util.Arrays;
 import java.util.List;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
-import fr.bordeaux.util.Logger;
 
 /**
  * Command that starts a new game from the CLI. It allows configuring the board size and the number

@@ -1,8 +1,8 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import org.jline.reader.LineReader;
 import fr.bordeaux.util.Logger;
+import org.jline.reader.LineReader;
 
 /**
  * Command that exits the CLI application. Before quitting, the user is prompted to optionally save

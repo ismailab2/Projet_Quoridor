@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * auto-completion.
  */
 public class CliApp {
-  
+
   /** Constant representing a single unique match for command completion. */
   private static final int UNIQUE_MATCH = 1;
 
@@ -193,9 +193,7 @@ public class CliApp {
                     new HumanPlayer("Bob", new Position(8, 4))))));
   }
 
-  /**
-   * Triggers an audible alert (beep) through the terminal.
-   */
+  /** Triggers an audible alert (beep) through the terminal. */
   private void beep() {
     if (this.terminal != null) {
       this.terminal.writer().print("\007");

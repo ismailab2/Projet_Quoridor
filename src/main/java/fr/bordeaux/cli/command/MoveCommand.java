@@ -45,17 +45,17 @@ public class MoveCommand implements Command {
   public GameEngine execute(GameEngine engine) {
     try {
       if (move.contains("-") && (move.length() == 5 || move.length() == 7)) {
-        LOGGER.debug("You played: "+this.move);
+        LOGGER.debug("You played: " + this.move);
         return handleMove(engine);
       } else if ((move.contains("v") || move.contains("h")) && move.length() == 3) {
-        LOGGER.debug("You played: "+this.move);
+        LOGGER.debug("You played: " + this.move);
         return handleWall(engine);
       } else {
         LOGGER.debug("Please use help to see how to give a valid command");
         return engine;
       }
     } catch (Exception e) {
-      LOGGER.error("Error while reading the move "+this.move);
+      LOGGER.error("Error while reading the move " + this.move);
       return engine;
     }
   }
