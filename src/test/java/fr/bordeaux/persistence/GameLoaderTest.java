@@ -36,27 +36,19 @@ public class GameLoaderTest {
   public void testLoadGame() throws IOException, GameLoadException {
     GameState loaded = GameLoader.loadGame(TEST_FILE);
 
-    System.out.println("Joueur courant : " + (loaded.getCurrentIndexPlayer() + 1));
-    System.out.println("Joueur 1 : " + loaded.getPlayers().get(0).getPosition());
-    System.out.println("Joueur 2 : " + loaded.getPlayers().get(1).getPosition());
-    System.out.println("Murs J1 : " + loaded.getPlayers().get(0).getRemainingWalls());
-    System.out.println("Murs J2 : " + loaded.getPlayers().get(1).getRemainingWalls());
-  }
+    assertNotNull(loaded);
+    assertEquals(2, loaded.getPlayers().size());
+    assertEquals(0, loaded.getCurrentIndexPlayer());
+    assertEquals(new Position(1, 4), loaded.getPlayers().get(0).getPosition());
+    assertEquals(new Position(8, 4), loaded.getPlayers().get(1).getPosition());
+    assertEquals(10, loaded.getPlayers().get(0).getRemainingWalls());
+    assertEquals(9, loaded.getPlayers().get(1).getRemainingWalls());
 
-  @Test
-  public void testLoadGameErreur() throws IOException {
-    PrintWriter writer = new PrintWriter(new FileWriter("erreur.txt"));
-    writer.println("mauvais_entete");
-    writer.println("2  # Couleur du joueur courant");
-    writer.close();
-
-    try {
-      GameLoader.loadGame("erreur.txt");
-    } catch (GameLoadException e) {
-      System.out.println("Type erreur : " + e.getErrorType());
-      System.out.println("Ligne : " + e.getLineNumber());
-      System.out.println("Message : " + e.getMessage());
-    }
+    assertFalse(
+        loaded
+            .getBoard()
+            .getGraph()
+            .hasEdge(loaded.getBoard().id(2, 2), loaded.getBoard().id(3, 2)));
   }
 
   @Test
