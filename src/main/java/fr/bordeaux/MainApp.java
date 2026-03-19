@@ -7,172 +7,249 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.gui.QuoridorApp;
-import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
-import java.util.Locale;
+import java.io.IOException;
 
 /** Entry point of the Quoridor application. */
-public class MainApp {
+public final class MainApp {
 
+  /** Logger principal de l'application */
   private static final Logger LOGGER = Logger.getInstance();
 
+  /** Version de l'application */
   private static final String VERSION = "1.0.0";
 
-  /** Size of the game board (number of rows/columns). */
+  /** Taille du plateau */
   public static final int BOARD_SIZE = 9;
 
-  /** Number of players in the game. */
+  /** Nombre de joueurs */
   public static final int PLAYER_SIZE = 2;
 
-  /** Private constructor to prevent instantiation of this utility class. */
+  /** Constructeur privé (classe utilitaire) */
   private MainApp() {}
 
   /**
-   * Main method. Entry point of the application. Handles command-line arguments, initializes
-   * logging, and launches GUI or CLI.
+   * Main method.
    *
-   * @param args Command-line arguments
+   * @param args arguments de la ligne de commande
    */
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
+    // initI18n();
 
-    LOGGER.info(I18n.get("test"));
-    I18n.setLocale(Locale.ENGLISH);
-    LOGGER.info(I18n.get("test"));
+    final ConfigManager config = loadConfig();
+    final AppMode mode = parseArgs(args, config);
+    validateMode(mode);
+    applyConfigLogs(config);
+    runApplication(mode, args, config);
+  }
 
-    ConfigManager config = ConfigManager.getInstance();
+  /*
+   private static void initI18n() {
+     if (LOGGER.isInfoEnabled()) {
+       LOGGER.info(I18n.get("test"));
+     }
+     //I18n.setLocale(Locale.ENGLISH);
+   }
+
+  */
+
+  private static ConfigManager loadConfig() {
+    final ConfigManager config = ConfigManager.getInstance();
     config.load();
-    LOGGER.debug("verbose mode: " + config.getOption("verbose", "default"));
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Configuration loaded");
+    }
+
+    return config;
+  }
+
+  private static AppMode parseArgs(final String[] args, final ConfigManager config) {
     boolean gui = false;
     boolean cli = false;
 
     for (int i = 0; i < args.length; i++) {
-      String arg = args[i];
+      final String arg = args[i];
+
       switch (arg) {
         case "-h":
         case "--help":
           printHelp();
           System.exit(0);
+          break;
+
         case "-V":
         case "--version":
-          LOGGER.info("Qoridor version " + VERSION);
+          logInfo("Quoridor version " + VERSION);
           System.exit(0);
+          break;
+
         case "-v":
         case "--verbose":
           config.setOption("verbose", "true");
           break;
+
         case "-d":
         case "--debug":
           config.setOption("debug", "true");
           break;
+
         case "-g":
         case "--gui":
           gui = true;
           break;
+
         case "-c":
         case "--cli":
           cli = true;
           break;
+
         case "-b":
         case "--blitz":
           config.setOption("blitz", "true");
           break;
+
         case "-t":
         case "--time":
-          if (i + 1 < args.length) {
-            String value = args[++i];
-            config.setOption("timeout", value);
-          } else {
-            LOGGER.error(" --time nécessite une valeur.");
-            printHelp();
-            System.exit(1);
-          }
+          i++;
+          handleTimeArgument(args, i, config);
           break;
+
         default:
-          LOGGER.error(" option invalide -> " + arg);
+          logError("Option invalide -> " + arg);
           printHelp();
           System.exit(1);
+          break;
       }
     }
 
-    if (gui && cli) {
-      LOGGER.error(" --gui et --cli sont incompatibles.");
+    return new AppMode(gui, cli);
+  }
+
+  private static void handleTimeArgument(
+      final String[] args, final int index, final ConfigManager config) {
+
+    if (index < args.length) {
+      final String value = args[index];
+      config.setOption("timeout", value);
+    } else {
+      logError("--time nécessite une valeur.");
       printHelp();
       System.exit(1);
     }
+  }
 
-    if (!gui && !cli) cli = true;
-
-    boolean verbose = config.getBoolean("verbose", false);
-    boolean debug = config.getBoolean("debug", false);
-    boolean blitz = config.getBoolean("blitz", false);
-    int timeout = config.getInt("timeout", 30);
-
-    if (verbose) {
-      LOGGER.info("Mode verbeux activé");
-    }
-
-    if (debug) {
-      LOGGER.info("Mode debug activé");
-    }
-
-    if (blitz) {
-      LOGGER.info("Mode blitz : " + timeout + " minutes");
-    }
-
-    try {
-      if (gui) {
-        LOGGER.debug("Lancement GUI");
-        QuoridorApp.main(args);
-      }
-
-      if (cli) {
-        LOGGER.debug("Lancement CLI");
-        Board board = new Board(BOARD_SIZE);
-        GameState state;
-        if (PLAYER_SIZE == 2 || PLAYER_SIZE == 4) {
-          state = new GameState(board, Player.createDefaultPlayers());
-        } else {
-          LOGGER.error(" Invalid number of players.");
-          System.exit(1);
-          return;
-        }
-        GameEngine engine = new GameEngine(state);
-        try {
-          CliApp cliApp = new CliApp(engine);
-          cliApp.run();
-        } catch (Exception e) {
-          LOGGER.error("CLI. Cause: " + e.getClass().getSimpleName());
-        }
-      }
-
-      System.exit(0);
-
-    } catch (Exception e) {
-      LOGGER.error(" Brutal interruption. Cause: " + e.getClass().getSimpleName());
+  private static void validateMode(final AppMode mode) {
+    if (mode.gui() && mode.cli()) {
+      logError("--gui et --cli sont incompatibles.");
+      printHelp();
       System.exit(1);
     }
   }
 
-  /** Prints the command-line help information. */
-  private static void printHelp() {
-    LOGGER.info("Usage: qoridor [OPTIONS]");
-    LOGGER.info("");
+  private static void applyConfigLogs(final ConfigManager config) {
+    final boolean verbose = config.getBoolean("verbose", false);
+    final boolean debug = config.getBoolean("debug", false);
+    final boolean blitz = config.getBoolean("blitz", false);
+    final int timeout = config.getInt("timeout", 30);
 
-    LOGGER.info("Options générales :");
-    LOGGER.info("  -h, --help        Affiche l'aide");
-    LOGGER.info("  -V, --version     Affiche la version");
-    LOGGER.info("  -v, --verbose     Mode verbeux");
-    LOGGER.info("  -d, --debug       Mode debug");
+    if (verbose) {
+      logInfo("Mode verbeux activé");
+    }
 
-    LOGGER.info("");
-    LOGGER.info("Modes :");
-    LOGGER.info("  -g, --gui         Interface graphique");
-    LOGGER.info("  -c, --cli         Mode ligne de commande (défaut)");
+    if (debug) {
+      logInfo("Mode debug activé");
+    }
 
-    LOGGER.info("");
-    LOGGER.info("Options blitz :");
-    LOGGER.info("  -b, --blitz       Active le mode blitz");
-    LOGGER.info("  -t, --time N      Temps en minutes (défaut 30)");
+    if (blitz) {
+      logInfo("Mode blitz : " + timeout + " minutes");
+    }
   }
+
+  private static void runApplication(
+      final AppMode mode, final String[] args, final ConfigManager config) {
+
+    try {
+      if (mode.gui()) {
+        runGui(args);
+      } else {
+        runCli(config);
+      }
+      System.exit(0);
+    } catch (IllegalStateException e) {
+      logError("Erreur interne : " + e.getMessage());
+      System.exit(1);
+    }
+  }
+
+  private static void runGui(final String[] args) {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Lancement GUI");
+    }
+    QuoridorApp.main(args);
+  }
+
+  private static void runCli(final ConfigManager config) {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Lancement CLI");
+    }
+
+    final Board board = new Board(BOARD_SIZE);
+    final GameState state = createGameState(board);
+
+    final GameEngine engine = new GameEngine(state);
+
+    try {
+      final CliApp cliApp = new CliApp(engine);
+      cliApp.run();
+    } catch (IllegalStateException | IOException e) {
+      logError("Erreur CLI : " + e.getMessage());
+    }
+  }
+
+  private static GameState createGameState(final Board board) {
+    if (PLAYER_SIZE == 2 || PLAYER_SIZE == 4) {
+      return new GameState(board, Player.createDefaultPlayers());
+    }
+
+    logError("Nombre de joueurs invalide.");
+    System.exit(1);
+    throw new IllegalStateException("Invalid player count");
+  }
+
+  private static void logInfo(final String message) {
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info(message);
+    }
+  }
+
+  private static void logError(final String message) {
+    if (LOGGER.isErrorEnabled()) {
+      LOGGER.error(message);
+    }
+  }
+
+  private static void printHelp() {
+    logInfo("Usage: qoridor [OPTIONS]");
+    logInfo("");
+
+    logInfo("Options générales :");
+    logInfo("  -h, --help        Affiche l'aide");
+    logInfo("  -V, --version     Affiche la version");
+    logInfo("  -v, --verbose     Mode verbeux");
+    logInfo("  -d, --debug       Mode debug");
+
+    logInfo("");
+    logInfo("Modes :");
+    logInfo("  -g, --gui         Interface graphique");
+    logInfo("  -c, --cli         Mode CLI (défaut)");
+
+    logInfo("");
+    logInfo("Options blitz :");
+    logInfo("  -b, --blitz       Active le mode blitz");
+    logInfo("  -t, --time N      Temps en minutes (défaut 30)");
+  }
+
+  /** Représente le mode d'exécution. */
+  private record AppMode(boolean gui, boolean cli) {}
 }
