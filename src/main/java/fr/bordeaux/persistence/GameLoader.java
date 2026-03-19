@@ -26,7 +26,7 @@ public final class GameLoader {
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    List<String> lines = readAllLines(filename); // reads all lines from file
+      List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
     List<Player> players = allp_l.players; // creates all players
@@ -44,21 +44,6 @@ public final class GameLoader {
     return gameState;
   }
 
-  /**
-   * Opens a file and reads all its lines into a list.
-   *
-   * @param filename path of the file to read
-   * @return list containing all lines of the file
-   * @throws IOException if an input/output error occurs
-   */
-  private static List<String> readAllLines(String filename) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-      List<String> lines = new ArrayList<>();
-      String line;
-      while ((line = reader.readLine()) != null) lines.add(line);
-      return lines;
-    }
-  }
 
   // Checks that the first line is "[game]"
   // If not, throws GameLoadException with error type and line number
@@ -91,13 +76,6 @@ public final class GameLoader {
     return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
   }
 
-  // Creates the 2 players with their default starting positions
-  private static List<Player> createDefaultPlayers() {
-    return new ArrayList<>(
-        Arrays.asList(
-            new HumanPlayer("Joueur1", new Position(0, 4)),
-            new HumanPlayer("Joueur2", new Position(8, 4))));
-  }
 
   // Reads the full board, repositions players and places all walls
   private static void readBoard(
