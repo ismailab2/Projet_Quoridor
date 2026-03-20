@@ -7,14 +7,11 @@ import java.io.PrintStream;
 
 /**
  * Logger simple pour l'application Quoridor.
- * <p>
- * Supporte une sortie console ou fichier avec différents niveaux :
- * INFO, DEBUG, VERBOSE et ERROR.
- * </p>
  *
- * <p>
- * Implémente le pattern Singleton thread-safe.
- * </p>
+ * <p>Supporte une sortie console ou fichier avec différents niveaux : INFO, DEBUG, VERBOSE et
+ * ERROR.
+ *
+ * <p>Implémente le pattern Singleton thread-safe.
  */
 public final class Logger {
 
@@ -45,10 +42,7 @@ public final class Logger {
   /** Indique si le mode verbose est actif */
   private boolean verboseEnabled;
 
-  /**
-   * Constructeur privé (console).
-   * Initialise le logger avec une sortie standard.
-   */
+  /** Constructeur privé (console). Initialise le logger avec une sortie standard. */
   private Logger() {
     this.writer = System.out;
     refreshConfig();
@@ -171,9 +165,7 @@ public final class Logger {
   // CONFIG
   // =========================================================
 
-  /**
-   * Recharge la configuration depuis le {@link ConfigManager}.
-   */
+  /** Recharge la configuration depuis le {@link ConfigManager}. */
   public void refreshConfig() {
     final ConfigManager config = ConfigManager.getInstance();
 
