@@ -37,6 +37,7 @@ public class ConfigManager {
 
   /**
    * Returns the dynamic path to the config file
+   *
    * @return Path to the config file
    */
   private Path getFilePath() {
@@ -49,7 +50,6 @@ public class ConfigManager {
    */
   public void load() {
     Path path = getFilePath();
-    System.out.println(path.toString());
     if (Files.exists(path)) {
 
       try (InputStream in = Files.newInputStream(path)) {
