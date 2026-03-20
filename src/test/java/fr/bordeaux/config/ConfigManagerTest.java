@@ -34,7 +34,7 @@ public class ConfigManagerTest {
     ConfigManager config = ConfigManager.getInstance();
     config.load();
 
-    assertFalse(Files.exists(configFile));
+    assertTrue(Files.exists(configFile));
 
     assertEquals("true", config.getOption("verbose", "false"));
     assertEquals("false", config.getOption("blitz", "true"));

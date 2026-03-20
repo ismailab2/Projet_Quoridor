@@ -14,10 +14,6 @@ public class ConfigManager {
   /** Singleton instance of ConfigManager */
   private static ConfigManager INSTANCE;
 
-  /** Path to the configuration file in the user's home directory */
-  private static final String FILE =
-      System.getProperty("user.home") + File.separator + ".quoridorrc";
-
   /** Stores all configuration properties and shortcuts */
   private final Properties props = new Properties();
 
@@ -40,11 +36,20 @@ public class ConfigManager {
   }
 
   /**
+   * Returns the dynamic path to the config file
+   * @return Path to the config file
+   */
+  private Path getFilePath() {
+    return Paths.get(System.getProperty("user.home"), ".quoridorrc");
+  }
+
+  /**
    * Loads the configuration file if it exists. If the file does not exist, initializes default
    * values and saves them.
    */
   public void load() {
-    Path path = Paths.get(FILE);
+    Path path = getFilePath();
+    System.out.println(path.toString());
     if (Files.exists(path)) {
 
       try (InputStream in = Files.newInputStream(path)) {
@@ -67,7 +72,7 @@ public class ConfigManager {
 
   /** Saves the current properties to the configuration file. */
   public void save() {
-    try (OutputStream out = Files.newOutputStream(Paths.get(FILE))) {
+    try (OutputStream out = Files.newOutputStream(getFilePath())) {
 
       props.store(out, "Quoridor configuration");
 
