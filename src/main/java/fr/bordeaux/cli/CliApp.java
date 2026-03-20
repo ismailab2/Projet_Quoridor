@@ -2,6 +2,7 @@ package fr.bordeaux.cli;
 
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.core.*;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -13,17 +14,42 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
 /**
- * Main application class for the Command Line Interface (CLI) of the Quoridor game. This class
- * handles the terminal interaction loop, command registration, and auto-completion features using
- * the JLine library.
+ * Manages the Quoridor CLI, handling the terminal loop, command registration, and JLine-based
+ * auto-completion.
  */
 public class CliApp {
 
+  /** Constant representing a single unique match for command completion. */
+  private static final int UNIQUE_MATCH = 1;
+
+  /** The core engine managing the game logic, board state, and Quoridor rules. */
   private GameEngine engine;
+
+  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
   private Terminal terminal;
+
+  /**
+   * The line reader responsible for text editing, history management, and tab-completion
+   * interaction.
+   */
   private LineReader reader;
+
+  /** State flag that controls the main execution loop of the CLI application. */
   private boolean running = true;
+
+  /**
+   * Internal state used to track the "Tab" key behavior, toggling between an error beep and showing
+   * suggestions.
+   */
   private boolean firstTab = true;
+
+  /** Logger to display informations */
+  private static final Logger LOGGER = Logger.getInstance();
+
+  /**
+   * A registry mapping command names to functions that instantiate specific Command objects based
+   * on user input tokens.
+   */
   private Map<String, Function<String[], Command>> commandRegistry;
 
   /**
@@ -73,12 +99,15 @@ public class CliApp {
     this.running = true;
 
     // Création du Completer intelligent
+    // Création du Completer intelligent
     Completer smartCompleter =
         (reader, line, candidates) -> {
           String buffer = line.line();
+          // On utilise line.word() ou on split pour trouver le token actuel
           String[] tokens = buffer.trim().split("\\s+");
-          if (tokens.length == 0 || buffer.isEmpty()) {
-            firstTab = true; // reset si vide
+
+          if (buffer.isEmpty()) {
+            firstTab = true;
             return;
           }
 
@@ -90,23 +119,36 @@ public class CliApp {
 
           List<String> matches;
 
-          // Sous-commandes "show"
-          if (tokens[0].equals("show") && tokens.length == 2) {
-            matches = showOptions.stream().filter(opt -> opt.startsWith(tokens[1])).toList();
+          // Logique de filtrage
+          if (tokens.length >= 1 && tokens[0].equals("show")) {
+            String subToken = (tokens.length == 2) ? tokens[1] : "";
+            matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
           } else {
             matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();
           }
 
+          // --- LOGIQUE DES 3 CAS ---
+
           if (matches.isEmpty()) {
-            try {
-              reader.getTerminal().writer().print("\007"); // bip
-              reader.getTerminal().flush();
-            } catch (Exception ignored) {
-            }
-            firstTab = true;
-          } else if (matches.size() == 1) {
+            // CAS 1 : Aucun match -> Bip
+            beep();
+          } else if (matches.size() == UNIQUE_MATCH) {
+            // CAS 2 : Un seul match -> Complétion directe
             candidates.add(new Candidate(matches.get(0)));
             firstTab = true;
+          } else {
+            // CAS 3 : Plusieurs matchs
+            if (firstTab) {
+              // Premier Tab : on bip pour prévenir qu'il y a plusieurs choix
+              beep();
+              firstTab = false;
+            } else {
+              // Deuxième Tab : on remplit les candidates pour que JLine les affiche
+              for (final String match : matches) {
+                candidates.add(new Candidate(match));
+              }
+              firstTab = true;
+            }
           }
         };
 
@@ -131,7 +173,7 @@ public class CliApp {
     commandRegistry.put("undo", UndoCommand::new);
     commandRegistry.put("redo", RedoCommand::new);
     commandRegistry.put("show", ShowCommand::new);
-    commandRegistry.put("set", tokens -> new SetCommand());
+    commandRegistry.put("set", SetCommand::new);
   }
 
   /**
@@ -148,6 +190,14 @@ public class CliApp {
                 List.of(
                     new HumanPlayer("Human", new Position(0, 4)),
                     new HumanPlayer("Bob", new Position(8, 4))))));
+  }
+
+  /** Triggers an audible alert (beep) through the terminal. */
+  private void beep() {
+    if (this.terminal != null) {
+      this.terminal.writer().print("\007");
+      this.terminal.flush();
+    }
   }
 
   /**
@@ -174,17 +224,17 @@ public class CliApp {
    */
   public void run() {
     if (engine != null) {
-      ShowCommand show = new ShowCommand(new String[] {"show", "board"});
+      final ShowCommand show = new ShowCommand(new String[] {"show", "board"});
       show.execute(engine);
     }
     while (running) {
-      String line = reader.readLine(">> ");
+      final String line = reader.readLine(">> ");
       fetch(line);
     }
     try {
       terminal.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      LOGGER.error("Terminal has been brutally closed...");
     }
   }
 
@@ -194,16 +244,58 @@ public class CliApp {
    *
    * @param input the raw command entered by the user
    */
-  public void fetch(String input) {
-    firstTab = true; // reset Tab state
-    String[] tokens = input.trim().split("\\s+");
-    String command = tokens[0].toLowerCase(Locale.US);
-    Command cmd;
+  public void fetch(final String input) {
+    firstTab = true;
+    final String[] tokens = input.trim().split("\\s+");
+    if (tokens.length == 0 || tokens[0].isEmpty()) {
+      return;
+    }
+
+    final String command = tokens[0].toLowerCase(Locale.US);
+    final Command cmd;
+
     if (commandRegistry.containsKey(command)) {
       cmd = commandRegistry.get(command).apply(tokens);
     } else {
+      // --- Suggestion Logic ---
+      String suggestion = null;
+      int bestDistance = 3; // Only suggest if the mistake is small (1 or 2 chars)
+
+      for (final String registered : commandRegistry.keySet()) {
+        final int dist = calculateDistance(command, registered);
+        if (dist < bestDistance) {
+          bestDistance = dist;
+          suggestion = registered;
+        }
+      }
+
+      if (suggestion != null) {
+        LOGGER.debug("Unknown command: '" + command + "'");
+        LOGGER.info("Did you mean: " + suggestion + " ? ");
+      }
+
+      // Default behavior (interpret as move)
       cmd = new MoveCommand(input);
     }
     engine = cmd.execute(engine);
+  }
+
+  private int calculateDistance(final String userCmd, final String command) {
+    final int[][] distance = new int[userCmd.length() + 1][command.length() + 1];
+    for (int i = 0; i <= userCmd.length(); i++) {
+      for (int j = 0; j <= command.length(); j++) {
+        if (i == 0) {
+          distance[i][j] = j;
+        } else if (j == 0) {
+          distance[i][j] = i;
+        } else {
+          distance[i][j] =
+              Math.min(
+                  distance[i - 1][j - 1] + (userCmd.charAt(i - 1) == command.charAt(j - 1) ? 0 : 1),
+                  Math.min(distance[i - 1][j] + 1, distance[i][j - 1] + 1));
+        }
+      }
+    }
+    return distance[userCmd.length()][command.length()];
   }
 }

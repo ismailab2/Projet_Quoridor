@@ -1,13 +1,12 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that suggests the best possible move for the current player. The move is computed using a
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class HintCommand implements Command {
 
   /** Logger for AI calculation messages. */
-  private static final Logger logger = LoggerFactory.getLogger(HintCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a new HintCommand. */
   public HintCommand() {}
@@ -30,18 +29,15 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    logger.info("Calculating best move...");
-    /*     MinimaxPlayer ia =
-    MinimaxPlayer.builder("hint", engine.getState().getCurrentPlayer().getPosition())
-        .withHeuristic("advanced")
-        .build(); */
-    MCTSPlayer ia = new MCTSPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
+    LOGGER.info("Calculating best move...");
+    MctsPlayer ia = new MctsPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
     Move hint = ia.getNextMove(engine.getState());
 
-    logger.debug("Move legality check: {}", RuleChecker.isMoveLegal(engine.getState(), hint));
-
+    if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
+      LOGGER.error("Suggested move: " + hint + " isn't legal");
+    }
     String bestMove = formatMove(hint);
-    logger.info("Best move : {}", bestMove);
+    LOGGER.info("Best move : " + bestMove);
     return engine;
   }
 
@@ -74,15 +70,16 @@ public class HintCommand implements Command {
   /** Displays help information about the hint command, including its usage and description. */
   @Override
   public void helpText() {
-    logger.info("=== HINT Command ===\n");
-    logger.info("Usage:");
-    logger.info("  hint\n");
-    logger.info("Description:");
-    logger.info("  Provides a suggestion for the next move.\n");
-    logger.info("  The suggested move is computed based on the current game state.\n");
-    logger.debug("Displays:");
-    logger.debug("  Should display a legal pawn or wall move.\n  Example:");
-    logger.debug("    Pawn move -> b3-b4");
-    logger.debug("    Wall move -> b3v / b3h");
+    LOGGER.info("=== HINT Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  hint\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Provides a suggestion for the next move.\n");
+    LOGGER.info("  The suggested move is computed based on the current game state.\n");
+    LOGGER.verbose("Displays:");
+    LOGGER.verbose("  Should display a legal pawn or wall move.");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  Pawn move -> b3-b4");
+    LOGGER.verbose("  Wall move -> b3v / b3h");
   }
 }

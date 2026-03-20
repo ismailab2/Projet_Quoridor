@@ -103,6 +103,15 @@ public abstract class Player {
     return remainingWalls;
   }
 
+  /**
+   * Sets the number of walls remaining
+   *
+   * @param walls The count of wanted walls
+   */
+  public void setRemainingWalls(int walls) {
+    this.remainingWalls = walls;
+  }
+
   /** Decrements the count of remaining walls if the player has any left. */
   public void useWall() {
     if (remainingWalls > 0) remainingWalls--;

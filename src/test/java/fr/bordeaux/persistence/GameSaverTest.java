@@ -1,7 +1,6 @@
 package fr.bordeaux.persistence;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
@@ -23,8 +22,19 @@ public class GameSaverTest {
     players.add(new HumanPlayer("Joueur2", new Position(8, 4)));
 
     GameState state = new GameState(board, players, 1);
-    GameSaver.saveGame(state, "test.txt");
-    System.out.println("Fichier généré !");
+    String filename = "test.txt";
+    GameSaver.saveGame(state, filename);
+
+    File file = new File(filename);
+    assertTrue(file.exists(), "Le fichier doit être créé");
+
+    List<String> lines = Files.readAllLines(file.toPath());
+    assertTrue(lines.contains("[settings]"));
+    assertTrue(lines.contains("[game]"));
+    assertTrue(lines.contains("2  # Current player color"));
+    assertTrue(lines.contains("walls: 10 10"));
+    assertTrue(lines.stream().anyMatch(line -> line.contains("_")));
+    assertTrue(lines.stream().anyMatch(line -> line.contains("|")));
   }
 
   @Test

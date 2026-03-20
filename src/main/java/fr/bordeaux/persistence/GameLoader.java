@@ -1,8 +1,7 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.ai.MinimaxPlayer;
-import fr.bordeaux.ai.NeuralNetPlayer;
 import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
@@ -27,7 +26,7 @@ public final class GameLoader {
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    List<String> lines = readAllLines(filename); // reads all lines from file
+    List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
     List<Player> players = allp_l.players; // creates all players
@@ -44,22 +43,6 @@ public final class GameLoader {
     applyMode(gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
-  }
-
-  /**
-   * Opens a file and reads all its lines into a list.
-   *
-   * @param filename path of the file to read
-   * @return list containing all lines of the file
-   * @throws IOException if an input/output error occurs
-   */
-  private static List<String> readAllLines(String filename) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-      List<String> lines = new ArrayList<>();
-      String line;
-      while ((line = reader.readLine()) != null) lines.add(line);
-      return lines;
-    }
   }
 
   // Checks that the first line is "[game]"
@@ -91,14 +74,6 @@ public final class GameLoader {
 
   private static int readBoardSize(List<String> lines, int currentLine) {
     return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
-  }
-
-  // Creates the 2 players with their default starting positions
-  private static List<Player> createDefaultPlayers() {
-    return new ArrayList<>(
-        Arrays.asList(
-            new HumanPlayer("Joueur1", new Position(0, 4)),
-            new HumanPlayer("Joueur2", new Position(8, 4))));
   }
 
   // Reads the full board, repositions players and places all walls
@@ -254,10 +229,7 @@ public final class GameLoader {
               myCurrentLine);
         }
       case "mcts":
-        return new PlayerAndLine(new MCTSPlayer(pName, pPostion), myCurrentLine);
-
-      case "neural-network":
-        return new PlayerAndLine(new NeuralNetPlayer(pName, pPostion), myCurrentLine);
+        return new PlayerAndLine(new MctsPlayer(pName, pPostion), myCurrentLine);
 
       case "random":
         return new PlayerAndLine(new RandomPlayer(pName, pPostion), myCurrentLine);

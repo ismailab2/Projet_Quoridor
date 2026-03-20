@@ -1,9 +1,8 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.util.Logger;
 import org.jline.reader.LineReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Command that exits the CLI application. Before quitting, the user is prompted to optionally save
@@ -14,7 +13,7 @@ public class QuitCommand implements Command {
   private final LineReader reader;
 
   /** Logger to display closing information. */
-  private static final Logger logger = LoggerFactory.getLogger(QuitCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a QuitCommand using the provided line reader to interact with the user.
@@ -44,10 +43,10 @@ public class QuitCommand implements Command {
         String path = reader.readLine("File path >> ");
         new SaveCommand(path).execute(engine);
       }
-      logger.info("Exiting Quoridor...");
+      LOGGER.info("Exiting Quoridor...");
       return engine;
     } catch (Exception e) {
-      logger.error("Error during quit process", e);
+      LOGGER.error("Error during quit process", e);
     }
     return engine;
   }
@@ -55,12 +54,12 @@ public class QuitCommand implements Command {
   /** Displays help information about the quit command, including its usage and behavior. */
   @Override
   public void helpText() {
-    logger.info("=== QUIT Command ===\n");
-    logger.info("Usage:");
-    logger.info("  quit\n");
-    logger.info("Description:");
-    logger.info("  Exits the application.\n");
-    logger.debug("Information:");
-    logger.debug("  This command will ask you if you want to save before quitting.\n");
+    LOGGER.info("=== QUIT Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  quit\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Exits the application.\n");
+    LOGGER.verbose("Information:");
+    LOGGER.verbose("  This command will ask you if you want to save before quitting.\n");
   }
 }

@@ -2,8 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.persistence.GameLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.bordeaux.util.Logger;
 
 /**
  * Command that loads a saved game from a file. The loaded game replaces the current game engine
@@ -15,7 +14,7 @@ public class LoadCommand implements Command {
   private String[] tokens;
 
   /** Logger to display informations */
-  private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a LoadCommand with the provided command tokens.
@@ -37,15 +36,15 @@ public class LoadCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (tokens.length < 2) {
-      logger.info("Usage: load FILE");
+      LOGGER.info("Usage: load FILE");
       return engine;
     }
     try {
-      logger.info("Loading game state from file: {}", tokens[1]);
+      LOGGER.info("Loading game state from file: " + tokens[1]);
       return new GameEngine(GameLoader.loadGame(tokens[1]));
     } catch (Exception e) {
       e.printStackTrace();
-      logger.error("Error while loading file {}", tokens[1], e);
+      LOGGER.error("Error while loading file " + tokens[1], e);
     }
     return engine;
   }
@@ -56,14 +55,14 @@ public class LoadCommand implements Command {
    */
   @Override
   public void helpText() {
-    logger.info("=== LOAD Command ===\n");
-    logger.info("Usage:");
-    logger.info("  load FILE\n");
-    logger.info("Description:");
-    logger.info("  Loads a saved game from the specified FILE.\n");
-    logger.info("Arguments:");
-    logger.info("  FILE   : Path to the save file (required).\n");
-    logger.info("Example:");
-    logger.info("  load savegame.txt\n");
+    LOGGER.info("=== LOAD Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  load FILE\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Loads a saved game from the specified FILE.\n");
+    LOGGER.verbose("Arguments:");
+    LOGGER.verbose("  FILE   : Path to the save file (required).\n");
+    LOGGER.verbose("Example:");
+    LOGGER.verbose("  load savegame.txt\n");
   }
 }
