@@ -70,6 +70,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   @SuppressWarnings(SUPPRESS_LOD)
+  /** Initializes the TensorFlow graph for the neural network. */
   private void initGraph() {
     this.graph = new Graph();
     final Ops tfOps = Ops.create(graph);
@@ -238,18 +239,38 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     return path.isEmpty() ? 20 : path.size() - 1;
   }
 
+  /**
+   * Returns the session used by the neural network.
+   *
+   * @return the session
+   */
   protected Session getSession() {
     return session;
   }
 
+  /**
+   * Returns the graph used by the neural network.
+   *
+   * @return the graph
+   */
   protected Graph getGraph() {
     return graph;
   }
 
+  /**
+   * Returns the input placeholder used by the neural network.
+   *
+   * @return the input placeholder
+   */
   protected Placeholder<TFloat32> getInputPlaceholder() {
     return inputPlaceholder;
   }
 
+  /**
+   * Returns the prediction used by the neural network.
+   *
+   * @return the prediction
+   */
   protected Operand<TFloat32> getPrediction() {
     return prediction;
   }

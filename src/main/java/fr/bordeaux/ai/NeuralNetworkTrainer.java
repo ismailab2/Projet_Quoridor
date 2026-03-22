@@ -32,7 +32,13 @@ public class NeuralNetworkTrainer {
     // Empty constructor to satisfy PMD
   }
 
-  /** Core training loop. Prepares tensors and runs SGD Target. */
+  /**
+   * Trains the neural network model.
+   *
+   * @param evaluator the neural network evaluator
+   * @param numGames the number of games to simulate
+   * @param epochs the number of epochs to train for
+   */
   public void trainModel(
       final NeuralNetworkEvaluator evaluator, final int numGames, final int epochs) {
     final Ops ops = Ops.create(evaluator.getGraph());
