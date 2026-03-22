@@ -6,9 +6,10 @@ import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class GameLoaderTest {
-  /*
 
   private static final String TEST_FILE = "load_test.txt";
 
@@ -60,6 +61,104 @@ public class GameLoaderTest {
   }
 
   @Test
+  public void testVerticalWallInCellLine() throws IOException, GameLoadException {
+    String filename = "vertical_wall_board.txt";
+
+    try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+      writer.println("[settings]");
+      writer.println("verbose=false");
+      writer.println("blitz=false");
+      writer.println("constest=false");
+      writer.println("ai=false");
+      writer.println("turns-limit=20");
+      writer.println("debug=false");
+      writer.println("nb-players=2");
+      writer.println("player-1-name=Player1");
+      writer.println("player-1-starting-position=Position: 0, 4");
+      writer.println("player-2-name=Player2");
+      writer.println("player-2-starting-position=Position: 8, 4");
+      writer.println("[game]");
+      writer.println("1  # Current player color");
+      writer.println("9  # Board size");
+      writer.println("# Board (2 players)");
+      writer.println(". . . . 1 . . . .");
+      writer.println("                 ");
+      writer.println(". . .|. . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . 2 . . . .");
+      writer.println("walls: 10 10");
+      writer.println("[History]");
+    }
+
+    GameState loaded = GameLoader.loadGame(filename);
+    Board board = loaded.getBoard();
+
+    assertFalse(
+        board.getGraph().hasEdge(board.id(1, 2), board.id(1, 3)),
+        "Le mur vertical doit supprimer l'arête entre les deux cases");
+  }
+
+  @Test
+  public void testReadPlayersPositions() throws IOException, GameLoadException {
+    String filename = "players_positions_board.txt";
+
+    try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+      writer.println("[settings]");
+      writer.println("verbose=false");
+      writer.println("blitz=false");
+      writer.println("constest=false");
+      writer.println("ai=false");
+      writer.println("turns-limit=20");
+      writer.println("debug=false");
+      writer.println("nb-players=2");
+      writer.println("player-1-name=Player1");
+      writer.println("player-1-starting-position=Position: 0, 4");
+      writer.println("player-2-name=Player2");
+      writer.println("player-2-starting-position=Position: 8, 4");
+      writer.println("[game]");
+      writer.println("1  # Current player color");
+      writer.println("9  # Board size");
+      writer.println("# Board (2 players)");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . 1 . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . . . . .");
+      writer.println("                 ");
+      writer.println(". . . . . 2 . . .");
+      writer.println("walls: 10 10");
+      writer.println("[History]");
+    }
+
+    GameState loaded = GameLoader.loadGame(filename);
+
+    assertEquals(new Position(1, 2), loaded.getPlayers().get(0).getPosition());
+    assertEquals(new Position(8, 5), loaded.getPlayers().get(1).getPosition());
+  }
+
+  @Test
   public void testLoadGameHistory() throws IOException, GameLoadException {
     GameState loaded = GameLoader.loadGame(TEST_FILE);
     Move[] history = loaded.getMovesPlayed(); // Reverse order, last move is index 0
@@ -85,5 +184,4 @@ public class GameLoaderTest {
     assertTrue(aiPlayer.isUseIterativeDeepening());
     assertTrue(aiPlayer.getHeuristicName().equals("advanced"));
   }
-   */
 }
