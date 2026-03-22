@@ -19,10 +19,10 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class NeuralNetworkEvaluatorTest {
 
-  // 1000 games and 150 epochs
-  private static final int TEST_NUM_TRAINING_GAMES = 1000;
-  private static final int TEST_EPOCHS = 150;
-  private static final String MODEL_PATH = "src/test/java/fr/bordeaux/ai/quoridor_model.dat";
+  // 5000 games and 1000 epochs
+  private static final int TEST_NUM_TRAINING_GAMES = 5000;
+  private static final int TEST_EPOCHS = 750;
+  private static final String MODEL_PATH = "src/main/resources/nnmodels/default_quoridor_model.bin";
   private NeuralNetworkEvaluator evaluator;
   private GameState state;
 
@@ -33,7 +33,8 @@ public class NeuralNetworkEvaluatorTest {
 
     if (modelFile.exists()) {
       System.out.println("--- Chargement du modèle pré-entraîné ---");
-      evaluator = new NeuralNetworkEvaluator(MODEL_PATH);
+      evaluator = NeuralNetworkEvaluator.loadDefault();
+
     } else {
       System.out.println("--- Aucun modèle trouvé. Entraînement en cours... ---");
       evaluator = new NeuralNetworkEvaluator(TEST_NUM_TRAINING_GAMES, TEST_EPOCHS);
@@ -95,7 +96,7 @@ public class NeuralNetworkEvaluatorTest {
     Player p2Near = new RandomPlayer("P2Near", new Position(8, 4));
     p1Near.setRemainingWalls(0);
     p2Near.setRemainingWalls(0);
-    p1Near.setPosition(new Position(7, 4)); // 1 step from goal row 8
+    p1Near.setPosition(new Position(7, 3)); // 1 step from goal row 8
     GameState nearState = new GameState(boardNear, Arrays.asList(p1Near, p2Near));
 
     // farState: both players stay at their canonical starting positions
@@ -105,7 +106,7 @@ public class NeuralNetworkEvaluatorTest {
     p1Far.setRemainingWalls(0);
     p2Far.setRemainingWalls(0);
     GameState farState = new GameState(boardFar, Arrays.asList(p1Far, p2Far));
-
+    evaluator.printWeights();
     int scoreNear = evaluator.evaluate(nearState);
     int scoreFar = evaluator.evaluate(farState);
     System.out.println("Score near: " + scoreNear);
