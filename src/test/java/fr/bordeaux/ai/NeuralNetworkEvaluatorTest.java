@@ -19,7 +19,7 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class NeuralNetworkEvaluatorTest {
 
-  // 5000 games and 1000 epochs
+  // 5000 games and 750 epochs
   private static final int TEST_NUM_TRAINING_GAMES = 5000;
   private static final int TEST_EPOCHS = 750;
   private static final String MODEL_PATH = "src/main/resources/nnmodels/default_quoridor_model.bin";
@@ -106,11 +106,8 @@ public class NeuralNetworkEvaluatorTest {
     p1Far.setRemainingWalls(0);
     p2Far.setRemainingWalls(0);
     GameState farState = new GameState(boardFar, Arrays.asList(p1Far, p2Far));
-    evaluator.printWeights();
     int scoreNear = evaluator.evaluate(nearState);
     int scoreFar = evaluator.evaluate(farState);
-    System.out.println("Score near: " + scoreNear);
-    System.out.println("Score far: " + scoreFar);
     int gap = scoreNear - scoreFar;
     assertTrue(
         gap >= 50,
