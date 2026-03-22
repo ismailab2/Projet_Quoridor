@@ -60,10 +60,24 @@ public final class MinimaxPlayer extends AiPlayer {
           (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
 
-    this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
+    this.heuristicFunction = determineHeuristic(this.heuristicName);
   }
 
-  /** Private constructor used by the copy() method for cloning the AI player. */
+  /**
+   * Private constructor used by the copy() method for cloning the AI player. This constructor
+   * allows for a complete state transfer including Minimax specific configurations like search
+   * depth and heuristic type.
+   *
+   * @param name The name of the AI player.
+   * @param current The current position of the pawn.
+   * @param start The starting position of the pawn.
+   * @param walls The number of remaining walls.
+   * @param score The current player score.
+   * @param depth The maximum search depth for the Minimax algorithm.
+   * @param timeLimit The maximum time allowed for reflection in seconds.
+   * @param iterativeDeepVal Whether to use iterative deepening during search.
+   * @param heuristicVal The name of the heuristic function to be used.
+   */
   private MinimaxPlayer(
       final String name,
       final Position current,
@@ -86,12 +100,13 @@ public final class MinimaxPlayer extends AiPlayer {
       this.mode =
           (final GameState state, final Long endTime) -> miniMax(state, this.searchDepth, endTime);
     }
-    this.heuristicFunction = determineHeuristic(this.heuristicName, this.getName());
+    this.heuristicFunction = determineHeuristic(this.heuristicName);
   }
 
   /**
-   * Static factory method for the builder. * @param name The player name.
+   * Static factory method for the builder.
    *
+   * @param name The player name.
    * @param pos The starting position.
    * @return A new Builder instance.
    */
@@ -105,18 +120,18 @@ public final class MinimaxPlayer extends AiPlayer {
    * @param heuristicNameP The name of the heuristic ("simple", "intermediate", or "advanced").
    * @return The corresponding heuristic class.
    */
-  private HeuristicEvaluator determineHeuristic(final String heuristicNameP, final String aiName) {
+  private HeuristicEvaluator determineHeuristic(final String heuristicNameP) {
     final HeuristicEvaluator chosenHeuristic;
     switch (heuristicNameP) {
       case "intermediate":
-        chosenHeuristic = new MediumHeuristic(aiName);
+        chosenHeuristic = new MediumHeuristic(this.getName());
         break;
       case "advanced":
-        chosenHeuristic = new AdvancedHeuristic(aiName);
+        chosenHeuristic = new AdvancedHeuristic(this.getName());
         break;
       case "simple":
       default:
-        chosenHeuristic = new SimpleHeuristic(aiName);
+        chosenHeuristic = new SimpleHeuristic(this.getName());
         break;
     }
     return chosenHeuristic;
@@ -315,6 +330,42 @@ public final class MinimaxPlayer extends AiPlayer {
         currentPlayer.giveBackWall();
       }
     }
+  }
+
+  /**
+   * Get the search depth of the MiniMax Player.
+   *
+   * @return The depth search value of Minimax
+   */
+  public int getSearchDepth() {
+    return this.searchDepth;
+  }
+
+  /**
+   * Get the limit time reflexion of the MiniMax Player.
+   *
+   * @return The reflexion time value of Minimax
+   */
+  public int getLimitTime() {
+    return this.reflexionTime;
+  }
+
+  /**
+   * Get if the MiniMax Player use iterative deepening.
+   *
+   * @return The boolean representing if Minimax use Iterative Deepening
+   */
+  public boolean isUseIterativeDeepening() {
+    return this.useIterativeD;
+  }
+
+  /**
+   * Get the heuristicname of the MiniMax Player.
+   *
+   * @return The name of the heuristic selected
+   */
+  public String getHeuristicName() {
+    return this.heuristicName;
   }
 
   @Override

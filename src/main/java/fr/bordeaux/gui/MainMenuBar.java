@@ -5,9 +5,16 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
+/** Represents the main menu bar of the application. */
 public class MainMenuBar extends MenuBar {
+  /** Dispatcher used to execute selected menu actions. */
   private final ActionDispatcher dispatcher;
 
+  /**
+   * Creates the main menu bar and binds its actions to the dispatcher.
+   *
+   * @param dispatcher dispatcher used to handle menu actions
+   */
   public MainMenuBar(ActionDispatcher dispatcher) {
     this.dispatcher = dispatcher;
     getMenus().addAll(createFileMenu(), createGameMenu());

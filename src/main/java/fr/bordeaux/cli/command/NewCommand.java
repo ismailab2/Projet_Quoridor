@@ -2,6 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
+import fr.bordeaux.util.Logger;
 import java.util.Arrays;
 import java.util.List;
 import org.jline.reader.EndOfFileException;
@@ -15,9 +16,20 @@ import org.jline.terminal.Terminal;
  */
 public class NewCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
+
+  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
   private Terminal terminal;
+
+  /**
+   * The line reader responsible for text editing, history management, and tab-completion
+   * interaction.
+   */
   private LineReader reader;
+
+  /** Logger to display informations */
+  private static final Logger LOGGER = Logger.getInstance();
 
   /**
    * Creates a NewCommand with the given CLI tokens, terminal and line reader.
@@ -57,9 +69,8 @@ public class NewCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    if (tokens.length > 5) {
-      System.out.println("wrong amount of arguments...");
-    }
+    if (tokens.length > 5) LOGGER.error("wrong amount of arguments...");
+
     int size = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9) - 1;
     Position[] positions = {
       new Position(0, size / 2), new Position(size, size / 2),
@@ -79,22 +90,24 @@ public class NewCommand implements Command {
 
       for (int i = 0; i < nbPlayer; i++) {
         try {
-          System.out.println("Player's type available :");
-          System.out.println(
+          LOGGER.info("Player's type available :");
+          LOGGER.info(
               "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [nn] NeuralNetwork ia  - [r]andom ia");
           String typePlayer = reader.readLine("Player's type >> ");
           if (typePlayer == null) throw new EndOfFileException();
           if (!typePlayer.equals("h")
               && !typePlayer.equals("mcts")
               && !typePlayer.equals("mini")
-              && !typePlayer.equals("nn")
               && !typePlayer.equals("r")) {
-            System.out.println("Wrong type, please enter h / mcts / mini / nn / r");
+            LOGGER.error("Wrong type, please enter h / mcts / mini / nn / r");
             i--;
             continue;
           }
           String inputName = reader.readLine("Player's name >> ");
-          if (inputName == null) throw new EndOfFileException();
+          if (inputName == null) {
+            LOGGER.error("Should give a name to the player...");
+            throw new EndOfFileException();
+          }
           switch (typePlayer) {
             case "h":
               {
@@ -103,17 +116,12 @@ public class NewCommand implements Command {
               }
             case "mcts":
               {
-                players[i] = new MCTSPlayer(inputName, positions[i]);
+                players[i] = new MctsPlayer(inputName, positions[i]);
                 break;
               }
             case "mini":
               {
                 players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
-                break;
-              }
-            case "nn":
-              {
-                players[i] = new NeuralNetPlayer(inputName, positions[i]);
                 break;
               }
             default:
@@ -123,15 +131,18 @@ public class NewCommand implements Command {
               }
           }
         } catch (EndOfFileException | UserInterruptException e) {
-          System.err.println("Tout va bien, je m'arrête !\n");
+          LOGGER.debug("You choose to interrupt the interaction.");
           try {
             terminal.close();
           } catch (Exception exc) {
-            System.err.println("Terminal fermé");
+            LOGGER.error("Terminal closed.");
+          } finally {
             return engine;
           }
         }
       }
+      String setNbPlayers = "nb-players=" + nbPlayer;
+      new SetCommand(setNbPlayers).execute(engine);
       return new GameEngine(new GameState(board, Arrays.stream(players).toList()));
     }
   }
@@ -141,19 +152,19 @@ public class NewCommand implements Command {
    */
   @Override
   public void helpText() {
-    System.out.println("=== NEW Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  new");
-    System.out.println("  new [boardSize] [nbPlayer]\n");
-    System.out.println("Description:");
-    System.out.println("  Starts a new game.\n");
-    System.out.println("Arguments (optional):");
-    System.out.println("  boardSize    : An odd integer greater than or equal to 3.");
-    System.out.println("  playerCount  : Must be either 2 or 4.\n");
-    System.out.println("If no arguments are provided, default settings are used.\n");
-    System.out.println("Examples:");
-    System.out.println("  new       -> 9x9 board with 2 players");
-    System.out.println("  new 5     -> 5x5 board with 2 players");
-    System.out.println("  new 7 4   -> 7x7 board with 4 players\n");
+    LOGGER.info("=== NEW Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  new");
+    LOGGER.info("  new [boardSize] [nbPlayer]\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Starts a new game.\n");
+    LOGGER.info("Arguments (optional):");
+    LOGGER.info("  boardSize    : An odd integer greater than or equal to 3.");
+    LOGGER.info("  playerCount  : Must be either 2 or 4.\n");
+    LOGGER.info("If no arguments are provided, default settings are used.\n");
+    LOGGER.verbose("Examples:");
+    LOGGER.verbose("  new       -> 9x9 board with 2 players");
+    LOGGER.verbose("  new 5     -> 5x5 board with 2 players");
+    LOGGER.verbose("  new 7 4   -> 7x7 board with 4 players\n");
   }
 }

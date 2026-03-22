@@ -1,27 +1,38 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.ai.MCTSPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.ai.MinimaxPlayer;
-import fr.bordeaux.ai.NeuralNetPlayer;
 import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
 
-public class GameLoader {
+/** Utility class used to load a game state from a save file. */
+public final class GameLoader {
   // Board size : always 9x9
-  private static final int SIZE = 9;
+  private static int SIZE = 9;
 
   private static final int BOARD_START = 3;
 
-  // Loads a file and reconstructs the GameState
+  /** Private constructor to prevent instantiation. */
+  private GameLoader() {}
+
+  /**
+   * Loads a saved game from a file and rebuilds the corresponding game state.
+   *
+   * @param filename path of the save file to load
+   * @return the reconstructed game state
+   * @throws IOException if an input/output error occurs while reading the file
+   * @throws GameLoadException if the file content is invalid or inconsistent
+   */
   public static GameState loadGame(String filename) throws IOException, GameLoadException {
-    List<String> lines = readAllLines(filename); // reads all lines from file
+    List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
     List<Player> players = allp_l.players; // creates all players
     int currentLine = allp_l.nextLine; // Line after settings
     validateHeader(lines, currentLine); // checks [game] header
+    SIZE = readBoardSize(lines, currentLine);
     Board board = new Board(SIZE); // creates empty 9x9 board
     readBoard(lines, board, players, currentLine); // places walls and players
     readRemainingWalls(lines, players, currentLine); // restores wall counts
@@ -29,18 +40,9 @@ public class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
+    applyMode(gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
-  }
-
-  // Opens the file and reads all lines into a list
-  private static List<String> readAllLines(String filename) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-      List<String> lines = new ArrayList<>();
-      String line;
-      while ((line = reader.readLine()) != null) lines.add(line);
-      return lines;
-    }
   }
 
   // Checks that the first line is "[game]"
@@ -70,12 +72,8 @@ public class GameLoader {
     return Integer.parseInt(lines.get(currentLine + 1).trim().split("#")[0].trim()) - 1;
   }
 
-  // Creates the 2 players with their default starting positions
-  private static List<Player> createDefaultPlayers() {
-    return new ArrayList<>(
-        Arrays.asList(
-            new HumanPlayer("Joueur1", new Position(0, 4)),
-            new HumanPlayer("Joueur2", new Position(8, 4))));
+  private static int readBoardSize(List<String> lines, int currentLine) {
+    return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
   }
 
   // Reads the full board, repositions players and places all walls
@@ -111,7 +109,7 @@ public class GameLoader {
   private static void readRemainingWalls(
       List<String> lines, List<Player> players, int currentLine) {
     String[] parts =
-        lines.get(BOARD_START + currentLine + SIZE * 2 - 1).replace("walls:", "").trim().split(" ");
+        lines.get(BOARD_START + currentLine + SIZE * 2).replace("walls:", "").trim().split(" ");
     for (int i = 0; i < players.size(); i++) {
       int walls = Integer.parseInt(parts[i]);
       // Call useWall() until the player has the correct number of walls
@@ -149,7 +147,7 @@ public class GameLoader {
     while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
-      currentLine = res.nextLine + 1;
+      currentLine = res.nextLine;
     }
     return new AllPlayerAndLine(lPlayers, currentLine);
   }
@@ -175,7 +173,7 @@ public class GameLoader {
     if (pType.equals("ai")) {
       return readAiPlayer(lines, myCurrentLine, pName, pPostion);
     } else {
-      return new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine);
+      return new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine + 1);
     }
   }
 
@@ -208,7 +206,8 @@ public class GameLoader {
       final List<String> lines, int currentLine, final String pName, final Position pPostion) {
     Map<String, String> aiSettings = new HashMap<>();
     int myCurrentLine = currentLine + 1;
-    while (checkStartByAi(lines, myCurrentLine)) {
+    int index = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
+    while (checkSameIndex(lines, myCurrentLine, index)) {
       final String[] ls = lines.get(myCurrentLine).split("=");
       final String[] aiParameter = ls[0].split("-");
       aiSettings.put(aiParameter[aiParameter.length - 1], ls[1]);
@@ -230,10 +229,7 @@ public class GameLoader {
               myCurrentLine);
         }
       case "mcts":
-        return new PlayerAndLine(new MCTSPlayer(pName, pPostion), myCurrentLine);
-
-      case "neural-network":
-        return new PlayerAndLine(new NeuralNetPlayer(pName, pPostion), myCurrentLine);
+        return new PlayerAndLine(new MctsPlayer(pName, pPostion), myCurrentLine);
 
       case "random":
         return new PlayerAndLine(new RandomPlayer(pName, pPostion), myCurrentLine);
@@ -256,14 +252,67 @@ public class GameLoader {
   }
 
   /**
-   * Checks if the current line starts with the prefix "ai" indicating it contains an AI setting.
+   * Checks if the current line index player is the same of the index parameter.
    *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
-   * @return {@code true} if the line starts with "ai", {@code false} otherwise.
+   * @param index The index of a player
+   * @return {@code true} if the line has the same index player, {@code false} otherwise.
    */
-  private static boolean checkStartByAi(final List<String> lines, final int currentLine) {
-    return lines.get(currentLine).startsWith("ai");
+  private static boolean checkSameIndex(
+      final List<String> lines, final int currentLine, final int index) {
+    if (!lines.get(currentLine).contains("-")) {
+      return false;
+    }
+    return Integer.parseInt(lines.get(currentLine).split("-")[1]) == index;
+  }
+
+  /**
+   * Applies the game configuration modes (verbose, blitz, etc.) from the save file to the provided
+   * game state. *
+   *
+   * <p>This method modifies the {@code gameState} object directly by reference. It expects the
+   * settings to be located at specific line indices following the [settings] header, using a
+   * "key=value" format.
+   *
+   * @param gameState the game state to configure
+   * @param lines the list of strings representing the save file content
+   * @throws IllegalArgumentException if the number of players defined in settings mismatches the
+   *     actual players list size
+   * @throws IndexOutOfBoundsException if the file is shorter than expected
+   * @throws NumberFormatException if a numeric value (turnLimit, nbPlayers) is improperly formatted
+   */
+  private static void applyMode(GameState gameState, final List<String> lines) {
+    int startLineMode = 1;
+    final boolean isVerbose = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isBlitz = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isContest = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isAi = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final int turnLimit = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final boolean isDebug = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
+    startLineMode++;
+    final int nbPlayers = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
+
+    gameState.setAi(isAi);
+    gameState.setBlitz(isBlitz);
+    gameState.setContest(isContest);
+    gameState.setDebug(isDebug);
+    gameState.setVerbose(isVerbose);
+    gameState.setTurnLimit(turnLimit);
+
+    if (gameState.getPlayers().size() != nbPlayers) {
+      throw new IllegalArgumentException(
+          "The number of players read from the file ("
+              + nbPlayers
+              + ") and the actual players in the game ("
+              + gameState.getPlayers().size()
+              + ") are different");
+    }
   }
 
   private static Position coordToPos(String coord) {

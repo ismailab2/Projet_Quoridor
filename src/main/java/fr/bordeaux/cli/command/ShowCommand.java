@@ -3,8 +3,13 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.util.Logger;
+import java.io.PrintStream;
+import java.util.List;
 
 /**
  * Command that displays various information about the current game, such as the board state,
@@ -12,7 +17,14 @@ import fr.bordeaux.core.Position;
  */
 public class ShowCommand implements Command {
 
+  /** Command entered by the user */
   private String[] tokens;
+
+  /** Logger to display informations */
+  private static final Logger LOGGER = Logger.getInstance();
+
+  /** Where the show command will write */
+  private final PrintStream writer = System.out;
 
   /** Creates a ShowCommand with the default option "board". */
   public ShowCommand() {
@@ -55,24 +67,27 @@ public class ShowCommand implements Command {
       case "configurations":
       case "config":
         {
-          String[] configs = new String[] {"verbose", "blitz", "timeout"};
+          String[] configs =
+              new String[] {
+                "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
+              };
           for (String cf : configs) {
-            System.out.println(cf + " = " + ConfigManager.getInstance().getOption(cf, null));
+            writer.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));
           }
           break;
         }
       case "time":
         {
-          System.out.println("time");
+          writer.println("time");
           break;
         }
       case "history":
         {
-          System.out.println("history");
+          showHistory(engine);
           break;
         }
       default:
-        System.out.println("The command  \"save " + tokens[1] + "\" doesn't exist...");
+        LOGGER.error("The command  \"show" + tokens[1] + "\" doesn't exist...");
         break;
     }
     return engine;
@@ -81,64 +96,65 @@ public class ShowCommand implements Command {
   /** Displays general help information for the show command. */
   @Override
   public void helpText() {
-    System.out.println("=== SHOW Command ===\n");
-    System.out.println("Usage:");
-    System.out.println("  show board");
-    System.out.println("  show history");
-    System.out.println("  show time\n");
-    System.out.println("Description:");
-    System.out.println("  Displays information about the current game.\n");
-    System.out.println("Options:");
-    System.out.println("  board         : Displays the current board state.");
-    System.out.println("  history       : Displays the list of moves played so far.");
-    System.out.println("  configuration : Displays all the configuations set for the game.");
-    System.out.println("  time          : Displays the remaining time for each player.\n");
-    System.out.println(
-        "If you want the help with an option, you can enter \"help show [option]\".\n");
+    LOGGER.info("=== SHOW Command ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show board");
+    LOGGER.info("  show history");
+    LOGGER.info("  show configuration");
+    LOGGER.info("  show time\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays information about the current game.\n");
+    LOGGER.verbose("  If any option is given, displays the board by default");
+    LOGGER.verbose("Options:");
+    LOGGER.verbose("  board         : Displays the current board state.");
+    LOGGER.verbose("  history       : Displays the list of moves played so far.");
+    LOGGER.verbose("  configuration : Displays all the configuations set for the game.");
+    LOGGER.verbose("  time          : Displays the remaining time for each player.\n");
+    LOGGER.verbose("If you want the help with an option, you can enter \"help show [option]\".\n");
   }
 
   /** Displays help information for the "show board" option. */
   public void helpBoard() {
-    System.out.println("=== SHOW BOARD ===\n");
-    System.out.println("Usage:");
-    System.out.println("  show board\n");
-    System.out.println("Description:");
-    System.out.println("  Displays the current state of the board.\n");
+    LOGGER.info("=== SHOW BOARD ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show board\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the current state of the board.\n");
   }
 
   /** Displays help information for the "show history" option. */
   public void helpHistory() {
-    System.out.println("=== SHOW HISTORY ===\n");
-    System.out.println("Usage:");
-    System.out.println("  show history\n");
-    System.out.println("Description:");
-    System.out.println("  Displays the chronological list of all moves played.\n");
+    LOGGER.info("=== SHOW HISTORY ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show history\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the chronological list of all moves played.\n");
   }
 
   /** Displays help information for the "show time" option. */
   public void helpTime() {
-    System.out.println("=== SHOW TIME ===\n");
-    System.out.println("Usage:");
-    System.out.println("  show time\n");
-    System.out.println("Description:");
-    System.out.println("  Displays the remaining time for each player.\n");
-    System.out.println("  Only relevant if a timed mode is active.\n");
+    LOGGER.info("=== SHOW TIME ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show time\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the remaining time for each player.\n");
+    LOGGER.info("  Only relevant if a timed mode is active.\n");
   }
 
   /** Displays help information for the "show configuration" option. */
   public void helpConfig() {
-    System.out.println("=== SHOW CONFIGURATION ===\n");
-    System.out.println("Usage:");
-    System.out.println("  show configuration\n");
-    System.out.println("Description:");
-    System.out.println("  Displays the current game configuration.\n");
-    System.out.println("  This includes all active settings such as:");
-    System.out.println("    - Board size");
-    System.out.println("    - Number of players");
-    System.out.println("    - Game mode (e.g., Blitz)");
-    System.out.println("    - Debug mode");
-    System.out.println("    - Any other configurable parameters\n");
-    System.out.println("This command does not modify the game state.\n");
+    LOGGER.info("=== SHOW CONFIGURATION ===\n");
+    LOGGER.info("Usage:");
+    LOGGER.info("  show configuration\n");
+    LOGGER.info("Description:");
+    LOGGER.info("  Displays the current game configuration.\n");
+    LOGGER.verbose("  This includes all active settings such as:");
+    LOGGER.verbose("    - Board size");
+    LOGGER.verbose("    - Number of players");
+    LOGGER.verbose("    - Game mode (e.g., Blitz)");
+    LOGGER.verbose("    - Debug mode");
+    LOGGER.verbose("    - Any other configurable parameters\n");
+    LOGGER.verbose("This command does not modify the game state.\n");
   }
 
   /**
@@ -150,31 +166,31 @@ public class ShowCommand implements Command {
   private void printBoard(GameEngine engine) {
     int boardSize = engine.getState().getBoard().getSize();
     Board b = engine.getState().getBoard();
-    for (int i = 0; i < boardSize; i++) System.out.print(((char) ('A' + i)) + " ");
-    System.out.println("");
+    for (int i = 0; i < boardSize; i++) writer.print(((char) ('A' + i)) + " ");
+    writer.println("");
     for (int i = 0; i < boardSize; i++) {
       boolean empty = true;
       for (int j = 0; j < boardSize; j++) {
         int id = 1;
         for (Player player : engine.getState().getPlayers()) {
           if (player.getPosition().equals(new Position(i, j))) {
-            System.out.print(id + printWall(b, i, j, false));
+            writer.print(id + printWall(b, i, j, false));
             empty = false;
           }
           id++;
         }
-        if (empty) System.out.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
+        if (empty) writer.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
         empty = true;
-        if (j == boardSize - 1) System.out.print(i + 1);
+        if (j == boardSize - 1) writer.print(i + 1);
       }
       if (i == boardSize - 1) break;
-      System.out.println("");
+      writer.println("");
       for (int j = 0; j < boardSize; j++) {
-        System.out.print(printWall(b, i, j, true));
+        writer.print(printWall(b, i, j, true));
       }
-      System.out.println("");
+      writer.println("");
     }
-    System.out.println("");
+    writer.println("");
   }
 
   /**
@@ -197,5 +213,57 @@ public class ShowCommand implements Command {
       if (b.getGraph().hasEdge(b.id(i, j), b.id(i, j + 1))) return " ";
       else return "X";
     }
+  }
+
+  /**
+   * Converts a board position into a human-readable string. The format follows the CLI coordinate
+   * notation (e.g., a0, b3).
+   *
+   * @param p the position to convert
+   * @return the string representation of the position
+   */
+  private String posToString(Position p) {
+    char letter = (char) ('a' + p.getY());
+    int number = p.getX() + 1;
+    return "" + letter + number;
+  }
+
+  /**
+   * Displays the complete history of moves played during the game. Format: [Player Number] -
+   * [StartPos]-[EndPos] for pawns, or [Player Number] - [Pos][Orientation] for walls.
+   *
+   * @param engine The game engine containing the current state and move history.
+   */
+  public void showHistory(GameEngine engine) {
+    writer.println("Oldest move");
+    List<Player> players = engine.getState().getPlayers();
+    int nbPlayers = engine.getState().getPlayers().size();
+    int count = 0;
+    Move[] moves = engine.getState().getMovesPlayed();
+    for (Move move : moves) {
+      String strMove = "";
+      if (move.isPawn()) {
+        Position from = move.getFrom();
+        strMove +=
+            "Player "
+                + players.get(count % nbPlayers).getName()
+                + " - "
+                + posToString(from)
+                + '-'
+                + posToString(move.getTo());
+      } else {
+        Orientation orientation = move.getOrientation();
+        strMove +=
+            "Player "
+                + players.get(count % nbPlayers).getName()
+                + " - "
+                + posToString(move.getTo())
+                + orientation.toString();
+      }
+      count++;
+      strMove += ";";
+      writer.println(strMove);
+    }
+    writer.println("Newest move");
   }
 }

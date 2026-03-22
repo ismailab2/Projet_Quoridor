@@ -11,7 +11,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-public class ConfigDialog {
+/** Utility class used to display the shortcut configuration dialog. */
+public final class ConfigDialog {
+
+  /** Private constructor to prevent instantiation. */
+  private ConfigDialog() {}
 
   /**
    * Shows the configuration dialog for keyboard shortcuts. Allows the user to view and customize
