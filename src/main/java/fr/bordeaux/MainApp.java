@@ -230,7 +230,7 @@ public final class MainApp {
   }
 
   private static void printHelp() {
-    logInfo("Usage: qoridor [OPTIONS]");
+    logInfo("Usage: quoridor [OPTIONS]");
     logInfo("");
 
     logInfo("Options générales :");
