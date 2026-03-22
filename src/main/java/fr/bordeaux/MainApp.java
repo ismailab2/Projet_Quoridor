@@ -197,6 +197,15 @@ public final class MainApp {
     final Board board = new Board(BOARD_SIZE);
     final GameState state = createGameState(board);
 
+    final boolean isBlitz = config.getBoolean("blitz", false);
+    state.setBlitz(isBlitz);
+
+    if (isBlitz) {
+      final int timeoutMinutes = config.getInt("timeout", 30);
+      final long timeoutMillis = timeoutMinutes * 60 * 1000L;
+      state.setLimitTimePlayer(timeoutMillis);
+    }
+
     final GameEngine engine = new GameEngine(state);
 
     try {

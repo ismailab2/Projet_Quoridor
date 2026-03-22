@@ -8,51 +8,82 @@ import java.util.concurrent.TimeUnit;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Player;
+
+/**
+ * Manager for the Blitz mode in Quoridor.
+ * This class uses a background thread to decrement the reflection time
+ * of the current player at regular intervals.
+ */
 public class BlitzManager {
+    
     private GameEngine gameEngine;
     private ScheduledExecutorService scheduler;
-    private Map<Player, Long> remainingsTimes = new HashMap<>();
     private boolean isRunning = false;
 
-    public BlitzManager(GameEngine gameEngine, int maxTime){
+    /**
+     * Constructs a BlitzManager associated with a game engine.
+     * * @param gameEngine The game engine to monitor.
+     */
+    public BlitzManager(GameEngine gameEngine){
         this.gameEngine = gameEngine;
-        for(Player player : this.gameEngine.getState().getPlayers()){
-            remainingsTimes.put(player, maxTime * 60 * 1000L);
-        }
     }
 
+    /**
+     * Starts or resumes the countdown.
+     * Creates a new scheduled thread that executes every second.
+     */
     public void start(){
         if(isRunning){
             return;
         }
         isRunning = true;
         scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(this::task, 1, 1, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::task, 1, 1, TimeUnit.SECONDS);  
     }
 
+    /**
+     * Temporarily stops the countdown (Pause).
+     * Shuts down the current thread to stop all decrementation.
+     */
     public void pause(){
         if(!isRunning){
             return;
         }
-        if(scheduler!= null && scheduler.isShutdown()){
-            scheduler.shutdown();
+        isRunning = false;
+        if(scheduler!= null && !scheduler.isShutdown()){
+            scheduler.shutdownNow();
         }
 
     }
 
+    /**
+     * Internal task executed at each timer tick (every second).
+     * Identifies the active player, decrements their time, and checks for loss conditions.
+     */
     private void task(){
         
-        if(gameEngine.getState().isPaused() || gameEngine.getState().isGameOver()){
+        GameState gameState = gameEngine.getState();
+        if(gameState.isPaused() || gameState.isGameOver()){
             return;
         }
-        Player target = this.gameEngine.getState().getCurrentPlayer();
-        Long playerTime = remainingsTimes.get(target) -1000;
-        remainingsTimes.put(target, playerTime);
+        Player target = gameState.getCurrentPlayer();
+        Long playerTime = target.getRemainingTime() -1000;
+        target.setRemainingTime( playerTime);
+
+        if (playerTime <= 0){
+            gameState.setGameOver(true);
+            System.out.println("TIMEOUT ! " + target.getName() + " a perdu.");
+            pause();
+        }
+        
     }
 
-    public long getTimeLeft(Player player) {
-        return remainingTimeMap.getOrDefault(player, 0L);
+    /**
+     * Indicates whether the time manager is currently active.
+     * * @return true if the timer is running, false otherwise.
+     */
+    public boolean isRunning() {
+        return isRunning;
     }
-
 
 }

@@ -78,7 +78,8 @@ public class ShowCommand implements Command {
         }
       case "time":
         {
-          writer.println("time");
+          Player player = engine.getState().getCurrentPlayer();
+          writer.println("Time left for the player " + player.getName() + " ---> " + player.getRemainingTime() + " ms" );
           break;
         }
       case "history":
