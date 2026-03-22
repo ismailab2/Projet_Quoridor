@@ -109,7 +109,7 @@ public final class GameLoader {
   private static void readRemainingWalls(
       List<String> lines, List<Player> players, int currentLine) {
     String[] parts =
-        lines.get(BOARD_START + currentLine + SIZE * 2).replace("walls:", "").trim().split(" ");
+        lines.get(BOARD_START + currentLine + SIZE * 2 - 1).replace("walls:", "").trim().split(" ");
     for (int i = 0; i < players.size(); i++) {
       int walls = Integer.parseInt(parts[i]);
       // Call useWall() until the player has the correct number of walls
