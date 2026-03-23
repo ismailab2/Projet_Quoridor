@@ -63,7 +63,6 @@ public class GameLoaderTest {
   @Test
   public void testVerticalWallInCellLine() throws IOException, GameLoadException {
     String filename = "vertical_wall_board.txt";
-
     try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
       writer.println("[settings]");
       writer.println("verbose=false");
@@ -113,7 +112,6 @@ public class GameLoaderTest {
   @Test
   public void testReadPlayersPositions() throws IOException, GameLoadException {
     String filename = "players_positions_board.txt";
-
     try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
       writer.println("[settings]");
       writer.println("verbose=false");

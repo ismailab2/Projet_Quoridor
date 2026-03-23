@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Objects;
-import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 
 class MainMenuBarTest {
   @BeforeAll
-  static void initJfx() throws Exception {
-    Platform.startup(() -> {});
+  static void initJfx() {
+    new JFXPanel();
   }
 
   @Test
