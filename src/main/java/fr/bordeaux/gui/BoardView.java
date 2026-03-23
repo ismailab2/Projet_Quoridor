@@ -4,6 +4,8 @@ import fr.bordeaux.core.*;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -32,6 +34,15 @@ public class BoardView extends GridPane {
     this.engine = engine;
 
     int size = engine.getState().getBoard().getSize();
+
+    // Force rows and cols to never change their size.
+    for (int i = 0; i < size; i++) {
+      ColumnConstraints col = new ColumnConstraints(cellSize);
+      this.getColumnConstraints().add(col);
+
+      RowConstraints row = new RowConstraints(cellSize);
+      this.getRowConstraints().add(row);
+    }
     cells = new StackPane[size][size];
     pawns = new Rectangle[engine.getState().getPlayers().size()][size];
 
@@ -70,7 +81,7 @@ public class BoardView extends GridPane {
         add(cell, col, row);
       }
     }
-
+    // drawWallSlots();
     drawWalls();
     drawPlayers();
     highlightCurrentPlayer();
@@ -127,22 +138,24 @@ public class BoardView extends GridPane {
         int v1 = board.id(row + 1, col);
         int v2 = board.id(row + 1, col + 1);
 
-        // mur horizontal
+        // horizontal wall (between row and row+1)
         if (!graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2)) {
-
-          Rectangle wall = new Rectangle(cellSize, wallThickness);
+          Rectangle wall = new Rectangle(cellSize * 2, wallThickness);
           wall.setFill(Color.BROWN);
-
-          add(wall, col, row);
+          wall.setMouseTransparent(true);
+          add(wall, col, row, 2, 1);
+          GridPane.setValignment(wall, VPos.BOTTOM);
+          wall.setTranslateY(wallThickness / 2.0);
         }
 
-        // mur vertical
+        // vertical wall (between col and col+1)
         if (!graph.hasEdge(u1, u2) && !graph.hasEdge(v1, v2)) {
-
-          Rectangle wall = new Rectangle(wallThickness, cellSize);
+          Rectangle wall = new Rectangle(wallThickness, cellSize * 2);
           wall.setFill(Color.BROWN);
-
-          add(wall, col, row);
+          wall.setMouseTransparent(true);
+          add(wall, col, row, 1, 2);
+          GridPane.setHalignment(wall, HPos.RIGHT);
+          wall.setTranslateX(wallThickness / 2.0);
         }
       }
     }
@@ -177,11 +190,11 @@ public class BoardView extends GridPane {
    * @param player player whose available moves are highlighted
    */
   public void highlightAccessibleCells(Player player) {
+    if (this.engine.getState().getCurrentPlayer() != player) return;
 
     for (StackPane[] row : cells)
       for (StackPane cell : row)
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
-
     List<Position> moves = engine.getState().getLegalMoves(player);
 
     for (Position pos : moves) {
@@ -234,6 +247,72 @@ public class BoardView extends GridPane {
     }
   }
 
+  // Le code en dessous permet de mettre en surbrillance les bords des cases quand on passe la
+  // souris dessus, et on a juste à faire
+  // clic droit pour placer un mur, tu peux le garder tel quel ou changer, c'est mieux que d'avoir
+  // des touches différentes pour placer
+  // les murs.
+  /**
+   * Creates and places invisible interactive rectangles (slots) on the board's borders.
+   * These slots detect mouse hovering to show a preview and handle right-clicks
+   * to place walls.
+   *
+  private void drawWallSlots() {
+    Board board = engine.getState().getBoard();
+    int size = board.getSize();
+
+    // Iterate up to size-1 because a wall occupies the space between two cells
+    for (int row = 0; row < size - 1; row++) {
+      for (int col = 0; col < size - 1; col++) {
+
+        // --- HORIZONTAL SLOT ---
+        // Width: 2 cells, Height: wall thickness
+        Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
+        hSlot.setFill(Color.TRANSPARENT); // Invisible until hovered
+
+        setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
+
+        // Span across 2 columns and 1 row
+        add(hSlot, col, row, 2, 1);
+        GridPane.setValignment(hSlot, VPos.BOTTOM);
+        // Vertical offset to center it exactly on the grid line
+        hSlot.setTranslateY(wallThickness / 2.0);
+
+        // --- VERTICAL SLOT ---
+        // Width: wall thickness, Height: 2 cells
+        Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
+        vSlot.setFill(Color.TRANSPARENT);
+
+        setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
+
+        // Span across 1 column and 2 rows
+        add(vSlot, col, row, 1, 2);
+        GridPane.setHalignment(vSlot, HPos.RIGHT);
+        // Horizontal offset to center it exactly on the grid line
+        vSlot.setTranslateX(wallThickness / 2.0);
+      }
+    }
+  }*/
+
+  /**
+   * Sets up mouse event handlers for a wall slot, including hover effects and click actions.
+   *
+   * @param slot The rectangle representing the interactive area
+   * @param row The starting row position for the potential wall
+   * @param col The starting column position for the potential wall
+   * @param orientation The orientation (HORIZONTAL/VERTICAL) of the wall
+   *     <p>private void setupWallInteractions(Rectangle slot, int row, int col, Orientation
+   *     orientation) {
+   *     <p>// Hover effect: show a semi-transparent brown preview (0.4 opacity)
+   *     slot.setOnMouseEntered(e -> { slot.setFill(Color.rgb(139, 69, 19, 0.4)); });
+   *     <p>// Hide the preview when the mouse leaves the area slot.setOnMouseExited(e -> {
+   *     slot.setFill(Color.TRANSPARENT); });
+   *     <p>// Handle click action slot.setOnMouseClicked(e -> { // Use right-click (SECONDARY) for
+   *     wall placement if (e.getButton() == MouseButton.SECONDARY) { Move wallMove = Move.wall(new
+   *     Position(row, col), orientation);
+   *     <p>// Check move legality through the engine before applying if (engine.play(wallMove)) {
+   *     drawBoard(); // Full redraw of the UI to reflect changes } } }); }
+   */
   /**
    * Returns the array containing the pawn shapes displayed on the board.
    *
