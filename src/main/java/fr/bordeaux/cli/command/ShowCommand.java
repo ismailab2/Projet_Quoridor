@@ -8,6 +8,8 @@ import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.util.Logger;
+import fr.bordeaux.util.TimeConvertor;
+
 import java.io.PrintStream;
 import java.util.List;
 
@@ -79,7 +81,7 @@ public class ShowCommand implements Command {
       case "time":
         {
           Player player = engine.getState().getCurrentPlayer();
-          writer.println("Time left for the player " + player.getName() + " ---> " + player.getRemainingTime() + " ms" );
+          writer.println("Time left for the player " + player.getName() + " ---> " + TimeConvertor.formatTime(player.getRemainingTime()) );
           break;
         }
       case "history":

@@ -72,7 +72,6 @@ public class BlitzManager {
 
         if (playerTime <= 0){
             gameState.setGameOver(true);
-            System.out.println("TIMEOUT ! " + target.getName() + " a perdu.");
             pause();
         }
         
