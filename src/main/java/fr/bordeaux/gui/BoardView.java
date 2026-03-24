@@ -19,7 +19,7 @@ import javafx.util.Duration;
 public class BoardView extends GridPane {
 
   private final GameEngine engine;
-  private final int cellSize = 100;
+  private final int cellSize = 85;
   private final int wallThickness = 10;
 
   private StackPane[][] cells;
@@ -81,7 +81,7 @@ public class BoardView extends GridPane {
         add(cell, col, row);
       }
     }
-    // drawWallSlots();
+    drawWallSlots();
     drawWalls();
     drawPlayers();
     highlightCurrentPlayer();
@@ -247,52 +247,37 @@ public class BoardView extends GridPane {
     }
   }
 
-  // Le code en dessous permet de mettre en surbrillance les bords des cases quand on passe la
-  // souris dessus, et on a juste à faire
-  // clic droit pour placer un mur, tu peux le garder tel quel ou changer, c'est mieux que d'avoir
-  // des touches différentes pour placer
-  // les murs.
   /**
-   * Creates and places invisible interactive rectangles (slots) on the board's borders.
-   * These slots detect mouse hovering to show a preview and handle right-clicks
-   * to place walls.
-   *
+   * Creates and places invisible interactive rectangles (slots) on the board's borders. These slots
+   * detect mouse hovering to show a preview and handle right-clicks to place walls.
+   */
   private void drawWallSlots() {
     Board board = engine.getState().getBoard();
     int size = board.getSize();
 
-    // Iterate up to size-1 because a wall occupies the space between two cells
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
 
-        // --- HORIZONTAL SLOT ---
-        // Width: 2 cells, Height: wall thickness
         Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
-        hSlot.setFill(Color.TRANSPARENT); // Invisible until hovered
+        hSlot.setFill(Color.TRANSPARENT);
 
         setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
 
-        // Span across 2 columns and 1 row
         add(hSlot, col, row, 2, 1);
         GridPane.setValignment(hSlot, VPos.BOTTOM);
-        // Vertical offset to center it exactly on the grid line
         hSlot.setTranslateY(wallThickness / 2.0);
 
-        // --- VERTICAL SLOT ---
-        // Width: wall thickness, Height: 2 cells
         Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
         vSlot.setFill(Color.TRANSPARENT);
 
         setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
 
-        // Span across 1 column and 2 rows
         add(vSlot, col, row, 1, 2);
         GridPane.setHalignment(vSlot, HPos.RIGHT);
-        // Horizontal offset to center it exactly on the grid line
         vSlot.setTranslateX(wallThickness / 2.0);
       }
     }
-  }*/
+  }
 
   /**
    * Sets up mouse event handlers for a wall slot, including hover effects and click actions.
@@ -301,18 +286,26 @@ public class BoardView extends GridPane {
    * @param row The starting row position for the potential wall
    * @param col The starting column position for the potential wall
    * @param orientation The orientation (HORIZONTAL/VERTICAL) of the wall
-   *     <p>private void setupWallInteractions(Rectangle slot, int row, int col, Orientation
-   *     orientation) {
-   *     <p>// Hover effect: show a semi-transparent brown preview (0.4 opacity)
-   *     slot.setOnMouseEntered(e -> { slot.setFill(Color.rgb(139, 69, 19, 0.4)); });
-   *     <p>// Hide the preview when the mouse leaves the area slot.setOnMouseExited(e -> {
-   *     slot.setFill(Color.TRANSPARENT); });
-   *     <p>// Handle click action slot.setOnMouseClicked(e -> { // Use right-click (SECONDARY) for
-   *     wall placement if (e.getButton() == MouseButton.SECONDARY) { Move wallMove = Move.wall(new
-   *     Position(row, col), orientation);
-   *     <p>// Check move legality through the engine before applying if (engine.play(wallMove)) {
-   *     drawBoard(); // Full redraw of the UI to reflect changes } } }); }
    */
+  private void setupWallInteractions(Rectangle slot, int row, int col, Orientation orientation) {
+
+    slot.setOnMouseEntered(e -> slot.setFill(Color.rgb(139, 69, 19, 0.4)));
+
+    slot.setOnMouseExited(e -> slot.setFill(Color.TRANSPARENT));
+
+    slot.setOnMouseClicked(
+        e -> {
+          if (e.getButton() == MouseButton.SECONDARY) {
+
+            Move wallMove = Move.wall(new Position(row, col), orientation);
+
+            if (engine.play(wallMove)) {
+              drawBoard();
+            }
+          }
+        });
+  }
+
   /**
    * Returns the array containing the pawn shapes displayed on the board.
    *
