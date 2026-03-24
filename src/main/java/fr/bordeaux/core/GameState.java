@@ -398,7 +398,12 @@ public class GameState {
     int y = pos.getY();
 
     Position[] candidates = {
-      new Position(x + 1, y), new Position(x - 1, y), new Position(x, y + 1), new Position(x, y - 1)
+      new Position(x + 1, y), new Position(x - 1, y), new Position(x, y + 1),
+          new Position(x, y - 1), // Up, Down, Left, Right
+      new Position(x + 2, y), new Position(x - 2, y), new Position(x, y + 2),
+          new Position(x, y - 2), // 2 times Up, Down, Left, Right
+      new Position(x + 1, y + 1), new Position(x - 1, y - 1), new Position(x + 1, y - 1),
+          new Position(x - 1, y + 1) // Diagonals
     };
 
     for (Position p : candidates) {
