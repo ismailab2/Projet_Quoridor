@@ -4,86 +4,117 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Utility class used to display the shortcut configuration dialog. */
 public final class ConfigDialog {
 
-  /** Private constructor to prevent instantiation. */
-  private ConfigDialog() {}
+    private ConfigDialog() {}
 
-  /**
-   * Shows the configuration dialog for keyboard shortcuts. Allows the user to view and customize
-   * shortcuts for all actions.
-   */
-  public static void show() {
-    // Create a new window (Stage) for the configuration dialog
-    Stage stage = new Stage();
-    stage.setTitle("Shortcut Configuration");
-    stage.setResizable(true);
+    /**
+     * Shows the configuration dialog for keyboard shortcuts.
+     */
+    public static void show() {
 
-    // GridPane layout to arrange labels and buttons in rows and columns
-    GridPane grid = new GridPane();
-    grid.setVgap(10);
-    grid.setHgap(10);
+        Stage stage = new Stage();
+        stage.setTitle("Shortcut Configuration");
+        stage.setResizable(true);
 
-    int row = 0;
+        GridPane grid = new GridPane();
+        grid.setVgap(10);
+        grid.setHgap(10);
 
-    for (Action action : Action.values()) {
-      Label actionLabel = new Label(action.name());
-      KeyCombination currentShortcut = ShortcutManager.getInstance().getShortcut(action);
-      Button keyButton = new Button(currentShortcut.getName());
+        int row = 0;
 
-      keyButton.setFocusTraversable(true); // Allow button to receive key events
-      keyButton.setOnKeyPressed(
-          (KeyEvent ke) -> {
-            KeyCode code = ke.getCode();
-            if (code == KeyCode.CONTROL || code == KeyCode.SHIFT || code == KeyCode.ALT) return;
+        for (Action action : Action.values()) {
 
-            // Detect pressed modifier keys
-            KeyCombination.Modifier ctrl = ke.isControlDown() ? KeyCombination.CONTROL_DOWN : null;
-            KeyCombination.Modifier shift = ke.isShiftDown() ? KeyCombination.SHIFT_DOWN : null;
-            KeyCombination.Modifier alt = ke.isAltDown() ? KeyCombination.ALT_DOWN : null;
+            Label actionLabel = new Label(action.name());
 
-            // Build the new KeyCodeCombination based on modifiers
-            KeyCodeCombination newShortcut;
-            if (ctrl != null && shift != null && alt != null)
-              newShortcut = new KeyCodeCombination(code, ctrl, shift, alt);
-            else if (ctrl != null && shift != null)
-              newShortcut = new KeyCodeCombination(code, ctrl, shift);
-            else if (ctrl != null && alt != null)
-              newShortcut = new KeyCodeCombination(code, ctrl, alt);
-            else if (shift != null && alt != null)
-              newShortcut = new KeyCodeCombination(code, shift, alt);
-            else if (ctrl != null) newShortcut = new KeyCodeCombination(code, ctrl);
-            else if (shift != null) newShortcut = new KeyCodeCombination(code, shift);
-            else if (alt != null) newShortcut = new KeyCodeCombination(code, alt);
-            else newShortcut = new KeyCodeCombination(code);
+            KeyCombination currentShortcut =
+                    ShortcutManager.getInstance().getShortcut(action);
 
-            // Update the shortcut in ShortcutManager and change the button text
-            ShortcutManager.getInstance().setShortcut(action, newShortcut);
-            keyButton.setText(newShortcut.getName());
-          });
+            Button keyButton = new Button(currentShortcut.getName());
 
-      grid.add(actionLabel, 0, row);
-      grid.add(keyButton, 1, row);
-      row++;
+            keyButton.setFocusTraversable(true);
+
+            keyButton.setOnKeyPressed(ke -> handleKeyPress(ke, action, keyButton));
+
+            grid.add(actionLabel, 0, row);
+            grid.add(keyButton, 1, row);
+            row++;
+        }
+
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(e -> stage.close());
+
+        HBox saveBox = new HBox(saveButton);
+        saveBox.setSpacing(10);
+
+        grid.add(saveBox, 0, row, 2, 1);
+
+        Scene scene = new Scene(grid, 400, 50 + row * 40);
+        stage.setScene(scene);
+        stage.show();
     }
 
-    Button saveButton = new Button("Save");
-    saveButton.setOnAction(e -> stage.close());
+    /**
+     * Handles keyboard shortcut editing.
+     */
+    private static void handleKeyPress(
+            KeyEvent ke,
+            Action action,
+            Button keyButton) {
 
-    HBox saveBox = new HBox(saveButton);
-    saveBox.setSpacing(10);
-    grid.add(saveBox, 0, row, 2, 1); // span two columns
+        KeyCode code = ke.getCode();
 
-    Scene scene = new Scene(grid, 400, 50 + row * 40);
-    stage.setScene(scene);
-    stage.show();
-  }
+        // Ignore modifier-only keys
+        if (isModifierKey(code)) {
+            return;
+        }
+
+        KeyCombination.Modifier[] modifiers = extractModifiers(ke);
+
+        KeyCodeCombination newShortcut =
+                new KeyCodeCombination(code, modifiers);
+
+        ShortcutManager.getInstance().setShortcut(action, newShortcut);
+
+        keyButton.setText(newShortcut.getName());
+    }
+
+    /**
+     * Returns true if the key is only a modifier key.
+     */
+    private static boolean isModifierKey(KeyCode code) {
+        return code == KeyCode.CONTROL
+                || code == KeyCode.SHIFT
+                || code == KeyCode.ALT;
+    }
+
+    /**
+     * Extracts active modifiers from the key event.
+     */
+    private static KeyCombination.Modifier[] extractModifiers(KeyEvent ke) {
+        List<KeyCombination.Modifier> mods = new ArrayList<>();
+
+        if (ke.isControlDown()) {
+            mods.add(KeyCombination.CONTROL_DOWN);
+        }
+        if (ke.isShiftDown()) {
+            mods.add(KeyCombination.SHIFT_DOWN);
+        }
+        if (ke.isAltDown()) {
+            mods.add(KeyCombination.ALT_DOWN);
+        }
+
+        return mods.toArray(new KeyCombination.Modifier[0]);
+    }
 }

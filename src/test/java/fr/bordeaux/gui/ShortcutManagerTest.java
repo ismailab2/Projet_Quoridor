@@ -185,22 +185,6 @@ class ShortcutManagerTest {
     assertNotNull(result);
   }
 
-  /*@Test
-  void testParseInvalidKeyCodeThrows() {
-      assertThrows(IllegalArgumentException.class, () -> callParse("CTRL+INVALID"));
-  }
-
-
-
-  @Test
-  void testRegisterThrowsIfDispatcherNull() {
-      ShortcutManager manager = ShortcutManager.getInstance();
-      Scene scene1 = mock(Scene.class);
-      assertThrows(IllegalStateException.class, () -> manager.register(scene1));
-  }
-
-   */
-
   @Test
   void testRegisterAddsEventHandler() {
     ShortcutManager manager = ShortcutManager.getInstance();
