@@ -69,8 +69,18 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     trainer.trainModel(this, numGames, epochs);
   }
 
+  /**
+   * Constructor for inference using a saved model from an InputStream.
+   *
+   * @param inputstream InputStream containing the .bin model binary.
+   * @throws IOException If stream is unreadable or corrupt.
+   */
+  private NeuralNetworkEvaluator(final InputStream inputstream) throws IOException {
+    initGraph();
+    NeuralNetworkTrainer.loadModel(this, inputstream);
+  }
+
   @SuppressWarnings(SUPPRESS_LOD)
-  /** Initializes the TensorFlow graph for the neural network. */
   private void initGraph() {
     this.graph = new Graph();
     final Ops tfOps = Ops.create(graph);
@@ -116,28 +126,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
           "Default model not found in classpath: /nnmodels/default_quoridor_model.bin");
     }
     return new NeuralNetworkEvaluator(inputstream);
-  }
-
-  /**
-   * Constructor for inference using a saved model from an InputStream.
-   *
-   * @param inputstream InputStream containing the .bin model binary.
-   * @throws IOException If stream is unreadable or corrupt.
-   */
-  public NeuralNetworkEvaluator(final InputStream inputstream) throws IOException {
-    initGraph();
-    NeuralNetworkTrainer.loadModel(this, inputstream);
-  }
-
-  /**
-   * Constructor for inference using a saved model from a file path.
-   *
-   * @param path Path to the .bin model file.
-   * @throws IOException If file is missing or corrupt.
-   */
-  public NeuralNetworkEvaluator(final String path) throws IOException {
-    initGraph();
-    NeuralNetworkTrainer.loadModel(this, path);
   }
 
   /**

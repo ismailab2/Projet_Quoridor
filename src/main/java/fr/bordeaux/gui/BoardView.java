@@ -253,46 +253,34 @@ public class BoardView extends GridPane {
   // des touches différentes pour placer
   // les murs.
   /**
-   * Creates and places invisible interactive rectangles (slots) on the board's borders.
-   * These slots detect mouse hovering to show a preview and handle right-clicks
-   * to place walls.
+   * Creates and places invisible interactive rectangles (slots) on the board's borders. These slots
+   * detect mouse hovering to show a preview and handle right-clicks to place walls.
    *
-  private void drawWallSlots() {
-    Board board = engine.getState().getBoard();
-    int size = board.getSize();
-
-    // Iterate up to size-1 because a wall occupies the space between two cells
-    for (int row = 0; row < size - 1; row++) {
-      for (int col = 0; col < size - 1; col++) {
-
-        // --- HORIZONTAL SLOT ---
-        // Width: 2 cells, Height: wall thickness
-        Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
-        hSlot.setFill(Color.TRANSPARENT); // Invisible until hovered
-
-        setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
-
-        // Span across 2 columns and 1 row
-        add(hSlot, col, row, 2, 1);
-        GridPane.setValignment(hSlot, VPos.BOTTOM);
-        // Vertical offset to center it exactly on the grid line
-        hSlot.setTranslateY(wallThickness / 2.0);
-
-        // --- VERTICAL SLOT ---
-        // Width: wall thickness, Height: 2 cells
-        Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
-        vSlot.setFill(Color.TRANSPARENT);
-
-        setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
-
-        // Span across 1 column and 2 rows
-        add(vSlot, col, row, 1, 2);
-        GridPane.setHalignment(vSlot, HPos.RIGHT);
-        // Horizontal offset to center it exactly on the grid line
-        vSlot.setTranslateX(wallThickness / 2.0);
-      }
-    }
-  }*/
+   * <p>private void drawWallSlots() { Board board = engine.getState().getBoard(); int size =
+   * board.getSize();
+   *
+   * <p>// Iterate up to size-1 because a wall occupies the space between two cells for (int row =
+   * 0; row < size - 1; row++) { for (int col = 0; col < size - 1; col++) {
+   *
+   * <p>// --- HORIZONTAL SLOT --- // Width: 2 cells, Height: wall thickness Rectangle hSlot = new
+   * Rectangle(cellSize * 2, wallThickness); hSlot.setFill(Color.TRANSPARENT); // Invisible until
+   * hovered
+   *
+   * <p>setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
+   *
+   * <p>// Span across 2 columns and 1 row add(hSlot, col, row, 2, 1); GridPane.setValignment(hSlot,
+   * VPos.BOTTOM); // Vertical offset to center it exactly on the grid line
+   * hSlot.setTranslateY(wallThickness / 2.0);
+   *
+   * <p>// --- VERTICAL SLOT --- // Width: wall thickness, Height: 2 cells Rectangle vSlot = new
+   * Rectangle(wallThickness, cellSize * 2); vSlot.setFill(Color.TRANSPARENT);
+   *
+   * <p>setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
+   *
+   * <p>// Span across 1 column and 2 rows add(vSlot, col, row, 1, 2); GridPane.setHalignment(vSlot,
+   * HPos.RIGHT); // Horizontal offset to center it exactly on the grid line
+   * vSlot.setTranslateX(wallThickness / 2.0); } } }
+   */
 
   /**
    * Sets up mouse event handlers for a wall slot, including hover effects and click actions.

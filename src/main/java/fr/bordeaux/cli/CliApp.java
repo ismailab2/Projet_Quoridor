@@ -221,8 +221,10 @@ public class CliApp {
   /**
    * Starts the CLI loop. Displays the board at startup and continuously reads user commands until
    * the application is stopped.
+   *
+   * @throws IOException Possible if mcts with NN selection used
    */
-  public void run() {
+  public void run() throws IOException {
     if (engine != null) {
       final ShowCommand show = new ShowCommand(new String[] {"show", "board"});
       show.execute(engine);
@@ -243,8 +245,9 @@ public class CliApp {
    * it is interpreted as a move.
    *
    * @param input the raw command entered by the user
+   * @throws IOException Possible if mcts with NN selection used
    */
-  public void fetch(final String input) {
+  public void fetch(final String input) throws IOException {
     firstTab = true;
     final String[] tokens = input.trim().split("\\s+");
     if (tokens.length == 0 || tokens[0].isEmpty()) {
