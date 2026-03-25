@@ -52,7 +52,11 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   /** Operation to assign values to the bias variable. */
   /* package */ Op biasAssign;
 
-  /** Default constructor. Loads the bundled model from the classpath. */
+  /**
+   * Default constructor. Loads the bundled model from the classpath.
+   *
+   * @throws IOException Exception raised if load fail
+   */
   public NeuralNetworkEvaluator() throws IOException {
     initGraph();
 
