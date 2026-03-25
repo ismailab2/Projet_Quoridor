@@ -65,12 +65,56 @@ class MoveCommandTest {
   }
 
   @Test
+  void executeCatchBranch() {
+    MoveCommand command = new MoveCommand("ea-e2");
+    Position before = p1.getPosition();
+
+    assertDoesNotThrow(() -> command.execute(engine));
+
+    assertEquals(before, p1.getPosition());
+  }
+
+  @Test
+  void executeWallCatchBranch() {
+    MoveCommand command = new MoveCommand("eav");
+    Position before = p1.getPosition();
+
+    assertDoesNotThrow(() -> command.execute(engine));
+
+    assertEquals(before, p1.getPosition());
+  }
+
+  @Test
+  void executeNullMove() {
+    MoveCommand command = new MoveCommand();
+    Position before = p1.getPosition();
+
+    assertDoesNotThrow(() -> command.execute(engine));
+
+    assertEquals(before, p1.getPosition());
+  }
+
+  @Test
+  void executeLongMoveFormat() {
+    MoveCommand command = new MoveCommand("e10-e11");
+
+    assertDoesNotThrow(() -> command.execute(engine));
+  }
+
+  @Test
   void handleMove() {
     MoveCommand command = new MoveCommand("e1-e2");
 
     command.handleMove(engine);
 
     assertEquals(new Position(1, 4), p1.getPosition());
+  }
+
+  @Test
+  void handleMoveBadSyntax() {
+    MoveCommand command = new MoveCommand("e1-e2-e3");
+
+    assertThrows(IllegalArgumentException.class, () -> command.handleMove(engine));
   }
 
   @Test
