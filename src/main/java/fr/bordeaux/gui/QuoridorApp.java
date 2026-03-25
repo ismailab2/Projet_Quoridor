@@ -1,6 +1,5 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.MainApp;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import javafx.application.Application;
@@ -29,22 +28,10 @@ public class QuoridorApp extends Application {
    */
   @Override
   public void start(Stage stage) {
-    ConfigManager.getInstance().load();
-
-    int boardSize = MainApp.BOARD_SIZE;
-    int playerSize = MainApp.PLAYER_SIZE;
+    int BOARD_SIZE =9;
     GameState state;
-    /*
-    if (playerSize == 2) {
-      state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
-    } else {
-      System.out.println("le gui est configurable pour de 2 joueurs uniquement");
-      state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
-    }
 
-     */
-
-    state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
+    state = new GameState(new Board(BOARD_SIZE), Player.createDefaultPlayers());
     GameEngine engine = new GameEngine(state);
 
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
@@ -60,7 +47,7 @@ public class QuoridorApp extends Application {
     // Attach drag-and-drop functionality
     DragAndDrop.install(engine, boardView);
 
-    Scene scene = new Scene(root, 900, 700);
+    Scene scene = new Scene(root);
 
     ShortcutManager manager = ShortcutManager.getInstance();
     manager.setDispatcher(dispatcher);
@@ -68,7 +55,9 @@ public class QuoridorApp extends Application {
 
     stage.setTitle("Quoridor");
     stage.setScene(scene);
-    stage.setResizable(true);
+    stage.setMinWidth(800);
+    stage.setMinHeight(600);
+    stage.setMaximized(true);
     stage.show();
   }
 

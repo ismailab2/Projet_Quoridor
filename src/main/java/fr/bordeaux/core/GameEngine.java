@@ -46,7 +46,6 @@ public class GameEngine {
   /** Resets the current game to its initial state and clears listeners. */
   public void newGame() {
     state.reset();
-    state.addListener(() -> {});
   }
 
   /**
@@ -69,7 +68,7 @@ public class GameEngine {
    */
   public void loadGame(String filename) {
     try {
-      state = state.loadGame(filename);
+      state.loadGame(filename);
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());
     }

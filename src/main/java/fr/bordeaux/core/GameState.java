@@ -13,8 +13,8 @@ import java.util.function.Predicate;
  */
 public class GameState {
 
-  private final Board board;
-  private final List<Player> players;
+  private Board board;
+  private List<Player> players;
   private int currentIndexPlayer;
   private boolean paused;
   private boolean gameOver;
@@ -281,33 +281,33 @@ public class GameState {
    */
   public void saveGame(String filename) throws IOException {
     GameSaver.saveGame(this, filename);
+    notifyListeners();
   }
 
   /**
    * Loads a game state from a file.
    *
    * @param filename Path to the file.
-   * @return The loaded {@link GameState}.
    * @throws IOException If reading fails.
    * @throws GameLoadException If the file content is invalid.
    */
-  public GameState loadGame(String filename) throws IOException, GameLoadException {
-    return GameLoader.loadGame(filename);
+  public void loadGame(String filename) throws IOException, GameLoadException {
+    GameState loaded = GameLoader.loadGame(filename);
+    this.board = loaded.board;
+    this.players = loaded.players;
+    this.currentIndexPlayer = loaded.currentIndexPlayer;
+    notifyListeners();
   }
 
-  /**
-   * Resets the game to a default state (9x9 board with two human players).
-   *
-   * @return A new {@link GameState} instance.
-   */
-  public GameState reset() {
+  /** Resets the game to a default state (9x9 board with two human players). */
+  public void reset() {
     int size = 9;
-    Board newBoard = new Board(size);
-    List<Player> newPlayers = new ArrayList<>();
-    newPlayers.add(new HumanPlayer("Human", new Position(0, size / 2)));
-    newPlayers.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
+    this.board = new Board(size);
+    this.players = new ArrayList<>();
+    players.add(new HumanPlayer("Human", new Position(0, size / 2)));
+    players.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
+    this.currentIndexPlayer = 0;
     notifyListeners();
-    return new GameState(newBoard, newPlayers);
   }
 
   /**
@@ -317,7 +317,6 @@ public class GameState {
    */
   public GameState copy() {
     Board boardCopy = this.board.copy();
-
     List<Player> playersCopy = new ArrayList<>();
     for (Player p : this.players) {
       playersCopy.add(p.copy());
