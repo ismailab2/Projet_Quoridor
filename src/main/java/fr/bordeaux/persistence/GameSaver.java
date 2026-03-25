@@ -199,11 +199,11 @@ public class GameSaver {
         saveAiSettings(w, g, newP, i);
       } else {
 
-        // writeLine(w, "player-"+i+"-remaining-time" ,  p.getRemainingTime());
-
         writeLine(w, "player-" + i + "-name", p.getName());
 
         writeLine(w, "player-" + i + "-starting-position", p.getStartingPosition().toString());
+
+        writeLine(w, "player-" + i + "-remaining-time", p.getRemainingTime());
       }
       i++;
     }
