@@ -522,14 +522,13 @@ public class GameState {
   }
 
   /**
-   * Initializes the reflection time for all players in the game.
-   * This should be called at the start of a Blitz game to set the 
-   * countdown timers to the specified limit.
+   * Initializes the reflection time for all players in the game. This should be called at the start
+   * of a Blitz game to set the countdown timers to the specified limit.
    *
    * @param timeLimit The initial time allowed for each player in milliseconds.
    */
-  public void setLimitTimePlayer(long timeLimit){
-    for(Player player : getPlayers()){
+  public void setLimitTimePlayer(long timeLimit) {
+    for (Player player : getPlayers()) {
       player.setRemainingTime(timeLimit);
     }
   }

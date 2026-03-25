@@ -5,7 +5,6 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Player;
 import fr.bordeaux.gui.QuoridorApp;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
@@ -38,7 +37,7 @@ public final class MainApp {
 
     final ConfigManager config = loadConfig();
     final AppMode mode = parseArgs(args, config);
-    validateMode(mode);
+    validateMode(mode, config);
     applyConfigLogs(config);
     runApplication(mode, args, config);
   }
@@ -104,6 +103,30 @@ public final class MainApp {
           cli = true;
           break;
 
+        case "--ai":
+          config.setOption("ai", "true");
+          break;
+
+        case "--ai-mode":
+          i++;
+          if (i < args.length) config.setOption("ai.mode", args[i]);
+          break;
+
+        case "--ai-minimax-depth":
+          i++;
+          if (i < args.length) config.setOption("ai.depth", args[i]);
+          break;
+
+        case "--ai-time":
+          i++;
+          if (i < args.length) config.setOption("ai.time", args[i]);
+          break;
+
+        case "--ai-minimax-scoring":
+          i++;
+          if (i < args.length) config.setOption("ai.scoring", args[i]);
+          break;
+
         case "-b":
         case "--blitz":
           config.setOption("blitz", "true");
@@ -129,6 +152,10 @@ public final class MainApp {
   private static void handleTimeArgument(
       final String[] args, final int index, final ConfigManager config) {
 
+    final boolean blitz = config.getBoolean("blitz", false);
+    if (!blitz) {
+      logInfo("--time nécessite d'activer le mode blitz. Il a donc été ignoré.");
+    }
     if (index < args.length) {
       final String value = args[index];
       config.setOption("timeout", value);
@@ -139,11 +166,23 @@ public final class MainApp {
     }
   }
 
-  private static void validateMode(final AppMode mode) {
+  private static void validateMode(final AppMode mode, final ConfigManager config) {
     if (mode.gui() && mode.cli()) {
       logError("--gui et --cli sont incompatibles.");
       printHelp();
       System.exit(1);
+    }
+
+    final boolean useAi = config.getBoolean("ai", false);
+    final boolean hasAiOptions =
+        config.getOption("ai.depth", null) != null
+            || config.getOption("ai.mode", null) != null
+            || config.getOption("ai.time", null) != null
+            || config.getOption("ai.scoring", null) != null;
+
+    if (!useAi && hasAiOptions) {
+      logInfo(
+          "Avertissement : Des options d'IA ont été fournies mais le flag --ai n'est pas présent. Elles seront ignorées.");
     }
   }
 
@@ -195,7 +234,7 @@ public final class MainApp {
     }
 
     final Board board = new Board(BOARD_SIZE);
-    final GameState state = createGameState(board);
+    final GameState state = createGameState(board, config);
 
     final boolean isBlitz = config.getBoolean("blitz", false);
     state.setBlitz(isBlitz);
@@ -216,9 +255,9 @@ public final class MainApp {
     }
   }
 
-  private static GameState createGameState(final Board board) {
+  private static GameState createGameState(final Board board, final ConfigManager config) {
     if (PLAYER_SIZE == 2 || PLAYER_SIZE == 4) {
-      return new GameState(board, Player.createDefaultPlayers());
+      return new GameState(board, PlayerFactory.createPlayers(config));
     }
 
     logError("Nombre de joueurs invalide.");

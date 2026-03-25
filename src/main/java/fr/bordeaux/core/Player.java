@@ -12,7 +12,7 @@ public abstract class Player {
   private final String name;
   private Position position;
   private int remainingWalls = 10;
-  private long remainingTime = 30*60*1000; //Time in milliseconds
+  private long remainingTime = 30 * 60 * 1000; // Time in milliseconds
   private final Position startingPosition;
   private int score = 0;
 
@@ -134,19 +134,21 @@ public abstract class Player {
 
   /**
    * Returns the player's remaining reflection time.
-   * * @return The remaining time in milliseconds.
+   *
+   * @return The remaining time in milliseconds.
    */
   public long getRemainingTime() {
-      return remainingTime;
+    return remainingTime;
   }
 
   /**
-   * Sets the player's remaining reflection time.
-   * Useful for initialization, loading a saved game, or updates by the timer.
-   * * @param remainingTime The new remaining time in milliseconds.
+   * Sets the player's remaining reflection time. Useful for initialization, loading a saved game,
+   * or updates by the timer.
+   *
+   * @param remainingTime The new remaining time in milliseconds.
    */
   public void setRemainingTime(long remainingTime) {
-      this.remainingTime = remainingTime;
+    this.remainingTime = remainingTime;
   }
 
   /**

@@ -22,13 +22,11 @@ public class GameEngine {
     initializeBlitz();
   }
 
-  /**
-   * Helper method to initialize the BlitzManager based on the current state.
-   */
+  /** Helper method to initialize the BlitzManager based on the current state. */
   private void initializeBlitz() {
     if (this.state.isBlitz()) {
-        this.blitzManager = new BlitzManager(this);
-        this.blitzManager.start();
+      this.blitzManager = new BlitzManager(this);
+      this.blitzManager.start();
     }
   }
 
@@ -109,9 +107,7 @@ public class GameEngine {
     state.redo();
   }
 
-  /**
-   * Toggles the pause state of the game and synchronization with the Blitz timer.
-   */
+  /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
     boolean newPauseState = !state.isPaused();
     state.setPaused(newPauseState);
@@ -176,5 +172,14 @@ public class GameEngine {
    */
   public GameState getState() {
     return state;
+  }
+
+  /**
+   * Returns the current blitz manager of the game.
+   *
+   * @return The {@link BlitzManager} managed by this engine.
+   */
+  public BlitzManager getBlitzManager() {
+    return blitzManager;
   }
 }

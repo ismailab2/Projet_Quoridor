@@ -228,14 +228,31 @@ public class CliApp {
       show.execute(engine);
     }
     while (running) {
-      final String line = reader.readLine(">> ");
-      fetch(line);
+
+      if (!engine.getState().getCurrentPlayer().isAI()) {
+        final String line = reader.readLine(">> ");
+        fetch(line);
+      } else {
+        System.out.println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+        executeAiTurn();
+        new ShowCommand(new String[] {"show", "board"}).execute(engine);
+      }
     }
     try {
       terminal.close();
     } catch (IOException e) {
       LOGGER.error("Terminal has been brutally closed...");
     }
+  }
+
+  private void executeAiTurn() {
+    Player ai = engine.getState().getCurrentPlayer();
+
+    Move move = ai.getNextMove(engine.getState());
+
+    engine.play(move);
+
+    LOGGER.info("L'IA a joué : " + move.toString());
   }
 
   /**
