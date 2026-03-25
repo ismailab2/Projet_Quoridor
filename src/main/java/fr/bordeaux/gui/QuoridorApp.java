@@ -28,7 +28,7 @@ public class QuoridorApp extends Application {
    */
   @Override
   public void start(Stage stage) {
-    int BOARD_SIZE =9;
+    int BOARD_SIZE = 9;
     GameState state;
 
     state = new GameState(new Board(BOARD_SIZE), Player.createDefaultPlayers());
