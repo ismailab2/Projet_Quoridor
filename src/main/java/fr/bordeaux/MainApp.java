@@ -6,6 +6,7 @@ import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.gui.QuoridorApp;
+import fr.bordeaux.factories.*;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 
