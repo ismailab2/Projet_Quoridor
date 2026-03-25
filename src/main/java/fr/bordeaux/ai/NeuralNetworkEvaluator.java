@@ -52,9 +52,18 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   /** Operation to assign values to the bias variable. */
   /* package */ Op biasAssign;
 
-  /** Default constructor. Uses 5000 games and 500 epochs. */
-  public NeuralNetworkEvaluator() {
-    this(DEFAULT_GAMES, DEFAULT_EPOCHS);
+  /** Default constructor. Loads the bundled model from the classpath. */
+  public NeuralNetworkEvaluator() throws IOException {
+    initGraph();
+
+    try (InputStream is =
+        NeuralNetworkEvaluator.class.getResourceAsStream("/nnmodels/default_quoridor_model.bin")) {
+      if (is == null) {
+        new NeuralNetworkTrainer().trainModel(this, DEFAULT_GAMES, DEFAULT_EPOCHS);
+      } else {
+        NeuralNetworkTrainer.loadModel(this, is);
+      }
+    }
   }
 
   /**
@@ -110,22 +119,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     this.session = new Session(graph);
 
     session.runner().addTarget(weights).addTarget(bias).run();
-  }
-
-  /**
-   * Factory method to implicitly load the default bundled model from the classpath.
-   *
-   * @return A NeuralNetworkEvaluator initialized with the default weights.
-   * @throws IOException If the resource is missing.
-   */
-  public static NeuralNetworkEvaluator loadDefault() throws IOException {
-    final InputStream inputstream =
-        NeuralNetworkEvaluator.class.getResourceAsStream("/nnmodels/default_quoridor_model.bin");
-    if (inputstream == null) {
-      throw new FileNotFoundException(
-          "Default model not found in classpath: /nnmodels/default_quoridor_model.bin");
-    }
-    return new NeuralNetworkEvaluator(inputstream);
   }
 
   /**

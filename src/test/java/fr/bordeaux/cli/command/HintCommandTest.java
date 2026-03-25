@@ -3,7 +3,6 @@ package fr.bordeaux.cli.command;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.core.*;
-
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

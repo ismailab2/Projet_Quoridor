@@ -33,7 +33,7 @@ public class NeuralNetworkEvaluatorTest {
 
     if (modelFile.exists()) {
       System.out.println("--- Chargement du modèle pré-entraîné ---");
-      evaluator = NeuralNetworkEvaluator.loadDefault();
+      evaluator = new NeuralNetworkEvaluator();
 
     } else {
       System.out.println("--- Aucun modèle trouvé. Entraînement en cours... ---");

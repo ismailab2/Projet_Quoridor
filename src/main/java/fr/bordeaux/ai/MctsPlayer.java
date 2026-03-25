@@ -63,7 +63,7 @@ public class MctsPlayer extends AiPlayer {
     NeuralNetworkEvaluator evaluator1;
     evaluator1 = null;
     if (useNN) {
-      evaluator1 = NeuralNetworkEvaluator.loadDefault();
+      evaluator1 = new NeuralNetworkEvaluator();
     }
     this.evaluator = evaluator1;
   }
@@ -138,7 +138,7 @@ public class MctsPlayer extends AiPlayer {
     final int playerIdx = state.getPlayers().indexOf(player);
     NeuralNetworkEvaluator evalToUse = null;
     if (useNN) {
-      evalToUse = NeuralNetworkEvaluator.loadDefault();
+      evalToUse = new NeuralNetworkEvaluator();
     }
     return new MctsNode(state.copy())
         .getBestMoveAfterSearch(reflectionTimeMs, playerIdx, evalToUse);
