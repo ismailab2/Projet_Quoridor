@@ -1,6 +1,5 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.MainApp;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import javafx.application.Application;
@@ -29,11 +28,10 @@ public class QuoridorApp extends Application {
    */
   @Override
   public void start(Stage stage) {
-    ConfigManager.getInstance().load();
-    int boardSize = MainApp.BOARD_SIZE;
+    int BOARD_SIZE =9;
     GameState state;
 
-    state = new GameState(new Board(boardSize), Player.createDefaultPlayers());
+    state = new GameState(new Board(BOARD_SIZE), Player.createDefaultPlayers());
     GameEngine engine = new GameEngine(state);
 
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
