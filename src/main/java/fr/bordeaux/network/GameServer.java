@@ -18,6 +18,13 @@ import java.net.Socket;
  */
 public class GameServer {
 
+    /**
+     * Default constructor.
+     * Initializes a new GameServer instance.
+     */
+    public GameServer() {
+    }
+
   /** TCP server socket */
   private ServerSocket serverSocket;
 

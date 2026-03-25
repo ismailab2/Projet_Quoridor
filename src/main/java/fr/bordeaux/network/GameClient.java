@@ -15,6 +15,13 @@ import java.net.*;
  */
 public class GameClient {
 
+    /**
+     * Default constructor.
+     * Initializes a new GameClient instance without connecting.
+     */
+    public GameClient() {
+    }
+
   /** TCP socket used for the connection */
   private Socket socket;
 

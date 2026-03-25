@@ -17,7 +17,15 @@ import fr.bordeaux.config.ConfigManager;
  */
 public final class MainApp {
 
-  /**
+    /**
+     * Default constructor.
+     * Constructs a new MainApp instance.
+     */
+    public MainApp() {
+    }
+
+
+    /**
    * This method performs the following steps:
    *
    * <ol>

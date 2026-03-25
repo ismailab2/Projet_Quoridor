@@ -11,6 +11,13 @@ package fr.bordeaux.Main;
  */
 public class AppLauncherFactory {
 
+    /**
+     * Default constructor.
+     * Constructs a new AppLauncherFactory instance.
+     */
+    public AppLauncherFactory() {
+    }
+
   /**
    * Creates an {@link AppLauncher} corresponding to the given mode.
    *
