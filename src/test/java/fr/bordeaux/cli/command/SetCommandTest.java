@@ -81,7 +81,7 @@ class SetCommandTest {
     assertSame(engine, result);
   }
 
-   @Test
+  @Test
   void executeEmptyKeyAndValue() {
     SetCommand command = new SetCommand(new String[] {"set", "="});
 

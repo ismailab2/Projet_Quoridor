@@ -84,7 +84,7 @@ class MoveCommandTest {
     assertEquals(before, p1.getPosition());
   }
 
-    @Test
+  @Test
   void executeNullMove() {
     MoveCommand command = new MoveCommand();
     Position before = p1.getPosition();

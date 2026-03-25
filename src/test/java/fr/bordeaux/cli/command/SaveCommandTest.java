@@ -59,14 +59,14 @@ class SaveCommandTest {
     assertTrue(new File(fileName).exists());
   }
 
-@Test
-void executeWithInvalidPath() {
-  SaveCommand command = new SaveCommand(new String[] {"save", "?:/invalid/save.txt"});
+  @Test
+  void executeWithInvalidPath() {
+    SaveCommand command = new SaveCommand(new String[] {"save", "?:/invalid/save.txt"});
 
-  GameEngine result = command.execute(engine);
+    GameEngine result = command.execute(engine);
 
-  assertSame(engine, result);
-}
+    assertSame(engine, result);
+  }
 
   @Test
   void savedFileContainsGameSection() throws Exception {
