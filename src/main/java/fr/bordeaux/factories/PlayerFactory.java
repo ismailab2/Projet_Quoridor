@@ -1,9 +1,9 @@
 package fr.bordeaux.factories;
 
+import fr.bordeaux.MainApp;
 import fr.bordeaux.ai.*;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
-import fr.bordeaux.MainApp;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -169,15 +169,15 @@ public final class GameLoader {
     int myCurrentLine = currentLine + 1;
     player = lines.get(myCurrentLine);
     final Position pPostion = readPlayerStartPosition(player);
-    myCurrentLine +=1;
+    myCurrentLine += 1;
     player = lines.get(myCurrentLine);
-    final long remainingTime = Long.parseLong( lines.get(myCurrentLine).split("=")[1]);
+    final long remainingTime = Long.parseLong(lines.get(myCurrentLine).split("=")[1]);
     PlayerAndLine result = null;
     if (pType.equals("ai")) {
       result = readAiPlayer(lines, myCurrentLine, pName, pPostion);
-      
+
     } else {
-      result =  new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine + 1);
+      result = new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine + 1);
     }
     result.player.setRemainingTime(remainingTime);
     return result;
