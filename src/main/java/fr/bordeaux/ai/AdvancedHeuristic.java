@@ -47,9 +47,7 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
     for (final Player otherPlayer : listPlayer) {
       if (otherPlayer.getName().equals(this.aiName)) {
         player = otherPlayer;
-        enemie = gameState.getCurrentPlayer();
       } else {
-        player = gameState.getCurrentPlayer();
         enemie = otherPlayer;
       }
     }
