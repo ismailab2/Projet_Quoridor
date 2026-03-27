@@ -1,6 +1,5 @@
-package fr.bordeaux.factories;
+package fr.bordeaux.Main;
 
-import fr.bordeaux.MainApp;
 import fr.bordeaux.ai.*;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
@@ -37,12 +36,12 @@ public final class PlayerFactory {
     List<Player> players = new ArrayList<>();
 
     players.add(
-        new HumanPlayer("Human 1", new Position(MainApp.BOARD_SIZE - 1, MainApp.BOARD_SIZE / 2)));
+        new HumanPlayer("Human 1", new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2)));
 
     if (config.getBoolean("ai", false)) {
-      players.add(buildAi("AI", new Position(0, MainApp.BOARD_SIZE / 2), config));
+      players.add(buildAi("AI", new Position(0, CliLauncher.BOARD_SIZE / 2), config));
     } else {
-      players.add(new HumanPlayer("Human 2", new Position(0, MainApp.BOARD_SIZE / 2)));
+      players.add(new HumanPlayer("Human 2", new Position(0, CliLauncher.BOARD_SIZE / 2)));
     }
     return players;
   }

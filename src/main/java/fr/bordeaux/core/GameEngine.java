@@ -64,7 +64,6 @@ public class GameEngine {
       blitzManager.pause();
     }
     state.reset();
-    state.addListener(() -> {});
   }
 
   /**
@@ -90,7 +89,7 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      state = state.loadGame(filename);
+      state.loadGame(filename);
       initializeBlitz();
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());

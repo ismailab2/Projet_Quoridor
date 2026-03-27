@@ -4,6 +4,8 @@ import fr.bordeaux.core.*;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -17,7 +19,7 @@ import javafx.util.Duration;
 public class BoardView extends GridPane {
 
   private final GameEngine engine;
-  private final int cellSize = 100;
+  private final int cellSize = 85;
   private final int wallThickness = 10;
 
   private StackPane[][] cells;
@@ -32,6 +34,15 @@ public class BoardView extends GridPane {
     this.engine = engine;
 
     int size = engine.getState().getBoard().getSize();
+
+    // Force rows and cols to never change their size.
+    for (int i = 0; i < size; i++) {
+      ColumnConstraints col = new ColumnConstraints(cellSize);
+      this.getColumnConstraints().add(col);
+
+      RowConstraints row = new RowConstraints(cellSize);
+      this.getRowConstraints().add(row);
+    }
     cells = new StackPane[size][size];
     pawns = new Rectangle[engine.getState().getPlayers().size()][size];
 
@@ -70,7 +81,7 @@ public class BoardView extends GridPane {
         add(cell, col, row);
       }
     }
-
+    drawWallSlots();
     drawWalls();
     drawPlayers();
     highlightCurrentPlayer();
@@ -127,22 +138,24 @@ public class BoardView extends GridPane {
         int v1 = board.id(row + 1, col);
         int v2 = board.id(row + 1, col + 1);
 
-        // mur horizontal
+        // horizontal wall (between row and row+1)
         if (!graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2)) {
-
-          Rectangle wall = new Rectangle(cellSize, wallThickness);
+          Rectangle wall = new Rectangle(cellSize * 2, wallThickness);
           wall.setFill(Color.BROWN);
-
-          add(wall, col, row);
+          wall.setMouseTransparent(true);
+          add(wall, col, row, 2, 1);
+          GridPane.setValignment(wall, VPos.BOTTOM);
+          wall.setTranslateY(wallThickness / 2.0);
         }
 
-        // mur vertical
+        // vertical wall (between col and col+1)
         if (!graph.hasEdge(u1, u2) && !graph.hasEdge(v1, v2)) {
-
-          Rectangle wall = new Rectangle(wallThickness, cellSize);
+          Rectangle wall = new Rectangle(wallThickness, cellSize * 2);
           wall.setFill(Color.BROWN);
-
-          add(wall, col, row);
+          wall.setMouseTransparent(true);
+          add(wall, col, row, 1, 2);
+          GridPane.setHalignment(wall, HPos.RIGHT);
+          wall.setTranslateX(wallThickness / 2.0);
         }
       }
     }
@@ -177,11 +190,11 @@ public class BoardView extends GridPane {
    * @param player player whose available moves are highlighted
    */
   public void highlightAccessibleCells(Player player) {
+    if (this.engine.getState().getCurrentPlayer() != player) return;
 
     for (StackPane[] row : cells)
       for (StackPane cell : row)
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
-
     List<Position> moves = engine.getState().getLegalMoves(player);
 
     for (Position pos : moves) {
@@ -232,6 +245,65 @@ public class BoardView extends GridPane {
       engine.play(wallMove);
       drawBoard();
     }
+  }
+
+  /**
+   * Creates and places invisible interactive rectangles (slots) on the board's borders. These slots
+   * detect mouse hovering to show a preview and handle right-clicks to place walls.
+   */
+  private void drawWallSlots() {
+    Board board = engine.getState().getBoard();
+    int size = board.getSize();
+
+    for (int row = 0; row < size - 1; row++) {
+      for (int col = 0; col < size - 1; col++) {
+
+        Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
+        hSlot.setFill(Color.TRANSPARENT);
+
+        setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
+
+        add(hSlot, col, row, 2, 1);
+        GridPane.setValignment(hSlot, VPos.BOTTOM);
+        hSlot.setTranslateY(wallThickness / 2.0);
+
+        Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
+        vSlot.setFill(Color.TRANSPARENT);
+
+        setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
+
+        add(vSlot, col, row, 1, 2);
+        GridPane.setHalignment(vSlot, HPos.RIGHT);
+        vSlot.setTranslateX(wallThickness / 2.0);
+      }
+    }
+  }
+
+  /**
+   * Sets up mouse event handlers for a wall slot, including hover effects and click actions.
+   *
+   * @param slot The rectangle representing the interactive area
+   * @param row The starting row position for the potential wall
+   * @param col The starting column position for the potential wall
+   * @param orientation The orientation (HORIZONTAL/VERTICAL) of the wall
+   */
+  private void setupWallInteractions(Rectangle slot, int row, int col, Orientation orientation) {
+
+    slot.setOnMouseEntered(e -> slot.setFill(Color.rgb(139, 69, 19, 0.4)));
+
+    slot.setOnMouseExited(e -> slot.setFill(Color.TRANSPARENT));
+
+    slot.setOnMouseClicked(
+        e -> {
+          if (e.getButton() == MouseButton.SECONDARY) {
+
+            Move wallMove = Move.wall(new Position(row, col), orientation);
+
+            if (engine.play(wallMove)) {
+              drawBoard();
+            }
+          }
+        });
   }
 
   /**

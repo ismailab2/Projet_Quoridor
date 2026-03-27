@@ -186,11 +186,10 @@ public class GameStateTest {
 
   @Test
   public void resetCreatesNewGame() {
-    GameState newGame = game.reset();
 
-    assertNotSame(game, newGame);
-    assertEquals(2, newGame.getPlayers().size());
-    assertEquals(9, newGame.getBoard().getSize());
+    game.reset();
+    assertEquals(2, game.getPlayers().size());
+    assertEquals(9, game.getBoard().getSize());
   }
 
   @Test

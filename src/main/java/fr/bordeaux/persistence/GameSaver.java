@@ -168,6 +168,7 @@ public class GameSaver {
   private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer newP, int i) {
     writeLine(w, "ai-" + i + "-name", newP.getName());
     writeLine(w, "ai-" + i + "-starting-position", newP.getStartingPosition().toString());
+    writeLine(w, "ai-" + i + "-remaining-time", newP.getRemainingTime());
     Map<String, Object> aiSettings = newP.getSettings();
     for (String s : aiSettings.keySet()) {
       writeLine(w, "ai-" + i + "-" + s, aiSettings.get(s));
