@@ -41,7 +41,12 @@ public class MainApp {
 
     ConfigManager config = ConfigManager.getInstance();
     config.load();
-    LOGGER.debug(I18n.get("verbose")+" "+I18n.get("mode")+": " + config.getOption("verbose", "default"));
+    LOGGER.debug(
+        I18n.get("verbose")
+            + " "
+            + I18n.get("mode")
+            + ": "
+            + config.getOption("verbose", "default"));
 
     boolean gui = false;
     boolean cli = false;
@@ -55,7 +60,7 @@ public class MainApp {
           System.exit(0);
         case "-V":
         case "--version":
-          LOGGER.info(I18n.get("quoridorVersion")+": " + VERSION);
+          LOGGER.info(I18n.get("quoridorVersion") + ": " + VERSION);
           System.exit(0);
         case "-v":
         case "--verbose":
@@ -69,9 +74,12 @@ public class MainApp {
         case "--gui":
           gui = true;
           break;
-        case "-c":
         case "--cli":
           cli = true;
+          break;
+        case "-c":
+        case "--contest":
+          config.setOption("contest", "true");
           break;
         case "-b":
         case "--blitz":
@@ -83,20 +91,20 @@ public class MainApp {
             String value = args[++i];
             config.setOption("timeout", value);
           } else {
-            LOGGER.error(" --time "+I18n.get("needsValue"));
+            LOGGER.error(" --time " + I18n.get("needsValue"));
             printHelp();
             System.exit(1);
           }
           break;
         default:
-          LOGGER.error(I18n.get("invalidOpt")+" -> " + arg);
+          LOGGER.error(I18n.get("invalidOpt") + " -> " + arg);
           printHelp();
           System.exit(1);
       }
     }
 
     if (gui && cli) {
-      LOGGER.error(" --gui & --cli "+I18n.get("incompatibleOpt"));
+      LOGGER.error(" --gui & --cli " + I18n.get("incompatibleOpt"));
       printHelp();
       System.exit(1);
     }
@@ -117,17 +125,17 @@ public class MainApp {
     }
 
     if (blitz) {
-      LOGGER.info(I18n.get("mode")+" blitz : " + timeout + " minutes");
+      LOGGER.info(I18n.get("mode") + " blitz : " + timeout + " minutes");
     }
 
     try {
       if (gui) {
-        LOGGER.debug(I18n.get("launching")+": GUI");
+        LOGGER.debug(I18n.get("launching") + ": GUI");
         QuoridorApp.main(args);
       }
 
       if (cli) {
-        LOGGER.debug(I18n.get("launching")+": CLI");
+        LOGGER.debug(I18n.get("launching") + ": CLI");
         Board board = new Board(BOARD_SIZE);
         GameState state;
         if (PLAYER_SIZE == 2 || PLAYER_SIZE == 4) {

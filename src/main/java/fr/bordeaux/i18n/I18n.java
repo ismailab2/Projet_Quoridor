@@ -19,6 +19,11 @@ public class I18n {
     setLocale(Locale.getDefault());
   }
 
+  /**
+   * Set the language that will be used
+   *
+   * @param locale the location to set the language
+   */
   public static void setLocale(Locale locale) {
     currentLocale = locale;
     bundle = ResourceBundle.getBundle(BUNDLE_NAME, currentLocale);
@@ -30,8 +35,11 @@ public class I18n {
   }
 
   /**
-   * Récupère un message dynamique avec des paramètres Exemple : "Bonjour {0}, vous avez {1}
-   * messages."
+   * Get a dynamic message.
+   *
+   * @param key the text to display from properties
+   * @param params more text
+   * @return text depending on the language choosen
    */
   public static String get(String key, Object... params) {
     String pattern = bundle.getString(key);

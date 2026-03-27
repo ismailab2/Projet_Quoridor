@@ -224,7 +224,7 @@ public class CliApp {
    */
   public void run() {
     if (engine != null) {
-      final ShowCommand show = new ShowCommand(new String[] {"show", "board"});
+      final ShowCommand show = new ShowCommand();
       show.execute(engine);
     }
     while (running) {

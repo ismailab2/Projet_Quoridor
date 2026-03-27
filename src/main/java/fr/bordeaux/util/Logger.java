@@ -1,15 +1,13 @@
 package fr.bordeaux.util;
 
 import fr.bordeaux.config.ConfigManager;
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 
 /**
  * A simple custom logger for the Quoridor project. Handles writing logs to a file and/or the
  * console.
  */
-public class Logger {
+public final class Logger {
   /** ANSI escape code to reset text formatting to default. */
   private static final String RESET = "\u001B[0m";
 
@@ -38,25 +36,6 @@ public class Logger {
   private boolean verbose;
 
   /**
-   * Private constructor for file-based logging. Initializes settings from {@link ConfigManager} and
-   * attempts to create a log file in the user's home directory.
-   *
-   * @param logFile The name of the file where logs should be saved.
-   */
-  private Logger(String logFile) {
-    try {
-      File fileWriter = new File(System.getProperty("user.home") + File.separator + logFile);
-      this.writer = new PrintStream(fileWriter);
-      String debugger = ConfigManager.getInstance().getOption("debug", "true");
-      this.debug = debugger.contains("true") ? true : false;
-      String verboser = ConfigManager.getInstance().getOption("verbose", "true");
-      this.verbose = verboser.contains("true") ? true : false;
-    } catch (IOException e) {
-      writer.println(e);
-    }
-  }
-
-  /**
    * Private constructor for console-based logging. Initializes settings from {@link ConfigManager}
    * and sets output to System.out.
    */
@@ -77,20 +56,6 @@ public class Logger {
   public static Logger getInstance() {
     if (instance == null) {
       instance = new Logger();
-    }
-    return instance;
-  }
-
-  /**
-   * Provides access to the Singleton instance with file output. If no instance exists, it creates
-   * one targeting the specified file.
-   *
-   * @param logFile The filename for the log output.
-   * @return The unique instance of the Logger.
-   */
-  public static Logger getInstance(String logFile) {
-    if (instance == null) {
-      instance = new Logger(logFile);
     }
     return instance;
   }
