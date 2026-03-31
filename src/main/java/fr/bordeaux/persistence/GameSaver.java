@@ -39,7 +39,7 @@ public class GameSaver {
    */
   private static void writeHeader(PrintWriter writer, GameState state) {
     writer.println("[game]");
-    writer.println((state.getCurrentIndexPlayer() + 1) + "  # Current player color");
+    writer.println((state.getCurrentPlayer().getColor().getId()) + "  # Current player color");
     writer.println(state.getBoard().getSize() + "  # Board size");
     writer.println("# Board (" + state.getPlayers().size() + " players)");
   }
