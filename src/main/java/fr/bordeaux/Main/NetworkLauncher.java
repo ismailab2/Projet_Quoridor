@@ -24,12 +24,8 @@ import java.util.Scanner;
  */
 public class NetworkLauncher implements AppLauncher {
 
-    /**
-     * Default constructor.
-     * Constructs a new NetworkLauncher instance.
-     */
-    public NetworkLauncher() {
-    }
+  /** Default constructor. Constructs a new NetworkLauncher instance. */
+  public NetworkLauncher() {}
 
   /**
    * This method runs a command loop reading user input and executing the corresponding network

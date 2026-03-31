@@ -21,12 +21,12 @@ public class ServerBroadcaster implements Runnable {
   /** Flag controlling the broadcasting loop */
   private volatile boolean running = true;
 
-    /**
-     * Broadcasts the server's presence on the local network every 10 seconds.
-     *
-     * @param name Name of the server.
-     * @param port TCP port of the server.
-     */
+  /**
+   * Broadcasts the server's presence on the local network every 10 seconds.
+   *
+   * @param name Name of the server.
+   * @param port TCP port of the server.
+   */
   public ServerBroadcaster(String name, int port) {
     this.name = name;
     this.port = port;
