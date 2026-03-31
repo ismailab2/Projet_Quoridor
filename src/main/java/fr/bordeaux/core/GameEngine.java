@@ -10,6 +10,7 @@ import java.io.IOException;
 public class GameEngine {
 
   private GameState state;
+  private BlitzManager blitzManager;
 
   /**
    * Constructs a GameEngine with the specified initial game state.
@@ -18,6 +19,15 @@ public class GameEngine {
    */
   public GameEngine(GameState state) {
     this.state = state;
+    initializeBlitz();
+  }
+
+  /** Helper method to initialize the BlitzManager based on the current state. */
+  private void initializeBlitz() {
+    if (this.state.isBlitz()) {
+      this.blitzManager = new BlitzManager(this);
+      this.blitzManager.start();
+    }
   }
 
   /**
@@ -37,7 +47,12 @@ public class GameEngine {
 
     Player p = state.getCurrentPlayer();
     state.applyMove(move);
+
     if (state.hasReachedGoal(p)) {
+      state.setGameOver(true);
+      if (blitzManager != null) {
+        blitzManager.pause();
+      }
       System.out.println(p.getName() + " won the game!");
     }
     return true;
@@ -45,6 +60,9 @@ public class GameEngine {
 
   /** Resets the current game to its initial state and clears listeners. */
   public void newGame() {
+    if (blitzManager != null) {
+      blitzManager.pause();
+    }
     state.reset();
   }
 
@@ -68,7 +86,11 @@ public class GameEngine {
    */
   public void loadGame(String filename) {
     try {
+      if (blitzManager != null) {
+        blitzManager.pause();
+      }
       state.loadGame(filename);
+      initializeBlitz();
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());
     }
@@ -84,19 +106,19 @@ public class GameEngine {
     state.redo();
   }
 
-  /**
-   * Toggles the pause state of the game. When paused, it also enables a "blitz" or temporary state
-   * modification.
-   */
+  /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
-    if (state.isPaused()) {
-      System.out.println("Resuming...");
-      state.setPaused(false);
-      state.setBlitz(false);
-    } else {
-      System.out.println("Pausing...");
-      state.setPaused(true);
-      state.setBlitz(true);
+    boolean newPauseState = !state.isPaused();
+    state.setPaused(newPauseState);
+
+    if (blitzManager != null) {
+      if (newPauseState) {
+        blitzManager.pause();
+        System.out.println("Timer Paused.");
+      } else {
+        blitzManager.start();
+        System.out.println("Timer Resumed.");
+      }
     }
   }
 
@@ -149,5 +171,14 @@ public class GameEngine {
    */
   public GameState getState() {
     return state;
+  }
+
+  /**
+   * Returns the current blitz manager of the game.
+   *
+   * @return The {@link BlitzManager} managed by this engine.
+   */
+  public BlitzManager getBlitzManager() {
+    return blitzManager;
   }
 }

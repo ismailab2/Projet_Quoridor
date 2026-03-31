@@ -36,7 +36,6 @@ public class GameLoaderTest {
 
     // Player 2 places a horizontal wall at c3 (2,2)
     state.applyMove(Move.wall(new Position(2, 2), Orientation.HORIZONTAL));
-
     // Save the state to a file
     GameSaver.saveGame(state, TEST_FILE);
   }
@@ -74,8 +73,10 @@ public class GameLoaderTest {
       writer.println("nb-players=2");
       writer.println("player-1-name=Player1");
       writer.println("player-1-starting-position=Position: 0, 4");
+      writer.println("player-1-remaining-time=30");
       writer.println("player-2-name=Player2");
       writer.println("player-2-starting-position=Position: 8, 4");
+      writer.println("player-2-remaining-time=30");
       writer.println("[game]");
       writer.println("1  # Current player color");
       writer.println("9  # Board size");
@@ -123,8 +124,10 @@ public class GameLoaderTest {
       writer.println("nb-players=2");
       writer.println("player-1-name=Player1");
       writer.println("player-1-starting-position=Position: 0, 4");
+      writer.println("player-1-remaining-time=30");
       writer.println("player-2-name=Player2");
       writer.println("player-2-starting-position=Position: 8, 4");
+      writer.println("player-2-remaining-time=30");
       writer.println("[game]");
       writer.println("1  # Current player color");
       writer.println("9  # Board size");
