@@ -52,9 +52,22 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   /** Operation to assign values to the bias variable. */
   /* package */ Op biasAssign;
 
-  /** Default constructor. Uses 5000 games and 500 epochs. */
-  public NeuralNetworkEvaluator() {
-    this(DEFAULT_GAMES, DEFAULT_EPOCHS);
+  /**
+   * Default constructor. Loads the bundled model from the classpath.
+   *
+   * @throws IOException Exception raised if load fail
+   */
+  public NeuralNetworkEvaluator() throws IOException {
+    initGraph();
+
+    try (InputStream is =
+        NeuralNetworkEvaluator.class.getResourceAsStream("/nnmodels/default_quoridor_model.bin")) {
+      if (is == null) {
+        new NeuralNetworkTrainer().trainModel(this, DEFAULT_GAMES, DEFAULT_EPOCHS);
+      } else {
+        NeuralNetworkTrainer.loadModel(this, is);
+      }
+    }
   }
 
   /**
@@ -69,8 +82,18 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     trainer.trainModel(this, numGames, epochs);
   }
 
+  /**
+   * Constructor for inference using a saved model from an InputStream.
+   *
+   * @param inputstream InputStream containing the .bin model binary.
+   * @throws IOException If stream is unreadable or corrupt.
+   */
+  private NeuralNetworkEvaluator(final InputStream inputstream) throws IOException {
+    initGraph();
+    NeuralNetworkTrainer.loadModel(this, inputstream);
+  }
+
   @SuppressWarnings(SUPPRESS_LOD)
-  /** Initializes the TensorFlow graph for the neural network. */
   private void initGraph() {
     this.graph = new Graph();
     final Ops tfOps = Ops.create(graph);
@@ -100,44 +123,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     this.session = new Session(graph);
 
     session.runner().addTarget(weights).addTarget(bias).run();
-  }
-
-  /**
-   * Factory method to implicitly load the default bundled model from the classpath.
-   *
-   * @return A NeuralNetworkEvaluator initialized with the default weights.
-   * @throws IOException If the resource is missing.
-   */
-  public static NeuralNetworkEvaluator loadDefault() throws IOException {
-    final InputStream inputstream =
-        NeuralNetworkEvaluator.class.getResourceAsStream("/nnmodels/default_quoridor_model.bin");
-    if (inputstream == null) {
-      throw new FileNotFoundException(
-          "Default model not found in classpath: /nnmodels/default_quoridor_model.bin");
-    }
-    return new NeuralNetworkEvaluator(inputstream);
-  }
-
-  /**
-   * Constructor for inference using a saved model from an InputStream.
-   *
-   * @param inputstream InputStream containing the .bin model binary.
-   * @throws IOException If stream is unreadable or corrupt.
-   */
-  public NeuralNetworkEvaluator(final InputStream inputstream) throws IOException {
-    initGraph();
-    NeuralNetworkTrainer.loadModel(this, inputstream);
-  }
-
-  /**
-   * Constructor for inference using a saved model from a file path.
-   *
-   * @param path Path to the .bin model file.
-   * @throws IOException If file is missing or corrupt.
-   */
-  public NeuralNetworkEvaluator(final String path) throws IOException {
-    initGraph();
-    NeuralNetworkTrainer.loadModel(this, path);
   }
 
   /**

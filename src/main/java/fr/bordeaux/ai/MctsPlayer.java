@@ -4,6 +4,7 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,16 +49,23 @@ public class MctsPlayer extends AiPlayer {
    * @param name The name of the AI player.
    * @param positionStart The starting position on the board.
    * @param reflectionTime Maximum search time in ms.
-   * @param evaluator The neural network to guide the search.
+   * @param useNN To use or not NeuralNetworks in selection
+   * @throws IOException Possible if mcts with NN selection used
    */
   public MctsPlayer(
       final String name,
       final Position positionStart,
       final long reflectionTime,
-      final NeuralNetworkEvaluator evaluator) {
+      final boolean useNN)
+      throws IOException {
     super(name, positionStart);
     this.reflectionTime = reflectionTime;
-    this.evaluator = evaluator;
+    NeuralNetworkEvaluator evaluator1;
+    evaluator1 = null;
+    if (useNN) {
+      evaluator1 = new NeuralNetworkEvaluator();
+    }
+    this.evaluator = evaluator1;
   }
 
   /**
@@ -108,8 +116,9 @@ public class MctsPlayer extends AiPlayer {
    * @param player the player for whom to find the best move.
    * @param state the current game state.
    * @return the best move for the player, or null.
+   * @throws IOException Can't happen because useNN is false here
    */
-  public static Move hint(final Player player, final GameState state) {
+  public static Move hint(final Player player, final GameState state) throws IOException {
     return hint(player, state, 2000, false);
   }
 
@@ -121,12 +130,11 @@ public class MctsPlayer extends AiPlayer {
    * @param reflectionTimeMs t
    * @param useNN nn @return best move or null.
    * @return the best move for the player, or null.
+   * @throws IOException Possible if mcts with NN selection used
    */
   public static Move hint(
-      final Player player,
-      final GameState state,
-      final long reflectionTimeMs,
-      final boolean useNN) {
+      final Player player, final GameState state, final long reflectionTimeMs, final boolean useNN)
+      throws IOException {
     final int playerIdx = state.getPlayers().indexOf(player);
     NeuralNetworkEvaluator evalToUse = null;
     if (useNN) {
