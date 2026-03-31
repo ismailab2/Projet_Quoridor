@@ -15,12 +15,8 @@ import java.net.*;
  */
 public class GameClient {
 
-    /**
-     * Default constructor.
-     * Initializes a new GameClient instance without connecting.
-     */
-    public GameClient() {
-    }
+  /** Default constructor. Initializes a new GameClient instance without connecting. */
+  public GameClient() {}
 
   /** TCP socket used for the connection */
   private Socket socket;
@@ -30,6 +26,9 @@ public class GameClient {
 
   /** Output stream to send commands to the server */
   private PrintWriter out;
+
+  /** */
+  private Thread listenerThread;
 
   /**
    * Attempts to establish a connection to the given host and port with a timeout of 5 seconds.
@@ -47,12 +46,31 @@ public class GameClient {
       out = new PrintWriter(socket.getOutputStream(), true);
 
       System.out.println("Connected to " + host + ":" + port);
+      startListener();
       return true;
 
     } catch (IOException e) {
       System.out.println("Connection failed: " + e.getMessage());
       return false;
     }
+  }
+
+  /** Starts a background listener thread that continuously reads messages sent by the server. */
+  private void startListener() {
+    listenerThread =
+        new Thread(
+            () -> {
+              try {
+                String line;
+                while ((line = in.readLine()) != null) {
+                  System.out.println("Server: " + line);
+                }
+              } catch (IOException e) {
+                System.out.println("Connection closed: " + e.getMessage());
+              }
+            });
+    listenerThread.setDaemon(true);
+    listenerThread.start();
   }
 
   /**
@@ -62,21 +80,8 @@ public class GameClient {
   public void ping() {
     if (!checkConnection()) return;
 
-    try {
-      long start = System.currentTimeMillis();
-
-      System.out.println("Client: PING");
-      out.println("PING");
-
-      String res = in.readLine();
-
-      long rtt = System.currentTimeMillis() - start;
-
-      System.out.println("Server: " + res + " TIME=" + rtt + "ms");
-
-    } catch (IOException e) {
-      System.out.println("Ping error: " + e.getMessage());
-    }
+    System.out.println("Client: PING");
+    out.println("PING");
   }
 
   /**
@@ -88,10 +93,6 @@ public class GameClient {
       if (checkConnection()) {
         System.out.println("Client: QUIT");
         out.println("QUIT");
-
-        String res = in.readLine(); // read BYE
-        System.out.println("Server: " + res);
-
         socket.close();
       }
     } catch (IOException ignored) {
@@ -163,5 +164,15 @@ public class GameClient {
       return false;
     }
     return true;
+  }
+
+  public void hello(String name) {
+    if (!checkConnection()) return;
+    out.println("HELLO " + name);
+  }
+
+  public void sendMove(String move) {
+    if (!checkConnection()) return;
+    out.println("MOVE " + move);
   }
 }
