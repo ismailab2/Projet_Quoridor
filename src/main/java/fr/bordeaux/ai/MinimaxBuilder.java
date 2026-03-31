@@ -1,5 +1,6 @@
 package fr.bordeaux.ai;
 
+import fr.bordeaux.core.Color;
 import fr.bordeaux.core.Position;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,9 @@ public class MinimaxBuilder {
 
   /** The starting position of the player on the game board. */
   private final Position positionStart;
+
+  /** The player's color. */
+  private final Color color;
 
   /** The maximum depth the AI will search if iterative deepening is disabled. */
   private int searchDepth = 2;
@@ -36,10 +40,12 @@ public class MinimaxBuilder {
    *
    * @param nameParameter The AI's name.
    * @param pos The starting position on the board.
+   * @param color The AI's color on the board.
    */
-  public MinimaxBuilder(final String nameParameter, final Position pos) {
+  public MinimaxBuilder(final String nameParameter, final Position pos, final Color color) {
     this.name = nameParameter;
     this.positionStart = pos;
+    this.color = color;
   }
 
   /**
@@ -138,6 +144,15 @@ public class MinimaxBuilder {
    */
   public Position getStartingPosition() {
     return this.positionStart;
+  }
+
+  /**
+   * Get the color of the MiniMax Player.
+   *
+   * @return The player's color
+   */
+  public Color getColor() {
+    return this.color;
   }
 
   /**

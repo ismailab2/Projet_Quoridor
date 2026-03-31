@@ -136,9 +136,15 @@ public class NeuralNetworkTrainer {
       final Random random) {
     final Board board = new Board(9);
     final Player player1 =
-        MinimaxPlayer.builder("P1", new Position(0, 4)).withDepth(1).withReflexion(1).build();
+        MinimaxPlayer.builder("P1", new Position(0, 4), Color.WHITE)
+            .withDepth(1)
+            .withReflexion(1)
+            .build();
     final Player player2 =
-        MinimaxPlayer.builder("P2", new Position(8, 4)).withDepth(1).withReflexion(1).build();
+        MinimaxPlayer.builder("P2", new Position(8, 4), Color.BLACK)
+            .withDepth(1)
+            .withReflexion(1)
+            .build();
 
     player1.setPosition(new Position(random.nextInt(8), random.nextInt(9)));
     player2.setPosition(new Position(random.nextInt(1, 9), random.nextInt(9)));

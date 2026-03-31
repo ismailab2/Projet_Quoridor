@@ -3,6 +3,7 @@ package fr.bordeaux.gui;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.GameEngine;
+import java.io.IOException;
 import javafx.application.Platform;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -10,7 +11,7 @@ import org.mockito.MockedStatic;
 class ActionDispatcherTest {
 
   @Test
-  void testNewGame() {
+  void testNewGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -20,7 +21,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testLoadGame() {
+  void testLoadGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -30,7 +31,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testSaveGame() {
+  void testSaveGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -40,7 +41,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testUndo() {
+  void testUndo() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -50,7 +51,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testRedo() {
+  void testRedo() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -60,7 +61,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testPause() {
+  void testPause() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -70,7 +71,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testHint() {
+  void testHint() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -80,7 +81,7 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testConfiguration() {
+  void testConfiguration() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 
@@ -102,11 +103,13 @@ class ActionDispatcherTest {
       dispatcher.dispatch(Action.INFO);
 
       mocked.verify(InfoDialog::show);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Test
-  void testQuit() {
+  void testQuit() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     ActionDispatcher dispatcher = new ActionDispatcher(engine);
 

@@ -35,23 +35,27 @@ public final class PlayerFactory {
   public static List<Player> createPlayers(final ConfigManager config) {
     List<Player> players = new ArrayList<>();
 
-    if (config.getBoolean("ai0", false)) {
+    if (config.getBoolean("ai1", false)) {
+      players.add(
+          buildAi("AI WHITE", new Position(0, CliLauncher.BOARD_SIZE / 2), config, Color.WHITE));
+    } else {
+      players.add(
+          new HumanPlayer("Human White", new Position(0, CliLauncher.BOARD_SIZE / 2), Color.WHITE));
+    }
+
+    if (config.getBoolean("ai2", false)) {
       players.add(
           buildAi(
-              "AI WHITE",
+              "AI BLACK",
               new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2),
               config,
-              "0"));
+              Color.BLACK));
     } else {
       players.add(
           new HumanPlayer(
-              "Human White", new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2)));
-    }
-
-    if (config.getBoolean("ai1", false)) {
-      players.add(buildAi("AI BLACK", new Position(0, CliLauncher.BOARD_SIZE / 2), config, "1"));
-    } else {
-      players.add(new HumanPlayer("Human Black", new Position(0, CliLauncher.BOARD_SIZE / 2)));
+              "Human Black",
+              new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2),
+              Color.BLACK));
     }
     return players;
   }
@@ -75,29 +79,44 @@ public final class PlayerFactory {
    * @throws UnsupportedOperationException if an unimplemented mode (MCTS/Neural) is requested.
    */
   private static Player buildAi(
-      final String name, final Position pos, final ConfigManager config, String color) {
+      final String name, final Position pos, final ConfigManager config, Color color) {
 
-    final String mode = config.getOption("ai" + color + ".mode", "minimax");
+    // Convert the Color enum to its ID string (e.g., "0" or "1") to match config keys
+    final String colorId = String.valueOf(color.getId());
+    final String prefix = "ai" + colorId;
+
+    final String mode = config.getOption(prefix + ".mode", "minimax");
     Player player = null;
+
     switch (mode) {
       case "mcts":
-        break;
+        // Get reflection time and convert to milliseconds
+        final long reflexionTimeMs = config.getInt(prefix + ".time", 5) * 1000L;
+        final String selection = config.getOption(prefix + ".selection", "UCT");
+        final boolean useNN = selection.equalsIgnoreCase("ML");
 
-      case "neural":
+        try {
+          player = new MctsPlayer(name, pos, reflexionTimeMs, useNN, color);
+        } catch (java.io.IOException e) {
+          throw new RuntimeException(
+              "Error initializing MCTS AI (" + selection + "): " + e.getMessage(), e);
+        }
         break;
 
       case "iterative":
       case "minimax":
       default:
-        final int depth = config.getInt("ai" + color + ".depth", 2);
-        final int reflexionTime = config.getInt("ai" + color + ".time", 5);
-        final String scoring = config.getOption("ai" + color + ".scoring", "simple");
+        final int depth = config.getInt(prefix + ".depth", 2);
+        final int reflexionTime = config.getInt(prefix + ".time", 5);
+        final String scoring = config.getOption(prefix + ".scoring", "simple");
+
         MinimaxBuilder builder =
-            MinimaxPlayer.builder(name, pos)
+            MinimaxPlayer.builder(name, pos, color)
                 .withDepth(depth)
                 .withHeuristic(scoring)
                 .withReflexion(reflexionTime);
-        if (mode.equals("iterative")) {
+
+        if ("iterative".equals(mode)) {
           builder.withIterativeDeepening(true);
         }
         player = builder.build();

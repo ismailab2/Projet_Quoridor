@@ -1,5 +1,6 @@
 package fr.bordeaux.ai;
 
+import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import java.util.List;
@@ -18,15 +19,15 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   private static final int MIN_SCORE = -10_000;
 
   /** The identifier of the AI player. */
-  private final String aiName;
+  private final Color aiColor;
 
   /**
    * Constructs an AdvancedHeuristic.
    *
-   * @param aiNameParameter The name of the AI player.
+   * @param aiColorParameter The color of the AI player.
    */
-  public AdvancedHeuristic(final String aiNameParameter) {
-    this.aiName = aiNameParameter;
+  public AdvancedHeuristic(final Color aiColorParameter) {
+    this.aiColor = aiColorParameter;
   }
 
   /**
@@ -45,7 +46,7 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
     Player enemie = null;
     Player player = null;
     for (final Player otherPlayer : listPlayer) {
-      if (otherPlayer.getName().equals(this.aiName)) {
+      if (otherPlayer.getColor() == this.aiColor) {
         player = otherPlayer;
       } else {
         enemie = otherPlayer;

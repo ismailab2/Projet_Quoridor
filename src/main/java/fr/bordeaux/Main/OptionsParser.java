@@ -76,13 +76,13 @@ public final class OptionsParser {
               String myColor = colors[x];
               String playerId;
 
-              if (myColor.equals("blanc") || myColor.equals("0")) {
-                playerId = "0";
-              } else if (myColor.equals("noir") || myColor.equals("1")) {
+              if (myColor.equals("blanc") || myColor.equals("1")) {
                 playerId = "1";
+              } else if (myColor.equals("noir") || myColor.equals("2")) {
+                playerId = "2";
               } else {
                 throw new IllegalArgumentException(
-                    "Couleur IA non reconnue. Utilisez 'blanc' (0) ou 'noir' (1).");
+                    "Couleur IA non reconnue. Utilisez 'blanc' (1) ou 'noir' (2).");
               }
               config.setOption("ai" + playerId, "true");
               aiPrefix.add(playerId);
@@ -133,6 +133,26 @@ public final class OptionsParser {
             }
           }
           break;
+        }
+
+        case "--ai-mcts-selection" -> {
+          i++;
+          if (i < args.length) {
+            String[] selection = args[i].split(",");
+            for (int x = 0; x < selection.length; x++) {
+              if (x >= aiPrefix.size()) {
+                throw new IllegalArgumentException(
+                    "Invalid option : "
+                        + selection[x]
+                        + " too many options compared to AIs number");
+              }
+              if (!selection[x].equals("UCT") && !selection[x].equals("ML")) {
+                throw new IllegalArgumentException(
+                    "Invalid option: " + selection[x] + " for mcts selection.");
+              }
+              config.setOption("ai" + aiPrefix.get(x) + ".selection", selection[x]);
+            }
+          }
         }
 
         case "-g", "--gui", "-c", "--cli", "-n", "--net" -> {

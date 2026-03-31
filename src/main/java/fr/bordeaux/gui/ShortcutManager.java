@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.Scene;
@@ -162,7 +163,11 @@ public class ShortcutManager {
         event -> {
           for (Action action : shortcuts.keySet()) {
             if (shortcuts.get(action).match(event)) {
-              dispatcher.dispatch(action);
+              try {
+                dispatcher.dispatch(action);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
               event.consume();
             }
           }

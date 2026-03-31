@@ -99,7 +99,6 @@ public class CliApp {
     this.running = true;
 
     // Création du Completer intelligent
-    // Création du Completer intelligent
     Completer smartCompleter =
         (reader, line, candidates) -> {
           String buffer = line.line();
@@ -188,8 +187,8 @@ public class CliApp {
             new GameState(
                 new Board(9),
                 List.of(
-                    new HumanPlayer("Human", new Position(0, 4)),
-                    new HumanPlayer("Bob", new Position(8, 4))))));
+                    new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                    new HumanPlayer("Bob", new Position(8, 4), Color.BLACK)))));
   }
 
   /** Triggers an audible alert (beep) through the terminal. */

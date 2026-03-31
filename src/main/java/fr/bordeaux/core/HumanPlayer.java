@@ -8,9 +8,10 @@ public class HumanPlayer extends Player {
    *
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
+   * @param color The color of the player.
    */
-  public HumanPlayer(String name, Position positionStart) {
-    super(name, positionStart);
+  public HumanPlayer(String name, Position positionStart, Color color) {
+    super(name, positionStart, color);
   }
 
   @Override
@@ -20,7 +21,8 @@ public class HumanPlayer extends Player {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore());
+        this.getScore(),
+        this.getColor());
   }
 
   /**
@@ -32,8 +34,9 @@ public class HumanPlayer extends Player {
    * @param walls The number of remaining walls.
    * @param score The current score of the player.
    */
-  private HumanPlayer(String name, Position current, Position start, int walls, int score) {
-    super(name, current, start, walls, score);
+  private HumanPlayer(
+      String name, Position current, Position start, int walls, int score, Color color) {
+    super(name, current, start, walls, score, color);
   }
 
   /**

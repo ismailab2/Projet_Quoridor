@@ -9,6 +9,7 @@ import java.util.List;
  */
 public abstract class Player {
 
+  private final Color color;
   private final String name;
   private Position position;
   private int remainingWalls = 10;
@@ -21,11 +22,13 @@ public abstract class Player {
    *
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
+   * @param color The color of the player.
    */
-  public Player(String name, Position positionStart) {
+  public Player(String name, Position positionStart, Color color) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;
+    this.color = color;
   }
 
   /**
@@ -36,13 +39,16 @@ public abstract class Player {
    * @param startPos The player's initial starting position.
    * @param walls The number of remaining walls.
    * @param score The current player score.
+   * @param color The color of the player.
    */
-  protected Player(String name, Position currentPos, Position startPos, int walls, int score) {
+  protected Player(
+      String name, Position currentPos, Position startPos, int walls, int score, Color color) {
     this.name = name;
     this.position = new Position(currentPos.getX(), currentPos.getY());
     this.startingPosition = startPos;
     this.remainingWalls = walls;
     this.score = score;
+    this.color = color;
   }
 
   /**
@@ -52,8 +58,8 @@ public abstract class Player {
    */
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
-    Player p1 = new HumanPlayer("Human", new Position(0, 4));
-    Player p2 = new HumanPlayer("Bob", new Position(8, 4));
+    Player p1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
+    Player p2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
     players.add(p1);
     players.add(p2);
     return players;
@@ -121,6 +127,15 @@ public abstract class Player {
   /** Increments the count of remaining walls. Typically used during an undo operation. */
   public void giveBackWall() {
     remainingWalls++;
+  }
+
+  /**
+   * Retrieves the color assigned to the player.
+   *
+   * @return The color of the player.
+   */
+  public Color getColor() {
+    return color;
   }
 
   /**

@@ -15,8 +15,8 @@ class HintCommandTest {
   @BeforeEach
   void setUp() {
     Board board = new Board(9);
-    Player p1 = new HumanPlayer("Human", new Position(0, 4));
-    Player p2 = new HumanPlayer("Bob", new Position(8, 4));
+    Player p1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
+    Player p2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
     GameState state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state);
   }

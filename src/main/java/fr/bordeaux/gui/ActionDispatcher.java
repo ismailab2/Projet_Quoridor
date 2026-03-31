@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameEngine;
+import java.io.IOException;
 import javafx.application.Platform;
 
 /**
@@ -31,8 +32,9 @@ public class ActionDispatcher {
    * application
    *
    * @param action The Action enum representing the user command.
+   * @throws IOException If an I/O error occurs during command execution.
    */
-  public void dispatch(Action action) {
+  public void dispatch(Action action) throws IOException {
     switch (action) {
       case NEW_GAME -> engine.newGame();
       case LOAD_GAME -> engine.loadGame("txt.txt");

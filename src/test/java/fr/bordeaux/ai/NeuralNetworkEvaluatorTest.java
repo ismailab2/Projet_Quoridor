@@ -2,10 +2,7 @@ package fr.bordeaux.ai;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,8 +39,8 @@ public class NeuralNetworkEvaluatorTest {
       System.out.println("--- Modèle sauvegardé pour les futurs tests ---");
     }
     Board board = new Board(9);
-    Player p1 = new RandomPlayer("P1", new Position(0, 4));
-    Player p2 = new RandomPlayer("P2", new Position(8, 4));
+    Player p1 = new RandomPlayer("P1", new Position(0, 4), Color.WHITE);
+    Player p2 = new RandomPlayer("P2", new Position(8, 4), Color.BLACK);
     List<Player> players = Arrays.asList(p1, p2);
     state = new GameState(board, players);
   }
@@ -92,8 +89,8 @@ public class NeuralNetworkEvaluatorTest {
   public void testEvaluateFavorsWinningPosition() {
     // nearState: p1 is moved close to its goal (row 8), p2 stays at its start
     Board boardNear = new Board(9);
-    Player p1Near = new RandomPlayer("P1Near", new Position(0, 4));
-    Player p2Near = new RandomPlayer("P2Near", new Position(8, 4));
+    Player p1Near = new RandomPlayer("P1Near", new Position(0, 4), Color.WHITE);
+    Player p2Near = new RandomPlayer("P2Near", new Position(8, 4), Color.BLACK);
     p1Near.setRemainingWalls(0);
     p2Near.setRemainingWalls(0);
     p1Near.setPosition(new Position(7, 3)); // 1 step from goal row 8
@@ -101,8 +98,8 @@ public class NeuralNetworkEvaluatorTest {
 
     // farState: both players stay at their canonical starting positions
     Board boardFar = new Board(9);
-    Player p1Far = new RandomPlayer("P1Far", new Position(0, 4));
-    Player p2Far = new RandomPlayer("P2Far", new Position(8, 4));
+    Player p1Far = new RandomPlayer("P1Far", new Position(0, 4), Color.WHITE);
+    Player p2Far = new RandomPlayer("P2Far", new Position(8, 4), Color.BLACK);
     p1Far.setRemainingWalls(0);
     p2Far.setRemainingWalls(0);
     GameState farState = new GameState(boardFar, Arrays.asList(p1Far, p2Far));

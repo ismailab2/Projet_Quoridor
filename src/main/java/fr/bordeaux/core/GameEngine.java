@@ -1,6 +1,6 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.MctsPlayer;
 import java.io.IOException;
 
 /**
@@ -122,16 +122,19 @@ public class GameEngine {
     }
   }
 
-  /** Provides a hint for the current player by calculating the best move using a Minimax AI. */
-  public void hint() {
+  /**
+   * Provides a hint for the current player by calculating the best move using an AI.
+   *
+   * @return The best move for the current player.
+   * @throws IOException If an I/O error occurs.
+   */
+  public Move hint() throws IOException {
 
     Player current = state.getCurrentPlayer();
 
-    MinimaxPlayer ia = MinimaxPlayer.builder(current.getName(), current.getPosition()).build();
+    final Move hint = MctsPlayer.hint(getState().getCurrentPlayer(), getState(), 3000, true);
 
-    Move hint = ia.getNextMove(state);
-
-    System.out.println("Best move : " + moveToString(hint));
+    return hint;
   }
 
   /**

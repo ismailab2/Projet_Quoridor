@@ -1,9 +1,6 @@
 package fr.bordeaux.ai;
 
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -47,7 +44,7 @@ public final class MinimaxPlayer extends AiPlayer {
    * @param builder The builder containing configuration settings.
    */
   public MinimaxPlayer(final MinimaxBuilder builder) {
-    super(builder.getName(), builder.getStartingPosition());
+    super(builder.getName(), builder.getStartingPosition(), builder.getColor());
     this.searchDepth = builder.getSearchDepth();
     this.reflexionTime = builder.getLimitTime();
     this.useIterativeD = builder.isUseIterativeDeepening();
@@ -87,8 +84,9 @@ public final class MinimaxPlayer extends AiPlayer {
       final int depth,
       final int timeLimit,
       final boolean iterativeDeepVal,
-      final String heuristicVal) {
-    super(name, current, start, walls, score);
+      final String heuristicVal,
+      final Color color) {
+    super(name, current, start, walls, score, color);
     this.searchDepth = depth;
     this.reflexionTime = timeLimit;
     this.useIterativeD = iterativeDeepVal;
@@ -108,10 +106,11 @@ public final class MinimaxPlayer extends AiPlayer {
    *
    * @param name The player name.
    * @param pos The starting position.
+   * @param color The AI's color on the board.
    * @return A new Builder instance.
    */
-  public static MinimaxBuilder builder(final String name, final Position pos) {
-    return new MinimaxBuilder(name, pos);
+  public static MinimaxBuilder builder(final String name, final Position pos, final Color color) {
+    return new MinimaxBuilder(name, pos, color);
   }
 
   /**
@@ -124,14 +123,14 @@ public final class MinimaxPlayer extends AiPlayer {
     final HeuristicEvaluator chosenHeuristic;
     switch (heuristicNameP) {
       case "intermediate":
-        chosenHeuristic = new MediumHeuristic(this.getName());
+        chosenHeuristic = new MediumHeuristic(this.getColor());
         break;
       case "advanced":
-        chosenHeuristic = new AdvancedHeuristic(this.getName());
+        chosenHeuristic = new AdvancedHeuristic(this.getColor());
         break;
       case "simple":
       default:
-        chosenHeuristic = new SimpleHeuristic(this.getName());
+        chosenHeuristic = new SimpleHeuristic(this.getColor());
         break;
     }
     return chosenHeuristic;
@@ -384,7 +383,8 @@ public final class MinimaxPlayer extends AiPlayer {
         this.searchDepth,
         this.reflexionTime,
         this.useIterativeD,
-        this.heuristicName);
+        this.heuristicName,
+        this.getColor());
   }
 
   @Override

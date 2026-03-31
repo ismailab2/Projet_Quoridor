@@ -21,9 +21,9 @@ public class MCTSPlayerTest {
     players = new ArrayList<>();
 
     // AI starts at the top (row 0, middle)
-    ai = new MctsPlayer("MCTS_AI", new Position(0, 4), 2000);
+    ai = new MctsPlayer("MCTS_AI", new Position(0, 4), 2000, Color.WHITE);
     // Opponent starts at the bottom (row 8, middle)
-    HumanPlayer opponent = new HumanPlayer("Opponent", new Position(8, 4));
+    HumanPlayer opponent = new HumanPlayer("Opponent", new Position(8, 4), Color.BLACK);
 
     players.add(ai);
     players.add(opponent);

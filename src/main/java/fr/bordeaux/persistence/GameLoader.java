@@ -167,17 +167,21 @@ public final class GameLoader {
     final String pType = player.split("=")[0].split("-")[0];
     final String pName = player.split("=")[1];
     int myCurrentLine = currentLine + 1;
+
+    String line = lines.get(myCurrentLine);
+    final Color pColor = Color.valueOf(line.split("=")[1].trim().toUpperCase());
+    myCurrentLine++;
+
     player = lines.get(myCurrentLine);
     final Position pPostion = readPlayerStartPosition(player);
     myCurrentLine += 1;
-    player = lines.get(myCurrentLine);
     final long remainingTime = Long.parseLong(lines.get(myCurrentLine).split("=")[1]);
     PlayerAndLine result = null;
     if (pType.equals("ai")) {
-      result = readAiPlayer(lines, myCurrentLine, pName, pPostion);
+      result = readAiPlayer(lines, myCurrentLine, pName, pPostion, pColor);
 
     } else {
-      result = new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine + 1);
+      result = new PlayerAndLine(new HumanPlayer(pName, pPostion, pColor), myCurrentLine + 1);
     }
     result.player.setRemainingTime(remainingTime);
     return result;
@@ -209,7 +213,11 @@ public final class GameLoader {
    * @throws IllegalArgumentException if the AI mode specified in the file is unknown.
    */
   private static PlayerAndLine readAiPlayer(
-      final List<String> lines, int currentLine, final String pName, final Position pPostion) {
+      final List<String> lines,
+      int currentLine,
+      final String pName,
+      final Position pPostion,
+      final Color pColor) {
     Map<String, String> aiSettings = new HashMap<>();
     int myCurrentLine = currentLine + 1;
     int index = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
@@ -227,7 +235,7 @@ public final class GameLoader {
           final int depth = Integer.parseInt(aiSettings.get("depth"));
           final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
           return new PlayerAndLine(
-              MinimaxPlayer.builder(pName, pPostion)
+              MinimaxPlayer.builder(pName, pPostion, pColor)
                   .withHeuristic(heuristicName)
                   .withDepth(depth)
                   .withReflexion(reflexionTime)
@@ -235,17 +243,27 @@ public final class GameLoader {
               myCurrentLine);
         }
       case "mcts":
-        return new PlayerAndLine(new MctsPlayer(pName, pPostion), myCurrentLine);
+        long reflexionTimeMcts = 2000;
+        if (aiSettings.containsKey("reflexion")) {
+          reflexionTimeMcts = Long.parseLong(aiSettings.get("reflexion"));
+        }
+        boolean useNN = "ML".equals(aiSettings.get("selection"));
+        try {
+          return new PlayerAndLine(
+              new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
+        } catch (java.io.IOException e) {
+          throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
+        }
 
       case "random":
-        return new PlayerAndLine(new RandomPlayer(pName, pPostion), myCurrentLine);
+        return new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor), myCurrentLine);
 
       case "minimax-iterative-deepening":
         {
           final String heuristicName = aiSettings.get("heuristic");
           final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
           return new PlayerAndLine(
-              MinimaxPlayer.builder(pName, pPostion)
+              MinimaxPlayer.builder(pName, pPostion, pColor)
                   .withHeuristic(heuristicName)
                   .withReflexion(reflexionTime)
                   .withIterativeDeepening(true)

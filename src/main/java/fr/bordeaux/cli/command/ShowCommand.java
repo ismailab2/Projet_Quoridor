@@ -185,13 +185,11 @@ public class ShowCommand implements Command {
     for (int i = 0; i < boardSize; i++) {
       boolean empty = true;
       for (int j = 0; j < boardSize; j++) {
-        int id = 1;
         for (Player player : engine.getState().getPlayers()) {
           if (player.getPosition().equals(new Position(i, j))) {
-            writer.print(id + printWall(b, i, j, false));
+            writer.print(player.getColor().getId() + printWall(b, i, j, false));
             empty = false;
           }
-          id++;
         }
         if (empty) writer.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
         empty = true;

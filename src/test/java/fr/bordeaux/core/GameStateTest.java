@@ -19,8 +19,8 @@ public class GameStateTest {
   @BeforeEach
   public void setup() {
     board = new Board(9);
-    human = new HumanPlayer("Human", new Position(0, 4));
-    ia = MinimaxPlayer.builder("IA", new Position(8, 4)).build();
+    human = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
+    ia = MinimaxPlayer.builder("IA", new Position(8, 4), Color.BLACK).build();
 
     List<Player> players = new ArrayList<>();
     players.add(human);
@@ -38,7 +38,7 @@ public class GameStateTest {
   @Test
   public void testPlayersNumberInvalidThree() {
     Board board = new Board(9);
-    Player human2 = new HumanPlayer("Human2", new Position(4, 4));
+    Player human2 = new HumanPlayer("Human2", new Position(4, 4), Color.BLUE);
     assertThrows(
         IllegalArgumentException.class,
         () -> {
@@ -143,7 +143,7 @@ public class GameStateTest {
 
   @Test
   public void winConditionFromBottomRow() {
-    Player p = new HumanPlayer("P", new Position(8, 4));
+    Player p = new HumanPlayer("P", new Position(8, 4), Color.BLACK);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
     int id = board.id(0, 4);
@@ -152,7 +152,7 @@ public class GameStateTest {
 
   @Test
   public void winConditionFromLeftCol() {
-    Player p = new HumanPlayer("P", new Position(4, 0));
+    Player p = new HumanPlayer("P", new Position(4, 0), Color.BLUE);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
     int id = board.id(4, 8);
@@ -161,7 +161,7 @@ public class GameStateTest {
 
   @Test
   public void winConditionFromRightCol() {
-    Player p = new HumanPlayer("P", new Position(4, 8));
+    Player p = new HumanPlayer("P", new Position(4, 8), Color.RED);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
     int id = board.id(4, 0);
@@ -234,8 +234,8 @@ public class GameStateTest {
   @Test
   public void checkGenerateLegalMoves() {
     board = new Board(3);
-    human = new HumanPlayer("Human", new Position(0, 1));
-    ia = MinimaxPlayer.builder("IA", new Position(2, 1)).build();
+    human = new HumanPlayer("Human", new Position(0, 1), Color.WHITE);
+    ia = MinimaxPlayer.builder("IA", new Position(2, 1), Color.BLACK).build();
     ia.setPosition(new Position(1, 1));
     List<Player> players = new ArrayList<>();
     players.add(human);

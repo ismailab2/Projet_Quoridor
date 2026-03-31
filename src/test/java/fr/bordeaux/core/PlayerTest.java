@@ -13,7 +13,7 @@ public class PlayerTest {
   @BeforeEach
   public void setUp() {
     startPos = new Position(0, 4);
-    player = new HumanPlayer("Alice", startPos);
+    player = new HumanPlayer("Alice", startPos, Color.WHITE);
   }
 
   @Test

@@ -304,8 +304,8 @@ public class GameState {
     int size = 9;
     this.board = new Board(size);
     this.players = new ArrayList<>();
-    players.add(new HumanPlayer("Human", new Position(0, size / 2)));
-    players.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
+    players.add(new HumanPlayer("Human", new Position(0, size / 2), Color.WHITE));
+    players.add(new HumanPlayer("Bob", new Position(size - 1, size / 2), Color.BLACK));
     this.currentIndexPlayer = 0;
     notifyListeners();
   }

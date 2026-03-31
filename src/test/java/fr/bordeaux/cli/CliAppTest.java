@@ -117,8 +117,8 @@ class CliAppTest {
 
   private GameEngine createEngine() {
     Board board = new Board(9);
-    Player player1 = new HumanPlayer("Human", new Position(0, 4));
-    Player player2 = new HumanPlayer("Bob", new Position(8, 4));
+    Player player1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
+    Player player2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
     GameState state = new GameState(board, List.of(player1, player2));
     return new GameEngine(state);
   }

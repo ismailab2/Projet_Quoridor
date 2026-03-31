@@ -1,9 +1,6 @@
 package fr.bordeaux.ai;
 
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.util.Map;
 
 /**
@@ -17,9 +14,10 @@ public abstract class AiPlayer extends Player {
    *
    * @param name The name of the AI player.
    * @param positionStart The starting position of the AI on the board.
+   * @param color The color of the player.
    */
-  public AiPlayer(final String name, final Position positionStart) {
-    super(name, positionStart);
+  public AiPlayer(final String name, final Position positionStart, Color color) {
+    super(name, positionStart, color);
   }
 
   /**
@@ -30,14 +28,16 @@ public abstract class AiPlayer extends Player {
    * @param start The starting position of the AI.
    * @param walls The number of walls remaining for this AI.
    * @param score The current score of the AI.
+   * @param color The color of the AI.
    */
   protected AiPlayer(
       final String name,
       final Position current,
       final Position start,
       final int walls,
-      final int score) {
-    super(name, current, start, walls, score);
+      final int score,
+      final Color color) {
+    super(name, current, start, walls, score, color);
   }
 
   /**

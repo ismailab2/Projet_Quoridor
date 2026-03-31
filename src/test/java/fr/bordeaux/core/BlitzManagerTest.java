@@ -14,11 +14,11 @@ public class BlitzManagerTest {
     Board board = new Board(9);
     List<Player> players = new ArrayList<>();
     players.add(
-        MinimaxPlayer.builder("IA", new Position(8, 4))
+        MinimaxPlayer.builder("IA", new Position(8, 4), Color.BLACK)
             .withIterativeDeepening(true)
             .withReflexion(2)
             .build());
-    players.add(new HumanPlayer("Human", new Position(0, 4)));
+    players.add(new HumanPlayer("Human", new Position(0, 4), Color.WHITE));
     GameState state = new GameState(board, players);
     state.setBlitz(true);
     state.setLimitTimePlayer(10000); // 10 seconds
@@ -49,8 +49,8 @@ public class BlitzManagerTest {
   public void testLooseByTime() {
     Board board = new Board(9);
     List<Player> players = new ArrayList<>();
-    players.add(new HumanPlayer("Human", new Position(8, 4)));
-    players.add(new HumanPlayer("Human", new Position(0, 4)));
+    players.add(new HumanPlayer("Human", new Position(8, 4), Color.WHITE));
+    players.add(new HumanPlayer("Human", new Position(0, 4), Color.BLACK));
     GameState state = new GameState(board, players);
     state.setBlitz(true);
     state.setLimitTimePlayer(1000); // 10 seconds

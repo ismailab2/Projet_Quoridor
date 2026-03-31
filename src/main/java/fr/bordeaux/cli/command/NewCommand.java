@@ -82,8 +82,8 @@ public class NewCommand implements Command {
           new GameState(
               new Board(size + 1),
               List.of(
-                  new HumanPlayer("Human", new Position(0, 4)),
-                  new HumanPlayer("Bob", new Position(8, 4)))));
+                  new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                  new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))));
     else {
       int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
       Board board = new Board(size + 1);
@@ -113,26 +113,28 @@ public class NewCommand implements Command {
           switch (typePlayer) {
             case "h":
               {
-                players[i] = new HumanPlayer(inputName, positions[i]);
+                players[i] = new HumanPlayer(inputName, positions[i], Color.fromId(i + 1));
                 break;
               }
             case "mcts":
               {
-                players[i] = new MctsPlayer(inputName, positions[i]);
+                players[i] = new MctsPlayer(inputName, positions[i], Color.fromId(i + 1));
                 break;
               }
             case "mini":
               {
-                players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
+                players[i] =
+                    MinimaxPlayer.builder(inputName, positions[i], Color.fromId(i + 1)).build();
                 break;
               }
             case "mctsnn":
               {
-                players[i] = new MctsPlayer(inputName, positions[i], 2000, true);
+                players[i] =
+                    new MctsPlayer(inputName, positions[i], 2000, true, Color.fromId(i + 1));
               }
             default:
               {
-                players[i] = new RandomPlayer(inputName, positions[i]);
+                players[i] = new RandomPlayer(inputName, positions[i], Color.fromId(i + 1));
                 break;
               }
           }
