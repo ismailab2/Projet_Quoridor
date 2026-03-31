@@ -58,6 +58,8 @@ public final class OptionsParser {
 
         case "-d", "--debug" -> config.setOption("debug", "true");
 
+        case "--daemon" -> config.setOption("daemon", "true");
+
         case "-b", "--blitz" -> config.setOption("blitz", "true");
 
         case "-t", "--time" -> {
@@ -152,6 +154,15 @@ public final class OptionsParser {
               }
               config.setOption("ai" + aiPrefix.get(x) + ".selection", selection[x]);
             }
+          }
+        }
+
+        case "-s", "--server" -> {
+          if (i + 1 < args.length) {
+            config.setOption("server", "true");
+            config.setOption("server-port", args[++i]);
+          } else {
+            throw new IllegalArgumentException("--server requires a port");
           }
         }
 
