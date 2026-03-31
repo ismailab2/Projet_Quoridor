@@ -2,6 +2,8 @@ package fr.bordeaux.Main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class interprets CLI arguments and configures the application accordingly. Supported options
@@ -38,6 +40,8 @@ public final class OptionsParser {
    */
   public static void parse(String[] args, ConfigManager config) {
 
+    List<String> aiPrefix = new ArrayList<>();
+
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
 
@@ -62,41 +66,74 @@ public final class OptionsParser {
         }
 
         case "--ai" -> {
-          
-          if (i < args.length){
-            config.setOption("ai", "true");
+          i++;
+          if (i < args.length) {
+            String aiColors = args[i].toLowerCase();
+            System.out.println(aiColors);
+            String[] colors = aiColors.split(",");
+            for (int x = 0; x < colors.length; x++) {
+
+              String myColor = colors[x];
+              String playerId;
+
+              if (myColor.equals("blanc") || myColor.equals("0")) {
+                playerId = "0";
+              } else if (myColor.equals("noir") || myColor.equals("1")) {
+                playerId = "1";
+              } else {
+                throw new IllegalArgumentException(
+                    "Couleur IA non reconnue. Utilisez 'blanc' (0) ou 'noir' (1).");
+              }
+              config.setOption("ai" + playerId, "true");
+              aiPrefix.add(playerId);
+            }
           }
           break;
         }
 
         case "--ai-mode" -> {
           i++;
-          if (i < args.length) config.setOption("ai.mode", args[i]);
-          System.out.println("Bien passé ici, ai.mode = " + config.getOption("ai.mode", "pomme2terre"));
+          if (i < args.length) {
+            String[] mode = args[i].split(",");
+            for (int x = 0; x < mode.length; x++) {
+              config.setOption("ai" + aiPrefix.get(x) + ".mode", mode[x]);
+            }
+          }
           break;
         }
-          
 
         case "--ai-minimax-depth" -> {
           i++;
-          if (i < args.length) config.setOption("ai.depth", args[i]);
+          if (i < args.length) {
+            String[] depth = args[i].split(",");
+            for (int x = 0; x < depth.length; x++) {
+              config.setOption("ai" + aiPrefix.get(x) + ".depth", depth[x]);
+            }
+          }
           break;
         }
-         
 
         case "--ai-time" -> {
           i++;
-          if (i < args.length) config.setOption("ai.time", args[i]);
+          if (i < args.length) {
+            String[] time = args[i].split(",");
+            for (int x = 0; x < time.length; x++) {
+              config.setOption("ai" + aiPrefix.get(x) + ".time", time[x]);
+            }
+          }
           break;
         }
-          
 
         case "--ai-minimax-scoring" -> {
           i++;
-          if (i < args.length) config.setOption("ai.scoring", args[i]);
+          if (i < args.length) {
+            String[] scoring = args[i].split(",");
+            for (int x = 0; x < scoring.length; x++) {
+              config.setOption("ai" + aiPrefix.get(x) + ".scoring", scoring[x]);
+            }
+          }
           break;
         }
-          
 
         case "-g", "--gui", "-c", "--cli", "-n", "--net" -> {
           // Handled elsewhere (AppModeResolver)

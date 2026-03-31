@@ -237,6 +237,9 @@ public class CliApp {
         executeAiTurn();
         new ShowCommand(new String[] {"show", "board"}).execute(engine);
       }
+      if (engine.getState().isGameOver()) {
+        running = false;
+      }
     }
     try {
       terminal.close();

@@ -35,13 +35,23 @@ public final class PlayerFactory {
   public static List<Player> createPlayers(final ConfigManager config) {
     List<Player> players = new ArrayList<>();
 
-    players.add(
-        new HumanPlayer("Human 1", new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2)));
-
-    if (config.getBoolean("ai", false)) {
-      players.add(buildAi("AI", new Position(0, CliLauncher.BOARD_SIZE / 2), config));
+    if (config.getBoolean("ai0", false)) {
+      players.add(
+          buildAi(
+              "AI WHITE",
+              new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2),
+              config,
+              "0"));
     } else {
-      players.add(new HumanPlayer("Human 2", new Position(0, CliLauncher.BOARD_SIZE / 2)));
+      players.add(
+          new HumanPlayer(
+              "Human White", new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2)));
+    }
+
+    if (config.getBoolean("ai1", false)) {
+      players.add(buildAi("AI BLACK", new Position(0, CliLauncher.BOARD_SIZE / 2), config, "1"));
+    } else {
+      players.add(new HumanPlayer("Human Black", new Position(0, CliLauncher.BOARD_SIZE / 2)));
     }
     return players;
   }
@@ -64,9 +74,10 @@ public final class PlayerFactory {
    * @return A {@link Player} instance configured according to the selected mode.
    * @throws UnsupportedOperationException if an unimplemented mode (MCTS/Neural) is requested.
    */
-  private static Player buildAi(final String name, final Position pos, final ConfigManager config) {
+  private static Player buildAi(
+      final String name, final Position pos, final ConfigManager config, String color) {
 
-    final String mode = config.getOption("ai.mode", "minimax");
+    final String mode = config.getOption("ai" + color + ".mode", "minimax");
     Player player = null;
     switch (mode) {
       case "mcts":
@@ -78,9 +89,9 @@ public final class PlayerFactory {
       case "iterative":
       case "minimax":
       default:
-        final int depth = config.getInt("ai.depth", 2);
-        final int reflexionTime = config.getInt("ai.time", 5);
-        final String scoring = config.getOption("ai.scoring", "simple");
+        final int depth = config.getInt("ai" + color + ".depth", 2);
+        final int reflexionTime = config.getInt("ai" + color + ".time", 5);
+        final String scoring = config.getOption("ai" + color + ".scoring", "simple");
         MinimaxBuilder builder =
             MinimaxPlayer.builder(name, pos)
                 .withDepth(depth)
