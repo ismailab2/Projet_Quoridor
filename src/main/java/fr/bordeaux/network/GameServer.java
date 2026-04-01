@@ -63,7 +63,8 @@ public class GameServer {
                 clientSocket = serverSocket.accept();
                 System.out.println("Client connected");
 
-                handleClient(clientSocket);
+                new Thread(() -> handleClient(clientSocket)).start();
+                // handleClient(clientSocket);
 
               } catch (IOException e) {
                 System.out.println("Port already used or error: " + e.getMessage());
