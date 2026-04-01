@@ -104,8 +104,7 @@ public class GameSaverTest {
     GameState state = new GameState(board, players, 0);
 
     state.setBlitz(true);
-    state.setAi(true);
-
+    state.setDebug(true);
     // Save the game to a file
     String filename = "test_parameters.txt";
     GameSaver.saveGame(state, filename);
@@ -134,7 +133,7 @@ public class GameSaverTest {
     assertFalse(settingsLines.isEmpty(), "The [settings] section should not be empty");
 
     assertTrue(settingsLines.contains("blitz=true"), "Mode blitz incorrect");
-    assertTrue(settingsLines.contains("ai=true"), "Mode ai incorrect");
+    assertTrue(settingsLines.contains("debug=true"), "Mode debug incorrect");
     assertTrue(
         settingsLines.contains("player-1-name=Player1"), "Incorrect name for the first Player");
     assertTrue(settingsLines.contains("ai-2-name=Ai1"), "Incorrect name for the second Player");

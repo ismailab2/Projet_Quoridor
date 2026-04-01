@@ -39,7 +39,7 @@ public class GameSaver {
    */
   private static void writeHeader(PrintWriter writer, GameState state) {
     writer.println("[game]");
-    writer.println((state.getCurrentIndexPlayer() + 1) + "  # Current player color");
+    writer.println((state.getCurrentPlayer().getColor().getId()) + "  # Current player color");
     writer.println(state.getBoard().getSize() + "  # Board size");
     writer.println("# Board (" + state.getPlayers().size() + " players)");
   }
@@ -189,7 +189,6 @@ public class GameSaver {
     writeLine(w, "verbose", g.isVerbose());
     writeLine(w, "blitz", g.isBlitz());
     writeLine(w, "constest", g.isContest());
-    writeLine(w, "ai", g.isAi());
     writeLine(w, "turns-limit", g.getTurnLimit());
     writeLine(w, "debug", g.isDebug());
     writeLine(w, "nb-players", g.getPlayers().size());

@@ -69,7 +69,6 @@ public class GameLoaderTest {
       writer.println("verbose=false");
       writer.println("blitz=false");
       writer.println("constest=false");
-      writer.println("ai=false");
       writer.println("turns-limit=20");
       writer.println("debug=false");
       writer.println("nb-players=2");
@@ -122,7 +121,6 @@ public class GameLoaderTest {
       writer.println("verbose=false");
       writer.println("blitz=false");
       writer.println("constest=false");
-      writer.println("ai=false");
       writer.println("turns-limit=20");
       writer.println("debug=false");
       writer.println("nb-players=2");

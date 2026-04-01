@@ -60,24 +60,12 @@ public class MediumHeuristic implements HeuristicEvaluator {
               - pStartingPosition.getX()
               - eStartingPosition.getX()
               - eCurrentPosition.getX();
-    } else if (pStartingPosition.getX() == gameState.getBoard().getSize() - 1) {
+    } else {
       evaluateHeuristic =
           pStartingPosition.getX()
               - pCurrentPosition.getX()
               - eCurrentPosition.getX()
               - eStartingPosition.getX();
-    } else if (pStartingPosition.getY() == 0) {
-      evaluateHeuristic =
-          pCurrentPosition.getY()
-              - pStartingPosition.getY()
-              - eStartingPosition.getY()
-              - eCurrentPosition.getY();
-    } else {
-      evaluateHeuristic =
-          pStartingPosition.getY()
-              - pCurrentPosition.getY()
-              - eCurrentPosition.getY()
-              - eStartingPosition.getY();
     }
     return evaluateHeuristic;
   }
