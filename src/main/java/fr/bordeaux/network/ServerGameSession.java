@@ -1,6 +1,7 @@
 package fr.bordeaux.network;
 
 import fr.bordeaux.core.Board;
+import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.HumanPlayer;
@@ -32,11 +33,11 @@ public class ServerGameSession {
     List<Player> gamePlayers = new ArrayList<>();
 
     if (sessions.size() >= 1) {
-      gamePlayers.add(new HumanPlayer(sessions.get(0).getName(), new Position(0, 4)));
+      gamePlayers.add(new HumanPlayer(sessions.get(0).getName(), new Position(0, 4), Color.WHITE));
     }
 
     if (sessions.size() >= 2) {
-      gamePlayers.add(new HumanPlayer(sessions.get(1).getName(), new Position(8, 4)));
+      gamePlayers.add(new HumanPlayer(sessions.get(1).getName(), new Position(8, 4), Color.BLACK));
     }
 
     this.gameState = new GameState(board, gamePlayers, 0);
