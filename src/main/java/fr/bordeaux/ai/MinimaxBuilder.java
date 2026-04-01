@@ -20,6 +20,9 @@ public class MinimaxBuilder {
   /** The player's color. */
   private final Color color;
 
+  /** The player's amount of wall. */
+  private final int walls;
+
   /** The maximum depth the AI will search if iterative deepening is disabled. */
   private int searchDepth = 2;
 
@@ -41,11 +44,13 @@ public class MinimaxBuilder {
    * @param nameParameter The AI's name.
    * @param pos The starting position on the board.
    * @param color The AI's color on the board.
+   * @param walls The amount of wall the player has.
    */
-  public MinimaxBuilder(final String nameParameter, final Position pos, final Color color) {
+  public MinimaxBuilder(final String nameParameter, final Position pos, final Color color, final int walls) {
     this.name = nameParameter;
     this.positionStart = pos;
     this.color = color;
+    this.walls = walls;
   }
 
   /**
@@ -153,6 +158,15 @@ public class MinimaxBuilder {
    */
   public Color getColor() {
     return this.color;
+  }
+
+  /**
+   * Get the number of wall of the MiniMax Player.
+   *
+   * @return The player's amount of wall.
+   */
+  public int getWalls() {
+    return this.walls;
   }
 
   /**

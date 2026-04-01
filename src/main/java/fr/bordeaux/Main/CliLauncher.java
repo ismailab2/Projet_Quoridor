@@ -16,7 +16,7 @@ import fr.bordeaux.util.Logger;
 public class CliLauncher implements AppLauncher {
 
   /** Default board size for Quoridor (9x9) */
-  public static final int BOARD_SIZE = 9;
+  public static int BOARD_SIZE = 9;
 
   /** CliLaucher */
   public CliLauncher() {}
@@ -30,6 +30,7 @@ public class CliLauncher implements AppLauncher {
    */
   @Override
   public void launch(String[] args, ConfigManager config) {
+    BOARD_SIZE = Integer.parseInt(config.getOption("board-size", "9"));
     Board board = new Board(BOARD_SIZE);
     GameState state = new GameState(board, PlayerFactory.createPlayers(config));
 

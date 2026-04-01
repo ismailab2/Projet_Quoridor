@@ -82,8 +82,8 @@ public class NewCommand implements Command {
           new GameState(
               new Board(size + 1),
               List.of(
-                  new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
-                  new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))));
+                  new HumanPlayer("Human", new Position(0, size/2), Color.WHITE),
+                  new HumanPlayer("Bob", new Position(size, size/2), Color.BLACK))));
     else {
       int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
       Board board = new Board(size + 1);
@@ -144,9 +144,8 @@ public class NewCommand implements Command {
             terminal.close();
           } catch (Exception exc) {
             LOGGER.error("Terminal closed.");
-          } finally {
-            return engine;
-          }
+          } 
+          return engine;
         } catch (
             IOException e) { // IOException can be caused by loading default NN for mctsnn option
           throw new RuntimeException(e);

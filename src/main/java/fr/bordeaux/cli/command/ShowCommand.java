@@ -70,7 +70,7 @@ public class ShowCommand implements Command {
         {
           String[] configs =
               new String[] {
-                "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
+                "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players", "board-size"
               };
           for (String cf : configs) {
             writer.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));

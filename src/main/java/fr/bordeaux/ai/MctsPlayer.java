@@ -29,8 +29,9 @@ public class MctsPlayer extends AiPlayer {
       final String name,
       final Position positionStart,
       final long reflectionTime,
-      final Color color) {
-    super(name, positionStart, color);
+      final Color color,
+      final int walls) {
+    super(name, positionStart, color, walls);
     this.reflectionTime = reflectionTime;
     this.evaluator = null;
   }
@@ -41,9 +42,10 @@ public class MctsPlayer extends AiPlayer {
    * @param name The name of the AI player.
    * @param positionStart The starting position on the board.
    * @param color The player's assigned color.
+   * @param walls The amount of wall the player has.
    */
-  public MctsPlayer(final String name, final Position positionStart, final Color color) {
-    this(name, positionStart, 2000, color);
+  public MctsPlayer(final String name, final Position positionStart, final Color color, final int walls) {
+    this(name, positionStart, 2000, color, walls);
   }
 
   /**
@@ -54,6 +56,7 @@ public class MctsPlayer extends AiPlayer {
    * @param reflectionTime Maximum search time in ms.
    * @param useNN To use or not NeuralNetworks in selection
    * @param color The player's assigned color.
+   * @param walls The amount of wall the player has.
    * @throws IOException Possible if mcts with NN selection used
    */
   public MctsPlayer(
@@ -61,9 +64,10 @@ public class MctsPlayer extends AiPlayer {
       final Position positionStart,
       final long reflectionTime,
       final boolean useNN,
-      final Color color)
+      final Color color,
+      final int walls)
       throws IOException {
-    super(name, positionStart, color);
+    super(name, positionStart, color, walls);
     this.reflectionTime = reflectionTime;
     NeuralNetworkEvaluator evaluator1;
     evaluator1 = null;

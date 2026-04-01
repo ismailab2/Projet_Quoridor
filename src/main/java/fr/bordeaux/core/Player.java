@@ -23,12 +23,14 @@ public abstract class Player {
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
    * @param color The color of the player.
+   * @param walls The amount of wall the player has.
    */
-  public Player(String name, Position positionStart, Color color) {
+  public Player(String name, Position positionStart, Color color, int walls) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;
     this.color = color;
+    this.remainingWalls = walls;
   }
 
   /**
@@ -58,8 +60,8 @@ public abstract class Player {
    */
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
-    Player p1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
-    Player p2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
+    Player p1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE, 20);
+    Player p2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK, 20);
     players.add(p1);
     players.add(p2);
     return players;

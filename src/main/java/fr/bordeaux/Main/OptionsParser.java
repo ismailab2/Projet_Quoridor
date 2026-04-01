@@ -157,12 +157,54 @@ public final class OptionsParser {
           }
         }
 
-        case "-s", "--server" -> {
+        case "-s" -> {
+          if (i + 1 < args.length) {
+            int argument = Integer.parseInt(args[i+1]);
+            if (argument < 16 && argument > 2) {
+              config.setOption("board-size", args[++i]);
+            } else if (argument > 999) {
+              config.setOption("server", "true");
+              config.setOption("server-port", args[++i]);
+            }
+          } else {
+            throw new IllegalArgumentException("--server requires a integer or a port");
+          }
+        }
+
+        case "--server" -> {
           if (i + 1 < args.length) {
             config.setOption("server", "true");
             config.setOption("server-port", args[++i]);
           } else {
             throw new IllegalArgumentException("--server requires a port");
+          }
+        }
+
+        case "-p", "--players" -> {
+          if (i + 1 < args.length) {
+            config.setOption("nb-players", args[++i]);
+          } else {
+            throw new IllegalArgumentException("--players requires an integer between 2 and 4");
+          }
+        }
+
+        case "-w", "--walls" -> {
+          if (i + 1 < args.length) {
+            if (Integer.parseInt(args[i+1]) < 0) {
+              config.setOption("nb-walls", "1000");
+            } else {
+              config.setOption("nb-walls", args[++i]);
+            }
+          } else {
+            throw new IllegalArgumentException("--walls requires an integer");
+          }
+        }
+
+        case "--size" -> {
+          if (i + 1 < args.length) {
+            config.setOption("board-size", args[++i]);
+          } else {
+            throw new IllegalArgumentException("--walls requires an integer");
           }
         }
 

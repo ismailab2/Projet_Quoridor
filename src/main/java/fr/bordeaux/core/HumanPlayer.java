@@ -9,9 +9,10 @@ public class HumanPlayer extends Player {
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
    * @param color The color of the player.
+   * @param walls The amount of walls the player has.
    */
-  public HumanPlayer(String name, Position positionStart, Color color) {
-    super(name, positionStart, color);
+  public HumanPlayer(String name, Position positionStart, Color color, int walls) {
+    super(name, positionStart, color, walls);
   }
 
   @Override
