@@ -6,8 +6,6 @@ import fr.bordeaux.core.*;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import org.tensorflow.Operand;
 import org.tensorflow.framework.losses.BinaryCrossentropy;
@@ -85,7 +83,7 @@ public class NeuralNetworkTrainer {
 
     for (int i = 0; i < data.size(); i++) {
       final TrainingData sample = data.get(i);
-      final double[] featArray = sample.getFeatures();
+      final double[] featArray = sample.features();
 
       for (int j = 0; j < NUM_FEATURES; j++) {
         matrix[i][j] = (float) featArray[j];
@@ -138,9 +136,15 @@ public class NeuralNetworkTrainer {
       final Random random) {
     final Board board = new Board(9);
     final Player player1 =
-        MinimaxPlayer.builder("P1", new Position(0, 4)).withDepth(1).withReflexion(1).build();
+        MinimaxPlayer.builder("P1", new Position(0, 4), Color.WHITE)
+            .withDepth(1)
+            .withReflexion(1)
+            .build();
     final Player player2 =
-        MinimaxPlayer.builder("P2", new Position(8, 4)).withDepth(1).withReflexion(1).build();
+        MinimaxPlayer.builder("P2", new Position(8, 4), Color.BLACK)
+            .withDepth(1)
+            .withReflexion(1)
+            .build();
 
     player1.setPosition(new Position(random.nextInt(8), random.nextInt(9)));
     player2.setPosition(new Position(random.nextInt(1, 9), random.nextInt(9)));
@@ -201,28 +205,20 @@ public class NeuralNetworkTrainer {
     return selectedMove;
   }
 
-  /** Internal data structure representing a single training example. */
-  private static final class TrainingData {
-    /** The feature array corresponding to a specific game state. */
-    private final double[] features;
-
-    /** The observed outcome of the simulated game (e.g. 1.0 for win, 0.0 for loss). */
-    private final double outcome;
-
+  /**
+   * Internal data structure representing a single training example.
+   *
+   * @param features The feature array corresponding to a specific game state.
+   * @param outcome The observed outcome of the simulated game (e.g. 1.0 for win, 0.0 for loss).
+   */
+  private record TrainingData(double[] features, double outcome) {
     /**
      * Constructs a new TrainingData instance.
      *
      * @param features an array of numerical features evaluating the position
      * @param outcome the float outcome representing win/loss
      */
-    private TrainingData(final double[] features, final double outcome) {
-      this.features = features;
-      this.outcome = outcome;
-    }
-
-    private double[] getFeatures() {
-      return features;
-    }
+    private TrainingData {}
   }
 
   /**
@@ -253,17 +249,5 @@ public class NeuralNetworkTrainer {
             .run();
       }
     }
-  }
-
-  /**
-   * Loads the model weights from a local binary file.
-   *
-   * @param evaluator the evaluator instance to initialize
-   * @param filePath the path to the model file to load
-   * @throws IOException if an error occurs while reading the file
-   */
-  public static void loadModel(final NeuralNetworkEvaluator evaluator, final String filePath)
-      throws IOException {
-    loadModel(evaluator, Files.newInputStream(Paths.get(filePath)));
   }
 }

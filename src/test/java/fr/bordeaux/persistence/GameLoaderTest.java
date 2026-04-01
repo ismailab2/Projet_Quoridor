@@ -18,9 +18,9 @@ public class GameLoaderTest {
     // Initialize board and players
     Board board = new Board(9);
     List<Player> players = new ArrayList<>();
-    players.add(new HumanPlayer("Player1", new Position(0, 4)));
+    players.add(new HumanPlayer("Player1", new Position(0, 4), Color.WHITE));
     players.add(
-        MinimaxPlayer.builder("Player2", new Position(8, 4))
+        MinimaxPlayer.builder("Player2", new Position(8, 4), Color.BLACK)
             .withIterativeDeepening(true)
             .withHeuristic("advanced")
             .build());
@@ -36,7 +36,6 @@ public class GameLoaderTest {
 
     // Player 2 places a horizontal wall at c3 (2,2)
     state.applyMove(Move.wall(new Position(2, 2), Orientation.HORIZONTAL));
-
     // Save the state to a file
     GameSaver.saveGame(state, TEST_FILE);
   }
@@ -52,6 +51,8 @@ public class GameLoaderTest {
     assertEquals(new Position(8, 4), loaded.getPlayers().get(1).getPosition());
     assertEquals(10, loaded.getPlayers().get(0).getRemainingWalls());
     assertEquals(9, loaded.getPlayers().get(1).getRemainingWalls());
+    assertEquals(Color.WHITE, loaded.getPlayers().get(0).getColor());
+    assertEquals(Color.BLACK, loaded.getPlayers().get(1).getColor());
 
     assertFalse(
         loaded
@@ -73,9 +74,13 @@ public class GameLoaderTest {
       writer.println("debug=false");
       writer.println("nb-players=2");
       writer.println("player-1-name=Player1");
+      writer.println("player-1-color=WHITE");
       writer.println("player-1-starting-position=Position: 0, 4");
+      writer.println("player-1-remaining-time=30");
       writer.println("player-2-name=Player2");
+      writer.println("player-2-color=BLACK");
       writer.println("player-2-starting-position=Position: 8, 4");
+      writer.println("player-2-remaining-time=30");
       writer.println("[game]");
       writer.println("1  # Current player color");
       writer.println("9  # Board size");
@@ -122,9 +127,13 @@ public class GameLoaderTest {
       writer.println("debug=false");
       writer.println("nb-players=2");
       writer.println("player-1-name=Player1");
+      writer.println("player-1-color=WHITE");
       writer.println("player-1-starting-position=Position: 0, 4");
+      writer.println("player-1-remaining-time=30");
       writer.println("player-2-name=Player2");
+      writer.println("player-2-color=BLACK");
       writer.println("player-2-starting-position=Position: 8, 4");
+      writer.println("player-2-remaining-time=30");
       writer.println("[game]");
       writer.println("1  # Current player color");
       writer.println("9  # Board size");

@@ -2,13 +2,8 @@ package fr.bordeaux.ai;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Move;
+import fr.bordeaux.core.*;
 import fr.bordeaux.core.Move.Type;
-import fr.bordeaux.core.Orientation;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -25,17 +20,24 @@ public class MinimaxPlayerTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> {
-          ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(-12).build();
+          ia1 =
+              MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE).withDepth(-12).build();
         });
     assertThrows(
         IllegalArgumentException.class,
         () -> {
-          ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withReflexion(0).build();
+          ia1 =
+              MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE)
+                  .withReflexion(0)
+                  .build();
         });
     assertThrows(
         IllegalArgumentException.class,
         () -> {
-          ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withHeuristic("bonjour").build();
+          ia1 =
+              MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE)
+                  .withHeuristic("bonjour")
+                  .build();
         });
   }
 
@@ -43,12 +45,12 @@ public class MinimaxPlayerTest {
   public void checkMiniMaxMoveWall() {
     board = new Board(9);
     ia1 =
-        MinimaxPlayer.builder("IA1", new Position(8, 4))
+        MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE)
             .withDepth(2)
             .withReflexion(5)
             .withHeuristic("advanced")
             .build();
-    ia2 = MinimaxPlayer.builder("IA2", new Position(0, 4)).build();
+    ia2 = MinimaxPlayer.builder("IA2", new Position(0, 4), Color.BLACK).build();
     ia1.setPosition(new Position(2, 4));
     ia2.setPosition(new Position(7, 2));
 
@@ -68,8 +70,8 @@ public class MinimaxPlayerTest {
   @Test
   public void checkMiniMaxMovePawn() {
     board = new Board(3);
-    ia1 = MinimaxPlayer.builder("IA1", new Position(2, 1)).withDepth(2).build();
-    ia2 = new RandomPlayer("IA2", new Position(0, 1));
+    ia1 = MinimaxPlayer.builder("IA1", new Position(2, 1), Color.WHITE).withDepth(2).build();
+    ia2 = new RandomPlayer("IA2", new Position(0, 1), Color.BLACK);
     ia1.setPosition(new Position(1, 1));
     ia2.setPosition(new Position(0, 2));
 
@@ -89,8 +91,8 @@ public class MinimaxPlayerTest {
   @Test
   public void checkTimer() {
     board = new Board(9);
-    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).withDepth(10).build();
-    ia2 = new RandomPlayer("IA2", new Position(0, 4));
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE).withDepth(10).build();
+    ia2 = new RandomPlayer("IA2", new Position(0, 4), Color.BLACK);
     List<Player> players = new ArrayList<>();
     players.add(ia1);
     players.add(ia2);
@@ -108,11 +110,11 @@ public class MinimaxPlayerTest {
   public void checkIterativeDeepening() {
     board = new Board(9);
     ia1 =
-        MinimaxPlayer.builder("IA1", new Position(8, 4))
+        MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE)
             .withDepth(2)
             .withHeuristic("intermediate")
             .build();
-    ia2 = new RandomPlayer("IA2", new Position(0, 4));
+    ia2 = new RandomPlayer("IA2", new Position(0, 4), Color.BLACK);
     List<Player> players = new ArrayList<>();
     players.add(ia1);
     players.add(ia2);
@@ -121,7 +123,7 @@ public class MinimaxPlayerTest {
     Move move1 = ia1.getNextMove(game);
 
     ia1 =
-        MinimaxPlayer.builder("IA1", new Position(8, 4))
+        MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE)
             .withIterativeDeepening(true)
             .withHeuristic("intermediate")
             .build();
@@ -137,7 +139,7 @@ public class MinimaxPlayerTest {
 
   @Test
   public void checkToString() {
-    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4)).build();
+    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE).build();
     assertEquals(
         ia1.toString(),
         "MiniMax AI "

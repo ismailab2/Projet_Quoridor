@@ -66,6 +66,7 @@ public class ConfigManager {
       props.setProperty("blitz", "false");
       props.setProperty("timeout", "30");
       props.setProperty("debug", "true");
+      props.setProperty("ai", "false");
       save();
     }
   }

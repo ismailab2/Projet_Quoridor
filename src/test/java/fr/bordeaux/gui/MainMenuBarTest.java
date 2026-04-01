@@ -3,6 +3,7 @@ package fr.bordeaux.gui;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.Objects;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.Menu;
@@ -58,7 +59,7 @@ class MainMenuBarTest {
   }
 
   @Test
-  void testMenuItemDispatchAction() {
+  void testMenuItemDispatchAction() throws IOException {
     ActionDispatcher dispatcher = mock(ActionDispatcher.class);
 
     MainMenuBar menuBar = new MainMenuBar(dispatcher);
@@ -77,7 +78,7 @@ class MainMenuBarTest {
   }
 
   @Test
-  void testQuitDispatch() {
+  void testQuitDispatch() throws IOException {
     ActionDispatcher dispatcher = mock(ActionDispatcher.class);
 
     MainMenuBar menuBar = new MainMenuBar(dispatcher);

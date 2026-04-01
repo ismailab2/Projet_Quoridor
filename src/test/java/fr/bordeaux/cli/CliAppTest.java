@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import org.jline.reader.LineReader;
@@ -77,7 +78,7 @@ class CliAppTest {
   }
 
   @Test
-  void fetchEmpty() {
+  void fetchEmpty() throws IOException {
     GameEngine before = app.getEngine();
 
     app.fetch("   ");
@@ -88,7 +89,7 @@ class CliAppTest {
   }
 
   @Test
-  void fetchQuit() {
+  void fetchQuit() throws IOException {
     when(reader.readLine(anyString())).thenReturn("n");
 
     app.fetch("quit");
@@ -98,7 +99,7 @@ class CliAppTest {
   }
 
   @Test
-  void fetchHelp() {
+  void fetchHelp() throws IOException {
     GameEngine before = app.getEngine();
 
     app.fetch("help");
@@ -108,7 +109,7 @@ class CliAppTest {
   }
 
   @Test
-  void fetchMove() {
+  void fetchMove() throws IOException {
     app.fetch("e1-e2");
 
     assertEquals(new Position(1, 4), p1.getPosition());
@@ -116,8 +117,8 @@ class CliAppTest {
 
   private GameEngine createEngine() {
     Board board = new Board(9);
-    Player player1 = new HumanPlayer("Human", new Position(0, 4));
-    Player player2 = new HumanPlayer("Bob", new Position(8, 4));
+    Player player1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
+    Player player2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
     GameState state = new GameState(board, List.of(player1, player2));
     return new GameEngine(state);
   }

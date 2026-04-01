@@ -16,8 +16,8 @@ public class RuleCheckerTest {
   @BeforeEach
   public void setup() {
     board = new Board(5); // petit plateau pour tester
-    p1 = new HumanPlayer("Human", new Position(0, 2));
-    p2 = MinimaxPlayer.builder("Bot", new Position(4, 2)).build();
+    p1 = new HumanPlayer("Human", new Position(0, 2), Color.WHITE);
+    p2 = MinimaxPlayer.builder("Bot", new Position(4, 2), Color.BLACK).build();
     state = new GameState(board, List.of(p1, p2));
   }
 

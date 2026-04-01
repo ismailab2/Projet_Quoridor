@@ -1,5 +1,6 @@
 package fr.bordeaux.ai;
 
+import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
@@ -11,15 +12,15 @@ import fr.bordeaux.core.Position;
 public class SimpleHeuristic implements HeuristicEvaluator {
 
   /** The identifier of the AI player to evaluate. */
-  private final String aiName;
+  private final Color aiColor;
 
   /**
    * Constructs a new SimpleHeuristic.
    *
-   * @param aiNameParameter The name used to identify the AI player in the game state.
+   * @param aiColorParameter The color used to identify the AI player in the game state.
    */
-  public SimpleHeuristic(final String aiNameParameter) {
-    this.aiName = aiNameParameter;
+  public SimpleHeuristic(final Color aiColorParameter) {
+    this.aiColor = aiColorParameter;
   }
 
   /**
@@ -34,7 +35,7 @@ public class SimpleHeuristic implements HeuristicEvaluator {
 
     Player player = null;
     for (final Player otherPlayer : gameState.getPlayers()) {
-      if (otherPlayer.getName().equals(this.aiName)) {
+      if (otherPlayer.getColor() == this.aiColor) {
         player = otherPlayer;
         break;
       }

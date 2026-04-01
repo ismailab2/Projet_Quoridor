@@ -99,7 +99,6 @@ public class CliApp {
     this.running = true;
 
     // Création du Completer intelligent
-    // Création du Completer intelligent
     Completer smartCompleter =
         (reader, line, candidates) -> {
           String buffer = line.line();
@@ -188,8 +187,8 @@ public class CliApp {
             new GameState(
                 new Board(9),
                 List.of(
-                    new HumanPlayer("Human", new Position(0, 4)),
-                    new HumanPlayer("Bob", new Position(8, 4))))));
+                    new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                    new HumanPlayer("Bob", new Position(8, 4), Color.BLACK)))));
   }
 
   /** Triggers an audible alert (beep) through the terminal. */
@@ -221,15 +220,27 @@ public class CliApp {
   /**
    * Starts the CLI loop. Displays the board at startup and continuously reads user commands until
    * the application is stopped.
+   *
+   * @throws IOException Possible if mcts with NN selection used
    */
-  public void run() {
+  public void run() throws IOException {
     if (engine != null) {
       final ShowCommand show = new ShowCommand(new String[] {"show", "board"});
       show.execute(engine);
     }
     while (running) {
-      final String line = reader.readLine(">> ");
-      fetch(line);
+
+      if (!engine.getState().getCurrentPlayer().isAI()) {
+        final String line = reader.readLine(">> ");
+        fetch(line);
+      } else {
+        System.out.println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+        executeAiTurn();
+        new ShowCommand(new String[] {"show", "board"}).execute(engine);
+      }
+      if (engine.getState().isGameOver()) {
+        running = false;
+      }
     }
     try {
       terminal.close();
@@ -238,13 +249,24 @@ public class CliApp {
     }
   }
 
+  private void executeAiTurn() {
+    Player ai = engine.getState().getCurrentPlayer();
+
+    Move move = ai.getNextMove(engine.getState());
+
+    engine.play(move);
+
+    LOGGER.info("L'IA a joué : " + move.toString());
+  }
+
   /**
    * Parses the user input and executes the corresponding command. If the command is not recognized,
    * it is interpreted as a move.
    *
    * @param input the raw command entered by the user
+   * @throws IOException Possible if mcts with NN selection used
    */
-  public void fetch(final String input) {
+  public void fetch(final String input) throws IOException {
     firstTab = true;
     final String[] tokens = input.trim().split("\\s+");
     if (tokens.length == 0 || tokens[0].isEmpty()) {

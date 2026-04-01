@@ -1,9 +1,7 @@
 package fr.bordeaux.ai;
 
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,9 +23,14 @@ public class MctsPlayer extends AiPlayer {
    * @param name The name of the AI player.
    * @param positionStart The starting position on the board.
    * @param reflectionTime Maximum time in ms to search for a move.
+   * @param color The player's assigned color.
    */
-  public MctsPlayer(final String name, final Position positionStart, final long reflectionTime) {
-    super(name, positionStart);
+  public MctsPlayer(
+      final String name,
+      final Position positionStart,
+      final long reflectionTime,
+      final Color color) {
+    super(name, positionStart, color);
     this.reflectionTime = reflectionTime;
     this.evaluator = null;
   }
@@ -37,9 +40,10 @@ public class MctsPlayer extends AiPlayer {
    *
    * @param name The name of the AI player.
    * @param positionStart The starting position on the board.
+   * @param color The player's assigned color.
    */
-  public MctsPlayer(final String name, final Position positionStart) {
-    this(name, positionStart, 2000);
+  public MctsPlayer(final String name, final Position positionStart, final Color color) {
+    this(name, positionStart, 2000, color);
   }
 
   /**
@@ -48,16 +52,25 @@ public class MctsPlayer extends AiPlayer {
    * @param name The name of the AI player.
    * @param positionStart The starting position on the board.
    * @param reflectionTime Maximum search time in ms.
-   * @param evaluator The neural network to guide the search.
+   * @param useNN To use or not NeuralNetworks in selection
+   * @param color The player's assigned color.
+   * @throws IOException Possible if mcts with NN selection used
    */
   public MctsPlayer(
       final String name,
       final Position positionStart,
       final long reflectionTime,
-      final NeuralNetworkEvaluator evaluator) {
-    super(name, positionStart);
+      final boolean useNN,
+      final Color color)
+      throws IOException {
+    super(name, positionStart, color);
     this.reflectionTime = reflectionTime;
-    this.evaluator = evaluator;
+    NeuralNetworkEvaluator evaluator1;
+    evaluator1 = null;
+    if (useNN) {
+      evaluator1 = new NeuralNetworkEvaluator();
+    }
+    this.evaluator = evaluator1;
   }
 
   /**
@@ -73,7 +86,8 @@ public class MctsPlayer extends AiPlayer {
         this.getStartingPosition(),
         this.getRemainingWalls(),
         this.getScore(),
-        this.reflectionTime);
+        this.reflectionTime,
+        this.getColor());
   }
 
   /** Private constructor used for copying the player state. */
@@ -83,8 +97,9 @@ public class MctsPlayer extends AiPlayer {
       final Position start,
       final int walls,
       final int score,
-      final long reflectionTime) {
-    super(name, current, start, walls, score);
+      final long reflectionTime,
+      final Color color) {
+    super(name, current, start, walls, score, color);
     this.reflectionTime = reflectionTime;
     this.evaluator = null;
   }
@@ -108,8 +123,9 @@ public class MctsPlayer extends AiPlayer {
    * @param player the player for whom to find the best move.
    * @param state the current game state.
    * @return the best move for the player, or null.
+   * @throws IOException Can't happen because useNN is false here
    */
-  public static Move hint(final Player player, final GameState state) {
+  public static Move hint(final Player player, final GameState state) throws IOException {
     return hint(player, state, 2000, false);
   }
 
@@ -121,12 +137,11 @@ public class MctsPlayer extends AiPlayer {
    * @param reflectionTimeMs t
    * @param useNN nn @return best move or null.
    * @return the best move for the player, or null.
+   * @throws IOException Possible if mcts with NN selection used
    */
   public static Move hint(
-      final Player player,
-      final GameState state,
-      final long reflectionTimeMs,
-      final boolean useNN) {
+      final Player player, final GameState state, final long reflectionTimeMs, final boolean useNN)
+      throws IOException {
     final int playerIdx = state.getPlayers().indexOf(player);
     NeuralNetworkEvaluator evalToUse = null;
     if (useNN) {
@@ -236,6 +251,8 @@ public class MctsPlayer extends AiPlayer {
   public Map<String, Object> getSettings() {
     final Map<String, Object> settings = new ConcurrentHashMap<>();
     settings.put("mode", "mcts");
+    settings.put("selection", this.evaluator == null ? "UCT" : "ML");
+    settings.put("reflexion", this.reflectionTime);
     return settings;
   }
 }

@@ -5,7 +5,6 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Player;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -32,7 +31,17 @@ public class CliLauncher implements AppLauncher {
   @Override
   public void launch(String[] args, ConfigManager config) {
     Board board = new Board(BOARD_SIZE);
-    GameState state = new GameState(board, Player.createDefaultPlayers());
+    GameState state = new GameState(board, PlayerFactory.createPlayers(config));
+
+    final boolean isBlitz = config.getBoolean("blitz", false);
+    state.setBlitz(isBlitz);
+
+    if (isBlitz) {
+      final int timeoutMinutes = config.getInt("timeout", 30);
+      final long timeoutMillis = timeoutMinutes * 60 * 1000L;
+      state.setLimitTimePlayer(timeoutMillis);
+    }
+
     GameEngine engine = new GameEngine(state);
 
     try {

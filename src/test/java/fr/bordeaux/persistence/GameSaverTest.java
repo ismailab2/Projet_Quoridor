@@ -18,8 +18,8 @@ public class GameSaverTest {
     board.addWall(new Position(4, 5), Orientation.VERTICAL);
 
     List<Player> players = new ArrayList<>();
-    players.add(new HumanPlayer("Joueur1", new Position(0, 4)));
-    players.add(new HumanPlayer("Joueur2", new Position(8, 4)));
+    players.add(new HumanPlayer("Joueur1", new Position(0, 4), Color.WHITE));
+    players.add(new HumanPlayer("Joueur2", new Position(8, 4), Color.BLACK));
 
     GameState state = new GameState(board, players, 1);
     String filename = "test.txt";
@@ -42,8 +42,8 @@ public class GameSaverTest {
     // Setup board and players
     Board board = new Board(9);
     List<Player> players = new ArrayList<>();
-    players.add(new HumanPlayer("Player1", new Position(0, 4))); // e1
-    players.add(new HumanPlayer("Player2", new Position(8, 4))); // e9
+    players.add(new HumanPlayer("Player1", new Position(0, 4), Color.WHITE)); // e1
+    players.add(new HumanPlayer("Player2", new Position(8, 4), Color.BLACK)); // e9
     GameState state = new GameState(board, players, 0);
 
     // Simulate moves
@@ -98,8 +98,9 @@ public class GameSaverTest {
     // Setup board and players
     Board board = new Board(9);
     List<Player> players = new ArrayList<>();
-    players.add(new HumanPlayer("Player1", new Position(0, 4))); // e1
-    players.add(MinimaxPlayer.builder("Ai1", new Position(8, 4)).withDepth(3).build()); // e9
+    players.add(new HumanPlayer("Player1", new Position(0, 4), Color.WHITE)); // e1
+    players.add(
+        MinimaxPlayer.builder("Ai1", new Position(8, 4), Color.BLACK).withDepth(3).build()); // e9
     GameState state = new GameState(board, players, 0);
 
     state.setBlitz(true);

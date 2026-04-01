@@ -304,8 +304,8 @@ public class GameState {
     int size = 9;
     this.board = new Board(size);
     this.players = new ArrayList<>();
-    players.add(new HumanPlayer("Human", new Position(0, size / 2)));
-    players.add(new HumanPlayer("Bob", new Position(size - 1, size / 2)));
+    players.add(new HumanPlayer("Human", new Position(0, size / 2), Color.WHITE));
+    players.add(new HumanPlayer("Bob", new Position(size - 1, size / 2), Color.BLACK));
     this.currentIndexPlayer = 0;
     notifyListeners();
   }
@@ -523,6 +523,18 @@ public class GameState {
    */
   public void setTurnLimit(int turnLimit) {
     this.turnLimit = turnLimit;
+  }
+
+  /**
+   * Initializes the reflection time for all players in the game. This should be called at the start
+   * of a Blitz game to set the countdown timers to the specified limit.
+   *
+   * @param timeLimit The initial time allowed for each player in milliseconds.
+   */
+  public void setLimitTimePlayer(long timeLimit) {
+    for (Player player : getPlayers()) {
+      player.setRemainingTime(timeLimit);
+    }
   }
 
   /**

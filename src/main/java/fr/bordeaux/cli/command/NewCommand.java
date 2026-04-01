@@ -3,6 +3,7 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.ai.*;
 import fr.bordeaux.core.*;
 import fr.bordeaux.util.Logger;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import org.jline.reader.EndOfFileException;
@@ -81,8 +82,8 @@ public class NewCommand implements Command {
           new GameState(
               new Board(size + 1),
               List.of(
-                  new HumanPlayer("Human", new Position(0, 4)),
-                  new HumanPlayer("Bob", new Position(8, 4)))));
+                  new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                  new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))));
     else {
       int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
       Board board = new Board(size + 1);
@@ -92,14 +93,15 @@ public class NewCommand implements Command {
         try {
           LOGGER.info("Player's type available :");
           LOGGER.info(
-              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [nn] NeuralNetwork ia  - [r]andom ia");
+              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [mctsnn] Monte Carlo ia with NeuralNetwork selector  - [r]andom ia");
           String typePlayer = reader.readLine("Player's type >> ");
           if (typePlayer == null) throw new EndOfFileException();
           if (!typePlayer.equals("h")
               && !typePlayer.equals("mcts")
               && !typePlayer.equals("mini")
-              && !typePlayer.equals("r")) {
-            LOGGER.error("Wrong type, please enter h / mcts / mini / nn / r");
+              && !typePlayer.equals("r")
+              && !typePlayer.equals("mctsnn")) {
+            LOGGER.error("Wrong type, please enter h / mcts / mini / mctsnn / r");
             i--;
             continue;
           }
@@ -111,22 +113,28 @@ public class NewCommand implements Command {
           switch (typePlayer) {
             case "h":
               {
-                players[i] = new HumanPlayer(inputName, positions[i]);
+                players[i] = new HumanPlayer(inputName, positions[i], Color.fromId(i + 1));
                 break;
               }
             case "mcts":
               {
-                players[i] = new MctsPlayer(inputName, positions[i]);
+                players[i] = new MctsPlayer(inputName, positions[i], Color.fromId(i + 1));
                 break;
               }
             case "mini":
               {
-                players[i] = MinimaxPlayer.builder(inputName, positions[i]).build();
+                players[i] =
+                    MinimaxPlayer.builder(inputName, positions[i], Color.fromId(i + 1)).build();
                 break;
+              }
+            case "mctsnn":
+              {
+                players[i] =
+                    new MctsPlayer(inputName, positions[i], 2000, true, Color.fromId(i + 1));
               }
             default:
               {
-                players[i] = new RandomPlayer(inputName, positions[i]);
+                players[i] = new RandomPlayer(inputName, positions[i], Color.fromId(i + 1));
                 break;
               }
           }
@@ -139,6 +147,9 @@ public class NewCommand implements Command {
           } finally {
             return engine;
           }
+        } catch (
+            IOException e) { // IOException can be caused by loading default NN for mctsnn option
+          throw new RuntimeException(e);
         }
       }
       String setNbPlayers = "nb-players=" + nbPlayer;

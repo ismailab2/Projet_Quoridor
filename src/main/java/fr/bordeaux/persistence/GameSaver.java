@@ -167,7 +167,9 @@ public class GameSaver {
    */
   private static void saveAiSettings(PrintWriter w, GameState g, AiPlayer newP, int i) {
     writeLine(w, "ai-" + i + "-name", newP.getName());
+    writeLine(w, "ai-" + i + "-color", newP.getColor());
     writeLine(w, "ai-" + i + "-starting-position", newP.getStartingPosition().toString());
+    writeLine(w, "ai-" + i + "-remaining-time", newP.getRemainingTime());
     Map<String, Object> aiSettings = newP.getSettings();
     for (String s : aiSettings.keySet()) {
       writeLine(w, "ai-" + i + "-" + s, aiSettings.get(s));
@@ -199,11 +201,13 @@ public class GameSaver {
         saveAiSettings(w, g, newP, i);
       } else {
 
-        // writeLine(w, "player-"+i+"-remaining-time" ,  p.getRemainingTime());
-
         writeLine(w, "player-" + i + "-name", p.getName());
 
+        writeLine(w, "player-" + i + "-color", p.getColor());
+
         writeLine(w, "player-" + i + "-starting-position", p.getStartingPosition().toString());
+
+        writeLine(w, "player-" + i + "-remaining-time", p.getRemainingTime());
       }
       i++;
     }

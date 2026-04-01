@@ -2,11 +2,7 @@ package fr.bordeaux.ai;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +19,8 @@ public class RandomPlayerTest {
   @Test
   public void testRandomDistribution() {
     board = new Board(9);
-    ia1 = new RandomPlayer("IA1", new Position(8, 4));
-    ia2 = new RandomPlayer("IA2", new Position(0, 4));
+    ia1 = new RandomPlayer("IA1", new Position(8, 4), Color.WHITE);
+    ia2 = new RandomPlayer("IA2", new Position(0, 4), Color.BLACK);
 
     List<Player> players = new ArrayList<>();
     players.add(ia1);
@@ -72,7 +68,7 @@ public class RandomPlayerTest {
 
   @Test
   public void checkToStringAndSettings() {
-    RandomPlayer ia1 = new RandomPlayer("IA1", new Position(8, 4));
+    RandomPlayer ia1 = new RandomPlayer("IA1", new Position(8, 4), Color.WHITE);
     assertEquals(
         ia1.toString(),
         "Random AI "
