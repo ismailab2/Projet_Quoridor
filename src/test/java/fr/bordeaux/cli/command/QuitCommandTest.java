@@ -46,7 +46,7 @@ class QuitCommandTest {
   @Test
   void executeYesSave() {
     when(reader.readLine("Save before quitting? [y/N] >> ")).thenReturn("y");
-    when(reader.readLine("File path >> ")).thenReturn("quit_test.json");
+    when(reader.readLine("File path >> ")).thenReturn("quit_test.txt");
 
     QuitCommand command = new QuitCommand(reader);
     GameEngine result = command.execute(engine);
@@ -59,7 +59,7 @@ class QuitCommandTest {
   @Test
   void executeYesWordSave() {
     when(reader.readLine("Save before quitting? [y/N] >> ")).thenReturn("yes");
-    when(reader.readLine("File path >> ")).thenReturn("quit_test_yes.json");
+    when(reader.readLine("File path >> ")).thenReturn("quit_test_yes.txt");
 
     QuitCommand command = new QuitCommand(reader);
 

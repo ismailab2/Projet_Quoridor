@@ -67,28 +67,30 @@ public final class OptionsParser {
           handleTimeArgument(args, i, config);
         }
 
-        case "--ai" -> {
-          i++;
-          if (i < args.length) {
-            String aiColors = args[i].toLowerCase();
-            System.out.println(aiColors);
-            String[] colors = aiColors.split(",");
-            for (int x = 0; x < colors.length; x++) {
+        case "-a", "--ai" -> {
+          String aiOption = "";
 
-              String myColor = colors[x];
-              String playerId;
+          // Check if the next argument exists and is not another flag
+          if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+            i++;
+            aiOption = args[i].toLowerCase();
+          }
 
-              if (myColor.equals("blanc") || myColor.equals("1")) {
-                playerId = "1";
-              } else if (myColor.equals("noir") || myColor.equals("2")) {
-                playerId = "2";
-              } else {
-                throw new IllegalArgumentException(
-                    "Couleur IA non reconnue. Utilisez 'blanc' (1) ou 'noir' (2).");
-              }
-              config.setOption("ai" + playerId, "true");
-              aiPrefix.add(playerId);
-            }
+          if ("a".equals(aiOption)) {
+            // Enable AI for all players
+            config.setOption("ai1", "true");
+            config.setOption("ai2", "true");
+            aiPrefix.add("1");
+            aiPrefix.add("2");
+          } else if ("blanc".equals(aiOption) || "1".equals(aiOption)) {
+            // Enable AI for White / Player 1
+            config.setOption("ai1", "true");
+            aiPrefix.add("1");
+          } else {
+            // Default case: Enable AI for Black / Player 2
+            // This triggers for "noir", "2", invalid colors, or if no color was provided
+            config.setOption("ai2", "true");
+            aiPrefix.add("2");
           }
           break;
         }
