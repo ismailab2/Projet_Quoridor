@@ -47,6 +47,11 @@ public class QuoridorApp extends Application {
     // Attach drag-and-drop functionality
     DragAndDrop.install(engine, boardView);
 
+    PlayerPanel player1Panel = new PlayerPanel("Player 1", state, state.getCurrentIndexPlayer());
+    PlayerPanel player2Panel = new PlayerPanel("Player 2", state, state.getCurrentIndexPlayer()+1);
+    root.setLeft(player1Panel);
+    root.setRight(player2Panel);
+
     Scene scene = new Scene(root);
 
     ShortcutManager manager = ShortcutManager.getInstance();

@@ -19,7 +19,7 @@ import javafx.util.Duration;
 public class BoardView extends GridPane {
 
   private final GameEngine engine;
-  private final int cellSize = 85;
+  private final int cellSize = 100;
   private final int wallThickness = 10;
 
   private StackPane[][] cells;
@@ -82,7 +82,7 @@ public class BoardView extends GridPane {
       }
     }
     drawWallSlots();
-    drawWalls();
+    //drawWalls();
     drawPlayers();
     highlightCurrentPlayer();
   }
@@ -119,45 +119,6 @@ public class BoardView extends GridPane {
               highlightAccessibleCells(player);
             }
           });
-    }
-  }
-
-  /** Draws all walls currently placed on the board. */
-  public void drawWalls() {
-
-    Board board = engine.getState().getBoard();
-    Graph graph = board.getGraph();
-
-    int size = board.getSize();
-
-    for (int row = 0; row < size - 1; row++) {
-      for (int col = 0; col < size - 1; col++) {
-
-        int u1 = board.id(row, col);
-        int u2 = board.id(row, col + 1);
-        int v1 = board.id(row + 1, col);
-        int v2 = board.id(row + 1, col + 1);
-
-        // horizontal wall (between row and row+1)
-        if (!graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2)) {
-          Rectangle wall = new Rectangle(cellSize * 2, wallThickness);
-          wall.setFill(Color.BROWN);
-          wall.setMouseTransparent(true);
-          add(wall, col, row, 2, 1);
-          GridPane.setValignment(wall, VPos.BOTTOM);
-          wall.setTranslateY(wallThickness / 2.0);
-        }
-
-        // vertical wall (between col and col+1)
-        if (!graph.hasEdge(u1, u2) && !graph.hasEdge(v1, v2)) {
-          Rectangle wall = new Rectangle(wallThickness, cellSize * 2);
-          wall.setFill(Color.BROWN);
-          wall.setMouseTransparent(true);
-          add(wall, col, row, 1, 2);
-          GridPane.setHalignment(wall, HPos.RIGHT);
-          wall.setTranslateX(wallThickness / 2.0);
-        }
-      }
     }
   }
 

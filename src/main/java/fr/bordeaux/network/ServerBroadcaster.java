@@ -21,15 +21,30 @@ public class ServerBroadcaster implements Runnable {
   /** Flag controlling the broadcasting loop */
   private volatile boolean running = true;
 
-    /**
-     * Broadcasts the server's presence on the local network every 10 seconds.
-     *
-     * @param name Name of the server.
-     * @param port TCP port of the server.
-     */
+  /** time */
+  private final int delayMs;
+
+  /**
+   * Broadcasts the server's presence on the local network every 10 seconds.
+   *
+   * @param name Name of the server.
+   * @param port TCP port of the server.
+   */
   public ServerBroadcaster(String name, int port) {
+    this(name, port, 10000);
+  }
+
+  /**
+   * Broadcasts the server's presence on the local network every 10 seconds.
+   *
+   * @param name Name of the server.
+   * @param port TCP port of the server.
+   * @param delayMs time.
+   */
+  public ServerBroadcaster(String name, int port, int delayMs) {
     this.name = name;
     this.port = port;
+    this.delayMs = delayMs;
   }
 
   /**
@@ -42,19 +57,17 @@ public class ServerBroadcaster implements Runnable {
   public void run() {
     try (DatagramSocket socket = new DatagramSocket()) {
       socket.setBroadcast(true);
+      InetAddress address = InetAddress.getByName("127.0.0.1"); // localhost pour test
 
       while (running) {
         String msg = name + ":" + port;
         byte[] buf = msg.getBytes();
 
-        DatagramPacket packet =
-            new DatagramPacket(buf, buf.length, InetAddress.getByName("255.255.255.255"), 12346);
-
+        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 12346);
         socket.send(packet);
 
-        Thread.sleep(10000); // broadcast every 10 seconds
+        Thread.sleep(delayMs);
       }
-
     } catch (Exception e) {
       e.printStackTrace();
     }
