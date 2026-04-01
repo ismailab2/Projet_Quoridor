@@ -25,6 +25,14 @@ public class GameClient {
   private PrintWriter out;
 
   /**
+   * Constructs a new GameClient.
+   * This instance can be used to join a specific server or perform network discovery.
+   */
+  public GameClient() {
+    // Explicit default constructor to satisfy Javadoc requirements
+  }
+
+  /**
    * Attempts to establish a connection to the given host and port with a timeout of 5 seconds.
    *
    * @param host Server hostname or IP address.
