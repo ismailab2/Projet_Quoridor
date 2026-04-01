@@ -21,6 +21,7 @@ public class ActionDispatcher {
    * Constructs an ActionDispatcher with a given GameEngine.
    *
    * @param engine The GameEngine instance to control the game.
+   * @param fileHandler The FileHandler used to save and load.
    */
   public ActionDispatcher(GameEngine engine, FileHandler fileHandler) {
     this.engine = engine;
