@@ -15,13 +15,16 @@ public class ActionDispatcher {
   /** Reference to the game engine to execute game-related actions */
   private final GameEngine engine;
 
+  private final FileHandler fileHandler;
+
   /**
    * Constructs an ActionDispatcher with a given GameEngine.
    *
    * @param engine The GameEngine instance to control the game.
    */
-  public ActionDispatcher(GameEngine engine) {
+  public ActionDispatcher(GameEngine engine, FileHandler fileHandler) {
     this.engine = engine;
+    this.fileHandler = fileHandler;
   }
 
   /**
@@ -37,8 +40,14 @@ public class ActionDispatcher {
   public void dispatch(Action action) throws IOException {
     switch (action) {
       case NEW_GAME -> engine.newGame();
-      case LOAD_GAME -> engine.loadGame("txt.txt");
-      case SAVE_GAME -> engine.saveGame("txt.txt");
+      case LOAD_GAME -> {
+        String path = fileHandler.chooseLoadFile();
+        if (path != null) engine.loadGame(path);
+      }
+      case SAVE_GAME -> {
+        String path = fileHandler.chooseSaveFile();
+        if (path != null) engine.saveGame(path);
+      }
       case CONFIGURATION -> ConfigDialog.show();
       case INFO -> InfoDialog.show();
       case REDO -> engine.redo();
