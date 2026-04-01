@@ -34,7 +34,9 @@ public class QuoridorApp extends Application {
     state = new GameState(new Board(BOARD_SIZE), Player.createDefaultPlayers());
     GameEngine engine = new GameEngine(state);
 
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = new FileHandler(stage);
+
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     BorderPane root = new BorderPane();
 
