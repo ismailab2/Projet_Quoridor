@@ -23,7 +23,7 @@ public class GameSaverTest {
 
     GameState state = new GameState(board, players, 1);
     String filename = "test.txt";
-    GameSaver.saveGame(new GameEngine(state), filename);
+    GameSaver.saveGame(new GameEngine(state, false, false, false, false, 10), filename);
 
     File file = new File(filename);
     assertTrue(file.exists(), "Le fichier doit être créé");
@@ -56,7 +56,7 @@ public class GameSaverTest {
 
     // Save the game to a file
     String filename = "test_history.txt";
-    GameSaver.saveGame(new GameEngine(state), filename);
+    GameSaver.saveGame(new GameEngine(state, false, false, false, false, 10), filename);
 
     // Verify file existence and content
     File file = new File(filename);
@@ -107,7 +107,7 @@ public class GameSaverTest {
     fr.bordeaux.config.ConfigManager.getInstance().setOption("debug", "true");
     // Save the game to a file
     String filename = "test_parameters.txt";
-    GameSaver.saveGame(new GameEngine(state), filename);
+    GameSaver.saveGame(new GameEngine(state, true, false, false, true, 10), filename);
 
     // Verify file existence and content
     File file = new File(filename);

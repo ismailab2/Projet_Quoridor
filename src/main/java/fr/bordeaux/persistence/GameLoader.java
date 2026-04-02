@@ -20,8 +20,7 @@ public final class GameLoader {
   /**
    * Loads a saved game from a file and rebuilds the corresponding game state.
    *
-   * @param engine the engine used to apply loaded configuration (via {@link
-   *     GameEngine#getConfig()})
+   * @param engine the engine used to apply loaded configuration
    * @param filename path of the save file to load
    * @return the reconstructed game state
    * @throws IOException if an input/output error occurs while reading the file
@@ -146,13 +145,30 @@ public final class GameLoader {
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
-    int currentLine = 7; // 7 because its at the 8 lines that starts the informations about players
-    while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
+    // Find the start of the [game] section first to know where players end
+    int gameSectionIndex = -1;
+    for (int i = 0; i < lines.size(); i++) {
+      if ("[game]".equals(lines.get(i))) {
+        gameSectionIndex = i;
+        break;
+      }
+    }
+
+    // Find the first player line after [settings]
+    int currentLine = 1;
+    while (currentLine < lines.size()
+        && currentLine < gameSectionIndex
+        && !lines.get(currentLine).startsWith("player-")
+        && !lines.get(currentLine).startsWith("ai-")) {
+      currentLine++;
+    }
+
+    while (currentLine < lines.size() && currentLine < gameSectionIndex) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
       currentLine = res.nextLine;
     }
-    return new AllPlayerAndLine(lPlayers, currentLine);
+    return new AllPlayerAndLine(lPlayers, gameSectionIndex);
   }
 
   /**
@@ -307,30 +323,37 @@ public final class GameLoader {
    * @throws IllegalArgumentException if the number of players defined in settings mismatches the
    *     actual players list size
    * @throws IndexOutOfBoundsException if the file is shorter than expected
-   * @throws NumberFormatException if a numeric value (turnLimit, nbPlayers) is improperly formatted
+   * @throws NumberFormatException if a numeric value (nbPlayers) is improperly formatted
    */
   private static void applyMode(GameEngine engine, GameState gameState, final List<String> lines) {
-    int startLineMode = 1;
-    final boolean isVerbose = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final boolean isBlitz = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final boolean isContest = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final int turnLimit = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final boolean isDebug = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final int nbPlayers = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
+    int nbPlayers = 0;
+    for (String line : lines) {
+      if (line.equals("[game]")) break;
+      if (!line.contains("=")) continue;
+      String[] parts = line.split("=");
+      String key = parts[0].trim();
+      String value = parts[1].trim();
 
-    fr.bordeaux.config.ConfigManager config = engine.getConfig();
-    config.setOption("blitz", String.valueOf(isBlitz));
-    config.setOption("contest", String.valueOf(isContest));
-    config.setOption("debug", String.valueOf(isDebug));
-    config.setOption("verbose", String.valueOf(isVerbose));
-    config.setOption("turnLimit", String.valueOf(turnLimit));
+      switch (key) {
+        case "verbose":
+          engine.setVerbose(Boolean.parseBoolean(value));
+          break;
+        case "blitz":
+          engine.setBlitz(Boolean.parseBoolean(value));
+          break;
+        case "constest":
+          engine.setContest(Boolean.parseBoolean(value));
+          break;
+        case "debug":
+          engine.setDebug(Boolean.parseBoolean(value));
+          break;
+        case "nb-players":
+          nbPlayers = Integer.parseInt(value);
+          break;
+      }
+    }
 
-    if (gameState.getPlayers().size() != nbPlayers) {
+    if (nbPlayers > 0 && gameState.getPlayers().size() != nbPlayers) {
       throw new IllegalArgumentException(
           "The number of players read from the file ("
               + nbPlayers

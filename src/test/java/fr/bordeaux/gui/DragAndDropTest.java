@@ -37,7 +37,7 @@ class DragAndDropTest {
   void setUp() throws Exception {
     Board board = new Board(9);
     state = new GameState(board, Player.createDefaultPlayers());
-    engine = new GameEngine(state);
+    engine = new GameEngine(state, false, false, false, false, 10);
     runAndWait(() -> boardView = new BoardView(engine));
     runAndWait(() -> DragAndDrop.install(engine, boardView));
     waitForFxEvents();

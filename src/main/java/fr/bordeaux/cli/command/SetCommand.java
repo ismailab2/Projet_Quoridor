@@ -69,10 +69,31 @@ public class SetCommand implements Command {
     }
 
     try {
-      ConfigManager config = engine.getConfig();
+      ConfigManager config = ConfigManager.getInstance();
 
       // Update the option in memory
       config.setOption(key, value);
+
+      // Update the engine in-memory state
+      switch (key) {
+        case "blitz":
+          engine.setBlitz(Boolean.parseBoolean(value));
+          break;
+        case "verbose":
+          engine.setVerbose(Boolean.parseBoolean(value));
+          break;
+        case "contest":
+          engine.setContest(Boolean.parseBoolean(value));
+          break;
+        case "debug":
+          engine.setDebug(Boolean.parseBoolean(value));
+          break;
+        case "nb-walls":
+          engine.setInitialWalls(Integer.parseInt(value));
+          break;
+        default:
+          break;
+      }
 
       // Persist the change to the file (.quoridorrc)
       config.save();

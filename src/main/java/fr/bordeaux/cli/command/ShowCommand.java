@@ -67,13 +67,12 @@ public class ShowCommand implements Command {
       case "configurations":
       case "config":
         {
-          String[] configs =
-              new String[] {
-                "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
-              };
-          for (String cf : configs) {
-            writer.println(cf + " = " + engine.getConfig().getOption(cf, "None"));
-          }
+          writer.println("verbose = " + engine.isVerbose());
+          writer.println("blitz = " + engine.isBlitz());
+          writer.println("contest = " + engine.isContest());
+          writer.println("debug = " + engine.isDebug());
+          writer.println("nb-walls = " + engine.getInitialWalls());
+          writer.println("nb-players = " + engine.getState().getPlayers().size());
           break;
         }
       case "time":

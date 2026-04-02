@@ -20,9 +20,8 @@ public class BlitzManagerTest {
             .build());
     players.add(new HumanPlayer("Human", new Position(0, 4), Color.WHITE));
     GameState state = new GameState(board, players);
-    fr.bordeaux.config.ConfigManager.getInstance().setOption("blitz", "true");
     state.setLimitTimePlayer(10000); // 10 seconds
-    GameEngine engine = new GameEngine(state);
+    GameEngine engine = new GameEngine(state, true, false, false, false, 10);
 
     BlitzManager blitz = engine.getBlitzManager();
     try {
@@ -52,9 +51,8 @@ public class BlitzManagerTest {
     players.add(new HumanPlayer("Human", new Position(8, 4), Color.WHITE));
     players.add(new HumanPlayer("Human", new Position(0, 4), Color.BLACK));
     GameState state = new GameState(board, players);
-    fr.bordeaux.config.ConfigManager.getInstance().setOption("blitz", "true");
-    state.setLimitTimePlayer(1000); // 10 seconds
-    GameEngine engine = new GameEngine(state);
+    state.setLimitTimePlayer(1000); // 1 second
+    GameEngine engine = new GameEngine(state, true, false, false, false, 10);
 
     BlitzManager blitz = engine.getBlitzManager();
     try {
