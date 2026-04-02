@@ -1,6 +1,10 @@
 .idea
 /target
-/pdp
+/pdp/02-final/*.aux
+/pdp/02-final/*.bbl
+/pdp/02-final/*.blg
+/pdp/02-final/*.log
+/pdp/02-final/*.out
 *.txt
 *.xml
 *.json
