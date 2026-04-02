@@ -148,7 +148,7 @@ public class PlayerPanel extends VBox {
   public void update(Player player) {
     wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
     scoreLabel.setText(String.valueOf(player.getScore()));
-    // timeLabel.setText(formatTime(player.getRemainingTime()));
+    timeLabel.setText(formatTime((int) player.getRemainingTime()));
   }
 
   /**
