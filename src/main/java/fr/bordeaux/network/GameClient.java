@@ -24,6 +24,10 @@ public class GameClient {
   /** Output stream to send commands to the server */
   private PrintWriter out;
 
+/**  */
+  private Thread listenerThread;
+
+
   /**
    * Constructs a new GameClient.
    * This instance can be used to join a specific server or perform network discovery.
@@ -55,6 +59,43 @@ public class GameClient {
       return false;
     }
   }
+
+  public boolean joinMulti(String host, int port) {
+  try {
+    socket = new Socket();
+    socket.connect(new InetSocketAddress(host, port), 5000);
+
+    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    out = new PrintWriter(socket.getOutputStream(), true);
+
+    System.out.println("Connected to " + host + ":" + port);
+    startListener();
+    return true;
+
+  } catch (IOException e) {
+    System.out.println("Connection failed: " + e.getMessage());
+    return false;
+  }
+}
+
+
+
+private void startListener() {
+  listenerThread =
+      new Thread(
+          () -> {
+            try {
+              String line;
+              while ((line = in.readLine()) != null) {
+                System.out.println("Server: " + line);
+              }
+            } catch (IOException e) {
+              System.out.println("Connection closed: " + e.getMessage());
+            }
+          });
+  listenerThread.setDaemon(true);
+  listenerThread.start();
+}
 
   /**
    * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
@@ -164,5 +205,15 @@ public class GameClient {
       return false;
     }
     return true;
+  }
+
+  public void hello(String name) {
+    if (!checkConnection()) return;
+    out.println("HELLO " + name);
+  }
+
+  public void sendMove(String move) {
+    if (!checkConnection()) return;
+    out.println("MOVE " + move);
   }
 }
