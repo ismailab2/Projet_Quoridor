@@ -143,7 +143,7 @@ public final class GameLoader {
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
-    int currentLine = 8; // 8 because its at the 9 lines that starts the informations about players
+    int currentLine = 7; // 7 because its at the 8 lines that starts the informations about players
     while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
@@ -314,15 +314,12 @@ public final class GameLoader {
     startLineMode++;
     final boolean isContest = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
-    final boolean isAi = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
     final int turnLimit = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
     final boolean isDebug = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
     final int nbPlayers = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
 
-    gameState.setAi(isAi);
     gameState.setBlitz(isBlitz);
     gameState.setContest(isContest);
     gameState.setDebug(isDebug);

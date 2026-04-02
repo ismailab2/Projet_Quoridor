@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.persistence.GameSaver;
 import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
@@ -45,7 +44,7 @@ public class SaveCommand implements Command {
     }
     try {
       LOGGER.info("Attempting to save game to: " + tokens[1]);
-      GameSaver.saveGame(engine.getState(), tokens[1]);
+      engine.saveGame(tokens[1]);
       LOGGER.info("Game saved successfully.");
     } catch (Exception e) {
       LOGGER.error("Failed to save game at path: " + tokens[1], e);

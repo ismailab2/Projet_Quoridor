@@ -189,7 +189,6 @@ public class GameSaver {
     writeLine(w, "verbose", g.isVerbose());
     writeLine(w, "blitz", g.isBlitz());
     writeLine(w, "constest", g.isContest());
-    writeLine(w, "ai", g.isAi());
     writeLine(w, "turns-limit", g.getTurnLimit());
     writeLine(w, "debug", g.isDebug());
     writeLine(w, "nb-players", g.getPlayers().size());

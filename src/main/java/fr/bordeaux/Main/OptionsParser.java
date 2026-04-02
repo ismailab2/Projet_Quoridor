@@ -2,8 +2,6 @@ package fr.bordeaux.Main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class interprets CLI arguments and configures the application accordingly. Supported options
@@ -40,8 +38,6 @@ public final class OptionsParser {
    */
   public static void parse(String[] args, ConfigManager config) {
 
-    List<String> aiPrefix = new ArrayList<>();
-
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
 
@@ -67,95 +63,32 @@ public final class OptionsParser {
           handleTimeArgument(args, i, config);
         }
 
-        case "--ai" -> {
-          i++;
-          if (i < args.length) {
-            String aiColors = args[i].toLowerCase();
-            System.out.println(aiColors);
-            String[] colors = aiColors.split(",");
-            for (int x = 0; x < colors.length; x++) {
-
-              String myColor = colors[x];
-              String playerId;
-
-              if (myColor.equals("blanc") || myColor.equals("1")) {
-                playerId = "1";
-              } else if (myColor.equals("noir") || myColor.equals("2")) {
-                playerId = "2";
-              } else {
-                throw new IllegalArgumentException(
-                    "Couleur IA non reconnue. Utilisez 'blanc' (1) ou 'noir' (2).");
-              }
-              config.setOption("ai" + playerId, "true");
-              aiPrefix.add(playerId);
-            }
+        case "-a", "--ai" -> {
+          String aiOption = "";
+          if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+            aiOption = args[++i].toLowerCase();
           }
-          break;
-        }
 
-        case "--ai-mode" -> {
-          i++;
-          if (i < args.length) {
-            String[] mode = args[i].split(",");
-            for (int x = 0; x < mode.length; x++) {
-              config.setOption("ai" + aiPrefix.get(x) + ".mode", mode[x]);
-            }
-          }
-          break;
-        }
-
-        case "--ai-minimax-depth" -> {
-          i++;
-          if (i < args.length) {
-            String[] depth = args[i].split(",");
-            for (int x = 0; x < depth.length; x++) {
-              config.setOption("ai" + aiPrefix.get(x) + ".depth", depth[x]);
-            }
-          }
-          break;
-        }
-
-        case "--ai-time" -> {
-          i++;
-          if (i < args.length) {
-            String[] time = args[i].split(",");
-            for (int x = 0; x < time.length; x++) {
-              config.setOption("ai" + aiPrefix.get(x) + ".time", time[x]);
-            }
-          }
-          break;
-        }
-
-        case "--ai-minimax-scoring" -> {
-          i++;
-          if (i < args.length) {
-            String[] scoring = args[i].split(",");
-            for (int x = 0; x < scoring.length; x++) {
-              config.setOption("ai" + aiPrefix.get(x) + ".scoring", scoring[x]);
-            }
-          }
-          break;
-        }
-
-        case "--ai-mcts-selection" -> {
-          i++;
-          if (i < args.length) {
-            String[] selection = args[i].split(",");
-            for (int x = 0; x < selection.length; x++) {
-              if (x >= aiPrefix.size()) {
-                throw new IllegalArgumentException(
-                    "Invalid option : "
-                        + selection[x]
-                        + " too many options compared to AIs number");
-              }
-              if (!selection[x].equals("UCT") && !selection[x].equals("ML")) {
-                throw new IllegalArgumentException(
-                    "Invalid option: " + selection[x] + " for mcts selection.");
-              }
-              config.setOption("ai" + aiPrefix.get(x) + ".selection", selection[x]);
-            }
+          if ("a".equals(aiOption)) {
+            config.setOption("ai1", "true");
+            config.setOption("ai2", "true");
+          } else if ("blanc".equals(aiOption) || "1".equals(aiOption)) {
+            config.setOption("ai1", "true");
+          } else {
+            // Default to Player 2
+            config.setOption("ai2", "true");
           }
         }
+
+        case "--ai-mode" -> applyAiOption(args[++i], "mode", config);
+
+        case "--ai-minimax-depth" -> applyAiOption(args[++i], "depth", config);
+
+        case "--ai-time" -> applyAiOption(args[++i], "time", config);
+
+        case "--ai-minimax-scoring" -> applyAiOption(args[++i], "scoring", config);
+
+        case "--ai-mcts-selection" -> applyMctsOption(args[++i], config);
 
         case "-s", "--server" -> {
           if (i + 1 < args.length) {
@@ -172,6 +105,43 @@ public final class OptionsParser {
 
         default -> throw new IllegalArgumentException("Invalid option: " + arg);
       }
+    }
+  }
+
+  /** Sets AI options only for players currently flagged as AI. */
+  private static void applyAiOption(
+      final String value, final String suffix, final ConfigManager config) {
+    final String[] values = value.split(",");
+
+    // Apply to Player 1 if AI is enabled
+    if (config.getBoolean("ai1", false)) {
+      config.setOption("ai1." + suffix, values[0].trim());
+    }
+
+    // Apply to Player 2 if AI is enabled
+    if (config.getBoolean("ai2", false)) {
+      // Use the second value if provided, otherwise fallback to the first
+      final String valToSet = (values.length > 1) ? values[1] : values[0];
+      config.setOption("ai2." + suffix, valToSet.trim());
+    }
+  }
+
+  /** Specialized helper for MCTS selection with active AI check. */
+  private static void applyMctsOption(final String value, final ConfigManager config) {
+    final String[] values = value.split(",");
+    for (final String v : values) {
+      final String trimmed = v.trim();
+      if (!trimmed.equals("UCT") && !trimmed.equals("ML")) {
+        throw new IllegalArgumentException("Invalid option: " + trimmed + " for MCTS selection.");
+      }
+    }
+
+    if (config.getBoolean("ai1", false)) {
+      config.setOption("ai1.selection", values[0].trim());
+    }
+    if (config.getBoolean("ai2", false)) {
+      final String valToSet = (values.length > 1) ? values[1] : values[0];
+      config.setOption("ai2.selection", valToSet.trim());
     }
   }
 

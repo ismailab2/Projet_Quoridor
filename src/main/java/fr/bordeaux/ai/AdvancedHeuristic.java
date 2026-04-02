@@ -39,8 +39,8 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   @Override
   public int evaluate(final GameState gameState) {
     final int evaluateHeuristic;
-    final float coeff1 = 1.2f;
-    final float coeff2 = 0.8f;
+    final float coeff1 = 1.5f;
+    final float coeff2 = 0.5f;
 
     final List<Player> listPlayer = gameState.getPlayers();
     Player enemie = null;

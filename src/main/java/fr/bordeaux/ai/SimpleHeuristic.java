@@ -49,12 +49,8 @@ public class SimpleHeuristic implements HeuristicEvaluator {
     final int evaluateHeuristic;
     if (startPos.getX() == 0) {
       evaluateHeuristic = actualPos.getX() - startPos.getX();
-    } else if (startPos.getX() == gameState.getBoard().getSize() - 1) {
+    } else{
       evaluateHeuristic = startPos.getX() - actualPos.getX();
-    } else if (startPos.getY() == 0) {
-      evaluateHeuristic = actualPos.getY() - startPos.getY();
-    } else {
-      evaluateHeuristic = startPos.getY() - actualPos.getY();
     }
     return evaluateHeuristic;
   }
