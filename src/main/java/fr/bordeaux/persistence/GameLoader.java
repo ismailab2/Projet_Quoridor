@@ -169,7 +169,6 @@ public final class GameLoader {
     String player = lines.get(currentLine);
     final String pType = player.split("=")[0].split("-")[0];
     final String pName = player.split("=")[1];
-    final String pWall = player.split("=")[1];
     int myCurrentLine = currentLine + 1;
 
     String line = lines.get(myCurrentLine);
@@ -182,7 +181,7 @@ public final class GameLoader {
     final long remainingTime = Long.parseLong(lines.get(myCurrentLine).split("=")[1]);
     PlayerAndLine result = null;
     if (pType.equals("ai")) {
-      result = readAiPlayer(lines, myCurrentLine, pName, pPostion, pColor, Integer.parseInt(pWall));
+      result = readAiPlayer(lines, myCurrentLine, pName, pPostion, pColor);
 
     } else {
       result = new PlayerAndLine(new HumanPlayer(pName, pPostion, pColor), myCurrentLine + 1);
@@ -221,8 +220,7 @@ public final class GameLoader {
       int currentLine,
       final String pName,
       final Position pPostion,
-      final Color pColor,
-      final int pWall) {
+      final Color pColor) {
     Map<String, String> aiSettings = new HashMap<>();
     int myCurrentLine = currentLine + 1;
     int index = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
