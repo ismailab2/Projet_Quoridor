@@ -49,7 +49,7 @@ public class SimpleHeuristic implements HeuristicEvaluator {
     final int evaluateHeuristic;
     if (startPos.getX() == 0) {
       evaluateHeuristic = actualPos.getX() - startPos.getX();
-    } else{
+    } else {
       evaluateHeuristic = startPos.getX() - actualPos.getX();
     }
     return evaluateHeuristic;

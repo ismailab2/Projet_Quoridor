@@ -23,7 +23,7 @@ class LoadCommandTest {
     GameState state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state);
 
-    GameSaver.saveGame(state, fileName);
+    GameSaver.saveGame(engine, fileName);
   }
 
   @AfterEach

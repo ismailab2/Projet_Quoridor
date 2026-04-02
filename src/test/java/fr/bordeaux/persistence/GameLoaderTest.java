@@ -13,6 +13,14 @@ public class GameLoaderTest {
 
   private static final String TEST_FILE = "load_test.txt";
 
+  private static GameEngine dummyEngine() {
+    Board board = new Board(9);
+    List<Player> players = new ArrayList<>();
+    players.add(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
+    players.add(new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
+    return new GameEngine(new GameState(board, players));
+  }
+
   @BeforeAll
   public static void setup() throws IOException {
     // Initialize board and players
@@ -27,8 +35,8 @@ public class GameLoaderTest {
 
     GameState state = new GameState(board, players, 0);
 
-    state.setTurnLimit(56);
-    state.setDebug(true);
+    fr.bordeaux.config.ConfigManager.getInstance().setOption("turnLimit", "56");
+    fr.bordeaux.config.ConfigManager.getInstance().setOption("debug", "true");
 
     // Apply moves to generate history (undoStack)
     // Player 1 moves pawn from e1 (0,4) to e2 (1,4)
@@ -37,12 +45,12 @@ public class GameLoaderTest {
     // Player 2 places a horizontal wall at c3 (2,2)
     state.applyMove(Move.wall(new Position(2, 2), Orientation.HORIZONTAL));
     // Save the state to a file
-    GameSaver.saveGame(state, TEST_FILE);
+    GameSaver.saveGame(new GameEngine(state), TEST_FILE);
   }
 
   @Test
   public void testLoadGame() throws IOException, GameLoadException {
-    GameState loaded = GameLoader.loadGame(TEST_FILE);
+    GameState loaded = GameLoader.loadGame(dummyEngine(), TEST_FILE);
 
     assertNotNull(loaded);
     assertEquals(2, loaded.getPlayers().size());
@@ -105,7 +113,7 @@ public class GameLoaderTest {
       writer.println("[History]");
     }
 
-    GameState loaded = GameLoader.loadGame(filename);
+    GameState loaded = GameLoader.loadGame(dummyEngine(), filename);
     Board board = loaded.getBoard();
 
     assertFalse(
@@ -157,7 +165,7 @@ public class GameLoaderTest {
       writer.println("[History]");
     }
 
-    GameState loaded = GameLoader.loadGame(filename);
+    GameState loaded = GameLoader.loadGame(dummyEngine(), filename);
 
     assertEquals(new Position(1, 2), loaded.getPlayers().get(0).getPosition());
     assertEquals(new Position(8, 5), loaded.getPlayers().get(1).getPosition());
@@ -165,7 +173,7 @@ public class GameLoaderTest {
 
   @Test
   public void testLoadGameHistory() throws IOException, GameLoadException {
-    GameState loaded = GameLoader.loadGame(TEST_FILE);
+    GameState loaded = GameLoader.loadGame(dummyEngine(), TEST_FILE);
     Move[] history = loaded.getMovesPlayed(); // Reverse order, last move is index 0
 
     // Verify history stack size
@@ -180,9 +188,9 @@ public class GameLoaderTest {
 
   @Test
   public void testLoadGameSettings() throws IOException, GameLoadException {
-    GameState loaded = GameLoader.loadGame(TEST_FILE);
-    assertTrue(loaded.getTurnLimit() == 56);
-    assertTrue(loaded.isDebug());
+    GameState loaded = GameLoader.loadGame(dummyEngine(), TEST_FILE);
+    assertTrue(fr.bordeaux.config.ConfigManager.getInstance().getInt("turnLimit", 100) == 56);
+    assertTrue(fr.bordeaux.config.ConfigManager.getInstance().getBoolean("debug", false));
     MinimaxPlayer aiPlayer = (MinimaxPlayer) loaded.getPlayers().get(1);
     assertTrue(aiPlayer.getName().equals("Player2"));
     assertTrue(aiPlayer.getStartingPosition().equals(new Position(8, 4)));

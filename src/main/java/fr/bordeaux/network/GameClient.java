@@ -25,8 +25,8 @@ public class GameClient {
   private PrintWriter out;
 
   /**
-   * Constructs a new GameClient.
-   * This instance can be used to join a specific server or perform network discovery.
+   * Constructs a new GameClient. This instance can be used to join a specific server or perform
+   * network discovery.
    */
   public GameClient() {
     // Explicit default constructor to satisfy Javadoc requirements
