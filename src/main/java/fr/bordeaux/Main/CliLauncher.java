@@ -41,7 +41,14 @@ public class CliLauncher implements AppLauncher {
       state.setLimitTimePlayer(timeoutMillis);
     }
 
-    GameEngine engine = new GameEngine(state);
+    GameEngine engine =
+        new GameEngine(
+            state,
+            isBlitz,
+            config.getBoolean("verbose", false),
+            config.getBoolean("contest", false),
+            config.getBoolean("debug", false),
+            Integer.parseInt(config.getOption("nb-walls", "10")));
 
     try {
       new CliApp(engine).run();

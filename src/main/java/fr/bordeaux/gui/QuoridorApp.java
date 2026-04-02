@@ -38,7 +38,7 @@ public class QuoridorApp extends Application {
     Player player1 = new HumanPlayer("Human Player", new Position(0, 4), Color.WHITE);
     Player player2 = new MctsPlayer("MCTS Player", new Position(8, 4), 3000, true, Color.BLACK);
     GameState state = new GameState(new Board(BOARD_SIZE), List.of(player1, player2));
-    GameEngine engine = new GameEngine(state);
+    GameEngine engine = new GameEngine(state, false, false, false, false, 10);
     FileHandler fileHandler = new FileHandler(stage);
     ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 

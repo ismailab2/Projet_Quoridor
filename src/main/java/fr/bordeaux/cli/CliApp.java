@@ -188,7 +188,12 @@ public class CliApp {
                 new Board(9),
                 List.of(
                     new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
-                    new HumanPlayer("Bob", new Position(8, 4), Color.BLACK)))));
+                    new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
+            false,
+            false,
+            false,
+            false,
+            10));
   }
 
   /** Triggers an audible alert (beep) through the terminal. */
