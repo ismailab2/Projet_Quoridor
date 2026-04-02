@@ -18,7 +18,7 @@ public class GameLoaderTest {
     List<Player> players = new ArrayList<>();
     players.add(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
     players.add(new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
-    return new GameEngine(new GameState(board, players));
+    return new GameEngine(new GameState(board, players), false, false, false, false, 10);
   }
 
   @BeforeAll
@@ -35,7 +35,6 @@ public class GameLoaderTest {
 
     GameState state = new GameState(board, players, 0);
 
-    fr.bordeaux.config.ConfigManager.getInstance().setOption("turnLimit", "56");
     fr.bordeaux.config.ConfigManager.getInstance().setOption("debug", "true");
 
     // Apply moves to generate history (undoStack)
@@ -45,7 +44,7 @@ public class GameLoaderTest {
     // Player 2 places a horizontal wall at c3 (2,2)
     state.applyMove(Move.wall(new Position(2, 2), Orientation.HORIZONTAL));
     // Save the state to a file
-    GameSaver.saveGame(new GameEngine(state), TEST_FILE);
+    GameSaver.saveGame(new GameEngine(state, false, false, false, false, 10), TEST_FILE);
   }
 
   @Test
@@ -77,7 +76,7 @@ public class GameLoaderTest {
       writer.println("verbose=false");
       writer.println("blitz=false");
       writer.println("constest=false");
-      writer.println("turns-limit=20");
+
       writer.println("debug=false");
       writer.println("nb-players=2");
       writer.println("player-1-name=Player1");
@@ -129,7 +128,7 @@ public class GameLoaderTest {
       writer.println("verbose=false");
       writer.println("blitz=false");
       writer.println("constest=false");
-      writer.println("turns-limit=20");
+
       writer.println("debug=false");
       writer.println("nb-players=2");
       writer.println("player-1-name=Player1");
@@ -189,7 +188,7 @@ public class GameLoaderTest {
   @Test
   public void testLoadGameSettings() throws IOException, GameLoadException {
     GameState loaded = GameLoader.loadGame(dummyEngine(), TEST_FILE);
-    assertTrue(fr.bordeaux.config.ConfigManager.getInstance().getInt("turnLimit", 100) == 56);
+
     assertTrue(fr.bordeaux.config.ConfigManager.getInstance().getBoolean("debug", false));
     MinimaxPlayer aiPlayer = (MinimaxPlayer) loaded.getPlayers().get(1);
     assertTrue(aiPlayer.getName().equals("Player2"));

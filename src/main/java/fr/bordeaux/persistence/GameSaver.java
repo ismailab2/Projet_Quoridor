@@ -182,18 +182,16 @@ public class GameSaver {
    * "[settings]" header followed by game rules and player configurations.
    *
    * @param w the {@link PrintWriter} used to write to the file
-   * @param engine the engine providing the configuration (via {@link GameEngine#getConfig()})
+   * @param engine the engine providing the configuration
    * @param g the current game state containing player data
    */
   private static void saveParameters(PrintWriter w, GameEngine engine, GameState g) {
     w.println("[settings]");
 
-    fr.bordeaux.config.ConfigManager config = engine.getConfig();
-    writeLine(w, "verbose", config.getBoolean("verbose", false));
-    writeLine(w, "blitz", config.getBoolean("blitz", false));
-    writeLine(w, "constest", config.getBoolean("contest", false));
-    writeLine(w, "turns-limit", config.getInt("turnLimit", 100));
-    writeLine(w, "debug", config.getBoolean("debug", false));
+    writeLine(w, "verbose", engine.isVerbose());
+    writeLine(w, "blitz", engine.isBlitz());
+    writeLine(w, "constest", engine.isContest());
+    writeLine(w, "debug", engine.isDebug());
     writeLine(w, "nb-players", g.getPlayers().size());
 
     int i = 1;
