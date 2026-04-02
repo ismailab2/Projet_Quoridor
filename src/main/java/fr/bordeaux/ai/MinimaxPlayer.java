@@ -44,7 +44,7 @@ public final class MinimaxPlayer extends AiPlayer {
    * @param builder The builder containing configuration settings.
    */
   public MinimaxPlayer(final MinimaxBuilder builder) {
-    super(builder.getName(), builder.getStartingPosition(), builder.getColor(), builder.getWalls());
+    super(builder.getName(), builder.getStartingPosition(), builder.getColor());
     this.searchDepth = builder.getSearchDepth();
     this.reflexionTime = builder.getLimitTime();
     this.useIterativeD = builder.isUseIterativeDeepening();

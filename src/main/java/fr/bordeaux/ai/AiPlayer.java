@@ -15,10 +15,9 @@ public abstract class AiPlayer extends Player {
    * @param name The name of the AI player.
    * @param positionStart The starting position of the AI on the board.
    * @param color The color of the player.
-   * @param walls The amount of wall the player has.
    */
-  public AiPlayer(final String name, final Position positionStart, Color color, int walls) {
-    super(name, positionStart, color, walls);
+  public AiPlayer(final String name, final Position positionStart, Color color) {
+    super(name, positionStart, color);
   }
 
   /**

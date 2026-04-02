@@ -15,10 +15,9 @@ public class RandomPlayer extends AiPlayer {
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
    * @param color The AI's color on the board.
-   * @param walls The amount of wall the player has.
    */
-  public RandomPlayer(final String name, final Position positionStart, final Color color, final int walls) {
-    super(name, positionStart, color, walls);
+  public RandomPlayer(final String name, final Position positionStart, final Color color) {
+    super(name, positionStart, color);
   }
 
   /**

@@ -185,7 +185,7 @@ public final class GameLoader {
       result = readAiPlayer(lines, myCurrentLine, pName, pPostion, pColor, Integer.parseInt(pWall));
 
     } else {
-      result = new PlayerAndLine(new HumanPlayer(pName, pPostion, pColor, Integer.parseInt(pWall)), myCurrentLine + 1);
+      result = new PlayerAndLine(new HumanPlayer(pName, pPostion, pColor), myCurrentLine + 1);
     }
     result.player.setRemainingTime(remainingTime);
     return result;
@@ -255,13 +255,13 @@ public final class GameLoader {
         boolean useNN = "ML".equals(aiSettings.get("selection"));
         try {
           return new PlayerAndLine(
-              new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor, pWall), myCurrentLine);
+              new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
         } catch (java.io.IOException e) {
           throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
         }
 
       case "random":
-        return new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor, pWall), myCurrentLine);
+        return new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor), myCurrentLine);
 
       case "minimax-iterative-deepening":
         {
