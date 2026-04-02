@@ -308,7 +308,7 @@ public final class MinimaxPlayer extends AiPlayer {
     }
 
     this.aiStack.push(move);
-    gameState.getNextPlayer();
+    gameState.nextPlayer();
   }
 
   /**

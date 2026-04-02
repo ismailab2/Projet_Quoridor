@@ -1,7 +1,6 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.persistence.GameLoader;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -41,7 +40,7 @@ public class LoadCommand implements Command {
     }
     try {
       LOGGER.info("Loading game state from file: " + tokens[1]);
-      return new GameEngine(GameLoader.loadGame(tokens[1]));
+      engine.loadGame(tokens[1]);
     } catch (Exception e) {
       e.printStackTrace();
       LOGGER.error("Error while loading file " + tokens[1], e);

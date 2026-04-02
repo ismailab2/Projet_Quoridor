@@ -1,6 +1,7 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.ai.MctsPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.io.IOException;
 
 /**
@@ -11,6 +12,7 @@ public class GameEngine {
 
   private GameState state;
   private BlitzManager blitzManager;
+  private ConfigManager config;
 
   /**
    * Constructs a GameEngine with the specified initial game state.
@@ -19,12 +21,13 @@ public class GameEngine {
    */
   public GameEngine(GameState state) {
     this.state = state;
+    this.config = ConfigManager.getInstance();
     initializeBlitz();
   }
 
   /** Helper method to initialize the BlitzManager based on the current state. */
   private void initializeBlitz() {
-    if (this.state.isBlitz()) {
+    if (this.config.getBoolean("blitz", false)) {
       this.blitzManager = new BlitzManager(this);
       this.blitzManager.start();
     }
@@ -73,7 +76,7 @@ public class GameEngine {
    */
   public void saveGame(String filename) {
     try {
-      state.saveGame(filename);
+      fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (IOException e) {
       System.err.println("Erreur sauvegarde : " + e.getMessage());
     }
@@ -89,7 +92,8 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      state.loadGame(filename);
+      GameState loaded = fr.bordeaux.persistence.GameLoader.loadGame(this, filename);
+      state.loadState(loaded);
       initializeBlitz();
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());
@@ -183,5 +187,14 @@ public class GameEngine {
    */
   public BlitzManager getBlitzManager() {
     return blitzManager;
+  }
+
+  /**
+   * Returns the configuration manager used by the game engine.
+   *
+   * @return The {@link ConfigManager}.
+   */
+  public ConfigManager getConfig() {
+    return config;
   }
 }

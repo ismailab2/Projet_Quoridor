@@ -20,12 +20,15 @@ public final class GameLoader {
   /**
    * Loads a saved game from a file and rebuilds the corresponding game state.
    *
+   * @param engine the engine used to apply loaded configuration (via {@link
+   *     GameEngine#getConfig()})
    * @param filename path of the save file to load
    * @return the reconstructed game state
    * @throws IOException if an input/output error occurs while reading the file
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
-  public static GameState loadGame(String filename) throws IOException, GameLoadException {
+  public static GameState loadGame(GameEngine engine, String filename)
+      throws IOException, GameLoadException {
     List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
@@ -40,7 +43,7 @@ public final class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
-    applyMode(gameState, lines);
+    applyMode(engine, gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
@@ -143,7 +146,7 @@ public final class GameLoader {
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
-    int currentLine = 8; // 8 because its at the 9 lines that starts the informations about players
+    int currentLine = 7; // 7 because its at the 8 lines that starts the informations about players
     while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
@@ -295,12 +298,12 @@ public final class GameLoader {
 
   /**
    * Applies the game configuration modes (verbose, blitz, etc.) from the save file to the provided
-   * game state. *
+   * engine's {@link fr.bordeaux.config.ConfigManager}.
    *
-   * <p>This method modifies the {@code gameState} object directly by reference. It expects the
-   * settings to be located at specific line indices following the [settings] header, using a
-   * "key=value" format.
+   * <p>This method reads settings at specific line indices following the [settings] header, using a
+   * "key=value" format, and writes them via {@link GameEngine#getConfig()}.
    *
+   * @param engine the engine whose configuration will be updated
    * @param gameState the game state to configure
    * @param lines the list of strings representing the save file content
    * @throws IllegalArgumentException if the number of players defined in settings mismatches the
@@ -308,7 +311,7 @@ public final class GameLoader {
    * @throws IndexOutOfBoundsException if the file is shorter than expected
    * @throws NumberFormatException if a numeric value (turnLimit, nbPlayers) is improperly formatted
    */
-  private static void applyMode(GameState gameState, final List<String> lines) {
+  private static void applyMode(GameEngine engine, GameState gameState, final List<String> lines) {
     int startLineMode = 1;
     final boolean isVerbose = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
@@ -316,20 +319,18 @@ public final class GameLoader {
     startLineMode++;
     final boolean isContest = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
-    final boolean isAi = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
     final int turnLimit = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
     final boolean isDebug = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
     startLineMode++;
     final int nbPlayers = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
 
-    gameState.setAi(isAi);
-    gameState.setBlitz(isBlitz);
-    gameState.setContest(isContest);
-    gameState.setDebug(isDebug);
-    gameState.setVerbose(isVerbose);
-    gameState.setTurnLimit(turnLimit);
+    fr.bordeaux.config.ConfigManager config = engine.getConfig();
+    config.setOption("blitz", String.valueOf(isBlitz));
+    config.setOption("contest", String.valueOf(isContest));
+    config.setOption("debug", String.valueOf(isDebug));
+    config.setOption("verbose", String.valueOf(isVerbose));
+    config.setOption("turnLimit", String.valueOf(turnLimit));
 
     if (gameState.getPlayers().size() != nbPlayers) {
       throw new IllegalArgumentException(

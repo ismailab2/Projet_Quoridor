@@ -91,8 +91,12 @@ public class MinimaxPlayerTest {
   @Test
   public void checkTimer() {
     board = new Board(9);
-    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE).withDepth(10).build();
-    ia2 = new RandomPlayer("IA2", new Position(0, 4), Color.BLACK);
+    ia1 =
+        MinimaxPlayer.builder("IA1", new Position(0, 4), Color.WHITE)
+            .withDepth(10)
+            .withHeuristic("intermediate")
+            .build();
+    ia2 = new RandomPlayer("IA2", new Position(8, 4), Color.BLACK);
     List<Player> players = new ArrayList<>();
     players.add(ia1);
     players.add(ia2);
@@ -139,7 +143,7 @@ public class MinimaxPlayerTest {
 
   @Test
   public void checkToString() {
-    ia1 = MinimaxPlayer.builder("IA1", new Position(8, 4), Color.WHITE).build();
+    ia1 = MinimaxPlayer.builder("IA1", new Position(0, 4), Color.WHITE).build();
     assertEquals(
         ia1.toString(),
         "MiniMax AI "

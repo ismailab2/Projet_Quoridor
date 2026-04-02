@@ -22,7 +22,7 @@ class PauseCommandTest {
 
   @Test
   void executeInBlitzMode() {
-    engine.getState().setBlitz(true);
+    fr.bordeaux.config.ConfigManager.getInstance().setOption("blitz", "true");
 
     PauseCommand command = new PauseCommand();
     GameEngine result = command.execute(engine);
@@ -33,7 +33,7 @@ class PauseCommandTest {
 
   @Test
   void executeWithoutBlitzMode() {
-    engine.getState().setBlitz(false);
+    fr.bordeaux.config.ConfigManager.getInstance().setOption("blitz", "false");
 
     PauseCommand command = new PauseCommand();
     GameEngine result = command.execute(engine);
