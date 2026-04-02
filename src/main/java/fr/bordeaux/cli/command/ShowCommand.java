@@ -1,6 +1,5 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
@@ -73,7 +72,7 @@ public class ShowCommand implements Command {
                 "verbose", "blitz", "timeout", "ai", "turns-limit", "debug", "nb-players"
               };
           for (String cf : configs) {
-            writer.println(cf + " = " + ConfigManager.getInstance().getOption(cf, "None"));
+            writer.println(cf + " = " + engine.getConfig().getOption(cf, "None"));
           }
           break;
         }

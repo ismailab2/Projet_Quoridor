@@ -1,9 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.persistence.GameLoadException;
-import fr.bordeaux.persistence.GameLoader;
-import fr.bordeaux.persistence.GameSaver;
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -20,12 +16,6 @@ public class GameState {
   private boolean gameOver;
   private final Deque<Move> undoStack;
   private final Deque<Move> redoStack;
-  private boolean debug = false;
-  private boolean verbose = false;
-  private boolean blitz = false;
-  private boolean contest = false;
-  private boolean ai = false;
-  private int turnLimit = 100;
 
   private final transient List<Runnable> listeners = new ArrayList<>();
 
@@ -92,7 +82,7 @@ public class GameState {
 
     undoStack.push(move);
     redoStack.clear();
-    getNextPlayer();
+    nextPlayer();
     notifyListeners();
   }
 
@@ -111,7 +101,7 @@ public class GameState {
       player.useWall();
     }
     undoStack.push(move);
-    getNextPlayer();
+    nextPlayer();
   }
 
   /**
@@ -201,7 +191,7 @@ public class GameState {
   }
 
   /** Moves the turn to the next player. */
-  public void getNextPlayer() {
+  public void nextPlayer() {
     currentIndexPlayer = (currentIndexPlayer + 1) % players.size();
   }
 
@@ -274,25 +264,12 @@ public class GameState {
   }
 
   /**
-   * Saves the state to a file.
+   * Copies the board, players and current player index from another {@link GameState} into this
+   * instance, then notifies all registered listeners.
    *
-   * @param filename Path to the file.
-   * @throws IOException If saving fails.
+   * @param loaded the game state to copy from
    */
-  public void saveGame(String filename) throws IOException {
-    GameSaver.saveGame(this, filename);
-    notifyListeners();
-  }
-
-  /**
-   * Loads a game state from a file.
-   *
-   * @param filename Path to the file.
-   * @throws IOException If reading fails.
-   * @throws GameLoadException If the file content is invalid.
-   */
-  public void loadGame(String filename) throws IOException, GameLoadException {
-    GameState loaded = GameLoader.loadGame(filename);
+  public void loadState(GameState loaded) {
     this.board = loaded.board;
     this.players = loaded.players;
     this.currentIndexPlayer = loaded.currentIndexPlayer;
@@ -397,12 +374,18 @@ public class GameState {
     int y = pos.getY();
 
     Position[] candidates = {
-      new Position(x + 1, y), new Position(x - 1, y), new Position(x, y + 1),
-          new Position(x, y - 1), // Up, Down, Left, Right
-      new Position(x + 2, y), new Position(x - 2, y), new Position(x, y + 2),
-          new Position(x, y - 2), // 2 times Up, Down, Left, Right
-      new Position(x + 1, y + 1), new Position(x - 1, y - 1), new Position(x + 1, y - 1),
-          new Position(x - 1, y + 1) // Diagonals
+      new Position(x + 1, y),
+      new Position(x - 1, y),
+      new Position(x, y + 1),
+      new Position(x, y - 1), // Up, Down, Left, Right
+      new Position(x + 2, y),
+      new Position(x - 2, y),
+      new Position(x, y + 2),
+      new Position(x, y - 2), // 2 times Up, Down, Left, Right
+      new Position(x + 1, y + 1),
+      new Position(x - 1, y - 1),
+      new Position(x + 1, y - 1),
+      new Position(x - 1, y + 1) // Diagonals
     };
 
     for (Position p : candidates) {
@@ -415,114 +398,6 @@ public class GameState {
     }
 
     return res;
-  }
-
-  /**
-   * Checks whether the debug mode is currently active.
-   *
-   * @return True if debug mode is enabled.
-   */
-  public boolean isDebug() {
-    return debug;
-  }
-
-  /**
-   * Sets the status of the debug mode.
-   *
-   * @param debug Set debug mode.
-   */
-  public void setDebug(boolean debug) {
-    this.debug = debug;
-  }
-
-  /**
-   * Checks whether the verbose mode is currently active for detailed logging.
-   *
-   * @return True if verbose mode is enabled.
-   */
-  public boolean isVerbose() {
-    return verbose;
-  }
-
-  /**
-   * Sets the status of the verbose mode.
-   *
-   * @param verbose Set verbose mode.
-   */
-  public void setVerbose(boolean verbose) {
-    this.verbose = verbose;
-  }
-
-  /**
-   * Checks whether the blitz mode is currently enabled for fast-paced gameplay.
-   *
-   * @return True if blitz mode is enabled.
-   */
-  public boolean isBlitz() {
-    return blitz;
-  }
-
-  /**
-   * Sets the status of the blitz mode.
-   *
-   * @param blitz Set blitz mode.
-   */
-  public void setBlitz(boolean blitz) {
-    this.blitz = blitz;
-  }
-
-  /**
-   * Checks whether the contest mode is currently enabled for competitive matches.
-   *
-   * @return True if contest mode is enabled.
-   */
-  public boolean isContest() {
-    return contest;
-  }
-
-  /**
-   * Sets the status of the contest mode.
-   *
-   * @param contest Set contest mode.
-   */
-  public void setContest(boolean contest) {
-    this.contest = contest;
-  }
-
-  /**
-   * Checks whether the global AI management system is active.
-   *
-   * @return True if AI management is enabled.
-   */
-  public boolean isAi() {
-    return ai;
-  }
-
-  /**
-   * Sets the status of the AI management system.
-   *
-   * @param ai Set AI management.
-   */
-  public void setAi(boolean ai) {
-    this.ai = ai;
-  }
-
-  /**
-   * Retrieves the maximum number of turns allowed in the game.
-   *
-   * @return The current turn limit.
-   */
-  public int getTurnLimit() {
-    return turnLimit;
-  }
-
-  /**
-   * Sets the maximum number of turns allowed before the game ends.
-   *
-   * @param turnLimit Set the turn limit.
-   */
-  public void setTurnLimit(int turnLimit) {
-    this.turnLimit = turnLimit;
   }
 
   /**
@@ -557,5 +432,6 @@ public class GameState {
    */
   public void setGameOver(boolean b) {
     this.gameOver = b;
+    notifyListeners();
   }
 }

@@ -34,7 +34,6 @@ public class CliLauncher implements AppLauncher {
     GameState state = new GameState(board, PlayerFactory.createPlayers(config));
 
     final boolean isBlitz = config.getBoolean("blitz", false);
-    state.setBlitz(isBlitz);
 
     if (isBlitz) {
       final int timeoutMinutes = config.getInt("timeout", 30);

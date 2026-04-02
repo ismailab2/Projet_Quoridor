@@ -147,6 +147,7 @@ public class BoardView extends GridPane {
    * visually indicate whose turn it is.
    */
   public void highlightCurrentPlayer() {
+    if (engine.getState().isGameOver()) return;
     Player current = engine.getState().getCurrentPlayer();
     Position pos = current.getPosition();
     StackPane cell = cells[pos.getX()][pos.getY()];
@@ -173,7 +174,7 @@ public class BoardView extends GridPane {
    * @param player the player whose legal moves should be highlighted
    */
   public void highlightAccessibleCells(Player player) {
-    if (engine.getState().getCurrentPlayer() != player) return;
+    if (engine.getState().getCurrentPlayer() != player || player.isAI()) return;
     for (StackPane[] row : cells)
       for (StackPane cell : row)
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
@@ -191,6 +192,7 @@ public class BoardView extends GridPane {
    */
   public void handleCellClick(int row, int col) {
     Player current = engine.getState().getCurrentPlayer();
+    if (current.isAI()) return;
     Move move = Move.pawn(current.getPosition(), new Position(row, col));
     if (engine.play(move)) drawBoard();
   }
@@ -205,6 +207,7 @@ public class BoardView extends GridPane {
    * @param button the mouse button that was clicked
    */
   public void handleWallClick(int row, int col, MouseButton button) {
+    if (engine.getState().getCurrentPlayer().isAI()) return;
     Orientation orientation =
         (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
     Move wallMove = Move.wall(new Position(row, col), orientation);
@@ -252,10 +255,16 @@ public class BoardView extends GridPane {
    * @param orientation the orientation of the wall (HORIZONTAL or VERTICAL)
    */
   private void setupWallInteractions(Rectangle slot, int row, int col, Orientation orientation) {
-    slot.setOnMouseEntered(e -> slot.setFill(Color.rgb(139, 69, 19, 0.4)));
+    slot.setOnMouseEntered(
+        e -> {
+          if (!engine.getState().getCurrentPlayer().isAI()) {
+            slot.setFill(Color.rgb(139, 69, 19, 0.4));
+          }
+        });
     slot.setOnMouseExited(e -> slot.setFill(Color.TRANSPARENT));
     slot.setOnMouseClicked(
         e -> {
+          if (engine.getState().getCurrentPlayer().isAI()) return;
           if (e.getButton() == MouseButton.SECONDARY) {
             Move wallMove = Move.wall(new Position(row, col), orientation);
             if (engine.play(wallMove)) drawBoard();

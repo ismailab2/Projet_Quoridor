@@ -69,7 +69,7 @@ public class SetCommand implements Command {
     }
 
     try {
-      ConfigManager config = ConfigManager.getInstance();
+      ConfigManager config = engine.getConfig();
 
       // Update the option in memory
       config.setOption(key, value);
