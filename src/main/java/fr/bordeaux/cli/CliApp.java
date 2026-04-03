@@ -192,6 +192,7 @@ public class CliApp {
     commandRegistry.put("redo", RedoCommand::new);
     commandRegistry.put("show", ShowCommand::new);
     commandRegistry.put("set", SetCommand::new);
+    commandRegistry.put("move", tokens -> new MoveCommand());
   }
 
   /**

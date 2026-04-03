@@ -2,6 +2,8 @@ package fr.bordeaux.ai;
 
 import fr.bordeaux.core.Color;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.i18n.I18n;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -182,16 +184,16 @@ public class MinimaxBuilder {
   public MinimaxPlayer build() {
     if (!validHeuristic(heuristicName)) {
       throw new IllegalArgumentException(
-          "Incorrect name for the heuristic, the " + heuristicName + " heuristic does not exist.");
+          I18n.get("incorrectHeuristic", heuristicName, I18n.get("inexist")));
     }
     if (searchDepth < 0) {
       throw new IllegalArgumentException(
-          "Illegal depth value ! Depth is greater than or equal to 0");
+          I18n.get("depthIllegal"));
     }
 
     if (reflexionTime <= 0) {
       throw new IllegalArgumentException(
-          "Illegal reflexionTime value ! reflexionTime is grater than 0");
+          I18n.get("reflexionTime"));
     }
     return new MinimaxPlayer(this);
   }

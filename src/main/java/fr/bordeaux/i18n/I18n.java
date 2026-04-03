@@ -41,9 +41,12 @@ public class I18n {
    * @param params more text
    * @return text depending on the language choosen
    */
-  public static String get(String key, Object... params) {
+  public static String get(String key, String... params) {
     String pattern = bundle.getString(key);
-    return MessageFormat.format(pattern, params);
+    for (String s : params) {
+      pattern += s + " ";
+    }
+    return pattern;
   }
 
   /** Constructs a new I18n manager. */

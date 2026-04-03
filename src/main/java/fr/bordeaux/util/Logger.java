@@ -1,18 +1,19 @@
 package fr.bordeaux.util;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * Logger simple pour l'application Quoridor.
+ * Logger for Quoridor application.
  *
- * <p>Supporte une sortie console ou fichier avec différents niveaux : INFO, DEBUG, VERBOSE et
+ * <p>Displays messages depending on different levels : INFO, DEBUG, VERBOSE and
  * ERROR.
  *
- * <p>Implémente le pattern Singleton thread-safe.
+ * <p>Implement the Singleton pattern.
  */
 public final class Logger {
   /** ANSI escape code to reset text formatting to default. */
@@ -64,7 +65,7 @@ public final class Logger {
       out = new PrintStream(file);
       out.close();
     } catch (IOException e) {
-      System.out.println("Erreur création fichier log, fallback console");
+      System.out.println(I18n.get("error")+I18n.get("creatingLogFile"));
       out = System.out;
     }
 
