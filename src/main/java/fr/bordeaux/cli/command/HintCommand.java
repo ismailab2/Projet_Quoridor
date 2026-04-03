@@ -5,6 +5,7 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 
@@ -29,14 +30,11 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) throws IOException {
-    LOGGER.info("Calculating best move...");
+    LOGGER.info(I18n.get("hintCalc"));
     Move hint = engine.hint();
 
-    if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
-      LOGGER.error("Suggested move: " + hint + " isn't legal");
-    }
     String bestMove = formatMove(hint);
-    LOGGER.info("Best move : " + bestMove);
+    LOGGER.info(I18n.get("hintPlay", bestMove));
     return engine;
   }
 
@@ -73,12 +71,8 @@ public class HintCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  hint\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Provides a suggestion for the next move.\n");
-    LOGGER.info("  The suggested move is computed based on the current game state.\n");
-    LOGGER.verbose("Displays:");
-    LOGGER.verbose("  Should display a legal pawn or wall move.");
-    LOGGER.verbose("Example:");
-    LOGGER.verbose("  Pawn move -> b3-b4");
-    LOGGER.verbose("  Wall move -> b3v / b3h");
+    LOGGER.info("  "+I18n.get("hintHelp1"));
+    LOGGER.verbose("  "+I18n.get("hintHelp2"));
+    LOGGER.verbose("  "+I18n.get("hintHelpEx"));
   }
 }

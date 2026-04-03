@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -39,11 +40,10 @@ public class LoadCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info("Loading game state from file: " + tokens[1]);
+      LOGGER.info(I18n.get("loading", tokens[1]));
       engine.loadGame(tokens[1]);
     } catch (Exception e) {
-      e.printStackTrace();
-      LOGGER.error("Error while loading file " + tokens[1], e);
+      LOGGER.error(I18n.get("loadError", tokens[1]), e);
     }
     return engine;
   }
@@ -58,10 +58,10 @@ public class LoadCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  load FILE\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Loads a saved game from the specified FILE.\n");
+    LOGGER.info("  "+I18n.get("loadHelp"));
     LOGGER.verbose("Arguments:");
-    LOGGER.verbose("  FILE   : Path to the save file (required).\n");
-    LOGGER.verbose("Example:");
+    LOGGER.verbose("  "+ I18n.get("loadArg"));
+    LOGGER.verbose(I18n.get("loadEx"));
     LOGGER.verbose("  load savegame.txt\n");
   }
 }
