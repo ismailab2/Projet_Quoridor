@@ -67,6 +67,7 @@ public class ConfigManager {
       props.setProperty("timeout", "30");
       props.setProperty("debug", "true");
       props.setProperty("ai", "false");
+      props.setProperty("nb-walls", "20");
       save();
     }
   }

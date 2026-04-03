@@ -5,6 +5,7 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Player;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -49,8 +50,10 @@ public class CliLauncher implements AppLauncher {
             config.getBoolean("verbose", false),
             config.getBoolean("contest", false),
             config.getBoolean("debug", false),
-            Integer.parseInt(config.getOption("nb-walls", "10")));
-
+            config.getInt("nb-walls", 10));
+    for (Player p : engine.getState().getPlayers()) {
+      p.setRemainingWalls(engine.getInitialWalls());
+    }
     try {
       new CliApp(engine).run();
     } catch (Exception e) {

@@ -88,6 +88,8 @@ public class SetCommand implements Command {
         case "debug":
           engine.setDebug(Boolean.parseBoolean(value));
           break;
+        case "walls":
+        case "wall":
         case "nb-walls":
           engine.setInitialWalls(Integer.parseInt(value));
           break;

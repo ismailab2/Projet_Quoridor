@@ -35,7 +35,8 @@ public final class PlayerFactory {
     List<Player> players = new ArrayList<>();
 
     if (config.getBoolean("ai1", false)) {
-      players.add(buildAi("AI WHITE", new Position(0, CliLauncher.BOARD_SIZE / 2), config, Color.WHITE));
+      players.add(
+          buildAi("AI WHITE", new Position(0, CliLauncher.BOARD_SIZE / 2), config, Color.WHITE));
     } else {
       players.add(
           new HumanPlayer("Human White", new Position(0, CliLauncher.BOARD_SIZE / 2), Color.WHITE));

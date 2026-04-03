@@ -1,4 +1,6 @@
 .idea
+/pdp
+/Quoridor
 /target
 /pdp/02-final/*.aux
 /pdp/02-final/*.bbl

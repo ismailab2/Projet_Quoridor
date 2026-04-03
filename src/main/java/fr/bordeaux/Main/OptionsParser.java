@@ -92,10 +92,10 @@ public final class OptionsParser {
 
         case "-s" -> {
           if (i + 1 < args.length) {
-            int argument = Integer.parseInt(args[i+1]);
+            int argument = Integer.parseInt(args[i + 1]);
             if (argument < 16 && argument > 2) {
               config.setOption("board-size", args[++i]);
-            } else if (argument > 999) {
+            } else if (argument >= 1000 && argument <= 9999) {
               config.setOption("server", "true");
               config.setOption("server-port", args[++i]);
             }
@@ -123,7 +123,7 @@ public final class OptionsParser {
 
         case "-w", "--walls" -> {
           if (i + 1 < args.length) {
-            if (Integer.parseInt(args[i+1]) < 0) {
+            if (Integer.parseInt(args[i + 1]) < 0) {
               config.setOption("nb-walls", "1000");
             } else {
               config.setOption("nb-walls", args[++i]);

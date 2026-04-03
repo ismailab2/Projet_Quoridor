@@ -60,7 +60,7 @@ public class GameEngine {
    */
   public boolean play(Move move) {
     if (state.isGameOver() || state.isPaused()) {
-      System.out.println("GAME OVER OR  PAUSE");
+      System.out.println("GAME OVER OR PAUSED");
       return false;
     }
 
@@ -96,7 +96,7 @@ public class GameEngine {
     try {
       fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (IOException e) {
-      System.err.println("Erreur sauvegarde : " + e.getMessage());
+      System.err.println("Saving error : " + e.getMessage());
     }
   }
 
