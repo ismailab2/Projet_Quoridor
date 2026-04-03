@@ -42,6 +42,8 @@ public final class GameLoaderComment {
     try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
       String line;
       boolean inBlockComment = false;
+      boolean inGameSection = false;
+
       while ((line = reader.readLine()) != null) {
         StringBuilder cleanLine = new StringBuilder();
         for (int i = 0; i < line.length(); i++) {
@@ -62,10 +64,27 @@ public final class GameLoaderComment {
           }
           cleanLine.append(currentChar);
         }
-        String cleaned = cleanLine.toString().trim();
 
-        // Add only non-empty lines
-        if (!cleaned.isEmpty()) {
+        String rawCleaned = cleanLine.toString();
+        String cleaned = rawCleaned.trim();
+
+        if ("[game]".equals(cleaned)) {
+          inGameSection = true;
+          result.add(cleaned);
+          continue;
+        }
+
+        if ("[History]".equals(cleaned)) {
+          inGameSection = false;
+          result.add(cleaned);
+          continue;
+        }
+
+        if (inGameSection) {
+          if (!cleaned.isEmpty() || rawCleaned.length() > 0) {
+            result.add(rawCleaned);
+          }
+        } else if (!cleaned.isEmpty()) {
           result.add(cleaned);
         }
       }

@@ -2,6 +2,7 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
 import javafx.application.Platform;
@@ -84,7 +85,14 @@ public final class DragAndDrop {
       final GameEngine engine, final Rectangle pawn, final int row, final int col) {
     pawn.setOnDragDetected(
         event -> {
-          Position currentPosition = engine.getState().getCurrentPlayer().getPosition();
+          Player currentPlayer = engine.getState().getCurrentPlayer();
+
+          if (currentPlayer.isAI()) {
+            event.consume();
+            return;
+          }
+
+          Position currentPosition = currentPlayer.getPosition();
 
           if (currentPosition.getX() != row || currentPosition.getY() != col) {
             event.consume();

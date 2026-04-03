@@ -1,9 +1,6 @@
 package fr.bordeaux.ai;
 
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +14,10 @@ public class RandomPlayer extends AiPlayer {
    *
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
+   * @param color The AI's color on the board.
    */
-  public RandomPlayer(final String name, final Position positionStart) {
-    super(name, positionStart);
+  public RandomPlayer(final String name, final Position positionStart, final Color color) {
+    super(name, positionStart, color);
   }
 
   /**
@@ -57,7 +55,8 @@ public class RandomPlayer extends AiPlayer {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore());
+        this.getScore(),
+        this.getColor());
   }
 
   /**
@@ -74,8 +73,9 @@ public class RandomPlayer extends AiPlayer {
       final Position current,
       final Position start,
       final int walls,
-      final int score) {
-    super(name, current, start, walls, score);
+      final int score,
+      final Color color) {
+    super(name, current, start, walls, score, color);
   }
 
   /**

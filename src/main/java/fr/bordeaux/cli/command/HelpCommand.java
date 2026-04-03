@@ -85,13 +85,9 @@ public class HelpCommand implements Command {
     LOGGER.info(
         "show history :        Displays all the moves that were played during the game. From older to the more recent.");
     LOGGER.info("show time :           Displays the time you and your opponent(s) each remain.");
-    LOGGER.info("show configuration :  Displays the configurations set on your game.");
+    LOGGER.info("show configurations : Displays the configurations set on your game.");
     LOGGER.info("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
   }
-
-  /* public void helpMove() {
-    ;
-  } */
 
   /**
    * Displays detailed help for a specific command based on the user input. The command is

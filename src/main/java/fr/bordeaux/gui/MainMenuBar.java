@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import java.io.IOException;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -49,7 +50,14 @@ public class MainMenuBar extends MenuBar {
 
   private MenuItem menuItem(String text, Action action) {
     MenuItem item = new MenuItem(text);
-    item.setOnAction(event -> dispatcher.dispatch(action));
+    item.setOnAction(
+        event -> {
+          try {
+            dispatcher.dispatch(action);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        });
 
     item.setAccelerator(ShortcutManager.getInstance().getShortcut(action));
     return item;

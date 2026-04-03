@@ -1,6 +1,7 @@
 package fr.bordeaux.cli;
 
 import fr.bordeaux.cli.command.*;
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
@@ -93,17 +94,16 @@ public class CliApp {
    * @throws IOException if the terminal cannot be initialized
    */
   public CliApp(final GameEngine engine) throws IOException {
-    // Initialisation du terminal
+    // Terminal initialisation
     this.terminal = TerminalBuilder.builder().system(true).build();
     this.engine = engine;
     this.running = true;
 
-    // Création du Completer intelligent
-    // Création du Completer intelligent
+    // Create smart completer
     Completer smartCompleter =
         (reader, line, candidates) -> {
           String buffer = line.line();
-          // On utilise line.word() ou on split pour trouver le token actuel
+          // Finding the current token
           String[] tokens = buffer.trim().split("\\s+");
 
           if (buffer.isEmpty()) {
@@ -116,34 +116,52 @@ public class CliApp {
                   "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
                   "set");
           List<String> showOptions = List.of("board", "time", "configurations", "history");
+          List<String> helpOptions =
+              List.of(
+                  "help",
+                  "hint",
+                  "load",
+                  "save",
+                  "quit",
+                  "pause",
+                  "redo",
+                  "undo",
+                  "set",
+                  "show board",
+                  "move",
+                  "show time",
+                  "show configurations",
+                  "show history");
 
           List<String> matches;
 
-          // Logique de filtrage
           if (tokens.length >= 1 && tokens[0].equals("show")) {
             String subToken = (tokens.length == 2) ? tokens[1] : "";
             matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
+          } else if (tokens.length >= 1 && tokens[0].equals("help")) {
+            String subToken = (tokens.length == 2) ? tokens[1] : "";
+            matches = helpOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
           } else {
             matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();
           }
 
-          // --- LOGIQUE DES 3 CAS ---
+          // Three cases
 
           if (matches.isEmpty()) {
-            // CAS 1 : Aucun match -> Bip
+            // No match -> Bip
             beep();
           } else if (matches.size() == UNIQUE_MATCH) {
-            // CAS 2 : Un seul match -> Complétion directe
+            // Only one match -> Completion
             candidates.add(new Candidate(matches.get(0)));
             firstTab = true;
           } else {
-            // CAS 3 : Plusieurs matchs
+            // Several matchs
             if (firstTab) {
-              // Premier Tab : on bip pour prévenir qu'il y a plusieurs choix
+              // First Tab : bip to prevent there is multiple choices
               beep();
               firstTab = false;
             } else {
-              // Deuxième Tab : on remplit les candidates pour que JLine les affiche
+              // Second Tab : show candidates
               for (final String match : matches) {
                 candidates.add(new Candidate(match));
               }
@@ -152,11 +170,11 @@ public class CliApp {
           }
         };
 
-    // Création du LineReader avec le Completer
+    // Create the LineReader with the smart Completer
     this.reader =
         LineReaderBuilder.builder().terminal(this.terminal).completer(smartCompleter).build();
 
-    // Initialisation du registre de commandes
+    // init the command register
     this.commandRegistry = new HashMap<>();
     commandRegistry.put("help", tokens -> new HelpCommand(tokens, commandRegistry));
     commandRegistry.put(
@@ -188,8 +206,13 @@ public class CliApp {
             new GameState(
                 new Board(9),
                 List.of(
-                    new HumanPlayer("Human", new Position(0, 4)),
-                    new HumanPlayer("Bob", new Position(8, 4))))));
+                    new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                    new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("blitz", "false")),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("verbose", "false")),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("contest", "false")),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("debug", "false")),
+            Integer.parseInt(ConfigManager.getInstance().getOption("nb-walls", "10"))));
   }
 
   /** Triggers an audible alert (beep) through the terminal. */
@@ -221,15 +244,27 @@ public class CliApp {
   /**
    * Starts the CLI loop. Displays the board at startup and continuously reads user commands until
    * the application is stopped.
+   *
+   * @throws IOException Possible if mcts with NN selection used
    */
-  public void run() {
+  public void run() throws IOException {
     if (engine != null) {
       final ShowCommand show = new ShowCommand();
       show.execute(engine);
     }
     while (running) {
-      final String line = reader.readLine(">> ");
-      fetch(line);
+
+      if (!engine.getState().getCurrentPlayer().isAI()) {
+        final String line = reader.readLine(">> ");
+        fetch(line);
+      } else {
+        System.out.println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+        executeAiTurn();
+        new ShowCommand(new String[] {"show", "board"}).execute(engine);
+      }
+      if (engine.getState().isGameOver()) {
+        running = false;
+      }
     }
     try {
       terminal.close();
@@ -238,13 +273,24 @@ public class CliApp {
     }
   }
 
+  private void executeAiTurn() {
+    Player ai = engine.getState().getCurrentPlayer();
+
+    Move move = ai.getNextMove(engine.getState());
+
+    engine.play(move);
+
+    LOGGER.info("L'IA a joué : " + move.toString());
+  }
+
   /**
    * Parses the user input and executes the corresponding command. If the command is not recognized,
    * it is interpreted as a move.
    *
    * @param input the raw command entered by the user
+   * @throws IOException Possible if mcts with NN selection used
    */
-  public void fetch(final String input) {
+  public void fetch(final String input) throws IOException {
     firstTab = true;
     final String[] tokens = input.trim().split("\\s+");
     if (tokens.length == 0 || tokens[0].isEmpty()) {
@@ -257,7 +303,6 @@ public class CliApp {
     if (commandRegistry.containsKey(command)) {
       cmd = commandRegistry.get(command).apply(tokens);
     } else {
-      // --- Suggestion Logic ---
       String suggestion = null;
       int bestDistance = 3; // Only suggest if the mistake is small (1 or 2 chars)
 

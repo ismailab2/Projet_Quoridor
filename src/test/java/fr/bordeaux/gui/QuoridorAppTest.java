@@ -2,6 +2,7 @@ package fr.bordeaux.gui;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import org.testfx.framework.junit5.ApplicationTest;
 class QuoridorAppTest extends ApplicationTest {
 
   @Override
-  public void start(Stage stage) {
+  public void start(Stage stage) throws IOException {
     QuoridorApp app = new QuoridorApp();
     app.start(stage);
   }

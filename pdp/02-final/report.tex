@@ -6,9 +6,9 @@
 %	REPORT INFORMATION
 %------------------------------------------------------------------------------
 
-\title{ProjectName -- C/Java/Python}
+\title{Quoridor -- Java}
 \subtitle{Rapport final}
-\author{Étudiant1, Étudiant2, Étudiant3, Étudiant4, Étudiant5}
+\author{Abdeldjabar Ismail Abdraman, Cengiz Vasseur, Joris Douillet, Khadidja Ahmat Hassan, Matthieu Pourageaud}
 
 %------------------------------------------------------------------------------
 
@@ -25,79 +25,161 @@
 %	MAIN MATTER
 %------------------------------------------------------------------------------
 
-\section*{Introduction}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-culpa qui officia deserunt mollit anim id est laborum.
+\section{Architecture du projet}
 
-Pellentesque iaculis molestie euismod. In hac habitasse platea dictumst. Duis eu
-gravida sem. Vivamus pulvinar, tellus auctor sollicitudin iaculis, quam massa
-blandit ligula, in mollis est tellus et velit. Nulla gravida sapien nibh, nec
-faucibus lorem aliquam sed. Curabitur rutrum elit purus, et congue neque
-venenatis vitae. Sed non magna nisi. Pellentesque euismod non ipsum a hendrerit.
-Pellentesque vehicula tincidunt lacinia. Sed rhoncus porttitor facilisis.
+\subsection{Justification du choix d’architecture}
 
-Etiam sed molestie odio. Nunc cursus sollicitudin est vitae posuere. Nullam
-pellentesque metus eu dui porttitor bibendum. Morbi egestas arcu ut urna dictum
-placerat non non nisl. Quisque non ante in eros cursus pulvinar. Sed augue
-libero, eleifend a urna eget, pellentesque condimentum odio. Sed sed dui non
-diam mattis interdum eget sed urna. Integer consectetur, erat id rutrum posuere,
-dui velit dictum mi, quis tincidunt magna diam sit amet nunc. Etiam dui augue,
-sollicitudin rhoncus nisl a, rhoncus tempor purus.
+Notre projet Quoridor nécessite l’implémentation d’un moteur de jeu respectant des règles strictes, tout en supportant plusieurs modes d’interaction (interface en ligne de commande, interface graphique, intelligence artificielle et jeu en réseau). Ces contraintes impliquent une forte complexité métier, une exigence de fiabilité des règles ainsi qu’une capacité d’évolution du logiciel. Afin de répondre à ces objectifs, nous avons retenu une architecture modulaire orientée domaine, inspirée de la Clean Architecture (Ports \& Adapters) \cite{martin2017clean}.
 
-Suspendisse cursus erat et metus fermentum ullamcorper. Etiam eros arcu, dapibus
-quis efficitur ut, congue id nunc. Pellentesque aliquam venenatis convallis.
-Nulla nisi justo, aliquet quis lacus eget, aliquet maximus velit. Maecenas ex
-turpis, iaculis eget dignissim non, efficitur vel mi. Maecenas pharetra elit
-ornare sem suscipit ornare id id sapien. Vivamus sem neque, consectetur vitae
-aliquet non, finibus eu lectus. Fusce aliquam ipsum ut viverra vehicula. Donec
-ultrices varius nulla vel finibus. Donec convallis fringilla ante id porta.
+Notre système est organisé autour d’un cœur métier central (\texttt{core}) qui regroupe l’ensemble de la logique du jeu : règles, état de la partie, moteur d’exécution et entités principales. Ce module est totalement indépendant des autres, garantissant que la logique métier reste cohérente, testable et inchangée, quelles que soient les modalités d’interaction avec le jeu.
 
-\section{Première section}
+Les modules complémentaires (\texttt{cli}, \texttt{gui}, \texttt{network}, \texttt{persistence}, \texttt{config}, \texttt{i18n}) fonctionnent comme des adaptateurs qui interagissent avec le cœur via des interfaces bien définies. Cette organisation permet de modifier, ajouter ou supprimer des interfaces sans impacter la logique du jeu. Par exemple, l’IA (modules \texttt{ai/minimax} ou \texttt{ai/mcts}) peut simuler des parties en utilisant directement \texttt{GameState} et \texttt{Board}, sans dépendre de l’interface graphique ou de la CLI.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-culpa qui officia deserunt mollit anim id est laborum.
+Le patron MVC (Model–View–Controller) est utilisé uniquement au niveau des interfaces. Le module \texttt{core} correspond au modèle, tandis que les modules \texttt{cli} et \texttt{gui} implémentent les vues et les contrôleurs. Cette utilisation locale de MVC permet de séparer clairement la présentation de la logique métier sans imposer ce modèle à l’ensemble de l’architecture.
 
-\section{Seconde section}
+Ce choix architectural apporte plusieurs bénéfices : une maintenabilité accrue, une testabilité élevée du moteur de jeu, une extensibilité facilitée (ajout de nouvelles IA ou interfaces) et une robustesse globale, puisque toutes les actions passent nécessairement par la validation des règles du cœur métier. Il constitue ainsi un compromis efficace entre rigueur logicielle, évolutivité et lisibilité du code, et s’avère adapté à un projet de jeu à règles complexes comme Quoridor.
 
-Voici un exemple de code en Python :
 
-{\large
-  \begin{minted}[frame=single]{python}
-def hello_world():
-    print("Hello, World!")
-hello_world()
-  \end{minted}
-}
 
-Un exemple d'image flottante (Fig.~\ref{fig:example}).
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Vue d’organisation des couches}
+
+La règle de dépendance est respectée : toutes les flèches pleines pointent vers l’intérieur (\texttt{core}), et jamais l’inverse.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{4cm}|p{11cm}|}
+        \hline
+        \textbf{Couche} & \textbf{Responsabilité} \\
+        \hline
+        Couche 1 & Domaine (core) : le noyau immuable, sans dépendances externes. Toutes les entités métier y résident. \\
+        \hline
+        Couche 2 & Application (util, config, graph) : services transversaux proches du domaine. Le module graph fournit la liste d’adjacence utilisée par le RuleChecker pour valider les chemins. \\
+        \hline
+        Couche 3 & Adaptateurs (cli, gui, network, ai, persistence, i18n) : les différents adaptateurs qui interagissent avec le monde extérieur tout en ne dépendant que du core. \\
+        \hline
+        Couche 4 & Infrastructure / Entrée (Main) : orchestre le démarrage via le patron Factory, instancie le bon launcher (CLI, GUI ou Network) et reste complètement découplée du domaine. \\
+        \hline
+    \end{tabular}
+    \caption{Organisation des couches}
+    \label{tab:packages1}
+\end{table}
+
+
+\subsection{Vue d'ensemble des packages}
+
+Le projet est organisé en onze packages distincts, chacun ayant une responsabilité bien définie :
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{2cm}|p{13cm}|}
+    \hline
+    \textbf{Package} & \textbf{Responsabilité} \\
+    \hline
+    core & Entités métier : Board, GameState, Player, Move, Position, GameEngine, RuleChecker \\
+    \hline
+    Main & Point d'entrée, résolution du mode de lancement, patron Factory \\
+    \hline
+    cli & Interface en ligne de commande avec le pattern Command pour chaque action utilisateur \\
+    \hline
+    gui & Interface graphique comportant les menus 'File' et 'Game' (JavaFX), proposant des raccourcis clavier. L’utilisateur doit pouvoir définir ses propres raccourcis pour chaque action listée \\
+    \hline
+    network & Implémente les commandes réseau de base et étendues pour gérer plusieurs clients simultanément, en utilisant un thread par client ou de la programmation asynchrone. Serveur TCP avec découverte UDP et client réseau \\
+    \hline
+    ai & Joueurs IA : Random, Minimax (alpha-beta, iterative deepening), MCTS, réseau de neurones \\
+    \hline
+    persistence & Sérialisation/désérialisation de l’état de jeu vers un fichier texte \\
+    \hline
+    util & Logger singleton partagé dans toute l’application \\
+    \hline
+    i18n & Gestion de la langue du logiciel. Si les variables d’environnement 'LANG' ou 'LC\_ALL' sont définies, le programme doit les utiliser pour déterminer la langue à utiliser \\
+    \hline
+    graph & Module Graph et GraphBuilder implémenté sous la forme d’une liste d’adjacence (adjacency list) pour représenter l’état du plateau de jeu \\
+    \hline
+    config & Fichier de configuration nommé '.quoridorrc', placé à la racine du répertoire de l’utilisateur (HOME). Le fichier est lu au démarrage du programme s’il est présent, et les options qu’il contient sont utilisées par défaut. Sinon, un fichier de configuration minimal est créé automatiquement \\
+    \hline
+\end{tabular}
+\caption{Vue d'ensemble des packages}
+\label{tab:packages}
+\end{table}
+
+
+\subsection{Vue en couches concentriques}
+
+schema en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[!ht]
-  \centering
-  \frame{\includegraphics[width=.85\textwidth]{layered_architectures.png}}
-  \caption{Une architecture en couches}\label{fig:example}
+    \centering
+    \frame{\includegraphics[width=.85\textwidth]{architecture_quoridor.png}}
+    \caption{Une architecture en couches}\label{fig:example1}
 \end{figure}
 
-\section*{Conclusion}
 
-Suspendisse sit amet nisi placerat, vestibulum nisl vel, iaculis nunc.
-Suspendisse quis libero vel ipsum gravida congue nec id arcu. Donec vel mi
-viverra, commodo urna vitae, tincidunt lectus. Fusce pellentesque, lectus a
-placerat vestibulum, magna lectus placerat nibh, vehicula pellentesque lacus
-erat non nulla. Suspendisse maximus, turpis at suscipit egestas, libero massa
-ultrices libero, at tincidunt velit eros a eros. Maecenas id tempor nunc.
-Phasellus condimentum porttitor sapien in sagittis. Proin in metus diam. Mauris
-in turpis sed ex viverra iaculis. Sed lobortis, tellus vitae congue blandit, leo
-elit auctor libero, id tempor ante dolor quis quam. Donec eget ligula quam.
-Maecenas porttitor massa vel felis elementum tristique.
+\subsection{Couche Domaine --- Package \texttt{core}}
+
+Le package \texttt{core} constitue le cœur du système. Il contient l’ensemble des entités métier ainsi que les règles du jeu. Aucune dépendance vers des bibliothèques externes ou d’autres couches n’est autorisée ici, garantissant une testabilité et une portabilité maximales.
+
+schema du couche core de notre architecture(Fig.~\ref{fig:example0}).
+\begin{figure}[!ht]
+    \centering
+    \frame{\includegraphics[width=.65\textwidth]{core.jpg}}
+    \caption{Une architecture en couches}\label{fig:example0}
+\end{figure}
+
+\subsection{Couche Principale --- Package \texttt{Main}}
+
+Le package \texttt{Main} est le point d’entrée de l’application. Il illustre l’utilisation conjointe des patrons \textbf{Factory} et \textbf{Strategy} pour sélectionner dynamiquement le mode de lancement en fonction des arguments passés en ligne de commande.
+
+schema du couche main de notre architecture (Fig.~\ref{fig:example2}).
+\begin{figure}[!ht]
+    \centering
+    \frame{\includegraphics[width=.65\textwidth]{main}}
+    \caption{Une architecture en couches}\label{fig:example2}
+\end{figure}
+
+\subsection{Interface CLI --- Pattern Command}
+
+Le package \texttt{cli} implémente l’interface en ligne de commande en utilisant le \textbf{patron Command}. Chaque action utilisateur est encapsulée dans une classe dédiée implémentant l’interface \texttt{Command}. Cela permet une meilleure extensibilité, une testabilité unitaire de chaque commande et facilite l’ajout d’un mécanisme d’annulation.
+
+schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
+\begin{figure}[!ht]
+    \centering
+    \frame{\includegraphics[width=.65\textwidth]{cli}}
+    \caption{Une architecture en couches}\label{fig:example3}
+\end{figure}
+
+\subsection{Module Réseau --- Package \texttt{network}}
+
+Le module réseau permet des parties entre clients distants via TCP. La découverte des serveurs disponibles sur le réseau local s’effectue via des diffusions UDP (UDP broadcast), simplifiant l’expérience multijoueur sans configuration manuelle.
+
+\subsection{Points forts architecturaux}
+
+\begin{itemize}
+  \item \textbf{Indépendance du domaine} : le package \texttt{core} est du Java pur, sans dépendance externe
+  \item \textbf{Extensibilité de l’IA} : tout nouvel algorithme étend simplement \texttt{AiPlayer}
+  \item \textbf{Pattern Command en CLI} : chaque commande est testable et extensible indépendamment
+  \item \textbf{Persistance découplée} : \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les interfaces du \texttt{core}
+  \item \textbf{Builder pour MinimaxPlayer} : configuration déclarative et lisible de l’IA
+\end{itemize}
+
+\subsection{Axes d'amélioration}
+
+
+
 
 %------------------------------------------------------------------------------
 %	BIBLIOGRAPHY

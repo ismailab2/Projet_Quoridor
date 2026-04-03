@@ -9,9 +9,11 @@ import java.util.List;
  */
 public abstract class Player {
 
+  private final Color color;
   private final String name;
   private Position position;
   private int remainingWalls = 10;
+  private long remainingTime = 30 * 60 * 1000; // Time in milliseconds
   private final Position startingPosition;
   private int score = 0;
 
@@ -20,11 +22,13 @@ public abstract class Player {
    *
    * @param name The name of the player.
    * @param positionStart The initial starting position on the board.
+   * @param color The color of the player.
    */
-  public Player(String name, Position positionStart) {
+  public Player(String name, Position positionStart, Color color) {
     this.name = name;
     this.position = positionStart;
     this.startingPosition = positionStart;
+    this.color = color;
   }
 
   /**
@@ -35,13 +39,16 @@ public abstract class Player {
    * @param startPos The player's initial starting position.
    * @param walls The number of remaining walls.
    * @param score The current player score.
+   * @param color The color of the player.
    */
-  protected Player(String name, Position currentPos, Position startPos, int walls, int score) {
+  protected Player(
+      String name, Position currentPos, Position startPos, int walls, int score, Color color) {
     this.name = name;
     this.position = new Position(currentPos.getX(), currentPos.getY());
     this.startingPosition = startPos;
     this.remainingWalls = walls;
     this.score = score;
+    this.color = color;
   }
 
   /**
@@ -51,8 +58,8 @@ public abstract class Player {
    */
   public static List<Player> createDefaultPlayers() {
     List<Player> players = new ArrayList<>();
-    Player p1 = new HumanPlayer("Human", new Position(0, 4));
-    Player p2 = new HumanPlayer("Bob", new Position(8, 4));
+    Player p1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
+    Player p2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
     players.add(p1);
     players.add(p2);
     return players;
@@ -123,12 +130,40 @@ public abstract class Player {
   }
 
   /**
+   * Retrieves the color assigned to the player.
+   *
+   * @return The color of the player.
+   */
+  public Color getColor() {
+    return color;
+  }
+
+  /**
    * Gets the current score of the player.
    *
    * @return The player's score.
    */
   public int getScore() {
     return score;
+  }
+
+  /**
+   * Returns the player's remaining reflection time.
+   *
+   * @return The remaining time in milliseconds.
+   */
+  public long getRemainingTime() {
+    return remainingTime;
+  }
+
+  /**
+   * Sets the player's remaining reflection time. Useful for initialization, loading a saved game,
+   * or updates by the timer.
+   *
+   * @param remainingTime The new remaining time in milliseconds.
+   */
+  public void setRemainingTime(long remainingTime) {
+    this.remainingTime = remainingTime;
   }
 
   /**

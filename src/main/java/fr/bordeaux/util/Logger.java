@@ -1,39 +1,46 @@
 package fr.bordeaux.util;
 
 import fr.bordeaux.config.ConfigManager;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * A simple custom logger for the Quoridor project. Handles writing logs to a file and/or the
- * console.
+ * Logger simple pour l'application Quoridor.
+ *
+ * <p>Supporte une sortie console ou fichier avec différents niveaux : INFO, DEBUG, VERBOSE et
+ * ERROR.
+ *
+ * <p>Implémente le pattern Singleton thread-safe.
  */
 public final class Logger {
   /** ANSI escape code to reset text formatting to default. */
   private static final String RESET = "\u001B[0m";
 
-  /** ANSI escape code for Cyan color, used for INFO logs. */
+  /** Coulor for INFO message */
   private static final String CYAN = "\u001B[36m";
 
-  /** ANSI escape code for Yellow color, used for DEBUG logs. */
+  /** Coulor for DEBUG message */
   private static final String YELLOW = "\u001B[33m";
 
-  /** ANSI escape code for Green color, used for VERBOSE logs. */
+  /** Coulor for VERBOSE message */
   private static final String GREEN = "\u001B[32m";
 
-  /** ANSI escape code for Red color, used for ERROR logs. */
+  /** Coulor for ERROR message */
   private static final String RED = "\u001B[31m";
 
-  /** The unique instance of the Logger (Singleton pattern). */
-  private static Logger instance;
+  /** Singleton Logger */
+  private static volatile Logger instance;
 
-  /** The output stream where logs are written. Defaults to System.out. */
-  private PrintStream writer = System.out;
+  /** Output stream */
+  private final PrintStream writer;
 
-  /** Flag indicating if debug-level logging is enabled. */
-  private boolean debug;
+  /** Boolean in case debug is enabled */
+  private boolean debugEnabled;
 
-  /** Flag indicating if verbose-level logging is enabled. */
-  private boolean verbose;
+  /** Boolean in case verbose is enabled */
+  private boolean verboseEnabled;
 
   /**
    * Private constructor for console-based logging. Initializes settings from {@link ConfigManager}
@@ -41,110 +48,187 @@ public final class Logger {
    */
   private Logger() {
     this.writer = System.out;
-    String debugger = ConfigManager.getInstance().getOption("debug", "true");
-    this.debug = debugger.contains("true") ? true : false;
-    String verboser = ConfigManager.getInstance().getOption("verbose", "true");
-    this.verbose = verboser.contains("true") ? true : false;
+    refreshConfig();
   }
 
   /**
-   * Provides access to the Singleton instance. If no instance exists, it creates one using the
-   * default console constructor.
+   * Private constructor (with file).
    *
-   * @return The unique instance of the Logger.
+   * @param logFile file to put log messages
+   */
+  private Logger(final String logFile) {
+    PrintStream out;
+
+    try {
+      final File file = new File(System.getProperty("user.home"), logFile);
+      out = new PrintStream(file);
+      out.close();
+    } catch (IOException e) {
+      System.out.println("Erreur création fichier log, fallback console");
+      out = System.out;
+    }
+
+    this.writer = out;
+    refreshConfig();
+  }
+
+  /**
+   * Return the Logger Singleton instance.
+   *
+   * @return logger's unique instance
    */
   public static Logger getInstance() {
     if (instance == null) {
-      instance = new Logger();
+      synchronized (Logger.class) {
+        if (instance == null) {
+          instance = new Logger();
+        }
+      }
     }
     return instance;
   }
 
   /**
-   * Logs an informational message.
+   * Return the Logger Singleton instance with the output file.
    *
-   * @param message The message to be logged.
+   * @param logFile file where to print the logs
+   * @return logger's unique instance
    */
-  public void info(String message) {
-    log("[INFO]", message);
-  }
-
-  /**
-   * Logs an error message along with the exception details.
-   *
-   * @param message The error description.
-   * @param e The exception associated with the error.
-   */
-  public void error(String message, Exception e) {
-    log("[ERROR]", message + " | Exception: " + e.getMessage());
-  }
-
-  /**
-   * Logs a simple error message.
-   *
-   * @param message The error message to be logged.
-   */
-  public void error(String message) {
-    log("[ERROR]", message);
-  }
-
-  /**
-   * Logs a debug message if the "debug" option is enabled in the configuration. Re-checks
-   * configuration settings before logging.
-   *
-   * @param message The debug message.
-   */
-  public void debug(String message) {
-    String debugger = ConfigManager.getInstance().getOption("debug", "true");
-    debug = debugger.contains("true") ? true : false;
-    if (debug) {
-      log("[DEBUG]", message);
-    }
-  }
-
-  /**
-   * Logs a verbose message if the "verbose" option is enabled in the configuration. Re-checks
-   * configuration settings before logging.
-   *
-   * @param message The detailed verbose message.
-   */
-  public void verbose(String message) {
-    String verboser = ConfigManager.getInstance().getOption("verbose", "true");
-    verbose = verboser.contains("true") ? true : false;
-    if (verbose) {
-      log("[VERBOSE]", message);
-    }
-  }
-
-  /**
-   * Core internal method that formats and writes the log message to the defined {@code writer}.
-   * Applies ANSI colors based on the log level.
-   *
-   * @param level The log level prefix (e.g., [INFO], [ERROR]).
-   * @param message The actual content of the log.
-   */
-  private void log(String level, String message) {
-    // Write to output
-    if (writer != null) {
-      String color;
-      switch (level) {
-        case "[INFO]":
-          color = CYAN;
-          break;
-        case "[DEBUG]":
-          color = YELLOW;
-          break;
-        case "[VERBOSE]":
-          color = GREEN;
-          break;
-        case "[ERROR]":
-          color = RED;
-          break;
-        default:
-          color = RESET;
-          break;
+  public static Logger getInstance(final String logFile) {
+    if (instance == null) {
+      synchronized (Logger.class) {
+        if (instance == null) {
+          instance = new Logger(logFile);
+        }
       }
-      writer.println(color + level + RESET + " " + message);
     }
+    return instance;
+  }
+
+  // =========================================================
+  // PUBLIC API
+  // =========================================================
+
+  /**
+   * INFO level message to display.
+   *
+   * @param message message to display
+   */
+  public void info(final String message) {
+    if (isInfoEnabled()) {
+      log("[INFO]", message, CYAN);
+    }
+  }
+
+  /**
+   * DEBUG level message to display.
+   *
+   * @param message message to display
+   */
+  public void debug(final String message) {
+    if (isDebugEnabled()) {
+      log("[DEBUG]", message, YELLOW);
+    }
+  }
+
+  /**
+   * VERBOSE level message to display.
+   *
+   * @param message message to display
+   */
+  public void verbose(final String message) {
+    if (isVerboseEnabled()) {
+      log("[VERBOSE]", message, GREEN);
+    }
+  }
+
+  /**
+   * ERROR level message to display.
+   *
+   * @param message message to display
+   */
+  public void error(final String message) {
+    if (isErrorEnabled()) {
+      log("[ERROR]", message, RED);
+    }
+  }
+
+  /**
+   * ERROR level message to display.
+   *
+   * @param message message to display
+   * @param e exception associée
+   */
+  public void error(final String message, final Exception e) {
+    if (isErrorEnabled()) {
+      log("[ERROR]", message + " | " + e.getClass().getSimpleName(), RED);
+    }
+  }
+
+  // =========================================================
+  // CONFIG
+  // =========================================================
+
+  /** Reload the configuration from the {@link ConfigManager}. */
+  public void refreshConfig() {
+    final ConfigManager config = ConfigManager.getInstance();
+
+    this.debugEnabled = Boolean.parseBoolean(config.getOption("debug", "false"));
+    this.verboseEnabled = Boolean.parseBoolean(config.getOption("verbose", "false"));
+  }
+
+  // =========================================================
+  // INTERNAL
+  // =========================================================
+
+  /**
+   * Intern method to print a message.
+   *
+   * @param level log level
+   * @param message the content to display
+   * @param color color to display the level
+   */
+  private void log(final String level, final String message, final String color) {
+    writer.println(color + level + RESET + " " + message);
+  }
+
+  // =========================================================
+  // LEVEL CHECKS
+  // =========================================================
+
+  /**
+   * Check if DEBUG level is activated.
+   *
+   * @return true if activated, false otherwise
+   */
+  public boolean isDebugEnabled() {
+    return debugEnabled;
+  }
+
+  /**
+   * Check if INFO level is activated.
+   *
+   * @return true (always active)
+   */
+  public boolean isInfoEnabled() {
+    return true;
+  }
+
+  /**
+   * Check if ERROR level is activated.
+   *
+   * @return true (always active)
+   */
+  public boolean isErrorEnabled() {
+    return true;
+  }
+
+  /**
+   * Check if VERBOSE level is activated.
+   *
+   * @return true if activated, false otherwise
+   */
+  public boolean isVerboseEnabled() {
+    return verboseEnabled;
   }
 }

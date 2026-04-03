@@ -20,12 +20,14 @@ public final class GameLoader {
   /**
    * Loads a saved game from a file and rebuilds the corresponding game state.
    *
+   * @param engine the engine used to apply loaded configuration
    * @param filename path of the save file to load
    * @return the reconstructed game state
    * @throws IOException if an input/output error occurs while reading the file
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
-  public static GameState loadGame(String filename) throws IOException, GameLoadException {
+  public static GameState loadGame(GameEngine engine, String filename)
+      throws IOException, GameLoadException {
     List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
@@ -40,6 +42,7 @@ public final class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
+    applyMode(engine, gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
@@ -108,7 +111,7 @@ public final class GameLoader {
   private static void readRemainingWalls(
       List<String> lines, List<Player> players, int currentLine) {
     String[] parts =
-        lines.get(BOARD_START + currentLine + SIZE * 2).replace("walls:", "").trim().split(" ");
+        lines.get(BOARD_START + currentLine + SIZE * 2 - 1).replace("walls:", "").trim().split(" ");
     for (int i = 0; i < players.size(); i++) {
       int walls = Integer.parseInt(parts[i]);
       // Call useWall() until the player has the correct number of walls
@@ -142,13 +145,30 @@ public final class GameLoader {
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
-    int currentLine = 8; // 8 because its at the 9 lines that starts the informations about players
-    while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
+    // Find the start of the [game] section first to know where players end
+    int gameSectionIndex = -1;
+    for (int i = 0; i < lines.size(); i++) {
+      if ("[game]".equals(lines.get(i))) {
+        gameSectionIndex = i;
+        break;
+      }
+    }
+
+    // Find the first player line after [settings]
+    int currentLine = 1;
+    while (currentLine < lines.size()
+        && currentLine < gameSectionIndex
+        && !lines.get(currentLine).startsWith("player-")
+        && !lines.get(currentLine).startsWith("ai-")) {
+      currentLine++;
+    }
+
+    while (currentLine < lines.size() && currentLine < gameSectionIndex) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
-      currentLine = res.nextLine + 1;
+      currentLine = res.nextLine;
     }
-    return new AllPlayerAndLine(lPlayers, currentLine);
+    return new AllPlayerAndLine(lPlayers, gameSectionIndex);
   }
 
   /**
@@ -166,14 +186,24 @@ public final class GameLoader {
     final String pType = player.split("=")[0].split("-")[0];
     final String pName = player.split("=")[1];
     int myCurrentLine = currentLine + 1;
+
+    String line = lines.get(myCurrentLine);
+    final Color pColor = Color.valueOf(line.split("=")[1].trim().toUpperCase());
+    myCurrentLine++;
+
     player = lines.get(myCurrentLine);
     final Position pPostion = readPlayerStartPosition(player);
-
+    myCurrentLine += 1;
+    final long remainingTime = Long.parseLong(lines.get(myCurrentLine).split("=")[1]);
+    PlayerAndLine result = null;
     if (pType.equals("ai")) {
-      return readAiPlayer(lines, myCurrentLine, pName, pPostion);
+      result = readAiPlayer(lines, myCurrentLine, pName, pPostion, pColor);
+
     } else {
-      return new PlayerAndLine(new HumanPlayer(pName, pPostion), myCurrentLine);
+      result = new PlayerAndLine(new HumanPlayer(pName, pPostion, pColor), myCurrentLine + 1);
     }
+    result.player.setRemainingTime(remainingTime);
+    return result;
   }
 
   /**
@@ -202,10 +232,15 @@ public final class GameLoader {
    * @throws IllegalArgumentException if the AI mode specified in the file is unknown.
    */
   private static PlayerAndLine readAiPlayer(
-      final List<String> lines, int currentLine, final String pName, final Position pPostion) {
+      final List<String> lines,
+      int currentLine,
+      final String pName,
+      final Position pPostion,
+      final Color pColor) {
     Map<String, String> aiSettings = new HashMap<>();
     int myCurrentLine = currentLine + 1;
-    while (checkStartByAi(lines, myCurrentLine)) {
+    int index = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
+    while (checkSameIndex(lines, myCurrentLine, index)) {
       final String[] ls = lines.get(myCurrentLine).split("=");
       final String[] aiParameter = ls[0].split("-");
       aiSettings.put(aiParameter[aiParameter.length - 1], ls[1]);
@@ -219,7 +254,7 @@ public final class GameLoader {
           final int depth = Integer.parseInt(aiSettings.get("depth"));
           final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
           return new PlayerAndLine(
-              MinimaxPlayer.builder(pName, pPostion)
+              MinimaxPlayer.builder(pName, pPostion, pColor)
                   .withHeuristic(heuristicName)
                   .withDepth(depth)
                   .withReflexion(reflexionTime)
@@ -227,17 +262,27 @@ public final class GameLoader {
               myCurrentLine);
         }
       case "mcts":
-        return new PlayerAndLine(new MctsPlayer(pName, pPostion), myCurrentLine);
+        long reflexionTimeMcts = 2000;
+        if (aiSettings.containsKey("reflexion")) {
+          reflexionTimeMcts = Long.parseLong(aiSettings.get("reflexion"));
+        }
+        boolean useNN = "ML".equals(aiSettings.get("selection"));
+        try {
+          return new PlayerAndLine(
+              new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
+        } catch (java.io.IOException e) {
+          throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
+        }
 
       case "random":
-        return new PlayerAndLine(new RandomPlayer(pName, pPostion), myCurrentLine);
+        return new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor), myCurrentLine);
 
       case "minimax-iterative-deepening":
         {
           final String heuristicName = aiSettings.get("heuristic");
           final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
           return new PlayerAndLine(
-              MinimaxPlayer.builder(pName, pPostion)
+              MinimaxPlayer.builder(pName, pPostion, pColor)
                   .withHeuristic(heuristicName)
                   .withReflexion(reflexionTime)
                   .withIterativeDeepening(true)
@@ -250,14 +295,72 @@ public final class GameLoader {
   }
 
   /**
-   * Checks if the current line starts with the prefix "ai" indicating it contains an AI setting.
+   * Checks if the current line index player is the same of the index parameter.
    *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
-   * @return {@code true} if the line starts with "ai", {@code false} otherwise.
+   * @param index The index of a player
+   * @return {@code true} if the line has the same index player, {@code false} otherwise.
    */
-  private static boolean checkStartByAi(final List<String> lines, final int currentLine) {
-    return lines.get(currentLine).startsWith("ai");
+  private static boolean checkSameIndex(
+      final List<String> lines, final int currentLine, final int index) {
+    if (!lines.get(currentLine).contains("-")) {
+      return false;
+    }
+    return Integer.parseInt(lines.get(currentLine).split("-")[1]) == index;
+  }
+
+  /**
+   * Applies the game configuration modes (verbose, blitz, etc.) from the save file to the provided
+   * engine's {@link fr.bordeaux.config.ConfigManager}.
+   *
+   * <p>This method reads settings at specific line indices following the [settings] header, using a
+   * "key=value" format, and writes them via {@link GameEngine#getConfig()}.
+   *
+   * @param engine the engine whose configuration will be updated
+   * @param gameState the game state to configure
+   * @param lines the list of strings representing the save file content
+   * @throws IllegalArgumentException if the number of players defined in settings mismatches the
+   *     actual players list size
+   * @throws IndexOutOfBoundsException if the file is shorter than expected
+   * @throws NumberFormatException if a numeric value (nbPlayers) is improperly formatted
+   */
+  private static void applyMode(GameEngine engine, GameState gameState, final List<String> lines) {
+    int nbPlayers = 0;
+    for (String line : lines) {
+      if (line.equals("[game]")) break;
+      if (!line.contains("=")) continue;
+      String[] parts = line.split("=");
+      String key = parts[0].trim();
+      String value = parts[1].trim();
+
+      switch (key) {
+        case "verbose":
+          engine.setVerbose(Boolean.parseBoolean(value));
+          break;
+        case "blitz":
+          engine.setBlitz(Boolean.parseBoolean(value));
+          break;
+        case "constest":
+          engine.setContest(Boolean.parseBoolean(value));
+          break;
+        case "debug":
+          engine.setDebug(Boolean.parseBoolean(value));
+          break;
+        case "nb-players":
+          nbPlayers = Integer.parseInt(value);
+          break;
+      }
+    }
+
+    if (nbPlayers > 0 && gameState.getPlayers().size() != nbPlayers) {
+      throw new IllegalArgumentException(
+          "The number of players read from the file ("
+              + nbPlayers
+              + ") and the actual players in the game ("
+              + gameState.getPlayers().size()
+              + ") are different");
+    }
   }
 
   private static Position coordToPos(String coord) {

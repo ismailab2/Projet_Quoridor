@@ -1,5 +1,6 @@
 package fr.bordeaux.ai;
 
+import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
@@ -13,15 +14,15 @@ import java.util.List;
 public class MediumHeuristic implements HeuristicEvaluator {
 
   /** The identifier of the AI player. */
-  private final String aiName;
+  private final Color aiColor;
 
   /**
    * Constructs a MediumHeuristic.
    *
-   * @param aiNameParameter The name of the AI player.
+   * @param aiColorParameter The color of the AI player.
    */
-  public MediumHeuristic(final String aiNameParameter) {
-    this.aiName = aiNameParameter;
+  public MediumHeuristic(final Color aiColorParameter) {
+    this.aiColor = aiColorParameter;
   }
 
   /**
@@ -37,7 +38,7 @@ public class MediumHeuristic implements HeuristicEvaluator {
     Player enemie = null;
     Player player = null;
     for (final Player otherPlayer : listPlayer) {
-      if (otherPlayer.getName().equals(this.aiName)) {
+      if (otherPlayer.getColor() == this.aiColor) {
         player = otherPlayer;
       } else {
         enemie = otherPlayer;
@@ -59,24 +60,12 @@ public class MediumHeuristic implements HeuristicEvaluator {
               - pStartingPosition.getX()
               - eStartingPosition.getX()
               - eCurrentPosition.getX();
-    } else if (pStartingPosition.getX() == gameState.getBoard().getSize() - 1) {
+    } else {
       evaluateHeuristic =
           pStartingPosition.getX()
               - pCurrentPosition.getX()
               - eCurrentPosition.getX()
               - eStartingPosition.getX();
-    } else if (pStartingPosition.getY() == 0) {
-      evaluateHeuristic =
-          pCurrentPosition.getY()
-              - pStartingPosition.getY()
-              - eStartingPosition.getY()
-              - eCurrentPosition.getY();
-    } else {
-      evaluateHeuristic =
-          pStartingPosition.getY()
-              - pCurrentPosition.getY()
-              - eCurrentPosition.getY()
-              - eStartingPosition.getY();
     }
     return evaluateHeuristic;
   }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.config.ConfigManager;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
@@ -185,22 +186,6 @@ class ShortcutManagerTest {
     assertNotNull(result);
   }
 
-  /*@Test
-  void testParseInvalidKeyCodeThrows() {
-      assertThrows(IllegalArgumentException.class, () -> callParse("CTRL+INVALID"));
-  }
-
-
-
-  @Test
-  void testRegisterThrowsIfDispatcherNull() {
-      ShortcutManager manager = ShortcutManager.getInstance();
-      Scene scene1 = mock(Scene.class);
-      assertThrows(IllegalStateException.class, () -> manager.register(scene1));
-  }
-
-   */
-
   @Test
   void testRegisterAddsEventHandler() {
     ShortcutManager manager = ShortcutManager.getInstance();
@@ -216,7 +201,7 @@ class ShortcutManagerTest {
   }
 
   @Test
-  void testRegisterDoesNotDispatchIfNoMatch() {
+  void testRegisterDoesNotDispatchIfNoMatch() throws IOException {
     ShortcutManager manager = ShortcutManager.getInstance();
 
     ActionDispatcher dispatcher = mock(ActionDispatcher.class);
@@ -246,7 +231,7 @@ class ShortcutManagerTest {
   }
 
   @Test
-  void testRegisterDispatchesActionOnMatch() {
+  void testRegisterDispatchesActionOnMatch() throws IOException {
     ShortcutManager manager = ShortcutManager.getInstance();
 
     ActionDispatcher dispatcher = mock(ActionDispatcher.class);

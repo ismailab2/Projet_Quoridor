@@ -1,12 +1,12 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.util.Logger;
+import java.io.IOException;
 
 /**
  * Command that suggests the best possible move for the current player. The move is computed using a
@@ -28,10 +28,9 @@ public class HintCommand implements Command {
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(GameEngine engine) throws IOException {
     LOGGER.info("Calculating best move...");
-    MctsPlayer ia = new MctsPlayer("hint", engine.getState().getCurrentPlayer().getPosition());
-    Move hint = ia.getNextMove(engine.getState());
+    Move hint = engine.hint();
 
     if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
       LOGGER.error("Suggested move: " + hint + " isn't legal");

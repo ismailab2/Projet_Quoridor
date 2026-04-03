@@ -3,6 +3,7 @@ package fr.bordeaux.gui;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.GameEngine;
+import java.io.IOException;
 import javafx.application.Platform;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -10,9 +11,10 @@ import org.mockito.MockedStatic;
 class ActionDispatcherTest {
 
   @Test
-  void testNewGame() {
+  void testNewGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.NEW_GAME);
 
@@ -20,29 +22,36 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testLoadGame() {
+  void testLoadGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    when(fileHandler.chooseLoadFile()).thenReturn("test.txt");
+
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.LOAD_GAME);
 
-    verify(engine).loadGame("txt.txt");
+    verify(engine).loadGame("test.txt");
   }
 
   @Test
-  void testSaveGame() {
+  void testSaveGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    when(fileHandler.chooseSaveFile()).thenReturn("test.txt");
+
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.SAVE_GAME);
 
-    verify(engine).saveGame("txt.txt");
+    verify(engine).saveGame("test.txt");
   }
 
   @Test
-  void testUndo() {
+  void testUndo() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.UNDO);
 
@@ -50,9 +59,10 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testRedo() {
+  void testRedo() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.REDO);
 
@@ -60,9 +70,10 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testPause() {
+  void testPause() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.PAUSE);
 
@@ -70,9 +81,10 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testHint() {
+  void testHint() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.HINT);
 
@@ -80,14 +92,13 @@ class ActionDispatcherTest {
   }
 
   @Test
-  void testConfiguration() {
+  void testConfiguration() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     try (MockedStatic<ConfigDialog> mocked = mockStatic(ConfigDialog.class)) {
-
       dispatcher.dispatch(Action.CONFIGURATION);
-
       mocked.verify(ConfigDialog::show);
     }
   }
@@ -95,25 +106,25 @@ class ActionDispatcherTest {
   @Test
   void testInfo() {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     try (MockedStatic<InfoDialog> mocked = mockStatic(InfoDialog.class)) {
-
       dispatcher.dispatch(Action.INFO);
-
       mocked.verify(InfoDialog::show);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Test
-  void testQuit() {
+  void testQuit() throws IOException {
     GameEngine engine = mock(GameEngine.class);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     try (MockedStatic<Platform> mocked = mockStatic(Platform.class)) {
-
       dispatcher.dispatch(Action.QUIT);
-
       mocked.verify(Platform::exit);
     }
   }
