@@ -1,5 +1,7 @@
 package fr.bordeaux.network;
 
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,9 +26,20 @@ public class GameClient {
   /** Output stream to send commands to the server */
   private PrintWriter out;
 
-/**  */
+  /** Background listener thread responsible for reading messages from the server */
   private Thread listenerThread;
 
+ /**
+ * Synchronization queue used to transfer an expected response
+ * from the listener thread to the calling method (ping, quit).
+ */
+  private final SynchronousQueue<String> syncResponse = new SynchronousQueue<>();
+
+ /**
+ * Indicates whether the next received message should be treated as
+ * a direct reply to a synchronous command instead of an asynchronous one.
+ */
+  private volatile boolean expectingDirectReply = false;
 
   /**
    * Constructs a new GameClient.
@@ -50,8 +63,9 @@ public class GameClient {
 
       in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       out = new PrintWriter(socket.getOutputStream(), true);
-
       System.out.println("Connected to " + host + ":" + port);
+
+      startListener();
       return true;
 
     } catch (IOException e) {
@@ -60,26 +74,11 @@ public class GameClient {
     }
   }
 
-  public boolean joinMulti(String host, int port) {
-  try {
-    socket = new Socket();
-    socket.connect(new InetSocketAddress(host, port), 5000);
-
-    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    out = new PrintWriter(socket.getOutputStream(), true);
-
-    System.out.println("Connected to " + host + ":" + port);
-    startListener();
-    return true;
-
-  } catch (IOException e) {
-    System.out.println("Connection failed: " + e.getMessage());
-    return false;
-  }
-}
-
-
-
+/**
+ * Starts the listener thread responsible for reading every line sent by the server.
+ * Replies expected by synchronous commands are placed into the synchronization queue,
+ * while other messages are printed directly.
+ */
 private void startListener() {
   listenerThread =
       new Thread(
@@ -87,7 +86,20 @@ private void startListener() {
             try {
               String line;
               while ((line = in.readLine()) != null) {
-                System.out.println("Server: " + line);
+                if (expectingDirectReply) {
+                 try {
+                    boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
+                    if (!delivered) {
+                      System.out.println("Server: " + line);
+                    }
+                  } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                  } finally {
+                    expectingDirectReply = false;
+                  }
+                } else {
+                  System.out.println("Server: " + line);
+                }
               }
             } catch (IOException e) {
               System.out.println("Connection closed: " + e.getMessage());
@@ -107,17 +119,22 @@ private void startListener() {
     try {
       long start = System.currentTimeMillis();
 
+      expectingDirectReply = true;
       System.out.println("Client: PING");
       out.println("PING");
 
-      String res = in.readLine();
-
+      String res = syncResponse.poll(5, TimeUnit.SECONDS);
       long rtt = System.currentTimeMillis() - start;
 
-      System.out.println("Server: " + res + " TIME=" + rtt + "ms");
-
-    } catch (IOException e) {
-      System.out.println("Ping error: " + e.getMessage());
+      if (res != null) {
+        System.out.println("Server: " + res + " TIME=" + rtt + "ms");
+      } else {
+        expectingDirectReply = false; 
+        System.out.println("Ping timeout: no response within 5 seconds.");
+    }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      System.out.println("Ping interrupted.");
     }
   }
 
@@ -126,19 +143,30 @@ private void startListener() {
    * connection.
    */
   public void quit() {
-    try {
-      if (checkConnection()) {
+    if (checkConnection()){
+      try {
+        expectingDirectReply = true;
         System.out.println("Client: QUIT");
         out.println("QUIT");
 
-        String res = in.readLine(); // read BYE
+        String res = syncResponse.poll(5, TimeUnit.SECONDS);
+         if ("BYE".equals(res)) {
+         System.out.println("Server: BYE");
+       } else if (res != null) {
         System.out.println("Server: " + res);
+       } else {
+          expectingDirectReply = false; 
+          System.out.println("No BYE received, closing anyway.");
+        }
 
         socket.close();
+      
+    } catch (IOException | InterruptedException e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
       }
-    } catch (IOException ignored) {
-    }
-
+  }
+} 
     System.out.println("Client exited.");
   }
 
@@ -207,11 +235,19 @@ private void startListener() {
     return true;
   }
 
+  /**
+   * Sends the player name to the server in order to register it in the current session.
+   * @param name player name
+   */
   public void hello(String name) {
     if (!checkConnection()) return;
     out.println("HELLO " + name);
   }
 
+ /**
+ * Sends a move to the server using the text format defined by the protocol.
+ * @param move move to send
+ */
   public void sendMove(String move) {
     if (!checkConnection()) return;
     out.println("MOVE " + move);

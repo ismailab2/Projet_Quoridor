@@ -72,7 +72,6 @@ public class NetworkLauncher implements AppLauncher {
     System.out.println("server stop");
     System.out.println("server list");
     System.out.println("join ip[:port]");
-    System.out.println("mjoin ip[:port]");
     System.out.println("ping");
     System.out.println("quit");
     System.out.println("multi start [port]");
@@ -131,15 +130,6 @@ public class NetworkLauncher implements AppLauncher {
           if (!success) {
             System.out.println("Failed to connect to " + host + ":" + port);
           }
-        } else if (cmd.startsWith("mjoin")) {
-          String target = cmd.split(" ")[1];
-          String[] hp = target.split(":");
-          String host = hp[0];
-          int port = hp.length > 1 ? Integer.parseInt(hp[1]) : 12345;
-          boolean success = client.joinMulti(host, port);
-          if (!success) {
-          System.out.println("Failed to connect to " + host + ":" + port);
-         }
         } else if (cmd.startsWith("hello ")) {
           String name = cmd.substring("hello ".length()).trim();
           client.hello(name);

@@ -10,25 +10,41 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Multi-client Quoridor server. */
+/**
+ * Multi-client Quoridor server allowing several players to connect,
+ * create games, and exchange network messages.
+*/
 public class MultiGameServer {
 
+  /** TCP server socket used to accept client connections. */
   private ServerSocket serverSocket;
+  /** Indicates whether the server is currently running. */
   private volatile boolean running = false;
-
+  /** UDP broadcaster announcing the server on the local network. */
   private ServerBroadcaster broadcaster;
+
+  /** Thread responsible for running the server UDP broadcast. */
   private Thread broadcastThread;
 
+  /** TCP port used by the server. */
   private int port;
-  private final Object lock = new Object();
 
+  /** Lock used to synchronize access to the server shared data. */
+  private final Object lock = new Object();
+  /** Connected clients indexed by their identifier. */
   private final Map<String, ClientSession> clients = new HashMap<>();
+  /** Running games indexed by their identifier. */
   private final Map<String, ServerGameSession> games = new HashMap<>();
+  /** Scoreboard of players known by the server. */
   private final Map<String, ScoreEntry> scoreboard = new HashMap<>();
 
+ /** Counter used to generate unique client identifiers. */
   private int nextClientId = 1;
-  private int nextGameId = 1;
 
+ /** Counter used to generate unique game identifiers. */
+  private int nextGameId = 1;
+  
+ /** Default constructor. */
   public MultiGameServer() {}
 
   /**
@@ -170,7 +186,7 @@ public class MultiGameServer {
     client.send("WELCOME " + client.getId());
   }
 
-  /** Handles a PING command. */
+  /** Handles the PING command by sending PONG back to the client. */
   private void processPing(ClientSession client) {
     client.send("PONG");
   }
