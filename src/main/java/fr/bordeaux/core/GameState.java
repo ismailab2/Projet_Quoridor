@@ -1,5 +1,8 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.Main.PlayerFactory;
+import fr.bordeaux.config.ConfigManager;
+
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -307,13 +310,13 @@ public class GameState {
     notifyListeners();
   }
 
-  /** Resets the game to a default state (9x9 board with two human players). */
-  public void reset() {
-    int size = 9;
+  /** Resets the game to a default state (9x9 board with two human players).
+   *  @param config the game config
+   * */
+  public void reset(ConfigManager config) {
+    int size = config.getInt("board-size", 9) ;
     this.board = new Board(size);
-    this.players = new ArrayList<>();
-    players.add(new HumanPlayer("Human", new Position(0, size / 2), Color.WHITE));
-    players.add(new HumanPlayer("Bob", new Position(size - 1, size / 2), Color.BLACK));
+    this.players = PlayerFactory.createPlayers(config);;
     this.currentIndexPlayer = 0;
     notifyListeners();
   }

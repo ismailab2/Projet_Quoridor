@@ -2,10 +2,7 @@ package fr.bordeaux.Main;
 
 import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.config.ConfigManager;
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.Player;
+import fr.bordeaux.core.*;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -31,30 +28,8 @@ public class CliLauncher implements AppLauncher {
    */
   @Override
   public void launch(String[] args, ConfigManager config) {
-    BOARD_SIZE = Integer.parseInt(config.getOption("board-size", "9"));
-    Board board = new Board(BOARD_SIZE);
-    GameState state = new GameState(board, PlayerFactory.createPlayers(config));
-
-    final boolean isBlitz = config.getBoolean("blitz", false);
-
-    if (isBlitz) {
-      final int timeoutMinutes = config.getInt("timeout", 30);
-      final long timeoutMillis = timeoutMinutes * 60 * 1000L;
-      state.setLimitTimePlayer(timeoutMillis);
-    }
-
-    GameEngine engine =
-        new GameEngine(
-            state,
-            isBlitz,
-            config.getBoolean("verbose", false),
-            config.getBoolean("contest", false),
-            config.getBoolean("debug", false),
-            config.getInt("nb-walls", 10));
-    for (Player p : engine.getState().getPlayers()) {
-      p.setRemainingWalls(engine.getInitialWalls());
-    }
     try {
+        GameEngine engine = GameEngineFactory.createGameEngine(config);
       new CliApp(engine).run();
     } catch (Exception e) {
       Logger.getInstance().error("CLI Error: " + e.getMessage());

@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
 import java.io.IOException;
 import javafx.application.Platform;
@@ -17,6 +18,7 @@ public class ActionDispatcher {
 
   private final FileHandler fileHandler;
 
+  private final ConfigManager configManager = ConfigManager.getInstance();
   /**
    * Constructs an ActionDispatcher with a given GameEngine.
    *
@@ -40,7 +42,7 @@ public class ActionDispatcher {
    */
   public void dispatch(Action action) throws IOException {
     switch (action) {
-      case NEW_GAME -> engine.newGame();
+      case NEW_GAME -> engine.newGame(configManager);
       case LOAD_GAME -> {
         String path = fileHandler.chooseLoadFile();
         if (path != null) engine.loadGame(path);
