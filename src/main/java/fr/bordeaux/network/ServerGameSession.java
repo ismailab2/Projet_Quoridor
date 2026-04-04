@@ -1,5 +1,6 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameEngine;
@@ -18,6 +19,7 @@ public class ServerGameSession {
   private final GameState gameState;
   private final GameEngine gameEngine;
   private final List<ClientSession> players;
+  ConfigManager config =  ConfigManager.getInstance();
 
   /**
    * Creates a new server-side game session for the given connected players.
@@ -41,7 +43,12 @@ public class ServerGameSession {
     }
 
     this.gameState = new GameState(board, gamePlayers, 0);
-    this.gameEngine = new GameEngine(gameState);
+    boolean blitz = config.getBoolean("blitz", false);
+    boolean verbose = config.getBoolean("verbose", false);
+    boolean contest = config.getBoolean("contest", false);
+    boolean debug = config.getBoolean("debug", false);
+    int initialWalls  = config.getInt("initialWalls", 20);
+    this.gameEngine = new GameEngine(gameState,blitz,verbose,contest,debug,initialWalls);
   }
 
   public String getGameId() {
