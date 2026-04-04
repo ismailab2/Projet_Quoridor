@@ -16,14 +16,15 @@ public class GameSaver {
   /**
    * Saves the current game state to a file.
    *
-   * @param state game state to save
+   * @param engine the engine holding the game state and configuration to save
    * @param filename path of the destination file
    * @throws IOException if an input/output error occurs while writing the file
    */
-  public static void saveGame(GameState state, String filename) throws IOException {
+  public static void saveGame(GameEngine engine, String filename) throws IOException {
     try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+      GameState state = engine.getState();
       SIZE = state.getBoard().getSize();
-      saveParameters(writer, state); // write all parameters needed to play the game
+      saveParameters(writer, engine, state); // write all parameters needed to play the game
       writeHeader(writer, state); // writes [game], current player, comment
       writeBoard(writer, state); // writes cells and walls
       writeWalls(writer, state); // writes "walls: 10 10"
@@ -180,17 +181,17 @@ public class GameSaver {
    * Saves the global game parameters and all players' information to the output file. Writes the
    * "[settings]" header followed by game rules and player configurations.
    *
-   * @param w The {@link PrintWriter} used to write to the file.
-   * @param g The current game state containing the parameters to save.
+   * @param w the {@link PrintWriter} used to write to the file
+   * @param engine the engine providing the configuration
+   * @param g the current game state containing player data
    */
-  private static void saveParameters(PrintWriter w, GameState g) {
+  private static void saveParameters(PrintWriter w, GameEngine engine, GameState g) {
     w.println("[settings]");
 
-    writeLine(w, "verbose", g.isVerbose());
-    writeLine(w, "blitz", g.isBlitz());
-    writeLine(w, "constest", g.isContest());
-    writeLine(w, "turns-limit", g.getTurnLimit());
-    writeLine(w, "debug", g.isDebug());
+    writeLine(w, "verbose", engine.isVerbose());
+    writeLine(w, "blitz", engine.isBlitz());
+    writeLine(w, "constest", engine.isContest());
+    writeLine(w, "debug", engine.isDebug());
     writeLine(w, "nb-players", g.getPlayers().size());
 
     int i = 1;

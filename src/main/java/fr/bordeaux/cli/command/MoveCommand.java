@@ -5,6 +5,7 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -122,6 +123,7 @@ public class MoveCommand implements Command {
       throw new IllegalArgumentException("No pawn at " + moves[0]);
     }
     engine.play(Move.pawn(from, to));
+    (new ShowCommand()).execute(engine);
     return engine;
   }
 
@@ -136,7 +138,12 @@ public class MoveCommand implements Command {
     Position pos = parsePosition(move.substring(0, move.length() - 1));
     Orientation orientation =
         (move.charAt(move.length() - 1) == 'v') ? Orientation.VERTICAL : Orientation.HORIZONTAL;
+    if (!RuleChecker.isMoveLegal(engine.getState(), Move.wall(pos, orientation))) {
+      LOGGER.error("That's an illegal move: " + pos);
+      return engine;
+    }
     engine.play(Move.wall(pos, orientation));
+    (new ShowCommand()).execute(engine);
     return engine;
   }
 }

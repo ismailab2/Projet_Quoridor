@@ -53,16 +53,14 @@ public class BlitzManager {
    */
   private void task() {
 
-    GameState gameState = gameEngine.getState();
-    if (gameState.isPaused() || gameState.isGameOver()) {
+    GameState state = gameEngine.getState();
+    if (state.isPaused() || state.isGameOver()) {
       return;
     }
-    Player target = gameState.getCurrentPlayer();
-    Long playerTime = target.getRemainingTime() - 1000;
-    target.setRemainingTime(playerTime);
 
-    if (playerTime <= 0) {
-      gameState.setGameOver(true);
+    state.decrementCurrentPlayerTime(1000);
+
+    if (state.isGameOver()) {
       pause();
     }
   }

@@ -30,6 +30,7 @@ public class GameClient {
   private Thread listenerThread;
 
   /**
+<<<<<<< HEAD
    * Synchronization queue used to transfer an expected response from the listener thread to the
    * calling method (ping, quit).
    */
@@ -42,6 +43,8 @@ public class GameClient {
   private volatile boolean expectingDirectReply = false;
 
   /**
+=======
+>>>>>>> main
    * Constructs a new GameClient. This instance can be used to join a specific server or perform
    * network discovery.
    */

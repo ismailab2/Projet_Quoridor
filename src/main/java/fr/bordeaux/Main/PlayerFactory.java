@@ -25,9 +25,8 @@ public final class PlayerFactory {
    * Creates and initializes the list of players for a game session based on the provided
    * configuration.
    *
-   * <p>By default, the first player is always a {@link HumanPlayer} positioned at the bottom of the
-   * board. The second player's type (Human or AI) is determined by the {@code "ai"} boolean flag in
-   * the configuration.
+   * <p>Players are created without walls; the {@link fr.bordeaux.core.GameEngine} is responsible
+   * for applying the wall count from the configuration after initialization.
    *
    * @param config The configuration manager containing CLI arguments or persistent settings.
    * @return A {@link List} of {@link Player} objects ready to start the game.
@@ -57,6 +56,20 @@ public final class PlayerFactory {
               new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2),
               Color.BLACK));
     }
+
+    int nbPlayers = Integer.parseInt(config.getOption("nb-players", "2"));
+    if (nbPlayers <= 4 && nbPlayers > 2) {
+      players.add(
+          new HumanPlayer("Human Blue", new Position(CliLauncher.BOARD_SIZE / 2, 0), Color.BLUE));
+      if (nbPlayers == 4) {
+        players.add(
+            new HumanPlayer(
+                "Human Red",
+                new Position(CliLauncher.BOARD_SIZE / 2, CliLauncher.BOARD_SIZE - 1),
+                Color.RED));
+      }
+    }
+
     return players;
   }
 
@@ -75,6 +88,7 @@ public final class PlayerFactory {
    * @param name The name assigned to the AI player.
    * @param pos The starting position on the board.
    * @param config The configuration source for AI parameters.
+   * @param color The color of the AI player.
    * @return A {@link Player} instance configured according to the selected mode.
    * @throws UnsupportedOperationException if an unimplemented mode (MCTS/Neural) is requested.
    */

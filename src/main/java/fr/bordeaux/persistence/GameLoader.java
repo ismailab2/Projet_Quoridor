@@ -20,12 +20,14 @@ public final class GameLoader {
   /**
    * Loads a saved game from a file and rebuilds the corresponding game state.
    *
+   * @param engine the engine used to apply loaded configuration
    * @param filename path of the save file to load
    * @return the reconstructed game state
    * @throws IOException if an input/output error occurs while reading the file
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
-  public static GameState loadGame(String filename) throws IOException, GameLoadException {
+  public static GameState loadGame(GameEngine engine, String filename)
+      throws IOException, GameLoadException {
     List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines); // checks [settings] header
     AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
@@ -40,7 +42,7 @@ public final class GameLoader {
     List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
-    applyMode(gameState, lines);
+    applyMode(engine, gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
   }
@@ -143,13 +145,30 @@ public final class GameLoader {
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     List<Player> lPlayers = new ArrayList<>();
-    int currentLine = 7; // 7 because its at the 8 lines that starts the informations about players
-    while (currentLine < lines.size() && !lines.get(currentLine).equals("[game]")) {
+    // Find the start of the [game] section first to know where players end
+    int gameSectionIndex = -1;
+    for (int i = 0; i < lines.size(); i++) {
+      if ("[game]".equals(lines.get(i))) {
+        gameSectionIndex = i;
+        break;
+      }
+    }
+
+    // Find the first player line after [settings]
+    int currentLine = 1;
+    while (currentLine < lines.size()
+        && currentLine < gameSectionIndex
+        && !lines.get(currentLine).startsWith("player-")
+        && !lines.get(currentLine).startsWith("ai-")) {
+      currentLine++;
+    }
+
+    while (currentLine < lines.size() && currentLine < gameSectionIndex) {
       final PlayerAndLine res = readPlayer(lines, currentLine);
       lPlayers.add(res.player);
       currentLine = res.nextLine;
     }
-    return new AllPlayerAndLine(lPlayers, currentLine);
+    return new AllPlayerAndLine(lPlayers, gameSectionIndex);
   }
 
   /**
@@ -293,40 +312,48 @@ public final class GameLoader {
 
   /**
    * Applies the game configuration modes (verbose, blitz, etc.) from the save file to the provided
-   * game state. *
+   * engine's {@link fr.bordeaux.config.ConfigManager}.
    *
-   * <p>This method modifies the {@code gameState} object directly by reference. It expects the
-   * settings to be located at specific line indices following the [settings] header, using a
-   * "key=value" format.
+   * <p>This method reads settings at specific line indices following the [settings] header, using a
+   * "key=value" format, and writes them via {@link GameEngine#getConfig()}.
    *
+   * @param engine the engine whose configuration will be updated
    * @param gameState the game state to configure
    * @param lines the list of strings representing the save file content
    * @throws IllegalArgumentException if the number of players defined in settings mismatches the
    *     actual players list size
    * @throws IndexOutOfBoundsException if the file is shorter than expected
-   * @throws NumberFormatException if a numeric value (turnLimit, nbPlayers) is improperly formatted
+   * @throws NumberFormatException if a numeric value (nbPlayers) is improperly formatted
    */
-  private static void applyMode(GameState gameState, final List<String> lines) {
-    int startLineMode = 1;
-    final boolean isVerbose = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final boolean isBlitz = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final boolean isContest = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final int turnLimit = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final boolean isDebug = Boolean.parseBoolean(lines.get(startLineMode).split("=")[1]);
-    startLineMode++;
-    final int nbPlayers = Integer.parseInt(lines.get(startLineMode).split("=")[1]);
+  private static void applyMode(GameEngine engine, GameState gameState, final List<String> lines) {
+    int nbPlayers = 0;
+    for (String line : lines) {
+      if (line.equals("[game]")) break;
+      if (!line.contains("=")) continue;
+      String[] parts = line.split("=");
+      String key = parts[0].trim();
+      String value = parts[1].trim();
 
-    gameState.setBlitz(isBlitz);
-    gameState.setContest(isContest);
-    gameState.setDebug(isDebug);
-    gameState.setVerbose(isVerbose);
-    gameState.setTurnLimit(turnLimit);
+      switch (key) {
+        case "verbose":
+          engine.setVerbose(Boolean.parseBoolean(value));
+          break;
+        case "blitz":
+          engine.setBlitz(Boolean.parseBoolean(value));
+          break;
+        case "constest":
+          engine.setContest(Boolean.parseBoolean(value));
+          break;
+        case "debug":
+          engine.setDebug(Boolean.parseBoolean(value));
+          break;
+        case "nb-players":
+          nbPlayers = Integer.parseInt(value);
+          break;
+      }
+    }
 
-    if (gameState.getPlayers().size() != nbPlayers) {
+    if (nbPlayers > 0 && gameState.getPlayers().size() != nbPlayers) {
       throw new IllegalArgumentException(
           "The number of players read from the file ("
               + nbPlayers

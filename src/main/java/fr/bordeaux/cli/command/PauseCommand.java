@@ -23,7 +23,7 @@ public class PauseCommand implements Command {
    */
   @Override
   public GameEngine execute(GameEngine engine) {
-    if (engine.getState().isBlitz()) {
+    if (engine.isBlitz()) {
       LOGGER.debug("Pausing the game.");
       engine.getState().setPaused(true);
     } else LOGGER.error("Not in blitz mode, pause is doing nothing.");

@@ -5,6 +5,7 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Player;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -16,7 +17,7 @@ import fr.bordeaux.util.Logger;
 public class CliLauncher implements AppLauncher {
 
   /** Default board size for Quoridor (9x9) */
-  public static final int BOARD_SIZE = 9;
+  public static int BOARD_SIZE = 9;
 
   /** CliLaucher */
   public CliLauncher() {}
@@ -30,11 +31,11 @@ public class CliLauncher implements AppLauncher {
    */
   @Override
   public void launch(String[] args, ConfigManager config) {
+    BOARD_SIZE = Integer.parseInt(config.getOption("board-size", "9"));
     Board board = new Board(BOARD_SIZE);
     GameState state = new GameState(board, PlayerFactory.createPlayers(config));
 
     final boolean isBlitz = config.getBoolean("blitz", false);
-    state.setBlitz(isBlitz);
 
     if (isBlitz) {
       final int timeoutMinutes = config.getInt("timeout", 30);
@@ -42,8 +43,17 @@ public class CliLauncher implements AppLauncher {
       state.setLimitTimePlayer(timeoutMillis);
     }
 
-    GameEngine engine = new GameEngine(state);
-
+    GameEngine engine =
+        new GameEngine(
+            state,
+            isBlitz,
+            config.getBoolean("verbose", false),
+            config.getBoolean("contest", false),
+            config.getBoolean("debug", false),
+            config.getInt("nb-walls", 10));
+    for (Player p : engine.getState().getPlayers()) {
+      p.setRemainingWalls(engine.getInitialWalls());
+    }
     try {
       new CliApp(engine).run();
     } catch (Exception e) {

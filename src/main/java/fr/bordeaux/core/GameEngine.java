@@ -11,20 +11,41 @@ public class GameEngine {
 
   private GameState state;
   private BlitzManager blitzManager;
+  private boolean blitz;
+  private boolean verbose;
+  private boolean contest;
+  private boolean debug;
+  private int initialWalls;
 
   /**
-   * Constructs a GameEngine with the specified initial game state.
+   * Constructs a GameEngine with the specified initial game state and configuration parameters.
    *
    * @param state The initial {@link GameState} to be managed by the engine.
+   * @param blitz Whether Blitz mode is enabled.
+   * @param verbose Whether verbose logging is enabled.
+   * @param contest Whether contest mode is enabled.
+   * @param debug Whether debug mode is enabled.
+   * @param initialWalls The initial number of walls for each player.
    */
-  public GameEngine(GameState state) {
+  public GameEngine(
+      GameState state,
+      boolean blitz,
+      boolean verbose,
+      boolean contest,
+      boolean debug,
+      int initialWalls) {
     this.state = state;
+    this.blitz = blitz;
+    this.verbose = verbose;
+    this.contest = contest;
+    this.debug = debug;
+    this.initialWalls = initialWalls;
     initializeBlitz();
   }
 
   /** Helper method to initialize the BlitzManager based on the current state. */
   private void initializeBlitz() {
-    if (this.state.isBlitz()) {
+    if (this.blitz) {
       this.blitzManager = new BlitzManager(this);
       this.blitzManager.start();
     }
@@ -39,7 +60,7 @@ public class GameEngine {
    */
   public boolean play(Move move) {
     if (state.isGameOver() || state.isPaused()) {
-      System.out.println("GAME OVER OR  PAUSE");
+      System.out.println("GAME OVER OR PAUSED");
       return false;
     }
 
@@ -73,9 +94,9 @@ public class GameEngine {
    */
   public void saveGame(String filename) {
     try {
-      state.saveGame(filename);
+      fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (IOException e) {
-      System.err.println("Erreur sauvegarde : " + e.getMessage());
+      System.err.println("Saving error : " + e.getMessage());
     }
   }
 
@@ -89,7 +110,8 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      state.loadGame(filename);
+      GameState loaded = fr.bordeaux.persistence.GameLoader.loadGame(this, filename);
+      state.loadState(loaded);
       initializeBlitz();
     } catch (Exception e) {
       System.err.println("Erreur chargement : " + e.getMessage());
@@ -183,5 +205,95 @@ public class GameEngine {
    */
   public BlitzManager getBlitzManager() {
     return blitzManager;
+  }
+
+  /**
+   * Returns whether blitz mode is enabled.
+   *
+   * @return {@code true} if blitz is enabled, {@code false} otherwise.
+   */
+  public boolean isBlitz() {
+    return blitz;
+  }
+
+  /**
+   * Sets whether blitz mode is enabled.
+   *
+   * @param blitz {@code true} to enable blitz, {@code false} to disable.
+   */
+  public void setBlitz(boolean blitz) {
+    this.blitz = blitz;
+  }
+
+  /**
+   * Returns whether verbose mode is enabled.
+   *
+   * @return {@code true} if verbose is enabled, {@code false} otherwise.
+   */
+  public boolean isVerbose() {
+    return verbose;
+  }
+
+  /**
+   * Sets whether verbose mode is enabled.
+   *
+   * @param verbose {@code true} to enable verbose, {@code false} to disable.
+   */
+  public void setVerbose(boolean verbose) {
+    this.verbose = verbose;
+  }
+
+  /**
+   * Returns whether contest mode is enabled.
+   *
+   * @return {@code true} if contest is enabled, {@code false} otherwise.
+   */
+  public boolean isContest() {
+    return contest;
+  }
+
+  /**
+   * Sets whether contest mode is enabled.
+   *
+   * @param contest {@code true} to enable contest, {@code false} to disable.
+   */
+  public void setContest(boolean contest) {
+    this.contest = contest;
+  }
+
+  /**
+   * Returns whether debug mode is enabled.
+   *
+   * @return {@code true} if debug is enabled, {@code false} otherwise.
+   */
+  public boolean isDebug() {
+    return debug;
+  }
+
+  /**
+   * Sets whether debug mode is enabled.
+   *
+   * @param debug {@code true} to enable debug, {@code false} to disable.
+   */
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+
+  /**
+   * Returns the initial number of walls per player.
+   *
+   * @return The initial wall count.
+   */
+  public int getInitialWalls() {
+    return initialWalls;
+  }
+
+  /**
+   * Sets the initial number of walls per player.
+   *
+   * @param initialWalls The new initial wall count.
+   */
+  public void setInitialWalls(int initialWalls) {
+    this.initialWalls = initialWalls;
   }
 }
