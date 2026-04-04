@@ -194,6 +194,8 @@ public class GameLoaderTest {
     assertTrue(aiPlayer.getName().equals("Player2"));
     assertTrue(aiPlayer.getStartingPosition().equals(new Position(8, 4)));
     assertTrue(aiPlayer.isUseIterativeDeepening());
+    assertEquals(aiPlayer.getSearchDepth(), 2);
+    assertEquals(aiPlayer.getLimitTime(), 5);
     assertTrue(aiPlayer.getHeuristicName().equals("advanced"));
   }
 }

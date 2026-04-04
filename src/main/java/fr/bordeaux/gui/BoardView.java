@@ -4,6 +4,7 @@ import fr.bordeaux.core.*;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.input.MouseButton;
@@ -36,7 +37,7 @@ public class BoardView extends GridPane {
     pawns = new Rectangle[engine.getState().getPlayers().size()][size];
     this.widthProperty().addListener((obs, oldVal, newVal) -> drawBoard());
     this.heightProperty().addListener((obs, oldVal, newVal) -> drawBoard());
-    engine.getState().addListener(this::drawBoard);
+    engine.getState().addListener(() -> Platform.runLater(this::drawBoard));
     drawBoard();
   }
 
