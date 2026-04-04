@@ -1,13 +1,11 @@
 package fr.bordeaux.core;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.io.File;
 import java.util.List;
-
-import fr.bordeaux.config.ConfigManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +24,7 @@ public class GameEngineTest {
     p2 = MinimaxPlayer.builder("Bot", new Position(4, 2), Color.BLACK).build();
     state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state, false, false, false, false, 10);
-    configManager  = ConfigManager.getInstance();
+    configManager = ConfigManager.getInstance();
   }
 
   @Test
@@ -55,7 +53,6 @@ public class GameEngineTest {
     Move wall2 = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
     assertFalse(engine.play(wall2));
   }
-
 
   @Test
   public void undo_reverts_pawn_move() {

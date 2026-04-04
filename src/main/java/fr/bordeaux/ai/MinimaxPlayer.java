@@ -224,7 +224,15 @@ public final class MinimaxPlayer extends AiPlayer {
       final long endTime) {
     final int resultScore;
     if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
-      resultScore = this.heuristicFunction.evaluate(gameState);
+
+      final int rawScore = this.heuristicFunction.evaluate(gameState);
+      if (rawScore >= 9000) {
+        resultScore = rawScore + currentDepth;
+      } else if (rawScore <= -9000) {
+        resultScore = rawScore - currentDepth;
+      } else {
+        resultScore = rawScore;
+      }
     } else {
       int currentAlpha = alpha;
       for (final Move move : gameState.generateLegalMoves()) {
@@ -261,7 +269,14 @@ public final class MinimaxPlayer extends AiPlayer {
     final int resultScore;
 
     if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
-      resultScore = this.heuristicFunction.evaluate(gameState);
+      final int rawScore = this.heuristicFunction.evaluate(gameState);
+      if (rawScore >= 9000) {
+        resultScore = rawScore + currentDepth;
+      } else if (rawScore <= -9000) {
+        resultScore = rawScore - currentDepth;
+      } else {
+        resultScore = rawScore;
+      }
     } else {
       int currentBeta = beta;
       for (final Move move : gameState.generateLegalMoves()) {
@@ -302,6 +317,9 @@ public final class MinimaxPlayer extends AiPlayer {
     final Player currentPlayer = gameState.getCurrentPlayer();
     if (move.isPawn()) {
       currentPlayer.setPosition(move.getTo());
+      if (gameState.hasReachedGoal(currentPlayer)) {
+        gameState.setGameOverSilent(true);
+      }
     } else {
       gameState.getBoard().addWall(move.getTo(), move.getOrientation());
       currentPlayer.useWall();
@@ -320,6 +338,7 @@ public final class MinimaxPlayer extends AiPlayer {
     if (!this.aiStack.isEmpty()) {
       final Move lastMove = this.aiStack.pop();
       gameState.previousPlayer();
+      gameState.setGameOverSilent(false);
       final Player currentPlayer = gameState.getCurrentPlayer();
 
       if (lastMove.isPawn()) {

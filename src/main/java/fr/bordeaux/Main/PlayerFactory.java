@@ -120,8 +120,8 @@ public final class PlayerFactory {
       case "iterative":
       case "minimax":
       default:
-        final int depth = config.getInt(prefix + ".depth", 2);
         final int reflexionTime = config.getInt(prefix + ".time", 5);
+        final int depth = config.getInt(prefix + ".depth", depthBasedOnTime(reflexionTime));
         final String scoring = config.getOption(prefix + ".scoring", "simple");
 
         MinimaxBuilder builder =
@@ -138,5 +138,26 @@ public final class PlayerFactory {
     }
 
     return player;
+  }
+
+  /**
+   * Determines the AI search depth based on the allocated reflection time.
+   *
+   * @param reflexionTime the time allowed for the AI to think, in seconds.
+   * @return the calculated search depth (from 2 to 5).
+   */
+  private static int depthBasedOnTime(int reflexionTime) {
+    final int result;
+    if (reflexionTime <= 5) {
+      result = 2;
+    } else if (reflexionTime <= 7) {
+      result = 3;
+    } else if (reflexionTime <= 10) {
+      result = 4;
+    } else {
+      result = 5;
+    }
+
+    return result;
   }
 }

@@ -30,9 +30,8 @@ public class GameClient {
   private Thread listenerThread;
 
   /**
-<<<<<<< HEAD
-   * Synchronization queue used to transfer an expected response from the listener thread to the
-   * calling method (ping, quit).
+   * <<<<<<< HEAD Synchronization queue used to transfer an expected response from the listener
+   * thread to the calling method (ping, quit).
    */
   private final SynchronousQueue<String> syncResponse = new SynchronousQueue<>();
 
@@ -43,10 +42,8 @@ public class GameClient {
   private volatile boolean expectingDirectReply = false;
 
   /**
-=======
->>>>>>> main
-   * Constructs a new GameClient. This instance can be used to join a specific server or perform
-   * network discovery.
+   * ======= >>>>>>> main Constructs a new GameClient. This instance can be used to join a specific
+   * server or perform network discovery.
    */
   public GameClient() {
     // Explicit default constructor to satisfy Javadoc requirements

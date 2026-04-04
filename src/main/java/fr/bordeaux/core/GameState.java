@@ -2,7 +2,6 @@ package fr.bordeaux.core;
 
 import fr.bordeaux.Main.PlayerFactory;
 import fr.bordeaux.config.ConfigManager;
-
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -310,13 +309,16 @@ public class GameState {
     notifyListeners();
   }
 
-  /** Resets the game to a default state (9x9 board with two human players).
-   *  @param config the game config
-   * */
+  /**
+   * Resets the game to a default state (9x9 board with two human players).
+   *
+   * @param config the game config
+   */
   public void reset(ConfigManager config) {
-    int size = config.getInt("board-size", 9) ;
+    int size = config.getInt("board-size", 9);
     this.board = new Board(size);
-    this.players = PlayerFactory.createPlayers(config);;
+    this.players = PlayerFactory.createPlayers(config);
+    ;
     this.currentIndexPlayer = 0;
     notifyListeners();
   }
@@ -467,5 +469,14 @@ public class GameState {
   public void setGameOver(boolean b) {
     this.gameOver = b;
     notifyListeners();
+  }
+
+  /**
+   * Sets the game over status without nottify listeners.
+   *
+   * @param b {@code true} to end the game.
+   */
+  public void setGameOverSilent(boolean b) {
+    this.gameOver = b;
   }
 }

@@ -19,6 +19,7 @@ public class ActionDispatcher {
   private final FileHandler fileHandler;
 
   private final ConfigManager configManager = ConfigManager.getInstance();
+
   /**
    * Constructs an ActionDispatcher with a given GameEngine.
    *

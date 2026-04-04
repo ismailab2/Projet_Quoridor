@@ -17,9 +17,9 @@ public final class TimeConvertor {
    * <p>The formatting rules are as follows:
    *
    * <ul>
-   *   <li>If {@code timeMilli <= 0}: returns "00:000".
+   *   <li>If {@code timeMilli <= 0}: returns "00:00".
    *   <li>If the duration is less than a minute: returns "Seconds : Milliseconds" (e.g., "45 :
-   *       123").
+   *       12").
    *   <li>If the duration is one minute or more: returns "Minutes : Seconds" (e.g., "12 : 34").
    * </ul>
    *
@@ -37,9 +37,9 @@ public final class TimeConvertor {
     String result;
 
     if (timeMilli <= 0) {
-      result = "00 : 000";
+      result = "00 : 00";
     } else if (nbMin <= 0) {
-      result = String.format("%02d : %03d", nbSeconds, nbMillis);
+      result = String.format("%02d : %02d", nbSeconds, nbMillis / 10);
     } else {
       result = String.format("%02d : %02d", nbMin, nbSeconds);
     }
