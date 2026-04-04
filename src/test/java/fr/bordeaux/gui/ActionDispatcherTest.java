@@ -2,6 +2,7 @@ package fr.bordeaux.gui;
 
 import static org.mockito.Mockito.*;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
 import java.io.IOException;
 import javafx.application.Platform;
@@ -14,11 +15,12 @@ class ActionDispatcherTest {
   void testNewGame() throws IOException {
     GameEngine engine = mock(GameEngine.class);
     FileHandler fileHandler = mock(FileHandler.class);
+    ConfigManager configManager = ConfigManager.getInstance();
     ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.NEW_GAME);
 
-    verify(engine).newGame();
+    verify(engine).newGame(configManager);
   }
 
   @Test

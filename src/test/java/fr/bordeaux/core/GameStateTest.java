@@ -6,6 +6,8 @@ import fr.bordeaux.ai.MinimaxPlayer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import fr.bordeaux.config.ConfigManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -187,7 +189,7 @@ public class GameStateTest {
   @Test
   public void resetCreatesNewGame() {
 
-    game.reset();
+    game.reset(ConfigManager.getInstance());
     assertEquals(2, game.getPlayers().size());
     assertEquals(9, game.getBoard().getSize());
   }

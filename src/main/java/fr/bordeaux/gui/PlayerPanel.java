@@ -2,6 +2,7 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.util.TimeConvertor;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -64,7 +65,7 @@ public class PlayerPanel extends VBox {
 
     Region separator = makeSeparator();
 
-    timeLabel = new Label("00:00");
+    timeLabel = new Label("30:00");
     VBox timeBox = makeStatBox("Temps", timeLabel, accentColor);
 
     Region separator2 = makeSeparator();
@@ -148,7 +149,7 @@ public class PlayerPanel extends VBox {
   public void update(Player player) {
     wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
     scoreLabel.setText(String.valueOf(player.getScore()));
-    timeLabel.setText(formatTime((int) player.getRemainingTime()));
+    timeLabel.setText(TimeConvertor.formatTime(player.getRemainingTime()));
   }
 
   /**

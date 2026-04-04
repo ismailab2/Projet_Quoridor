@@ -68,6 +68,7 @@ public class ConfigManager {
       props.setProperty("debug", "true");
       props.setProperty("ai", "false");
       props.setProperty("nb-walls", "20");
+      props.setProperty("board-size", "9");
       save();
     }
   }
