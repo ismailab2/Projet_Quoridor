@@ -126,7 +126,7 @@ public class NetworkLauncher implements AppLauncher {
           String[] hp = target.split(":");
           String host = hp[0];
           int port = hp.length > 1 ? Integer.parseInt(hp[1]) : 12345;
-            boolean success = client.join(host, port);
+          boolean success = client.join(host, port);
           if (!success) {
             System.out.println("Failed to connect to " + host + ":" + port);
           }

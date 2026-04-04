@@ -1,13 +1,13 @@
 package fr.bordeaux.network;
 
 import fr.bordeaux.core.Board;
+import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.HumanPlayer;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-import fr.bordeaux.core.Color;
 import java.util.ArrayList;
 import java.util.List;
 

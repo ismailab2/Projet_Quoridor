@@ -9,11 +9,12 @@ public class ScoreEntry {
   private int losses;
   private int gamesPlayed;
 
-/**
- * Creates a new scoreboard entry for a player.
- * @param playerId player identifier
- * @param playerName player name
- */
+  /**
+   * Creates a new scoreboard entry for a player.
+   *
+   * @param playerId player identifier
+   * @param playerName player name
+   */
   public ScoreEntry(String playerId, String playerName) {
     this.playerId = playerId;
     this.playerName = playerName;
@@ -34,35 +35,46 @@ public class ScoreEntry {
     gamesPlayed++;
   }
 
-/** @return the player identifier */
+  /**
+   * @return the player identifier
+   */
   public String getPlayerId() {
     return playerId;
   }
 
-/** @return the player name */
+  /**
+   * @return the player name
+   */
   public String getPlayerName() {
     return playerName;
   }
 
-/**
- * Updates the player name.
- * @param playerName new player name
- */
+  /**
+   * Updates the player name.
+   *
+   * @param playerName new player name
+   */
   public void setPlayerName(String playerName) {
     this.playerName = playerName;
   }
 
-/** @return the number of wins */
+  /**
+   * @return the number of wins
+   */
   public int getWins() {
     return wins;
   }
 
-/** @return the number of losses */
+  /**
+   * @return the number of losses
+   */
   public int getLosses() {
     return losses;
   }
 
-/** @return the total number of played games */
+  /**
+   * @return the total number of played games
+   */
   public int getGamesPlayed() {
     return gamesPlayed;
   }

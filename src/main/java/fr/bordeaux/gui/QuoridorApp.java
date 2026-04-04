@@ -34,9 +34,8 @@ public class QuoridorApp extends Application {
     int BOARD_SIZE = 9;
     GameState state = new GameState(new Board(BOARD_SIZE), Player.createDefaultPlayers());
     GameEngine engine = new GameEngine(state);
-      FileHandler fileHandler = new FileHandler(stage);
-      ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
-
+    FileHandler fileHandler = new FileHandler(stage);
+    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     PlayerPanel player1Panel = new PlayerPanel("Player 1", state, 0);
     PlayerPanel player2Panel = new PlayerPanel("Player 2", state, 1);

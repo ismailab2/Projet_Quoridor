@@ -11,15 +11,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Multi-client Quoridor server allowing several players to connect,
- * create games, and exchange network messages.
-*/
+ * Multi-client Quoridor server allowing several players to connect, create games, and exchange
+ * network messages.
+ */
 public class MultiGameServer {
 
   /** TCP server socket used to accept client connections. */
   private ServerSocket serverSocket;
+
   /** Indicates whether the server is currently running. */
   private volatile boolean running = false;
+
   /** UDP broadcaster announcing the server on the local network. */
   private ServerBroadcaster broadcaster;
 
@@ -31,20 +33,23 @@ public class MultiGameServer {
 
   /** Lock used to synchronize access to the server shared data. */
   private final Object lock = new Object();
+
   /** Connected clients indexed by their identifier. */
   private final Map<String, ClientSession> clients = new HashMap<>();
+
   /** Running games indexed by their identifier. */
   private final Map<String, ServerGameSession> games = new HashMap<>();
+
   /** Scoreboard of players known by the server. */
   private final Map<String, ScoreEntry> scoreboard = new HashMap<>();
 
- /** Counter used to generate unique client identifiers. */
+  /** Counter used to generate unique client identifiers. */
   private int nextClientId = 1;
 
- /** Counter used to generate unique game identifiers. */
+  /** Counter used to generate unique game identifiers. */
   private int nextGameId = 1;
-  
- /** Default constructor. */
+
+  /** Default constructor. */
   public MultiGameServer() {}
 
   /**

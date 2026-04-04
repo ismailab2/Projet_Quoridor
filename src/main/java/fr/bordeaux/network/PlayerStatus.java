@@ -4,7 +4,7 @@ package fr.bordeaux.network;
 public enum PlayerStatus {
   /** Player is connected but not currently in a game. */
   IDLE,
-  
+
   /** Player is currently playing a game. */
   INGAME
 }
