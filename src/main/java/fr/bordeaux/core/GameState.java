@@ -18,6 +18,7 @@ public class GameState {
   private final Deque<Move> redoStack;
 
   private final transient List<Runnable> listeners = new ArrayList<>();
+  private final transient List<Runnable> timerListeners = new ArrayList<>();
 
   /**
    * Constructs a GameState with a board, a list of players, and an initial player index.
@@ -60,9 +61,39 @@ public class GameState {
     listeners.add(listener);
   }
 
+  /**
+   * Adds a listener to be notified of timer changes.
+   *
+   * @param listener The {@link Runnable} to execute on change.
+   */
+  public void addIimerListener(Runnable listener) {
+    timerListeners.add(listener);
+  }
+
+  /**
+   * Decrements current player's time, checks for game over, and notifies listeners.
+   *
+   * @param amountInMillis amount to subtract in milliseconds.
+   */
+  public void decrementCurrentPlayerTime(long amountInMillis) {
+    final Player target = getCurrentPlayer();
+    final long newTime = target.getRemainingTime() - amountInMillis;
+    target.setRemainingTime(newTime);
+
+    if (newTime <= 0) {
+      setGameOver(true);
+    }
+    notifyTimerListeners();
+  }
+
   /** Notifies all registered listeners of a state change. */
   private void notifyListeners() {
     for (Runnable l : listeners) l.run();
+  }
+
+  /** Notifies all registered listeners of a timer change. */
+  private void notifyTimerListeners() {
+    for (Runnable l : timerListeners) l.run();
   }
 
   /**

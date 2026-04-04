@@ -39,8 +39,8 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   @Override
   public int evaluate(final GameState gameState) {
     final int evaluateHeuristic;
-    final float coeff1 = 1.5f;
-    final float coeff2 = 0.5f;
+    final float coeff1 = 2.0f;
+    final float coeff2 = 1.0f;
 
     final List<Player> listPlayer = gameState.getPlayers();
     Player enemie = null;
@@ -77,8 +77,8 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
     } else if (lMin.size() <= criticalSize) {
       evaluateHeuristic = MIN_SCORE;
     } else {
-      final int scoreBFS = (lMin.size() - lMax.size()) * 10;
-      final int scoreWall = (int) (nbWallPlayer * coeff1 * 10 - nbWallEnemie * coeff2 * 10);
+      final int scoreBFS = (lMin.size() - lMax.size()) * 40;
+      final int scoreWall = (int) (nbWallPlayer * coeff1 - nbWallEnemie * coeff2);
       evaluateHeuristic = scoreBFS + scoreWall;
     }
 
