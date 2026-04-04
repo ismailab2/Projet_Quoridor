@@ -29,7 +29,13 @@ public class GuiLauncher implements AppLauncher {
     QuoridorApp.main(args);
   }
 
-  public GameEngine buildEngine() throws IOException {
-      return GameEngineFactory.createGameEngine(ConfigManager.getInstance());
-  }
+    /**
+     * Builds and returns a new GameEngine instance using the current configuration.
+     *
+     * @return a new {@link GameEngine} initialized with the configuration
+     * @throws IOException if there is an error reading the configuration
+     */
+    public GameEngine buildEngine() throws IOException {
+        return GameEngineFactory.createGameEngine(ConfigManager.getInstance());
+    }
 }

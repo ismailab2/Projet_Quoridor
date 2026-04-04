@@ -61,7 +61,6 @@ public class ConfigManager {
         System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
       }
     } else {
-      // Default configuration values
       props.setProperty("verbose", "true");
       props.setProperty("blitz", "false");
       props.setProperty("timeout", "30");

@@ -310,7 +310,9 @@ public class GameState {
     notifyListeners();
   }
 
-  /** Resets the game to a default state (9x9 board with two human players). */
+  /** Resets the game to a default state (9x9 board with two human players).
+   *  @param config the game config
+   * */
   public void reset(ConfigManager config) {
     int size = config.getInt("board-size", 9) ;
     this.board = new Board(size);
