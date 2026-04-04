@@ -3,7 +3,7 @@ package fr.bordeaux.Main;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.GameServer;
-// import fr.bordeaux.network.MultiGameServer;
+import fr.bordeaux.network.MultiGameServer;
 import java.util.Scanner;
 
 /**
@@ -40,16 +40,19 @@ public class NetworkLauncher implements AppLauncher {
     Scanner sc = new Scanner(System.in);
 
     GameServer server = new GameServer();
-    // MultiGameServer multiServer = new MultiGameServer();
+    MultiGameServer multiServer = new MultiGameServer();
     GameClient client = new GameClient();
+
+    boolean multiMode = false;
 
     String serverMode = config.getOption("server", "false");
     String serverPort = config.getOption("server-port", "12345");
     String daemonMode = config.getOption("daemon", "false");
 
     if ("true".equals(serverMode)) {
+      multiMode = true;
       int port = (serverPort != null) ? Integer.parseInt(serverPort) : 12345;
-      // multiServer.start(port);
+      multiServer.start(port);
 
       if ("true".equals(daemonMode)) {
         System.out.println("Server started in daemon mode on port " + port);
@@ -86,34 +89,36 @@ public class NetworkLauncher implements AppLauncher {
 
       try {
         if (cmd.startsWith("server start")) {
+          multiMode = false;
           String[] p = cmd.split(" ");
           int port = (p.length > 2) ? Integer.parseInt(p[2]) : 12345;
           server.start(port);
         } else if (cmd.equals("server stop")) {
           server.stop();
         } else if (cmd.startsWith("multi start")) {
+          multiMode = true;
           String[] p = cmd.split(" ");
           int port = (p.length > 2) ? Integer.parseInt(p[2]) : 12345;
-          // multiServer.start(port);
+          multiServer.start(port);
 
         } else if (cmd.equals("multi stop")) {
-          // multiServer.stop();
+          multiServer.stop();
 
         } else if (cmd.equals("server status")) {
-          // System.out.println(multiServer.getServerStatus());
+          System.out.println(multiServer.getServerStatus());
 
         } else if (cmd.equals("players")) {
-          // System.out.println(multiServer.listPlayers());
+          System.out.println(multiServer.listPlayers());
 
         } else if (cmd.equals("scoreboard")) {
-          // System.out.println(multiServer.getScoreboard());
+          System.out.println(multiServer.getScoreboard());
 
         } else if (cmd.startsWith("new ")) {
           String[] parts = cmd.split(" ");
           if (parts.length != 3) {
             System.out.println("Usage: new PLAYER1 PLAYER2");
           } else {
-            // System.out.println(multiServer.createGame(parts[1], parts[2]));
+            System.out.println(multiServer.createGame(parts[1], parts[2]));
           }
 
         } else if (cmd.startsWith("join")) {
@@ -127,12 +132,12 @@ public class NetworkLauncher implements AppLauncher {
           }
         } else if (cmd.startsWith("hello ")) {
           String name = cmd.substring("hello ".length()).trim();
-          // client.hello(name);
+          client.hello(name);
         } else if (cmd.equals("ping")) {
           client.ping();
         } else if (cmd.startsWith("move ")) {
           String move = cmd.substring("move ".length()).trim();
-          // client.sendMove(move);
+          client.sendMove(move);
         } else if (cmd.equals("server list")) {
           client.serverList();
         } else if (cmd.equals("quit")) {

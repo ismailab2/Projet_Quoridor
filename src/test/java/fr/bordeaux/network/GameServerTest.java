@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 public class GameServerTest {
 
   private GameServer server;
-  private int port = 1234;
+  private int port = 12344;
 
   @BeforeEach
   public void setUp() throws InterruptedException {
