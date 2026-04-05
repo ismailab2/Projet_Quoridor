@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,6 +51,12 @@ public class MultiGameServer {
   /** Counter used to generate unique game identifiers. */
   private int nextGameId = 1;
 
+  /** Maximum inactivity duration before a client is disconnected. */
+  private static final long CLIENT_TIMEOUT_MS = 60000;
+
+  /** Delay between timeout checks. */
+  private static final long TIMEOUT_CHECK_INTERVAL_MS = 5000;
+
   /** Default constructor. */
   public MultiGameServer() {}
 
@@ -65,11 +73,12 @@ public class MultiGameServer {
                 serverSocket = new ServerSocket(port);
                 running = true;
 
-                System.out.println("MultiGameServer started on port " + port);
+                System.out.println("Server started on port " + port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
                 broadcastThread.start();
+                startTimeoutChecker();
 
                 while (running) {
                   Socket socket = serverSocket.accept();
@@ -115,6 +124,7 @@ public class MultiGameServer {
       String line;
 
       while ((line = client.getIn().readLine()) != null && running) {
+        client.setLastPing(System.currentTimeMillis());
         System.out.println(client.getId() + " -> " + line);
 
         if (line.startsWith("HELLO ")) {
@@ -144,8 +154,12 @@ public class MultiGameServer {
    * @param client the disconnected client
    */
   private void unregisterClient(ClientSession client) {
+    boolean removed;
     synchronized (lock) {
-      clients.remove(client.getId());
+      removed = clients.remove(client.getId()) != null;
+      if (!removed) {
+        return;
+      }
 
       String gameId = client.getCurrentGameId();
       if (gameId != null) {
@@ -233,9 +247,8 @@ public class MultiGameServer {
 
         client.send("OK");
 
-        ClientSession opponent = game.getOpponent(client.getId());
-        if (opponent != null) {
-          opponent.send("OPPONENT_MOVE " + moveText);
+        for (ClientSession otherPlayer : game.getOtherPlayers(client.getId())) {
+          otherPlayer.send("OPPONENT_MOVE " + moveText);
         }
 
         ClientSession winner = game.getWinnerSession();
@@ -256,17 +269,17 @@ public class MultiGameServer {
    * @param winner the winning client
    */
   private void finishGame(ServerGameSession game, ClientSession winner) {
-    ClientSession loser = game.getOpponent(winner.getId());
-
     ScoreEntry winnerScore = scoreboard.get(winner.getId());
     if (winnerScore != null) {
       winnerScore.recordWin();
     }
 
-    if (loser != null) {
-      ScoreEntry loserScore = scoreboard.get(loser.getId());
-      if (loserScore != null) {
-        loserScore.recordLoss();
+    for (ClientSession player : game.getPlayers()) {
+      if (!player.getId().equals(winner.getId())) {
+        ScoreEntry loserScore = scoreboard.get(player.getId());
+        if (loserScore != null) {
+          loserScore.recordLoss();
+        }
       }
     }
 
@@ -351,34 +364,41 @@ public class MultiGameServer {
    */
   public String createGame(String... playerIds) {
     synchronized (lock) {
-      if (playerIds.length != 2) {
-        return "ERROR need exactly 2 players";
+      if (playerIds.length != 2 && playerIds.length != 4) {
+        return "ERROR need exactly 2 or 4 players";
       }
 
-      ClientSession p1 = clients.get(playerIds[0]);
-      ClientSession p2 = clients.get(playerIds[1]);
+      java.util.Set<String> seenIds = new java.util.HashSet<>();
+      java.util.List<ClientSession> sessions = new java.util.ArrayList<>();
 
-      if (p1 == null || p2 == null) {
-        return "ERROR player not found";
-      }
+      for (String playerId : playerIds) {
+        if (!seenIds.add(playerId)) {
+          return "ERROR duplicate player";
+        }
 
-      if (p1.getStatus() != PlayerStatus.IDLE || p2.getStatus() != PlayerStatus.IDLE) {
-        return "ERROR player not available";
+        ClientSession player = clients.get(playerId);
+        if (player == null) {
+          return "ERROR player not found";
+        }
+
+        if (player.getStatus() != PlayerStatus.IDLE) {
+          return "ERROR player not available";
+        }
+
+        sessions.add(player);
       }
 
       String gameId = "G" + nextGameId++;
-      ServerGameSession game = new ServerGameSession(gameId, java.util.List.of(p1, p2));
+      ServerGameSession game = new ServerGameSession(gameId, sessions);
 
       games.put(gameId, game);
 
-      p1.setStatus(PlayerStatus.INGAME);
-      p2.setStatus(PlayerStatus.INGAME);
-
-      p1.setCurrentGameId(gameId);
-      p2.setCurrentGameId(gameId);
-
-      p1.send("GAME_START " + gameId + " YOUR_TURN");
-      p2.send("GAME_START " + gameId + " WAIT");
+      for (int i = 0; i < sessions.size(); i++) {
+        ClientSession player = sessions.get(i);
+        player.setStatus(PlayerStatus.INGAME);
+        player.setCurrentGameId(gameId);
+        player.send("GAME_START " + gameId + (i == 0 ? " YOUR_TURN" : " WAIT"));
+      }
 
       return "Game created: " + gameId;
     }
@@ -399,6 +419,7 @@ public class MultiGameServer {
 
       synchronized (lock) {
         for (ClientSession client : clients.values()) {
+          client.send("SERVER_STOPPED");
           client.close();
         }
         clients.clear();
@@ -413,5 +434,40 @@ public class MultiGameServer {
     }
 
     System.out.println("Server stopped.");
+  }
+
+  /** Disconnects every client that has been inactive for more than one minute. */
+  private void startTimeoutChecker() {
+    Thread timeoutThread =
+        new Thread(
+            () -> {
+              while (running) {
+                List<ClientSession> expiredClients = new ArrayList<>();
+
+                synchronized (lock) {
+                  long now = System.currentTimeMillis();
+                  for (ClientSession client : clients.values()) {
+                    if (now - client.getLastPing() > CLIENT_TIMEOUT_MS) {
+                      expiredClients.add(client);
+                    }
+                  }
+                }
+
+                for (ClientSession client : expiredClients) {
+                  client.send("ERROR timeout");
+                  client.close();
+                  unregisterClient(client);
+                }
+
+                try {
+                  Thread.sleep(TIMEOUT_CHECK_INTERVAL_MS);
+                } catch (InterruptedException ignored) {
+                  Thread.currentThread().interrupt();
+                  return;
+                }
+              }
+            });
+    timeoutThread.setDaemon(true);
+    timeoutThread.start();
   }
 }

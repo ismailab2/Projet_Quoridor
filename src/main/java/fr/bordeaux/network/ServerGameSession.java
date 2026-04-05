@@ -21,6 +21,11 @@ public class ServerGameSession {
    * @param sessions client sessions participating in the game
    */
   public ServerGameSession(String gameId, List<ClientSession> sessions) {
+    if (sessions.size() != 2 && sessions.size() != 4) {
+      throw new IllegalArgumentException(
+          "ServerGameSession requires 2 or 4 players, but got: " + sessions.size());
+    }
+
     this.gameId = gameId;
     this.players = new ArrayList<>(sessions);
 
@@ -32,6 +37,12 @@ public class ServerGameSession {
     }
     if (sessions.size() >= 2) {
       gamePlayers.add(new HumanPlayer(sessions.get(1).getName(), new Position(8, 4), Color.BLACK));
+    }
+    if (sessions.size() >= 3) {
+      gamePlayers.add(new HumanPlayer(sessions.get(2).getName(), new Position(4, 0), Color.BLUE));
+    }
+    if (sessions.size() >= 4) {
+      gamePlayers.add(new HumanPlayer(sessions.get(3).getName(), new Position(4, 8), Color.RED));
     }
 
     this.gameState = new GameState(board, gamePlayers, 0);
@@ -107,6 +118,22 @@ public class ServerGameSession {
       }
     }
     return null;
+  }
+
+  /**
+   * Returns every other player in the game except the provided one.
+   *
+   * @param playerId player identifier
+   * @return the other client sessions in turn order
+   */
+  public List<ClientSession> getOtherPlayers(String playerId) {
+    List<ClientSession> others = new ArrayList<>();
+    for (ClientSession player : players) {
+      if (!player.getId().equals(playerId)) {
+        others.add(player);
+      }
+    }
+    return others;
   }
 
   /**
