@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import fr.bordeaux.core.GameEngine;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for GuiLauncher.
- */
+/** Unit tests for GuiLauncher. */
 public class GuiLauncherTest {
 
   @Test

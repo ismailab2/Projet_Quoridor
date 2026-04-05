@@ -23,9 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
 
-/**
- * Unit tests for ContestLauncher
- */
+/** Unit tests for ContestLauncher */
 public class ContestLauncherTest {
 
   private ConfigManager config;
@@ -178,7 +176,8 @@ public class ContestLauncherTest {
 
       Move result = (Move) m.invoke(null, state, config);
 
-      assertEquals(expectedFallback, result, "Should fallback to first legal move on MCTS exception");
+      assertEquals(
+          expectedFallback, result, "Should fallback to first legal move on MCTS exception");
       assertTrue(capturedErr.toString().contains("MCTS failed (MCTS Failure)"));
     }
   }
@@ -187,7 +186,8 @@ public class ContestLauncherTest {
   public void testComputeBestMove_NoLegalMovesFallback() throws Exception {
     GameState state = mock(GameState.class);
     when(state.generateLegalMoves()).thenReturn(List.of());
-    when(state.getCurrentPlayer()).thenReturn(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
+    when(state.getCurrentPlayer())
+        .thenReturn(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
 
     try (MockedStatic<fr.bordeaux.ai.mcts.MctsPlayer> mockedMcts =
         mockStatic(fr.bordeaux.ai.mcts.MctsPlayer.class)) {
@@ -218,23 +218,24 @@ public class ContestLauncherTest {
     sb.append("1\n"); // Current player
     sb.append("9\n"); // Size
     for (int i = 0; i < 8; i++) {
-        sb.append("1 . . . . . . . .\n");
-        sb.append(". . . . . . . . .\n");
+      sb.append("1 . . . . . . . .\n");
+      sb.append(". . . . . . . . .\n");
     }
     sb.append(". . . . . . . . 2\n");
     sb.append("walls: 10 10\n");
     sb.append("[History]\n");
-    
+
     Files.writeString(saveFile, sb.toString());
     config.enableContest(saveFile.toString());
 
     ContestLauncher launcher = newContestLauncher();
     launcher.launch(new String[] {}, config);
-    
+
     String output = capturedOut.toString().trim();
     String error = capturedErr.toString().trim();
-    
-    assertTrue(output.matches("[a-i][0-8]-[a-i][0-8]|[a-i][0-8][hv]"), 
+
+    assertTrue(
+        output.matches("[a-i][0-8]-[a-i][0-8]|[a-i][0-8][hv]"),
         "Output should be algebraic notation. Output: [" + output + "], Error: [" + error + "]");
   }
 

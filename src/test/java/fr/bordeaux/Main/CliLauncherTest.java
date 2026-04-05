@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for CliLauncher.
- */
+/** Unit tests for CliLauncher. */
 public class CliLauncherTest {
 
   @Test
