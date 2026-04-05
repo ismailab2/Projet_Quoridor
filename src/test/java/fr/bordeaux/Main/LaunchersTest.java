@@ -3,6 +3,7 @@ package fr.bordeaux.Main;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -11,7 +12,6 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import fr.bordeaux.core.*;
 
 public class LaunchersTest {
 
@@ -29,12 +29,13 @@ public class LaunchersTest {
 
   @Test
   public void testGuiLauncherBuildEngine() {
-    
+
     GuiLauncher launcher = new GuiLauncher();
-    assertDoesNotThrow(() -> {
-      var engine = launcher.buildEngine();
-      assertNotNull(engine);
-    });
+    assertDoesNotThrow(
+        () -> {
+          var engine = launcher.buildEngine();
+          assertNotNull(engine);
+        });
   }
 
   @Test
@@ -51,11 +52,11 @@ public class LaunchersTest {
 
   @Test
   public void testContestLaunchInvalidFileContent(@TempDir Path tempDir) throws IOException {
-      Path badFile = tempDir.resolve("bad_save.txt");
-      Files.writeString(badFile, "this is not a valid save file\n");
-      config.enableContest(badFile.toString());
-      ContestLauncher launcher = newContestLauncher();
-      assertDoesNotThrow(() -> launcher.launch(new String[]{}, config));
+    Path badFile = tempDir.resolve("bad_save.txt");
+    Files.writeString(badFile, "this is not a valid save file\n");
+    config.enableContest(badFile.toString());
+    ContestLauncher launcher = newContestLauncher();
+    assertDoesNotThrow(() -> launcher.launch(new String[] {}, config));
   }
 
   @Test
@@ -64,18 +65,17 @@ public class LaunchersTest {
     Files.writeString(badFile, "this is not a valid save file\n");
     config.enableContest(badFile.toString());
     ContestLauncher launcher = newContestLauncher();
-    assertDoesNotThrow(() -> launcher.launch(new String[]{}, config));
+    assertDoesNotThrow(() -> launcher.launch(new String[] {}, config));
   }
 
   @Test
   public void testMoveToStringPawn() throws Exception {
-    
-    Method m = ContestLauncher.class.getDeclaredMethod("moveToString", 
-        Move.class);
+
+    Method m = ContestLauncher.class.getDeclaredMethod("moveToString", Move.class);
     m.setAccessible(true);
 
     Position from = new Position(0, 4);
-    Position to   = new Position(1, 4);
+    Position to = new Position(1, 4);
     Move pawnMove = Move.pawn(from, to);
 
     String result = (String) m.invoke(null, pawnMove);
@@ -84,13 +84,11 @@ public class LaunchersTest {
 
   @Test
   public void testMoveToStringWallHorizontal() throws Exception {
-    Method m = ContestLauncher.class.getDeclaredMethod("moveToString",
-        Move.class);
+    Method m = ContestLauncher.class.getDeclaredMethod("moveToString", Move.class);
     m.setAccessible(true);
 
-    Position pos  = new Position(3, 2);
-    Move wallMove = Move.wall(pos,
-        Orientation.HORIZONTAL);
+    Position pos = new Position(3, 2);
+    Move wallMove = Move.wall(pos, Orientation.HORIZONTAL);
 
     String result = (String) m.invoke(null, wallMove);
     assertEquals("d2h", result);
@@ -98,13 +96,11 @@ public class LaunchersTest {
 
   @Test
   public void testMoveToStringWallVertical() throws Exception {
-    Method m = ContestLauncher.class.getDeclaredMethod("moveToString",
-        Move.class);
+    Method m = ContestLauncher.class.getDeclaredMethod("moveToString", Move.class);
     m.setAccessible(true);
 
-    Position pos  = new Position(5, 1);
-    Move wallMove = Move.wall(pos,
-        Orientation.VERTICAL);
+    Position pos = new Position(5, 1);
+    Move wallMove = Move.wall(pos, Orientation.VERTICAL);
 
     String result = (String) m.invoke(null, wallMove);
     assertEquals("f1v", result);
@@ -112,8 +108,7 @@ public class LaunchersTest {
 
   @Test
   public void testPosToString() throws Exception {
-    Method m = ContestLauncher.class.getDeclaredMethod("posToString",
-        Position.class);
+    Method m = ContestLauncher.class.getDeclaredMethod("posToString", Position.class);
     m.setAccessible(true);
 
     assertEquals("a0", m.invoke(null, new Position(0, 0)));
@@ -123,8 +118,7 @@ public class LaunchersTest {
 
   @Test
   public void testCreateDummyEngine() throws Exception {
-    Method m = ContestLauncher.class.getDeclaredMethod("createDummyEngine",
-        ConfigManager.class);
+    Method m = ContestLauncher.class.getDeclaredMethod("createDummyEngine", ConfigManager.class);
     m.setAccessible(true);
 
     Object engine = m.invoke(null, config);
@@ -132,27 +126,24 @@ public class LaunchersTest {
     assertInstanceOf(GameEngine.class, engine);
   }
 
-
   @Test
   public void testNetworkLauncherConstructor() {
     assertNotNull(new NetworkLauncher());
   }
 
-
   @Test
   public void testNetworkLauncherQuitImmediately() throws InterruptedException {
-      NetworkLauncher launcher = new NetworkLauncher();
-      java.io.InputStream original = System.in;
-      System.setIn(new java.io.ByteArrayInputStream("quit\n".getBytes()));
+    NetworkLauncher launcher = new NetworkLauncher();
+    java.io.InputStream original = System.in;
+    System.setIn(new java.io.ByteArrayInputStream("quit\n".getBytes()));
 
-      Thread t = new Thread(() -> launcher.launch(new String[]{}, config));
-      t.start();
-      t.join(3000);
+    Thread t = new Thread(() -> launcher.launch(new String[] {}, config));
+    t.start();
+    t.join(3000);
 
-      System.setIn(original);
-      assertFalse(t.isAlive(), "Le thread devrait s'être terminé après 'quit'");
+    System.setIn(original);
+    assertFalse(t.isAlive(), "Le thread devrait s'être terminé après 'quit'");
   }
-
 
   private ContestLauncher newContestLauncher() {
     try {

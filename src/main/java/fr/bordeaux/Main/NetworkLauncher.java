@@ -24,8 +24,32 @@ import java.util.Scanner;
  */
 public class NetworkLauncher implements AppLauncher {
 
+  /** TCP server managing single games. */
+  private final GameServer server;
+
+  /** Multi-game server managing multiple simultaneous games and players. */
+  private final MultiGameServer multiServer;
+
+  /** Network client used to connect to and interact with remote servers. */
+  private final GameClient client;
+
+  /**
+   * Constructs a new NetworkLauncher with specified network components.
+   *
+   * @param server the GameServer instance
+   * @param multiServer the MultiGameServer instance
+   * @param client the GameClient instance
+   */
+  NetworkLauncher(GameServer server, MultiGameServer multiServer, GameClient client) {
+    this.server = server;
+    this.multiServer = multiServer;
+    this.client = client;
+  }
+
   /** Default constructor. Constructs a new NetworkLauncher instance. */
-  public NetworkLauncher() {}
+  public NetworkLauncher() {
+    this(new GameServer(), new MultiGameServer(), new GameClient());
+  }
 
   /**
    * This method runs a command loop reading user input and executing the corresponding network
