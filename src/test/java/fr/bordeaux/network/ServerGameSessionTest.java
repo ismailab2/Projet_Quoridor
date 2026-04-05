@@ -39,6 +39,22 @@ public class ServerGameSessionTest {
   }
 
   @Test
+  void constructorInitializesGameWithFourPlayers() {
+    ClientSession alice = client("id-1", "Alice");
+    ClientSession bob = client("id-2", "Bob");
+    ClientSession chloe = client("id-3", "Chloe");
+    ClientSession david = client("id-4", "David");
+
+    ServerGameSession session = new ServerGameSession("game-4", List.of(alice, bob, chloe, david));
+
+    assertEquals(4, session.getGameState().getPlayers().size());
+    assertEquals(new Position(0, 4), session.getGameState().getPlayers().get(0).getPosition());
+    assertEquals(new Position(8, 4), session.getGameState().getPlayers().get(1).getPosition());
+    assertEquals(new Position(4, 0), session.getGameState().getPlayers().get(2).getPosition());
+    assertEquals(new Position(4, 8), session.getGameState().getPlayers().get(3).getPosition());
+  }
+
+  @Test
   void constructorRejectsSinglePlayerSession() {
     ClientSession alice = client("id-1", "Alice");
 
@@ -58,6 +74,18 @@ public class ServerGameSessionTest {
     assertSame(bob, session.getOpponent("id-1"));
     assertSame(alice, session.getOpponent("id-2"));
     assertSame(alice, session.getOpponent("missing"));
+  }
+
+  @Test
+  void getOtherPlayersReturnsEveryoneExceptRequestedPlayer() {
+    ClientSession alice = client("id-1", "Alice");
+    ClientSession bob = client("id-2", "Bob");
+    ClientSession chloe = client("id-3", "Chloe");
+    ClientSession david = client("id-4", "David");
+    ServerGameSession session = new ServerGameSession("game-4", List.of(alice, bob, chloe, david));
+
+    assertEquals(List.of(bob, chloe, david), session.getOtherPlayers("id-1"));
+    assertEquals(List.of(alice, chloe, david), session.getOtherPlayers("id-2"));
   }
 
   @Test

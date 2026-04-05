@@ -2,7 +2,6 @@ package fr.bordeaux.Main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.network.GameClient;
-import fr.bordeaux.network.GameServer;
 import fr.bordeaux.network.MultiGameServer;
 import java.util.Scanner;
 
@@ -30,7 +29,7 @@ public class NetworkLauncher implements AppLauncher {
 
   /**
    * This method runs a command loop reading user input and executing the corresponding network
-   * commands using {@link GameServer} and {@link GameClient}.
+   * commands using {@link MultiGameServer} and {@link GameClient}.
    *
    * @param args Command-line arguments (not used here)
    * @param config Configuration manager instance
@@ -39,18 +38,14 @@ public class NetworkLauncher implements AppLauncher {
   public void launch(String[] args, ConfigManager config) {
     Scanner sc = new Scanner(System.in);
 
-    GameServer server = new GameServer();
     MultiGameServer multiServer = new MultiGameServer();
     GameClient client = new GameClient();
-
-    boolean multiMode = false;
 
     String serverMode = config.getOption("server", "false");
     String serverPort = config.getOption("server-port", "12345");
     String daemonMode = config.getOption("daemon", "false");
 
     if ("true".equals(serverMode)) {
-      multiMode = true;
       int port = (serverPort != null) ? Integer.parseInt(serverPort) : 12345;
       multiServer.start(port);
 
@@ -74,36 +69,25 @@ public class NetworkLauncher implements AppLauncher {
     System.out.println("join ip[:port]");
     System.out.println("ping");
     System.out.println("quit");
-    System.out.println("multi start [port]");
-    System.out.println("multi stop");
     System.out.println("server status");
     System.out.println("players");
     System.out.println("scoreboard");
-    System.out.println("new PLAYER1 PLAYER2");
+    System.out.println("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
     System.out.println("hello NAME");
     System.out.println("move MOVE");
 
-    while (true) {
+    boolean running = true;
+    while (running) {
       System.out.print("> ");
       String cmd = sc.nextLine();
 
       try {
         if (cmd.startsWith("server start")) {
-          multiMode = false;
-          String[] p = cmd.split(" ");
-          int port = (p.length > 2) ? Integer.parseInt(p[2]) : 12345;
-          server.start(port);
-        } else if (cmd.equals("server stop")) {
-          server.stop();
-        } else if (cmd.startsWith("multi start")) {
-          multiMode = true;
           String[] p = cmd.split(" ");
           int port = (p.length > 2) ? Integer.parseInt(p[2]) : 12345;
           multiServer.start(port);
-
-        } else if (cmd.equals("multi stop")) {
+        } else if (cmd.equals("server stop")) {
           multiServer.stop();
-
         } else if (cmd.equals("server status")) {
           System.out.println(multiServer.getServerStatus());
 
@@ -115,10 +99,12 @@ public class NetworkLauncher implements AppLauncher {
 
         } else if (cmd.startsWith("new ")) {
           String[] parts = cmd.split(" ");
-          if (parts.length != 3) {
-            System.out.println("Usage: new PLAYER1 PLAYER2");
+          if (parts.length != 3 && parts.length != 5) {
+            System.out.println("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
           } else {
-            System.out.println(multiServer.createGame(parts[1], parts[2]));
+            String[] playerIds = new String[parts.length - 1];
+            System.arraycopy(parts, 1, playerIds, 0, playerIds.length);
+            System.out.println(multiServer.createGame(playerIds));
           }
 
         } else if (cmd.startsWith("join")) {
@@ -142,7 +128,8 @@ public class NetworkLauncher implements AppLauncher {
           client.serverList();
         } else if (cmd.equals("quit")) {
           client.quit();
-          break;
+        } else if (cmd.equals("exit")) {
+          running = false;
         } else {
           System.out.println("Unknown command");
         }

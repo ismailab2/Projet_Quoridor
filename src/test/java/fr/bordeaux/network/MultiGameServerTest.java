@@ -92,6 +92,31 @@ public class MultiGameServerTest {
   }
 
   @Test
+  void createGame_fourPlayers_ok() {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    TestClient bob = client("C2", "Bob");
+    TestClient chloe = client("C3", "Chloe");
+    TestClient david = client("C4", "David");
+    addClient(server, alice);
+    addClient(server, bob);
+    addClient(server, chloe);
+    addClient(server, david);
+
+    String result = server.createGame("C1", "C2", "C3", "C4");
+
+    assertEquals("Game created: G1", result);
+    assertEquals(PlayerStatus.INGAME, alice.getStatus());
+    assertEquals(PlayerStatus.INGAME, bob.getStatus());
+    assertEquals(PlayerStatus.INGAME, chloe.getStatus());
+    assertEquals(PlayerStatus.INGAME, david.getStatus());
+    assertTrue(out(alice).contains("GAME_START G1 YOUR_TURN"));
+    assertTrue(out(bob).contains("GAME_START G1 WAIT"));
+    assertTrue(out(chloe).contains("GAME_START G1 WAIT"));
+    assertTrue(out(david).contains("GAME_START G1 WAIT"));
+  }
+
+  @Test
   void quit_ok() throws Exception {
     MultiGameServer server = new MultiGameServer();
     TestClient alice = client("C1", "Alice");
@@ -196,9 +221,54 @@ public class MultiGameServerTest {
 
     data.server.stop();
 
+    assertTrue(out(data.alice).contains("SERVER_STOPPED"));
+    assertTrue(out(data.bob).contains("SERVER_STOPPED"));
     assertTrue(data.alice.wasClosed());
     assertTrue(data.bob.wasClosed());
     assertEquals("Port: 0\nConnected clients: 0\nRunning games: 0", data.server.getServerStatus());
+  }
+
+  @Test
+  void move_ok_broadcastsToAllOtherPlayersInFourPlayerGame() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    TestClient bob = client("C2", "Bob");
+    TestClient chloe = client("C3", "Chloe");
+    TestClient david = client("C4", "David");
+    addClient(server, alice);
+    addClient(server, bob);
+    addClient(server, chloe);
+    addClient(server, david);
+    server.createGame("C1", "C2", "C3", "C4");
+
+    call(
+        server,
+        "processMove",
+        new Class<?>[] {ClientSession.class, String.class},
+        alice,
+        "MOVE e1-e2");
+
+    assertTrue(out(alice).contains("OK"));
+    assertTrue(out(bob).contains("OPPONENT_MOVE e1-e2"));
+    assertTrue(out(chloe).contains("OPPONENT_MOVE e1-e2"));
+    assertTrue(out(david).contains("OPPONENT_MOVE e1-e2"));
+  }
+
+  @Test
+  void timeoutChecker_disconnectsInactiveClient() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    setRunning(server, true);
+    TestClient alice = client("C1", "Alice");
+    alice.setLastPing(System.currentTimeMillis() - 61000);
+    addClient(server, alice);
+
+    call(server, "startTimeoutChecker", new Class<?>[] {});
+    Thread.sleep(5500);
+
+    assertFalse(clients(server).containsKey("C1"));
+    assertTrue(out(alice).contains("ERROR timeout"));
+    assertTrue(alice.wasClosed());
+    setRunning(server, false);
   }
 
   @Test
