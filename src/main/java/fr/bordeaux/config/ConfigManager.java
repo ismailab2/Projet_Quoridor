@@ -61,13 +61,13 @@ public class ConfigManager {
         System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
       }
     } else {
-      // Default configuration values
       props.setProperty("verbose", "true");
       props.setProperty("blitz", "false");
       props.setProperty("timeout", "30");
       props.setProperty("debug", "true");
       props.setProperty("ai", "false");
       props.setProperty("nb-walls", "20");
+      props.setProperty("board-size", "9");
       save();
     }
   }

@@ -3,6 +3,7 @@ package fr.bordeaux.core;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ public class GameEngineTest {
   private GameState state;
   private Player p1, p2;
   private Board board;
+  private ConfigManager configManager;
 
   @BeforeEach
   public void setup() {
@@ -22,6 +24,7 @@ public class GameEngineTest {
     p2 = MinimaxPlayer.builder("Bot", new Position(4, 2), Color.BLACK).build();
     state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state, false, false, false, false, 10);
+    configManager = ConfigManager.getInstance();
   }
 
   @Test
@@ -52,20 +55,6 @@ public class GameEngineTest {
   }
 
   @Test
-  public void play_wall_move_blocks_path() {
-    /*
-    Move wall1 = Move.wall(new Position(3, 0), Orientation.HORIZONTAL);
-    board.addWall(wall1.getTo(), wall1.getOrientation());
-    Move wall2 = Move.wall(new Position(3, 2), Orientation.HORIZONTAL);
-    //System.out.println(state.getCurrentPlayer().getPosition());
-    //System.out.println(RuleChecker.isMoveLegal(state, wall2));
-    assertFalse(RuleChecker.isMoveLegal(state, wall2));
-
-       */
-
-  }
-
-  @Test
   public void undo_reverts_pawn_move() {
     Position from = p1.getPosition();
     Position to = new Position(1, 2);
@@ -93,7 +82,6 @@ public class GameEngineTest {
     engine.play(wall);
     engine.undo();
     engine.redo();
-    // System.out.println(wall.getTo());
     assertTrue(board.isWallCollision(new Position(2, 2), Orientation.HORIZONTAL));
   }
 
@@ -108,7 +96,7 @@ public class GameEngineTest {
   @Test
   public void newGame_resets_state() {
     GameState old = engine.getState();
-    engine.newGame();
+    engine.newGame(configManager);
     GameState fresh = engine.getState();
     assertSame(old, fresh);
     assertEquals(2, fresh.getPlayers().size());
@@ -120,7 +108,7 @@ public class GameEngineTest {
   public void save_and_load_game() {
     String file = "engine_test.json";
     engine.saveGame(file);
-    engine.newGame();
+    engine.newGame(configManager);
     engine.loadGame(file);
     assertEquals(2, engine.getState().getPlayers().size());
     new File(file).delete();

@@ -38,7 +38,7 @@ public class ScoreEntry {
   /**
    * Returns the player identifier.
    *
-   * @return the player identifier
+   * @return player ID
    */
   public String getPlayerId() {
     return playerId;
@@ -47,7 +47,7 @@ public class ScoreEntry {
   /**
    * Returns the player name.
    *
-   * @return the player name
+   * @return player name
    */
   public String getPlayerName() {
     return playerName;
@@ -63,27 +63,27 @@ public class ScoreEntry {
   }
 
   /**
-   * Returns the number of wins.
+   * Returns the number of wins the player has.
    *
-   * @return the number of wins
+   * @return number of wins
    */
   public int getWins() {
     return wins;
   }
 
   /**
-   * Returns the number of losses.
+   * Returns the number of losses the player has.
    *
-   * @return the number of losses
+   * @return number of losses
    */
   public int getLosses() {
     return losses;
   }
 
   /**
-   * Returns the total number of played games.
+   * Returns the total number of games played by the player.
    *
-   * @return the total number of played games
+   * @return total games played
    */
   public int getGamesPlayed() {
     return gamesPlayed;

@@ -1,6 +1,7 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.ai.MctsPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.io.IOException;
 
 /**
@@ -79,16 +80,20 @@ public class GameEngine {
     return true;
   }
 
-  /** Resets the current game to its initial state and clears listeners. */
-  public void newGame() {
+  /**
+   * Resets the current game to its initial state and clears listeners.
+   *
+   * @param config The {@link ConfigManager } to be performed.
+   */
+  public void newGame(ConfigManager config) {
     if (blitzManager != null) {
       blitzManager.pause();
     }
-    state.reset();
+    state.reset(config);
   }
 
   /**
-   * Saves the current game state to a file.
+   * Saves the current game state to a file.C
    *
    * @param filename The path to the file where the game will be saved.
    */

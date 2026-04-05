@@ -35,7 +35,7 @@ public class BlitzManagerTest {
 
   @Test
   public void testDecreaseTime() throws InterruptedException {
-    state.setLimitTimePlayer(10000); // 10 seconds
+    state.setLimitTimePlayer(65000); // 65 seconds
     Player player = state.getCurrentPlayer();
     long initialTime = player.getRemainingTime();
 
@@ -47,7 +47,7 @@ public class BlitzManagerTest {
     long afterSleep = player.getRemainingTime();
 
     assertTrue(afterSleep < initialTime, "Le temps devrait avoir diminué");
-    assertEquals(9000, afterSleep, "Le temps restant devrait être exactement de 9000 ms");
+    assertEquals(64000, afterSleep, "Le temps restant devrait être exactement de 64000 ms");
   }
 
   @Test

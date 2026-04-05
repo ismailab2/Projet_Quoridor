@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-/** Represents one connected client on the server side. */
+/**
+ * Represents a connected client on the server. Manages the client's socket, input/output streams,
+ * name, status, and current game.
+ */
 public class ClientSession {
 
   private final String id;
@@ -18,12 +21,12 @@ public class ClientSession {
   private long lastPing;
 
   /**
-   * Creates a client session for one connected player.
+   * Creates a new client session for one connected player.
    *
-   * @param id client identifier
+   * @param id unique client identifier
    * @param socket client socket
-   * @param in input reader
-   * @param out output writer
+   * @param in input reader from the client
+   * @param out output writer to the client
    */
   public ClientSession(String id, Socket socket, BufferedReader in, PrintWriter out) {
     this.id = id;
@@ -37,15 +40,15 @@ public class ClientSession {
   }
 
   /**
-   * Sends a text message to the client.
+   * Sends a message to the client.
    *
-   * @param message message to send
+   * @param message text to send
    */
   public void send(String message) {
     out.println(message);
   }
 
-  /** Closes the client socket. */
+  /** Closes the client connection. */
   public void close() {
     try {
       socket.close();
@@ -54,34 +57,34 @@ public class ClientSession {
   }
 
   /**
-   * Returns the client identifier.
+   * Returns the unique identifier of this client.
    *
-   * @return the client identifier
+   * @return the client ID
    */
   public String getId() {
     return id;
   }
 
   /**
-   * Returns the player name.
+   * Returns the name of this client.
    *
-   * @return the player name
+   * @return the client's name
    */
   public String getName() {
     return name;
   }
 
   /**
-   * Updates the player name.
+   * Sets the name of this client.
    *
-   * @param name new player name
+   * @param name new client name
    */
   public void setName(String name) {
     this.name = name;
   }
 
   /**
-   * Returns the client socket.
+   * Returns the socket associated with this client.
    *
    * @return the client socket
    */
@@ -90,34 +93,34 @@ public class ClientSession {
   }
 
   /**
-   * Returns the input reader associated with the client.
+   * Returns the input reader for this client.
    *
-   * @return the input reader associated with the client
+   * @return the input stream reader
    */
   public BufferedReader getIn() {
     return in;
   }
 
   /**
-   * Returns the output writer associated with the client.
+   * Returns the output writer for this client.
    *
-   * @return the output writer associated with the client
+   * @return the output stream writer
    */
   public PrintWriter getOut() {
     return out;
   }
 
   /**
-   * Returns the current player status.
+   * Returns the current status of this client.
    *
-   * @return the current player status
+   * @return the player status
    */
   public PlayerStatus getStatus() {
     return status;
   }
 
   /**
-   * Updates the player status.
+   * Sets the current status of this client.
    *
    * @param status new player status
    */
@@ -126,36 +129,36 @@ public class ClientSession {
   }
 
   /**
-   * Returns the current game identifier.
+   * Returns the identifier of the current game this client is in, or null if none.
    *
-   * @return the current game identifier, or null if none
+   * @return current game ID or null
    */
   public String getCurrentGameId() {
     return currentGameId;
   }
 
   /**
-   * Updates the current game identifier.
+   * Sets the current game identifier for this client.
    *
-   * @param currentGameId new game identifier
+   * @param currentGameId new game ID
    */
   public void setCurrentGameId(String currentGameId) {
     this.currentGameId = currentGameId;
   }
 
   /**
-   * Returns the timestamp of the last received ping.
+   * Returns the timestamp of the last ping received from this client.
    *
-   * @return timestamp of the last received ping
+   * @return timestamp of last ping
    */
   public long getLastPing() {
     return lastPing;
   }
 
   /**
-   * Modifie l'horodatage du dernier ping reçu.
+   * Updates the timestamp of the last received ping.
    *
-   * @param lastPing nouvel horodatage
+   * @param lastPing new timestamp
    */
   public void setLastPing(long lastPing) {
     this.lastPing = lastPing;

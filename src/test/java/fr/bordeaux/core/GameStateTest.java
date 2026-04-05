@@ -3,6 +3,7 @@ package fr.bordeaux.core;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -187,7 +188,7 @@ public class GameStateTest {
   @Test
   public void resetCreatesNewGame() {
 
-    game.reset();
+    game.reset(ConfigManager.getInstance());
     assertEquals(2, game.getPlayers().size());
     assertEquals(9, game.getBoard().getSize());
   }

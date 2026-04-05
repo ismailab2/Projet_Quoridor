@@ -1,10 +1,9 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.ai.MctsPlayer;
+import fr.bordeaux.Main.GuiLauncher;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import java.io.IOException;
-import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -34,18 +33,9 @@ public class QuoridorApp extends Application {
    */
   @Override
   public void start(Stage stage) throws IOException {
-    int BOARD_SIZE = 9;
-    Player player1 = new HumanPlayer("Human Player", new Position(0, 4), Color.WHITE);
-    Player player2 = new MctsPlayer("MCTS Player", new Position(8, 4), 3000, true, Color.BLACK);
-    GameState state = new GameState(new Board(BOARD_SIZE), List.of(player1, player2));
-    GameEngine engine =
-        new GameEngine(
-            state,
-            Boolean.parseBoolean(ConfigManager.getInstance().getOption("blitz", "false")),
-            false,
-            false,
-            false,
-            Integer.parseInt(ConfigManager.getInstance().getOption("nb-walls", "10")));
+    GuiLauncher guiLauncher = new GuiLauncher();
+    GameEngine engine = guiLauncher.buildEngine();
+    GameState state = engine.getState();
     FileHandler fileHandler = new FileHandler(stage);
     ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
@@ -129,7 +119,7 @@ public class QuoridorApp extends Application {
                 if (popupShown.compareAndSet(false, true)) {
                   Player winner = null;
                   for (Player p : state.getPlayers()) {
-                    if (state.hasReachedGoal(p)) {
+                    if (state.hasReachedGoal(p) || p.getRemainingTime() <= 0) {
                       winner = p;
                       break;
                     }

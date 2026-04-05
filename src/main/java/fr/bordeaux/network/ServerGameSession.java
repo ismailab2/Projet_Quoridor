@@ -44,9 +44,9 @@ public class ServerGameSession {
   }
 
   /**
-   * Returns the identifier of this game session.
+   * Returns the game session identifier.
    *
-   * @return the game session identifier
+   * @return game ID
    */
   public String getGameId() {
     return gameId;
