@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.network.GameClient;
-import fr.bordeaux.network.GameServer;
 import fr.bordeaux.network.MultiGameServer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

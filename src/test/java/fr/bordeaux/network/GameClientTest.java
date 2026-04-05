@@ -221,5 +221,4 @@ public class GameClientTest {
     assertTrue(output.contains("Broadcast sent, waiting for responses..."));
     assertTrue(output.contains("Server found: testServer:9000"));
   }
-
 }
