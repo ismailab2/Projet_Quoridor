@@ -124,18 +124,28 @@ public class BoardView extends GridPane {
   public void drawPlayers() {
     int cellSize = getCellSize();
     List<Player> players = engine.getState().getPlayers();
-    for (int i = 0; i < players.size(); i++) {
-      Player player = players.get(i);
+    for (Player player : players) {
       Position pos = player.getPosition();
       Rectangle pawn = new Rectangle(cellSize * 0.6, cellSize * 0.6);
       pawn.setArcWidth(15);
       pawn.setArcHeight(15);
-      pawn.setFill(i == 0 ? Color.RED : Color.BLACK);
+      pawn.setStroke(Color.LIGHTGRAY);
+      pawn.setStrokeWidth(5);
+      pawn.setEffect(new javafx.scene.effect.DropShadow(5, javafx.scene.paint.Color.GRAY));
+      fr.bordeaux.core.Color playerColor = player.getColor();
+
+      Color fxColor = switch (playerColor) {
+        case WHITE -> Color.WHITE;
+        case BLACK -> Color.BLACK;
+        case BLUE -> Color.BLUE;
+        case RED -> Color.RED;
+      };
+      pawn.setFill(fxColor);
       cells[pos.getX()][pos.getY()].getChildren().add(pawn);
       pawn.setOnMouseClicked(
-          e -> {
-            if (e.getButton() == MouseButton.PRIMARY) highlightAccessibleCells(player);
-          });
+              e -> {
+                if (e.getButton() == MouseButton.PRIMARY) highlightAccessibleCells(player);
+              });
     }
   }
 

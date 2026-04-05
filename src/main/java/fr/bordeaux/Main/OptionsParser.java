@@ -37,6 +37,11 @@ public final class OptionsParser {
    * @throws IllegalArgumentException if an invalid argument or missing value is provided.
    */
   public static void parse(String[] args, ConfigManager config) {
+    // Reset session-specific flags to their default values
+    config.setOption("blitz", "false");
+    config.setOption("contest", "false");
+    config.setOption("ai1", "false");
+    config.setOption("ai2", "false");
 
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
