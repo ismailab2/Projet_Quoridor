@@ -178,7 +178,7 @@ public class QuoridorApp extends Application {
    * @param engine the game engine to observe
    * @param container the container where the overlay will be displayed
    */
-  private void setupGameOverListener(GameEngine engine, StackPane container) {
+  void setupGameOverListener(GameEngine engine, StackPane container) {
     AtomicBoolean popupShown = new AtomicBoolean(false);
 
     engine
@@ -219,8 +219,7 @@ public class QuoridorApp extends Application {
    * @param winnerName the name of the winning player
    * @param popupShown the flag to reset when the overlay is closed
    */
-  private void showGameOverOverlay(
-      StackPane container, String winnerName, AtomicBoolean popupShown) {
+  void showGameOverOverlay(StackPane container, String winnerName, AtomicBoolean popupShown) {
     VBox overlay = new VBox(20);
     overlay.setAlignment(Pos.CENTER);
     overlay.setMaxSize(400, 200);
@@ -256,7 +255,7 @@ public class QuoridorApp extends Application {
    * @param engine the game engine to interact with
    * @param boardView the board view to redraw after an AI move
    */
-  private void setupAITurnListener(GameEngine engine, BoardView boardView) {
+  void setupAITurnListener(GameEngine engine, BoardView boardView) {
     AtomicBoolean aiComputing = new AtomicBoolean(false);
 
     Runnable aiTurnTask =
@@ -303,14 +302,5 @@ public class QuoridorApp extends Application {
   @Override
   public void stop() {
     ConfigManager.getInstance().save();
-  }
-
-  /**
-   * Main entry point for launching the JavaFX application.
-   *
-   * @param args command-line arguments
-   */
-  public static void main(String[] args) {
-    launch(args);
   }
 }
