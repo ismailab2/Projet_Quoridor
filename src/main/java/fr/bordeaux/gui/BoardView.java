@@ -22,8 +22,6 @@ public class BoardView extends GridPane {
 
   private final GameEngine engine;
   private StackPane[][] cells;
-  private Rectangle[][] pawns;
-
   /**
    * Creates a board view linked to the given game engine. Registers listeners on width, height and
    * game state to trigger automatic redraws.
@@ -34,7 +32,6 @@ public class BoardView extends GridPane {
     this.engine = engine;
     int size = engine.getState().getBoard().getSize();
     cells = new StackPane[size][size];
-    pawns = new Rectangle[engine.getState().getPlayers().size()][size];
     this.widthProperty().addListener((obs, oldVal, newVal) -> drawBoard());
     this.heightProperty().addListener((obs, oldVal, newVal) -> drawBoard());
     engine.getState().addListener(() -> Platform.runLater(this::drawBoard));
@@ -134,7 +131,6 @@ public class BoardView extends GridPane {
       pawn.setArcWidth(15);
       pawn.setArcHeight(15);
       pawn.setFill(i == 0 ? Color.RED : Color.BLACK);
-      pawns[i][0] = pawn;
       cells[pos.getX()][pos.getY()].getChildren().add(pawn);
       pawn.setOnMouseClicked(
           e -> {

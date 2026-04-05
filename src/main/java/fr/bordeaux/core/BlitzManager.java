@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class BlitzManager {
 
-  private GameEngine gameEngine;
+  private final GameEngine gameEngine;
   private ScheduledExecutorService scheduler;
-  private boolean isRunning = false;
+  private boolean running = false;
 
   /**
    * Constructs a BlitzManager associated with a game engine.
@@ -25,10 +25,10 @@ public class BlitzManager {
 
   /** Starts or resumes the countdown. Creates a new scheduled thread that executes every second. */
   public void start() {
-    if (isRunning) {
+    if (running) {
       return;
     }
-    isRunning = true;
+    running = true;
     scheduler = Executors.newSingleThreadScheduledExecutor();
     scheduler.scheduleAtFixedRate(this::task, 1, 1, TimeUnit.SECONDS);
   }
@@ -38,10 +38,10 @@ public class BlitzManager {
    * decrementation.
    */
   public void pause() {
-    if (!isRunning) {
+    if (!running) {
       return;
     }
-    isRunning = false;
+    running = false;
     if (scheduler != null && !scheduler.isShutdown()) {
       scheduler.shutdownNow();
     }
@@ -71,6 +71,6 @@ public class BlitzManager {
    * @return true if the timer is running, false otherwise.
    */
   public boolean isRunning() {
-    return isRunning;
+    return running;
   }
 }

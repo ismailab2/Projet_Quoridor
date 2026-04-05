@@ -154,13 +154,8 @@ public class GameEngine {
    * @return The best move for the current player.
    * @throws IOException If an I/O error occurs.
    */
-  public Move hint() throws IOException {
-
-    Player current = state.getCurrentPlayer();
-
-    final Move hint = MctsPlayer.hint(getState().getCurrentPlayer(), getState(), 3000, true);
-
-    return hint;
+  public String hint() throws IOException {
+      return moveToString(MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true));
   }
 
   /**

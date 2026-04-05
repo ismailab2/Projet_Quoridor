@@ -109,7 +109,7 @@ public class PlayerPanel extends VBox {
                   Player p = state.getPlayers().get(playerIndex);
                   update(p);
                 }));
-    state.addIimerListener(
+    state.addTimerListener(
         () ->
             Platform.runLater(
                 () -> {
@@ -159,15 +159,5 @@ public class PlayerPanel extends VBox {
   public void update(Player player) {
     wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
     scoreLabel.setText(String.valueOf(player.getScore()));
-  }
-
-  /**
-   * Formats a time given in seconds into a "mm:ss" string.
-   *
-   * @param seconds The time in seconds.
-   * @return A formatted string representing the time.
-   */
-  private String formatTime(int seconds) {
-    return String.format("%02d:%02d", seconds / 60, seconds % 60);
   }
 }

@@ -21,5 +21,6 @@ public enum AppMode {
   CLI,
 
   /** Network mode (server/client interactions) */
-  NETWORK;
+  NETWORK,
+
 }

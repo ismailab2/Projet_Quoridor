@@ -50,6 +50,20 @@ public final class OptionsParser {
           logInfo("Quoridor version 1.0.0");
         }
 
+          case "--contest", "-c" -> {
+              if (i + 1 < args.length) {
+                  String file = args[++i];
+                  config.setOption("contest-file", file);
+
+                  ContestLauncher launcher = new ContestLauncher();
+                  launcher.launch(args, config);
+
+                  System.exit(0);
+              } else {
+                  throw new IllegalArgumentException("--contest requires a file path");
+              }
+          }
+
         case "-v", "--verbose" -> config.setOption("verbose", "true");
 
         case "-d", "--debug" -> config.setOption("debug", "true");
@@ -141,7 +155,7 @@ public final class OptionsParser {
           }
         }
 
-        case "-g", "--gui", "-c", "--cli", "-n", "--net" -> {
+        case "-g", "--gui", "--cli", "-n", "--net" -> {
           // Handled elsewhere (AppModeResolver)
         }
 
@@ -215,25 +229,24 @@ public final class OptionsParser {
   /**
    * @brief Prints usage and help information to the console.
    */
-  private static void printHelp() {
-    logInfo("Usage: quoridor [OPTIONS]");
-    logInfo("");
 
-    logInfo("General options:");
-    logInfo("  -h, --help        Show this help message");
-    logInfo("  -V, --version     Display version");
-    logInfo("  -v, --verbose     Enable verbose mode");
-    logInfo("  -d, --debug       Enable debug mode");
-
-    logInfo("");
-    logInfo("Modes:");
-    logInfo("  -g, --gui         Launch GUI mode");
-    logInfo("  -c, --cli         Launch CLI mode (default)");
-    logInfo("  -n, --net         Launch network mode");
-
-    logInfo("");
-    logInfo("Blitz options:");
-    logInfo("  -b, --blitz       Enable blitz mode");
-    logInfo("  -t, --time N      Timeout in minutes (default 30)");
-  }
+    private static void printHelp() {
+        logInfo("Usage: quoridor [OPTIONS]");
+        logInfo("");
+        logInfo("General options:");
+        logInfo("  -h, --help        Show this help message");
+        logInfo("  -V, --version     Display version");
+        logInfo("  -v, --verbose     Enable verbose mode");
+        logInfo("  -d, --debug       Enable debug mode");
+        logInfo("");
+        logInfo("Modes:");
+        logInfo("  --contest, -c <file> Launch contest mode from file");
+        logInfo("  -g, --gui         Launch GUI mode");
+        logInfo("  -n, --net         Launch network mode");
+        logInfo("");
+        logInfo("Blitz options:");
+        logInfo("  -b, --blitz       Enable blitz mode");
+        logInfo("  -t, --time N      Timeout in minutes (default 30)");
+        System.exit(0);
+    }
 }

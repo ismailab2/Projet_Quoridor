@@ -69,7 +69,7 @@ public class GameState {
    *
    * @param listener The {@link Runnable} to execute on change.
    */
-  public void addIimerListener(Runnable listener) {
+  public void addTimerListener(Runnable listener) {
     timerListeners.add(listener);
   }
 
@@ -316,8 +316,13 @@ public class GameState {
   public void reset(ConfigManager config) {
     int size = config.getInt("board-size", 9) ;
     this.board = new Board(size);
-    this.players = PlayerFactory.createPlayers(config);;
+    this.players = PlayerFactory.createPlayers(config);
     this.currentIndexPlayer = 0;
+    boolean blitz = config.getBoolean("blitz", false);
+    if (blitz) {
+          int timeout = config.getInt("timeout", 30);
+          setLimitTimePlayer(timeout * 60 * 1000L);
+    }
     notifyListeners();
   }
 

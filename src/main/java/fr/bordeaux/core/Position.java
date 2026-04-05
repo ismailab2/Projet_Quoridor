@@ -5,8 +5,8 @@ import java.util.Objects;
 /** Represents a position on the Quoridor board. */
 public class Position {
 
-  int x;
-  int y;
+  private final int x;
+  private final int y;
 
   /**
    * Constructs a new Position with specified coordinates.
