@@ -21,7 +21,7 @@ public class ClientSession {
   private long lastPing;
 
   /**
-   * Creates a new client session.
+   * Creates a new client session for one connected player.
    *
    * @param id unique client identifier
    * @param socket client socket
