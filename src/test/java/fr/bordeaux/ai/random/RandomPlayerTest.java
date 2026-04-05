@@ -1,4 +1,4 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.random;
 
 import static org.junit.jupiter.api.Assertions.*;
 

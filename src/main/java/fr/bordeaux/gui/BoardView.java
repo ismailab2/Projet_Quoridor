@@ -22,6 +22,7 @@ public class BoardView extends GridPane {
 
   private final GameEngine engine;
   private StackPane[][] cells;
+
   /**
    * Creates a board view linked to the given game engine. Registers listeners on width, height and
    * game state to trigger automatic redraws.
@@ -134,18 +135,19 @@ public class BoardView extends GridPane {
       pawn.setEffect(new javafx.scene.effect.DropShadow(5, javafx.scene.paint.Color.GRAY));
       fr.bordeaux.core.Color playerColor = player.getColor();
 
-      Color fxColor = switch (playerColor) {
-        case WHITE -> Color.WHITE;
-        case BLACK -> Color.BLACK;
-        case BLUE -> Color.BLUE;
-        case RED -> Color.RED;
-      };
+      Color fxColor =
+          switch (playerColor) {
+            case WHITE -> Color.WHITE;
+            case BLACK -> Color.BLACK;
+            case BLUE -> Color.BLUE;
+            case RED -> Color.RED;
+          };
       pawn.setFill(fxColor);
       cells[pos.getX()][pos.getY()].getChildren().add(pawn);
       pawn.setOnMouseClicked(
-              e -> {
-                if (e.getButton() == MouseButton.PRIMARY) highlightAccessibleCells(player);
-              });
+          e -> {
+            if (e.getButton() == MouseButton.PRIMARY) highlightAccessibleCells(player);
+          });
     }
   }
 

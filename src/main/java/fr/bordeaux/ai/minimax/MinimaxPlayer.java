@@ -1,11 +1,13 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.minimax;
 
+import fr.bordeaux.ai.base.AiPlayer;
+import fr.bordeaux.ai.base.HeuristicEvaluator;
+import fr.bordeaux.ai.heuristics.*;
+import fr.bordeaux.ai.random.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
@@ -149,7 +151,9 @@ public final class MinimaxPlayer extends AiPlayer {
     Move bestMove = this.mode.apply(state, deadlineTime);
 
     if (bestMove == null) {
-      bestMove = randomMove(state);
+      final RandomPlayer fallback =
+          new RandomPlayer(this.getName(), this.getPosition(), this.getColor());
+      bestMove = fallback.getNextMove(state);
     }
     return bestMove;
   }
@@ -293,18 +297,6 @@ public final class MinimaxPlayer extends AiPlayer {
       resultScore = currentBeta;
     }
     return resultScore;
-  }
-
-  /**
-   * Plays a random move if time limit expires before any valid evaluation.
-   *
-   * @param gameState The game state.
-   * @return A random legal move.
-   */
-  private Move randomMove(final GameState gameState) {
-    final List<Move> legalMoves = gameState.generateLegalMoves();
-    final Random randomGenerator = new Random();
-    return legalMoves.get(randomGenerator.nextInt(legalMoves.size()));
   }
 
   /**

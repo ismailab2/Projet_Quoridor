@@ -22,5 +22,4 @@ public enum AppMode {
 
   /** Network mode (server/client interactions) */
   NETWORK,
-
 }

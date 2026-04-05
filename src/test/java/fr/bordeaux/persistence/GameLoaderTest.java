@@ -2,7 +2,10 @@ package fr.bordeaux.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.*;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.*;
+import fr.bordeaux.ai.minimax.*;
+import fr.bordeaux.ai.random.*;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;

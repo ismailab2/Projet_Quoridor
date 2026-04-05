@@ -1,4 +1,4 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.minimax;
 
 import fr.bordeaux.core.Color;
 import fr.bordeaux.core.Position;

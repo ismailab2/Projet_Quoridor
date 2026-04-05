@@ -1,7 +1,8 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.minimax;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.bordeaux.ai.random.RandomPlayer;
 import fr.bordeaux.core.*;
 import fr.bordeaux.core.Move.Type;
 import java.util.ArrayList;

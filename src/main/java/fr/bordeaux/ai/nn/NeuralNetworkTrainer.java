@@ -1,7 +1,8 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.nn;
 
-import static fr.bordeaux.ai.NeuralNetworkEvaluator.NUM_FEATURES;
+import static fr.bordeaux.ai.nn.NeuralNetworkEvaluator.NUM_FEATURES;
 
+import fr.bordeaux.ai.minimax.MinimaxPlayer;
 import fr.bordeaux.core.*;
 import java.io.DataInputStream;
 import java.io.IOException;

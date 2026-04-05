@@ -1,5 +1,6 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.random;
 
+import fr.bordeaux.ai.base.AiPlayer;
 import fr.bordeaux.core.*;
 import java.util.HashMap;
 import java.util.List;

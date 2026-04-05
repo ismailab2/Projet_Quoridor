@@ -2,7 +2,7 @@ package fr.bordeaux.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.minimax.MinimaxPlayer;
 import fr.bordeaux.config.ConfigManager;
 import java.util.ArrayList;
 import java.util.List;

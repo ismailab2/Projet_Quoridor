@@ -1,6 +1,9 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.ai.*;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.*;
+import fr.bordeaux.ai.minimax.*;
+import fr.bordeaux.ai.random.*;
 import fr.bordeaux.core.*;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;

@@ -41,7 +41,7 @@ public final class MainApp {
       OptionsParser.parse(args, config);
 
       if (config.isContestMode()) {
-            new ContestLauncher().launch(args, config);
+        new ContestLauncher().launch(args, config);
       }
       AppMode mode = AppModeResolver.resolve(args);
 

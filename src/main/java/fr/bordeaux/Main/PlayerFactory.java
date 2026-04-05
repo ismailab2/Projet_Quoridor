@@ -1,6 +1,9 @@
 package fr.bordeaux.Main;
 
-import fr.bordeaux.ai.*;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.*;
+import fr.bordeaux.ai.minimax.*;
+import fr.bordeaux.ai.random.*;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import java.util.ArrayList;
@@ -35,39 +38,22 @@ public final class PlayerFactory {
     List<Player> players = new ArrayList<>();
     int size = ConfigManager.getInstance().getInt("board-size", 9);
     if (config.getBoolean("ai1", false)) {
-      players.add(
-          buildAi("AI WHITE", new Position(0, size / 2), config, Color.WHITE));
+      players.add(buildAi("AI WHITE", new Position(0, size / 2), config, Color.WHITE));
     } else {
-      players.add(
-
-          new HumanPlayer("Human White", new Position(0, size / 2), Color.WHITE));
+      players.add(new HumanPlayer("Human White", new Position(0, size / 2), Color.WHITE));
     }
 
     if (config.getBoolean("ai2", false)) {
-      players.add(
-          buildAi(
-              "AI BLACK",
-              new Position(size - 1, size / 2),
-              config,
-              Color.BLACK));
+      players.add(buildAi("AI BLACK", new Position(size - 1, size / 2), config, Color.BLACK));
     } else {
-      players.add(
-          new HumanPlayer(
-              "Human Black",
-              new Position(size - 1, size / 2),
-              Color.BLACK));
+      players.add(new HumanPlayer("Human Black", new Position(size - 1, size / 2), Color.BLACK));
     }
 
     int nbPlayers = Integer.parseInt(config.getOption("nb-players", "2"));
     if (nbPlayers <= 4 && nbPlayers > 2) {
-      players.add(
-          new HumanPlayer("Human Blue", new Position(size / 2, 0), Color.BLUE));
+      players.add(new HumanPlayer("Human Blue", new Position(size / 2, 0), Color.BLUE));
       if (nbPlayers == 4) {
-        players.add(
-            new HumanPlayer(
-                "Human Red",
-                new Position(size / 2, size - 1),
-                Color.RED));
+        players.add(new HumanPlayer("Human Red", new Position(size / 2, size - 1), Color.RED));
       }
     }
 

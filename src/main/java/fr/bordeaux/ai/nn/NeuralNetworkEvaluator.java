@@ -1,5 +1,6 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.nn;
 
+import fr.bordeaux.ai.base.HeuristicEvaluator;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -83,14 +84,16 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   }
 
   /**
-   * Constructor for inference using a saved model from an InputStream.
+   * Constructor for inference using a saved model from a file path.
    *
-   * @param inputstream InputStream containing the .bin model binary.
-   * @throws IOException If stream is unreadable or corrupt.
+   * @param path Path to the .bin model file.
+   * @throws IOException If file is missing or corrupt.
    */
-  private NeuralNetworkEvaluator(final InputStream inputstream) throws IOException {
+  public NeuralNetworkEvaluator(final String path) throws IOException {
     initGraph();
-    NeuralNetworkTrainer.loadModel(this, inputstream);
+    try (InputStream is = Files.newInputStream(Paths.get(path))) {
+      NeuralNetworkTrainer.loadModel(this, is);
+    }
   }
 
   @SuppressWarnings(SUPPRESS_LOD)
