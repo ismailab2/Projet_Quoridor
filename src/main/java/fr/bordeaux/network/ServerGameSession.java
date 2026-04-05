@@ -1,14 +1,7 @@
 package fr.bordeaux.network;
 
 import fr.bordeaux.config.ConfigManager;
-import fr.bordeaux.core.Board;
-import fr.bordeaux.core.Color;
-import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.core.GameState;
-import fr.bordeaux.core.HumanPlayer;
-import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Player;
-import fr.bordeaux.core.Position;
+import fr.bordeaux.core.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +12,7 @@ public class ServerGameSession {
   private final GameState gameState;
   private final GameEngine gameEngine;
   private final List<ClientSession> players;
-  ConfigManager config =  ConfigManager.getInstance();
+  ConfigManager config = ConfigManager.getInstance();
 
   /**
    * Creates a new server-side game session for the given connected players.
@@ -37,7 +30,6 @@ public class ServerGameSession {
     if (sessions.size() >= 1) {
       gamePlayers.add(new HumanPlayer(sessions.get(0).getName(), new Position(0, 4), Color.WHITE));
     }
-
     if (sessions.size() >= 2) {
       gamePlayers.add(new HumanPlayer(sessions.get(1).getName(), new Position(8, 4), Color.BLACK));
     }
@@ -47,26 +39,52 @@ public class ServerGameSession {
     boolean verbose = config.getBoolean("verbose", false);
     boolean contest = config.getBoolean("contest", false);
     boolean debug = config.getBoolean("debug", false);
-    int initialWalls  = config.getInt("initialWalls", 20);
-    this.gameEngine = new GameEngine(gameState,blitz,verbose,contest,debug,initialWalls);
+    int initialWalls = config.getInt("initialWalls", 20);
+    this.gameEngine = new GameEngine(gameState, blitz, verbose, contest, debug, initialWalls);
   }
 
+  /**
+   * Returns the identifier of this game session.
+   *
+   * @return the game session identifier
+   */
   public String getGameId() {
     return gameId;
   }
 
+  /**
+   * Returns the game state.
+   *
+   * @return current game state
+   */
   public GameState getGameState() {
     return gameState;
   }
 
+  /**
+   * Returns the server-side game engine.
+   *
+   * @return game engine
+   */
   public GameEngine getGameEngine() {
     return gameEngine;
   }
 
+  /**
+   * Returns the list of connected players in this game.
+   *
+   * @return list of client sessions
+   */
   public List<ClientSession> getPlayers() {
     return players;
   }
 
+  /**
+   * Checks if a player with the given ID is in this game session.
+   *
+   * @param playerId player identifier
+   * @return true if the player is in the game
+   */
   public boolean containsPlayer(String playerId) {
     for (ClientSession player : players) {
       if (player.getId().equals(playerId)) {
@@ -76,6 +94,12 @@ public class ServerGameSession {
     return false;
   }
 
+  /**
+   * Returns the opponent of the specified player.
+   *
+   * @param playerId player identifier
+   * @return the opponent client session, or null if not found
+   */
   public ClientSession getOpponent(String playerId) {
     for (ClientSession player : players) {
       if (!player.getId().equals(playerId)) {
@@ -85,6 +109,11 @@ public class ServerGameSession {
     return null;
   }
 
+  /**
+   * Returns the current player's client session.
+   *
+   * @return current player session, or null if invalid index
+   */
   public ClientSession getCurrentPlayerSession() {
     int currentIndex = gameState.getCurrentIndexPlayer();
     if (currentIndex < 0 || currentIndex >= players.size()) {
@@ -94,9 +123,9 @@ public class ServerGameSession {
   }
 
   /**
-   * Returns the winning client session if a player has reached the goal.
+   * Returns the winning player session if the game is finished.
    *
-   * @return the winner session, or null if the game is not finished
+   * @return winner session or null if game is not finished
    */
   public ClientSession getWinnerSession() {
     for (int i = 0; i < gameState.getPlayers().size(); i++) {
@@ -109,9 +138,9 @@ public class ServerGameSession {
   }
 
   /**
-   * Checks whether the specified player is the current player.
+   * Checks if it is the specified player's turn.
    *
-   * @param playerId identifier of the player
+   * @param playerId player identifier
    * @return true if it is this player's turn
    */
   public boolean isPlayerTurn(String playerId) {
@@ -123,12 +152,17 @@ public class ServerGameSession {
    * Applies a move through the server-side game engine.
    *
    * @param move move to validate and apply
-   * @return true if the move is legal and was applied
+   * @return true if the move was legal and applied
    */
   public boolean applyMove(Move move) {
     return gameEngine.play(move);
   }
 
+  /**
+   * Checks if the game session is finished.
+   *
+   * @return true if the game is over
+   */
   public boolean isFinished() {
     return gameState.isGameOver();
   }

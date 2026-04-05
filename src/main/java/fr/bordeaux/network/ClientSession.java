@@ -17,6 +17,14 @@ public class ClientSession {
   private String currentGameId;
   private long lastPing;
 
+  /**
+   * Creates a client session for one connected player.
+   *
+   * @param id client identifier
+   * @param socket client socket
+   * @param in input reader
+   * @param out output writer
+   */
   public ClientSession(String id, Socket socket, BufferedReader in, PrintWriter out) {
     this.id = id;
     this.socket = socket;
@@ -46,6 +54,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the client identifier.
+   *
    * @return the client identifier
    */
   public String getId() {
@@ -53,6 +63,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the player name.
+   *
    * @return the player name
    */
   public String getName() {
@@ -69,6 +81,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the client socket.
+   *
    * @return the client socket
    */
   public Socket getSocket() {
@@ -76,6 +90,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the input reader associated with the client.
+   *
    * @return the input reader associated with the client
    */
   public BufferedReader getIn() {
@@ -83,6 +99,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the output writer associated with the client.
+   *
    * @return the output writer associated with the client
    */
   public PrintWriter getOut() {
@@ -90,6 +108,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the current player status.
+   *
    * @return the current player status
    */
   public PlayerStatus getStatus() {
@@ -106,6 +126,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the current game identifier.
+   *
    * @return the current game identifier, or null if none
    */
   public String getCurrentGameId() {
@@ -122,6 +144,8 @@ public class ClientSession {
   }
 
   /**
+   * Returns the timestamp of the last received ping.
+   *
    * @return timestamp of the last received ping
    */
   public long getLastPing() {
