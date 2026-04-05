@@ -37,6 +37,11 @@ public final class OptionsParser {
    * @throws IllegalArgumentException if an invalid argument or missing value is provided.
    */
   public static void parse(String[] args, ConfigManager config) {
+    // Reset session-specific flags to their default values
+    config.setOption("blitz", "false");
+    config.setOption("contest", "false");
+    config.setOption("ai1", "false");
+    config.setOption("ai2", "false");
 
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
@@ -48,6 +53,16 @@ public final class OptionsParser {
 
         case "-V", "--version" -> {
           logInfo("Quoridor version 1.0.0");
+        }
+
+        case "--contest", "-c" -> {
+          if (i + 1 < args.length) {
+            String file = args[++i];
+            config.enableContest(file);
+
+          } else {
+            throw new IllegalArgumentException("--contest requires a file path");
+          }
         }
 
         case "-v", "--verbose" -> config.setOption("verbose", "true");
@@ -141,7 +156,7 @@ public final class OptionsParser {
           }
         }
 
-        case "-g", "--gui", "-c", "--cli", "-n", "--net" -> {
+        case "-g", "--gui", "--cli", "-n", "--net" -> {
           // Handled elsewhere (AppModeResolver)
         }
 
@@ -218,22 +233,20 @@ public final class OptionsParser {
   private static void printHelp() {
     logInfo("Usage: quoridor [OPTIONS]");
     logInfo("");
-
     logInfo("General options:");
     logInfo("  -h, --help        Show this help message");
     logInfo("  -V, --version     Display version");
     logInfo("  -v, --verbose     Enable verbose mode");
     logInfo("  -d, --debug       Enable debug mode");
-
     logInfo("");
     logInfo("Modes:");
+    logInfo("  --contest, -c <file> Launch contest mode from file");
     logInfo("  -g, --gui         Launch GUI mode");
-    logInfo("  -c, --cli         Launch CLI mode (default)");
     logInfo("  -n, --net         Launch network mode");
-
     logInfo("");
     logInfo("Blitz options:");
     logInfo("  -b, --blitz       Enable blitz mode");
     logInfo("  -t, --time N      Timeout in minutes (default 30)");
+    System.exit(0);
   }
 }

@@ -1,5 +1,6 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.heuristics;
 
+import fr.bordeaux.ai.base.HeuristicEvaluator;
 import fr.bordeaux.core.Color;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;

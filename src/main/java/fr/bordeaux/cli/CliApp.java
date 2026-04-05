@@ -100,75 +100,7 @@ public class CliApp {
     this.running = true;
 
     // Create smart completer
-    Completer smartCompleter =
-        (reader, line, candidates) -> {
-          String buffer = line.line();
-          // Finding the current token
-          String[] tokens = buffer.trim().split("\\s+");
-
-          if (buffer.isEmpty()) {
-            firstTab = true;
-            return;
-          }
-
-          List<String> mainCommands =
-              List.of(
-                  "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
-                  "set");
-          List<String> showOptions = List.of("board", "time", "configurations", "history");
-          List<String> helpOptions =
-              List.of(
-                  "help",
-                  "hint",
-                  "load",
-                  "save",
-                  "quit",
-                  "pause",
-                  "redo",
-                  "undo",
-                  "set",
-                  "show board",
-                  "move",
-                  "show time",
-                  "show configurations",
-                  "show history");
-
-          List<String> matches;
-
-          if (tokens.length >= 1 && tokens[0].equals("show")) {
-            String subToken = (tokens.length == 2) ? tokens[1] : "";
-            matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
-          } else if (tokens.length >= 1 && tokens[0].equals("help")) {
-            String subToken = (tokens.length == 2) ? tokens[1] : "";
-            matches = helpOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
-          } else {
-            matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();
-          }
-
-          // Three cases
-
-          if (matches.isEmpty()) {
-            // No match -> Bip
-            beep();
-          } else if (matches.size() == UNIQUE_MATCH) {
-            // Only one match -> Completion
-            candidates.add(new Candidate(matches.get(0)));
-            firstTab = true;
-          } else {
-            // Several matchs
-            if (firstTab) {
-              // First Tab : bip to prevent there is multiple choices
-              beep();
-              firstTab = false;
-            } else {
-              // Second Tab : show candidates
-              for (final String match : matches) {
-                candidates.add(new Candidate(match));
-              }
-              firstTab = true;
-            }
-          }
-        };
+    Completer smartCompleter = new SmartCompleter();
 
     // Create the LineReader with the smart Completer
     this.reader =
@@ -273,7 +205,7 @@ public class CliApp {
     }
   }
 
-  private void executeAiTurn() {
+  void executeAiTurn() {
     Player ai = engine.getState().getCurrentPlayer();
 
     Move move = ai.getNextMove(engine.getState());
@@ -342,5 +274,78 @@ public class CliApp {
       }
     }
     return distance[userCmd.length()][command.length()];
+  }
+
+  /** Package-private inner class to handle smart tab-completion for the CLI. */
+  class SmartCompleter implements Completer {
+    @Override
+    public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+      String buffer = line.line();
+      // Finding the current token
+      String[] tokens = buffer.trim().split("\\s+");
+
+      if (buffer.isEmpty()) {
+        firstTab = true;
+        return;
+      }
+
+      List<String> mainCommands =
+          List.of(
+              "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
+              "set");
+      List<String> showOptions = List.of("board", "time", "configurations", "history");
+      List<String> helpOptions =
+          List.of(
+              "help",
+              "hint",
+              "load",
+              "save",
+              "quit",
+              "pause",
+              "redo",
+              "undo",
+              "set",
+              "show board",
+              "move",
+              "show time",
+              "show configurations",
+              "show history");
+
+      List<String> matches;
+
+      if (tokens.length >= 1 && tokens[0].equals("show")) {
+        String subToken = (tokens.length == 2) ? tokens[1] : "";
+        matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
+      } else if (tokens.length >= 1 && tokens[0].equals("help")) {
+        String subToken = (tokens.length == 2) ? tokens[1] : "";
+        matches = helpOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
+      } else {
+        matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();
+      }
+
+      // Three cases
+
+      if (matches.isEmpty()) {
+        // No match -> Bip
+        beep();
+      } else if (matches.size() == UNIQUE_MATCH) {
+        // Only one match -> Completion
+        candidates.add(new Candidate(matches.get(0)));
+        firstTab = true;
+      } else {
+        // Several matches
+        if (firstTab) {
+          // First Tab : bip to indicate multiple choices
+          beep();
+          firstTab = false;
+        } else {
+          // Second Tab : show candidates
+          for (final String match : matches) {
+            candidates.add(new Candidate(match));
+          }
+          firstTab = true;
+        }
+      }
+    }
   }
 }

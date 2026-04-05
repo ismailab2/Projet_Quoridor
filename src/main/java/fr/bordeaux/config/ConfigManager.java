@@ -68,6 +68,8 @@ public class ConfigManager {
       props.setProperty("ai", "false");
       props.setProperty("nb-walls", "20");
       props.setProperty("board-size", "9");
+      props.setProperty("contest", "false");
+      props.setProperty("contest-file", "");
       save();
     }
   }
@@ -124,9 +126,40 @@ public class ConfigManager {
    */
   public int getInt(String key, int defaultValue) {
     try {
-      return Integer.parseInt(props.getProperty(key));
-    } catch (Exception e) {
+      String value = props.getProperty(key);
+      if (value == null) return defaultValue;
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
       return defaultValue;
     }
+  }
+
+  /**
+   * Returns {@code true} when the application was launched with {@code --contest}.
+   *
+   * @return whether contest mode is active
+   */
+  public boolean isContestMode() {
+    return getBoolean("contest", false);
+  }
+
+  /**
+   * Returns the path of the position file supplied to {@code --contest}. Returns an empty string
+   * when no file was given.
+   *
+   * @return the contest file path, or {@code ""}
+   */
+  public String getContestFile() {
+    return getOption("contest-file", "");
+  }
+
+  /**
+   * Enables contest mode and stores the associated position-file path.
+   *
+   * @param filePath absolute or relative path to the position file
+   */
+  public void enableContest(String filePath) {
+    setOption("contest", "true");
+    setOption("contest-file", filePath);
   }
 }

@@ -68,7 +68,7 @@ public class GameState {
    *
    * @param listener The {@link Runnable} to execute on change.
    */
-  public void addIimerListener(Runnable listener) {
+  public void addTimerListener(Runnable listener) {
     timerListeners.add(listener);
   }
 
@@ -318,8 +318,12 @@ public class GameState {
     int size = config.getInt("board-size", 9);
     this.board = new Board(size);
     this.players = PlayerFactory.createPlayers(config);
-    ;
     this.currentIndexPlayer = 0;
+    boolean blitz = config.getBoolean("blitz", false);
+    if (blitz) {
+      int timeout = config.getInt("timeout", 30);
+      setLimitTimePlayer(timeout * 60 * 1000L);
+    }
     notifyListeners();
   }
 
@@ -348,13 +352,13 @@ public class GameState {
    * @return A list of legal {@link Move} objects.
    */
   public List<Move> generateLegalMoves() {
-    List<Move> res = new ArrayList<>();
-    for (Move m : generatePseudoLegalMoves()) {
+    List<Move> legalMoves = new ArrayList<>(generateLegalPawnMoves(getCurrentPlayer()));
+    for (Move m : generatePseudoLegalWallMoves(getCurrentPlayer())) {
       if (RuleChecker.isMoveLegal(this, m)) {
-        res.add(m);
+        legalMoves.add(m);
       }
     }
-    return res;
+    return legalMoves;
   }
 
   /**
@@ -363,36 +367,80 @@ public class GameState {
    * @return A list of pseudo-legal {@link Move} objects.
    */
   public List<Move> generatePseudoLegalMoves() {
-    List<Move> all_possible_moves = new ArrayList<>();
-    Position player_pos = getCurrentPlayer().getPosition();
-    int x = player_pos.getX();
-    int y = player_pos.getY();
-    for (int i = -1; i < 2; i++) {
-      for (int j = -1; j < 2; j++) {
-        if (i != 0 || j != 0) {
-          all_possible_moves.add(Move.pawn(new Position(x, y), new Position(x + i, y + j)));
-        }
-      }
-    }
-
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x + 2, y)));
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x - 2, y)));
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y + 2)));
-    all_possible_moves.add(Move.pawn(player_pos, new Position(x, y - 2)));
-
-    if (getCurrentPlayer().getRemainingWalls() > 0) {
-      for (x = 0; x < board.getSize() - 1; x++) {
-        for (y = 0; y < board.getSize() - 1; y++) {
-          Position pos_wall = new Position(x, y);
-
-          all_possible_moves.add(Move.wall(pos_wall, Orientation.HORIZONTAL));
-
-          all_possible_moves.add(Move.wall(pos_wall, Orientation.VERTICAL));
-        }
-      }
-    }
-
+    List<Move> all_possible_moves =
+        new ArrayList<>(generatePseudoLegalPawnMoves(getCurrentPlayer()));
+    all_possible_moves.addAll(generatePseudoLegalWallMoves(getCurrentPlayer()));
     return all_possible_moves;
+  }
+
+  /**
+   * Generates all potential pawn move candidates for a player without rule validation.
+   *
+   * @param player The player to generate moves for.
+   * @return A list of pseudo-legal pawn {@link Move} objects.
+   */
+  public List<Move> generatePseudoLegalPawnMoves(Player player) {
+    List<Move> pawnMoves = new ArrayList<>();
+    Position pos = player.getPosition();
+    int x = pos.getX();
+    int y = pos.getY();
+
+    // 4 Cardinal directions (distance 1)
+    pawnMoves.add(Move.pawn(pos, new Position(x + 1, y)));
+    pawnMoves.add(Move.pawn(pos, new Position(x - 1, y)));
+    pawnMoves.add(Move.pawn(pos, new Position(x, y + 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(x, y - 1)));
+
+    // 4 Jumps (distance 2)
+    pawnMoves.add(Move.pawn(pos, new Position(x + 2, y)));
+    pawnMoves.add(Move.pawn(pos, new Position(x - 2, y)));
+    pawnMoves.add(Move.pawn(pos, new Position(x, y + 2)));
+    pawnMoves.add(Move.pawn(pos, new Position(x, y - 2)));
+
+    // 4 Diagonals
+    pawnMoves.add(Move.pawn(pos, new Position(x + 1, y + 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(x - 1, y - 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(x + 1, y - 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(x - 1, y + 1)));
+
+    return pawnMoves;
+  }
+
+  /**
+   * Generates all potential wall placement candidates for a player.
+   *
+   * @param player The player to generate wall moves for.
+   * @return A list of pseudo-legal wall {@link Move} objects.
+   */
+  public List<Move> generatePseudoLegalWallMoves(Player player) {
+    List<Move> wallMoves = new ArrayList<>();
+    if (player.getRemainingWalls() > 0) {
+      int size = board.getSize();
+      for (int x = 0; x < size - 1; x++) {
+        for (int y = 0; y < size - 1; y++) {
+          Position pos = new Position(x, y);
+          wallMoves.add(Move.wall(pos, Orientation.HORIZONTAL));
+          wallMoves.add(Move.wall(pos, Orientation.VERTICAL));
+        }
+      }
+    }
+    return wallMoves;
+  }
+
+  /**
+   * Generates only legal pawn movements for a specific player.
+   *
+   * @param player The player to check.
+   * @return A list of legal pawn {@link Move} objects.
+   */
+  public List<Move> generateLegalPawnMoves(Player player) {
+    List<Move> legalPawnMoves = new ArrayList<>();
+    for (Move m : generatePseudoLegalPawnMoves(player)) {
+      if (RuleChecker.isMoveLegal(this, m)) {
+        legalPawnMoves.add(m);
+      }
+    }
+    return legalPawnMoves;
   }
 
   /**
@@ -402,37 +450,10 @@ public class GameState {
    * @return A list of legal target {@link Position}s.
    */
   public List<Position> getLegalMoves(Player player) {
-
     List<Position> res = new ArrayList<>();
-
-    Position pos = player.getPosition();
-    int x = pos.getX();
-    int y = pos.getY();
-
-    Position[] candidates = {
-      new Position(x + 1, y),
-      new Position(x - 1, y),
-      new Position(x, y + 1),
-      new Position(x, y - 1), // Up, Down, Left, Right
-      new Position(x + 2, y),
-      new Position(x - 2, y),
-      new Position(x, y + 2),
-      new Position(x, y - 2), // 2 times Up, Down, Left, Right
-      new Position(x + 1, y + 1),
-      new Position(x - 1, y - 1),
-      new Position(x + 1, y - 1),
-      new Position(x - 1, y + 1) // Diagonals
-    };
-
-    for (Position p : candidates) {
-
-      Move m = Move.pawn(new Position(x, y), p);
-
-      if (RuleChecker.isMoveLegal(this, m)) {
-        res.add(p);
-      }
+    for (Move m : generateLegalPawnMoves(player)) {
+      res.add(m.getTo());
     }
-
     return res;
   }
 

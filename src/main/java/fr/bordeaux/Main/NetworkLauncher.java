@@ -24,8 +24,27 @@ import java.util.Scanner;
  */
 public class NetworkLauncher implements AppLauncher {
 
+  /** Multi-game server managing multiple simultaneous games and players. */
+  private final MultiGameServer multiServer;
+
+  /** Network client used to connect to and interact with remote servers. */
+  private final GameClient client;
+
+  /**
+   * Constructs a new NetworkLauncher with specified network components.
+   *
+   * @param multiServer the MultiGameServer instance
+   * @param client the GameClient instance
+   */
+  NetworkLauncher(MultiGameServer multiServer, GameClient client) {
+    this.multiServer = multiServer;
+    this.client = client;
+  }
+
   /** Default constructor. Constructs a new NetworkLauncher instance. */
-  public NetworkLauncher() {}
+  public NetworkLauncher() {
+    this(new MultiGameServer(), new GameClient());
+  }
 
   /**
    * This method runs a command loop reading user input and executing the corresponding network
@@ -37,9 +56,6 @@ public class NetworkLauncher implements AppLauncher {
   @Override
   public void launch(String[] args, ConfigManager config) {
     Scanner sc = new Scanner(System.in);
-
-    MultiGameServer multiServer = new MultiGameServer();
-    GameClient client = new GameClient();
 
     String serverMode = config.getOption("server", "false");
     String serverPort = config.getOption("server-port", "12345");
@@ -77,7 +93,7 @@ public class NetworkLauncher implements AppLauncher {
     System.out.println("move MOVE");
 
     boolean running = true;
-    while (running) {
+    while (running && sc.hasNextLine()) {
       System.out.print("> ");
       String cmd = sc.nextLine();
 
@@ -126,9 +142,10 @@ public class NetworkLauncher implements AppLauncher {
           client.sendMove(move);
         } else if (cmd.equals("server list")) {
           client.serverList();
-        } else if (cmd.equals("quit")) {
-          client.quit();
-        } else if (cmd.equals("exit")) {
+        } else if (cmd.equals("quit") || cmd.equals("exit")) {
+          if (cmd.equals("quit")) {
+            client.quit();
+          }
           running = false;
         } else {
           System.out.println("Unknown command");

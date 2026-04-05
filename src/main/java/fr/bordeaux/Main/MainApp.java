@@ -39,6 +39,10 @@ public final class MainApp {
 
     try {
       OptionsParser.parse(args, config);
+
+      if (config.isContestMode()) {
+        new ContestLauncher().launch(args, config);
+      }
       AppMode mode = AppModeResolver.resolve(args);
 
       AppLauncher launcher = AppLauncherFactory.create(mode);

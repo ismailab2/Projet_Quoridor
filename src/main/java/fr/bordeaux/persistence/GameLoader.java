@@ -1,8 +1,9 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.ai.MctsPlayer;
-import fr.bordeaux.ai.MinimaxPlayer;
-import fr.bordeaux.ai.RandomPlayer;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.MctsPlayer;
+import fr.bordeaux.ai.minimax.MinimaxPlayer;
+import fr.bordeaux.ai.random.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;

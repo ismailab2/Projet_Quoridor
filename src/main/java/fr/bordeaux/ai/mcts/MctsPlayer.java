@@ -1,5 +1,7 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.mcts;
 
+import fr.bordeaux.ai.base.AiPlayer;
+import fr.bordeaux.ai.nn.NeuralNetworkEvaluator;
 import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.util.Map;

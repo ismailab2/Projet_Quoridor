@@ -1,6 +1,6 @@
 package fr.bordeaux.persistence;
 
-import fr.bordeaux.ai.AiPlayer;
+import fr.bordeaux.ai.base.AiPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;

@@ -1,6 +1,6 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.ai.MctsPlayer;
+import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.config.ConfigManager;
 import java.io.IOException;
 
@@ -156,12 +156,8 @@ public class GameEngine {
    * @throws IOException If an I/O error occurs.
    */
   public Move hint() throws IOException {
-
-    Player current = state.getCurrentPlayer();
-
-    final Move hint = MctsPlayer.hint(getState().getCurrentPlayer(), getState(), 3000, true);
-
-    return hint;
+    moveToString(MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true));
+    return MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true);
   }
 
   /**

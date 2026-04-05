@@ -1,7 +1,8 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.nn;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.bordeaux.ai.random.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.File;
 import java.io.IOException;
@@ -114,5 +115,62 @@ public class NeuralNetworkEvaluatorTest {
             + scoreFar
             + ", Gap: "
             + gap);
+  }
+
+  /**
+   * Tests that a model saved to a file can be reloaded to yield consistent scores.
+   *
+   * @throws IOException If the temporary file cannot be created or model saving fails.
+   */
+  @Test
+  public void testSaveModel() throws IOException {
+    File tempFile = File.createTempFile("test_nn_model", ".bin");
+    tempFile.deleteOnExit();
+
+    // 1. Save the model from the primary evaluator
+    evaluator.saveModel(tempFile.getAbsolutePath());
+    assertTrue(tempFile.exists(), "Model file should be created");
+    assertTrue(
+        tempFile.length() >= 20,
+        "Model file should have weights for "
+            + NeuralNetworkEvaluator.NUM_FEATURES
+            + " features and a bias.");
+
+    // 2. Create a secondary evaluator and load the saved file into it.
+    try (NeuralNetworkEvaluator reloaded = new NeuralNetworkEvaluator(1, 1)) {
+      try (java.io.InputStream is = new java.io.FileInputStream(tempFile)) {
+        NeuralNetworkTrainer.loadModel(reloaded, is);
+      }
+
+      // 3. Both evaluators must now return identical scores for any given state
+      int originalScore = evaluator.evaluate(state);
+      int reloadedScore = reloaded.evaluate(state);
+      assertEquals(
+          originalScore,
+          reloadedScore,
+          "Evaluating with a reloaded model should yield the original score");
+    }
+  }
+
+  /**
+   * Tests that a model can be loaded via a String path constructor.
+   *
+   * @throws IOException If the path is invalid.
+   */
+  @Test
+  public void testConstructorWithPath() throws IOException {
+    File modelFile = new File(MODEL_PATH);
+    if (!modelFile.exists()) {
+      // If the default model file doesn't exist yet, save it first.
+      evaluator.saveModel(MODEL_PATH);
+    }
+
+    try (NeuralNetworkEvaluator pathEvaluator = new NeuralNetworkEvaluator(MODEL_PATH)) {
+      assertNotNull(pathEvaluator, "Path-based evaluator should be initialized");
+      assertEquals(
+          evaluator.evaluate(state),
+          pathEvaluator.evaluate(state),
+          "Path-based evaluator should produce the same results as the primary one");
+    }
   }
 }

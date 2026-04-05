@@ -4,6 +4,7 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
 import java.io.IOException;
+import javafx.application.Application;
 
 /**
  * This launcher starts the Quoridor graphical interface using the QuoridorApp main class. It
@@ -15,15 +16,16 @@ public class GuiLauncher implements AppLauncher {
   public GuiLauncher() {}
 
   /**
-   * Delegates execution to {@link QuoridorApp#main(String[])}. Any GUI initialization, window
-   * creation, and event handling is managed by QuoridorApp.
+   * Delegates execution to {@link Application#launch(Class, String...)}. Any GUI initialization,
+   * window creation, and event handling is managed by QuoridorApp. creation, and event handling is
+   * managed by QuoridorApp.
    *
    * @param args command-line arguments passed to the GUI
    * @param config configuration manager instance for loading settings (currently unused)
    */
   @Override
   public void launch(String[] args, ConfigManager config) {
-    QuoridorApp.main(args);
+    Application.launch(QuoridorApp.class, args);
   }
 
   /**

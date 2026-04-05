@@ -2,7 +2,7 @@ package fr.bordeaux.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.minimax.MinimaxPlayer;
 import fr.bordeaux.config.ConfigManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,13 +100,9 @@ public class GameStateTest {
 
     Move move = Move.pawn(pos, p1);
 
-    // System.out.println("1 " + human.getPosition());
     game.applyMove(move);
-    // System.out.println("2 " + human.getPosition());
     game.undo();
-    // System.out.println("3 " + human.getPosition());
     game.redo();
-    // System.out.println("4 " + human.getPosition());
 
     assertEquals(p1, human.getPosition());
     assertEquals(ia, game.getCurrentPlayer());
@@ -128,9 +124,7 @@ public class GameStateTest {
   public void victoryIsDetected() {
     human.setPosition(new Position(8, 4));
     Position pos = game.getCurrentPlayer().getPosition();
-    // System.out.println("1 " + human.getPosition());
     game.applyMove(Move.pawn(pos, new Position(8, 4)));
-    // System.out.println("2 " + human.getPosition());
 
     assertFalse(game.isGameOver());
   }
@@ -170,27 +164,58 @@ public class GameStateTest {
   }
 
   @Test
-  public void saveAndLoadJsonWorks() {
-    /*
-    String filename = "test_save.json";
-    game.saveGameJSON(filename);
-
-    GameState loaded = game.loadGameJSON(filename);
-
-    assertNotNull(loaded);
-    assertEquals(game.getPlayers().size(), loaded.getPlayers().size());
-
-    new File(filename).delete();
-
-       */
-  }
-
-  @Test
   public void resetCreatesNewGame() {
 
     game.reset(ConfigManager.getInstance());
     assertEquals(2, game.getPlayers().size());
     assertEquals(9, game.getBoard().getSize());
+  }
+
+  @Test
+  public void testResetWithBlitz() {
+    ConfigManager config = ConfigManager.getInstance();
+    String oldBlitz = config.getOption("blitz", "false");
+    String oldTimeout = config.getOption("timeout", "30");
+
+    try {
+      config.setOption("blitz", "true");
+      config.setOption("timeout", "10"); // 10 minutes
+
+      game.reset(config);
+
+      // 10 minutes = 10 * 60 * 1000 = 600,000 ms
+      for (Player p : game.getPlayers()) {
+        assertEquals(600000L, p.getRemainingTime());
+      }
+    } finally {
+      // Restore config to avoid side effects on other tests
+      config.setOption("blitz", oldBlitz);
+      config.setOption("timeout", oldTimeout);
+    }
+  }
+
+  @Test
+  public void testGetLegalMoves() {
+    // Starting position (0,4) for WHITE player
+    List<Position> legalPositions = game.getLegalMoves(human);
+
+    // Possible moves from (0,4) on a standard board are (1,4), (0,3), (0,5)
+    assertTrue(legalPositions.contains(new Position(1, 4)));
+    assertTrue(legalPositions.contains(new Position(0, 3)));
+    assertTrue(legalPositions.contains(new Position(0, 5)));
+    assertEquals(3, legalPositions.size());
+  }
+
+  @Test
+  public void testGenerateLegalPawnMoves() {
+    List<Move> legalPawnMoves = game.generateLegalPawnMoves(human);
+
+    // Should contain moves to the same positions as getLegalMoves
+    assertTrue(legalPawnMoves.stream().anyMatch(m -> m.getTo().equals(new Position(1, 4))));
+    assertTrue(legalPawnMoves.stream().anyMatch(m -> m.getTo().equals(new Position(0, 3))));
+    assertTrue(legalPawnMoves.stream().anyMatch(m -> m.getTo().equals(new Position(0, 5))));
+    assertEquals(3, legalPawnMoves.size());
+    assertTrue(legalPawnMoves.stream().allMatch(Move::isPawn));
   }
 
   @Test

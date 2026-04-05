@@ -1,8 +1,9 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.mcts;
 
-import static fr.bordeaux.ai.MctsPlayer.backpropagate;
-import static fr.bordeaux.ai.MctsPlayer.bestUCT;
+import static fr.bordeaux.ai.mcts.MctsPlayer.backpropagate;
+import static fr.bordeaux.ai.mcts.MctsPlayer.bestUCT;
 
+import fr.bordeaux.ai.nn.NeuralNetworkEvaluator;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;

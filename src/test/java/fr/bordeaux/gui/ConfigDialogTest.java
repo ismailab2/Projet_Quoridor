@@ -3,24 +3,21 @@ package fr.bordeaux.gui;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import javafx.application.Platform;
+import java.util.Optional;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
-import org.junit.jupiter.api.BeforeAll;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.testfx.framework.junit5.ApplicationTest;
 
-class ConfigDialogTest {
+class ConfigDialogTest extends ApplicationTest {
 
-  @BeforeAll
-  static void initJavaFx() {
-    try {
-      Platform.startup(() -> {});
-    } catch (IllegalStateException ignored) {
-    }
-  }
+  @Override
+  public void start(Stage stage) {}
 
   @Test
   void testHandleKeyPress_modifierKey_returnsEarly() throws Exception {
@@ -88,17 +85,51 @@ class ConfigDialogTest {
 
   @Test
   void testExtractModifiers() throws Exception {
-    KeyEvent event = mock(KeyEvent.class);
-
-    when(event.isControlDown()).thenReturn(true);
-    when(event.isShiftDown()).thenReturn(true);
-    when(event.isAltDown()).thenReturn(false);
-
     var method = ConfigDialog.class.getDeclaredMethod("extractModifiers", KeyEvent.class);
     method.setAccessible(true);
 
-    KeyCodeCombination.Modifier[] mods = (KeyCodeCombination.Modifier[]) method.invoke(null, event);
+    // Test Control + Shift
+    KeyEvent event1 = mock(KeyEvent.class);
+    when(event1.isControlDown()).thenReturn(true);
+    when(event1.isShiftDown()).thenReturn(true);
+    when(event1.isAltDown()).thenReturn(false);
+    KeyCodeCombination.Modifier[] mods1 =
+        (KeyCodeCombination.Modifier[]) method.invoke(null, event1);
+    assertEquals(2, mods1.length);
 
-    assertEquals(2, mods.length);
+    // Test Alt only
+    KeyEvent event2 = mock(KeyEvent.class);
+    when(event2.isControlDown()).thenReturn(false);
+    when(event2.isShiftDown()).thenReturn(false);
+    when(event2.isAltDown()).thenReturn(true);
+    KeyCodeCombination.Modifier[] mods2 =
+        (KeyCodeCombination.Modifier[]) method.invoke(null, event2);
+    assertEquals(1, mods2.length);
+
+    // Test No Modifiers
+    KeyEvent event3 = mock(KeyEvent.class);
+    when(event3.isControlDown()).thenReturn(false);
+    when(event3.isShiftDown()).thenReturn(false);
+    when(event3.isAltDown()).thenReturn(false);
+    KeyCodeCombination.Modifier[] mods3 =
+        (KeyCodeCombination.Modifier[]) method.invoke(null, event3);
+    assertEquals(0, mods3.length);
+  }
+
+  @Test
+  void testShow() {
+    interact(ConfigDialog::show);
+
+    Optional<Window> stageOpt =
+        Window.getWindows().stream()
+            .filter(window -> window instanceof Stage)
+            .filter(window -> "Shortcut Configuration".equals(((Stage) window).getTitle()))
+            .findFirst();
+
+    assertTrue(stageOpt.isPresent(), "ConfigDialog stage should be opened");
+    Stage stage = (Stage) stageOpt.get();
+    assertTrue(stage.isShowing());
+
+    interact(stage::close);
   }
 }

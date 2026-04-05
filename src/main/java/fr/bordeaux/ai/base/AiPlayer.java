@@ -1,4 +1,4 @@
-package fr.bordeaux.ai;
+package fr.bordeaux.ai.base;
 
 import fr.bordeaux.core.*;
 import java.util.Map;
