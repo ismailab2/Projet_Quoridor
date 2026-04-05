@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
@@ -129,5 +130,49 @@ class ActionDispatcherTest {
       dispatcher.dispatch(Action.QUIT);
       mocked.verify(Platform::exit);
     }
+  }
+
+  @Test
+  void testServerStatusShowsCurrentState() throws IOException {
+    GameEngine engine = mock(GameEngine.class);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = spy(new ActionDispatcher(engine, fileHandler));
+
+    doNothing().when(dispatcher).showMessage(anyString(), anyString(), anyString());
+
+    dispatcher.dispatch(Action.SERVER_STATUS);
+
+    verify(dispatcher).showMessage(eq("Network"), eq("Server Status"), contains("Connected clients"));
+  }
+
+  @Test
+  void testServerListShowsDiscoveryMessage() throws IOException {
+    GameEngine engine = mock(GameEngine.class);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = spy(new ActionDispatcher(engine, fileHandler));
+
+    doNothing().when(dispatcher).showMessage(anyString(), anyString(), anyString());
+
+    dispatcher.dispatch(Action.SERVER_LIST);
+
+    verify(dispatcher)
+        .showMessage(eq("Network"), eq("Server List"), contains("Server discovery started"));
+  }
+
+  @Test
+  void testStartServerPromptsAndShowsConfirmation() throws IOException {
+    GameEngine engine = mock(GameEngine.class);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = spy(new ActionDispatcher(engine, fileHandler));
+
+    doReturn("12345")
+        .when(dispatcher)
+        .promptUser(anyString(), anyString(), anyString(), anyString());
+    doNothing().when(dispatcher).showMessage(anyString(), anyString(), anyString());
+
+    dispatcher.dispatch(Action.START_SERVER);
+
+    verify(dispatcher)
+        .showMessage(eq("Network"), eq("Server"), contains("Server started on port 12345"));
   }
 }

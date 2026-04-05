@@ -23,9 +23,10 @@ class MainMenuBarTest {
 
     MainMenuBar menuBar = new MainMenuBar(dispatcher);
 
-    assertEquals(2, menuBar.getMenus().size());
+    assertEquals(3, menuBar.getMenus().size());
     assertEquals("File", menuBar.getMenus().get(0).getText());
     assertEquals("Game", menuBar.getMenus().get(1).getText());
+    assertEquals("Network", menuBar.getMenus().get(2).getText());
   }
 
   @Test
@@ -75,6 +76,24 @@ class MainMenuBarTest {
     newGameItem.getOnAction().handle(null);
 
     verify(dispatcher).dispatch(Action.NEW_GAME);
+  }
+
+  @Test
+  void testNetworkMenuItemsExist() {
+    ActionDispatcher dispatcher = mock(ActionDispatcher.class);
+
+    MainMenuBar menuBar = new MainMenuBar(dispatcher);
+
+    Menu network = menuBar.getMenus().get(2);
+
+    assertTrue(network.getItems().stream().anyMatch(item -> "Start Server".equals(item.getText())));
+    assertTrue(network.getItems().stream().anyMatch(item -> "Stop Server".equals(item.getText())));
+    assertTrue(network.getItems().stream().anyMatch(item -> "Server List".equals(item.getText())));
+    assertTrue(network.getItems().stream().anyMatch(item -> "Server Status".equals(item.getText())));
+    assertTrue(network.getItems().stream().anyMatch(item -> "Players".equals(item.getText())));
+    assertTrue(network.getItems().stream().anyMatch(item -> "Scoreboard".equals(item.getText())));
+    assertTrue(
+        network.getItems().stream().anyMatch(item -> "New Network Game".equals(item.getText())));
   }
 
   @Test

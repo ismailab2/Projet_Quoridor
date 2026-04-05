@@ -30,5 +30,38 @@ public enum Action {
   PAUSE,
 
   /** Displays a hint for the current player. */
-  HINT
+  HINT,
+
+  /** Starts the network server. */
+  START_SERVER,
+
+  /** Stops the network server. */
+  STOP_SERVER,
+
+  /** Displays the network server status. */
+  SERVER_STATUS,
+
+  /** Discovers available servers on the local network. */
+  SERVER_LIST,
+
+  /** Displays the connected players. */
+  PLAYERS,
+
+  /** Displays the server scoreboard. */
+  SCOREBOARD,
+
+  /** Creates a new network game. */
+  NEW_NETWORK_GAME,
+
+  /** Joins a remote network server. */
+  JOIN_SERVER,
+
+  /** Sends the local player name to the connected server. */
+  SET_NETWORK_NAME,
+
+  /** Sends a ping to the connected server. */
+  PING_SERVER,
+
+  /** Disconnects from the connected network server. */
+  QUIT_SERVER
 }
