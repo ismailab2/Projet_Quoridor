@@ -10,9 +10,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class BlitzManager {
 
-  private final GameEngine gameEngine;
+  private static final long THRESHOLD_MS = 60_000;
+  private static final int TICK_SLOW_MS = 1000;
+  private static final int TICK_FAST_MS = 10;
+
+  private GameEngine gameEngine;
   private ScheduledExecutorService scheduler;
-  private boolean running = false;
+  private boolean isRunning = false;
 
   /**
    * Constructs a BlitzManager associated with a game engine.
@@ -25,12 +29,23 @@ public class BlitzManager {
 
   /** Starts or resumes the countdown. Creates a new scheduled thread that executes every second. */
   public void start() {
-    if (running) {
+    if (isRunning) {
       return;
     }
-    running = true;
+    isRunning = true;
+    long remaining = gameEngine.getState().getCurrentPlayer().getRemainingTime();
+    int tick = remaining > THRESHOLD_MS ? TICK_SLOW_MS : TICK_FAST_MS;
+    startWithTick(tick);
+  }
+
+  /**
+   * Creates a new scheduler and starts it with the given tick interval.
+   *
+   * @param tickMs the interval in milliseconds between each timer tick
+   */
+  private void startWithTick(int tickMs) {
     scheduler = Executors.newSingleThreadScheduledExecutor();
-    scheduler.scheduleAtFixedRate(this::task, 1, 1, TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(() -> task(tickMs), tickMs, tickMs, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -38,10 +53,10 @@ public class BlitzManager {
    * decrementation.
    */
   public void pause() {
-    if (!running) {
+    if (!isRunning) {
       return;
     }
-    running = false;
+    isRunning = false;
     if (scheduler != null && !scheduler.isShutdown()) {
       scheduler.shutdownNow();
     }
@@ -51,17 +66,29 @@ public class BlitzManager {
    * Internal task executed at each timer tick (every second). Identifies the active player,
    * decrements their time, and checks for loss conditions.
    */
-  private void task() {
+  private void task(int tickMs) {
+    try {
+      GameState state = gameEngine.getState();
+      if (state.isPaused() || state.isGameOver()) return;
 
-    GameState state = gameEngine.getState();
-    if (state.isPaused() || state.isGameOver()) {
-      return;
-    }
+      state.decrementCurrentPlayerTime(tickMs);
+      if (state.isGameOver()) {
+        pause();
+        return;
+      }
 
-    state.decrementCurrentPlayerTime(1000);
+      if (tickMs == TICK_SLOW_MS && state.getCurrentPlayer().getRemainingTime() <= THRESHOLD_MS) {
+        ScheduledExecutorService old = scheduler;
+        new Thread(
+                () -> {
+                  old.shutdownNow();
+                  startWithTick(TICK_FAST_MS);
+                })
+            .start();
+      }
 
-    if (state.isGameOver()) {
-      pause();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -71,6 +98,6 @@ public class BlitzManager {
    * @return true if the timer is running, false otherwise.
    */
   public boolean isRunning() {
-    return running;
+    return isRunning;
   }
 }

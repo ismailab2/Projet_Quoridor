@@ -53,12 +53,8 @@ public final class OptionsParser {
           case "--contest", "-c" -> {
               if (i + 1 < args.length) {
                   String file = args[++i];
-                  config.setOption("contest-file", file);
+                  config.enableContest(file);
 
-                  ContestLauncher launcher = new ContestLauncher();
-                  launcher.launch(args, config);
-
-                  System.exit(0);
               } else {
                   throw new IllegalArgumentException("--contest requires a file path");
               }

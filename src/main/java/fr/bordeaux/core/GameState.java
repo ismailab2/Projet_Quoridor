@@ -473,4 +473,14 @@ public class GameState {
     this.gameOver = b;
     notifyListeners();
   }
+
+    /**
+     * Sets the game over status without nottify listeners.
+     *
+     * @param b {@code true} to end the game.
+     */
+    public void setGameOverSilent(boolean b) {
+        this.gameOver = b;
+    }
+
 }

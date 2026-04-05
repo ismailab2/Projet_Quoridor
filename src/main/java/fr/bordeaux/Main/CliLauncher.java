@@ -29,7 +29,7 @@ public class CliLauncher implements AppLauncher {
   @Override
   public void launch(String[] args, ConfigManager config) {
     try {
-        GameEngine engine = GameEngineFactory.createGameEngine(config);
+      GameEngine engine = GameEngineFactory.createGameEngine(config);
       new CliApp(engine).run();
     } catch (Exception e) {
       Logger.getInstance().error("CLI Error: " + e.getMessage());

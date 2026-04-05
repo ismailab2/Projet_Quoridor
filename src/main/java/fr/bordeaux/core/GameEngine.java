@@ -2,7 +2,6 @@ package fr.bordeaux.core;
 
 import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.config.ConfigManager;
-
 import java.io.IOException;
 
 /**
@@ -81,9 +80,11 @@ public class GameEngine {
     return true;
   }
 
-  /** Resets the current game to its initial state and clears listeners.
+  /**
+   * Resets the current game to its initial state and clears listeners.
+   *
    * @param config The {@link ConfigManager } to be performed.
-   * */
+   */
   public void newGame(ConfigManager config) {
     if (blitzManager != null) {
       blitzManager.pause();
@@ -154,8 +155,9 @@ public class GameEngine {
    * @return The best move for the current player.
    * @throws IOException If an I/O error occurs.
    */
-  public String hint() throws IOException {
-      return moveToString(MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true));
+  public Move hint() throws IOException {
+      moveToString(MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true));
+      return MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true);
   }
 
   /**

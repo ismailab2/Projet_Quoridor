@@ -33,39 +33,40 @@ public final class PlayerFactory {
    */
   public static List<Player> createPlayers(final ConfigManager config) {
     List<Player> players = new ArrayList<>();
-
+    int size = ConfigManager.getInstance().getInt("board-size", 9);
     if (config.getBoolean("ai1", false)) {
       players.add(
-          buildAi("AI WHITE", new Position(0, CliLauncher.BOARD_SIZE / 2), config, Color.WHITE));
+          buildAi("AI WHITE", new Position(0, size / 2), config, Color.WHITE));
     } else {
       players.add(
-          new HumanPlayer("Human White", new Position(0, CliLauncher.BOARD_SIZE / 2), Color.WHITE));
+
+          new HumanPlayer("Human White", new Position(0, size / 2), Color.WHITE));
     }
 
     if (config.getBoolean("ai2", false)) {
       players.add(
           buildAi(
               "AI BLACK",
-              new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2),
+              new Position(size - 1, size / 2),
               config,
               Color.BLACK));
     } else {
       players.add(
           new HumanPlayer(
               "Human Black",
-              new Position(CliLauncher.BOARD_SIZE - 1, CliLauncher.BOARD_SIZE / 2),
+              new Position(size - 1, size / 2),
               Color.BLACK));
     }
 
     int nbPlayers = Integer.parseInt(config.getOption("nb-players", "2"));
     if (nbPlayers <= 4 && nbPlayers > 2) {
       players.add(
-          new HumanPlayer("Human Blue", new Position(CliLauncher.BOARD_SIZE / 2, 0), Color.BLUE));
+          new HumanPlayer("Human Blue", new Position(size / 2, 0), Color.BLUE));
       if (nbPlayers == 4) {
         players.add(
             new HumanPlayer(
                 "Human Red",
-                new Position(CliLauncher.BOARD_SIZE / 2, CliLauncher.BOARD_SIZE - 1),
+                new Position(size / 2, size - 1),
                 Color.RED));
       }
     }
@@ -120,8 +121,8 @@ public final class PlayerFactory {
       case "iterative":
       case "minimax":
       default:
-        final int depth = config.getInt(prefix + ".depth", 2);
         final int reflexionTime = config.getInt(prefix + ".time", 5);
+        final int depth = config.getInt(prefix + ".depth", depthBasedOnTime(reflexionTime));
         final String scoring = config.getOption(prefix + ".scoring", "simple");
 
         MinimaxBuilder builder =
@@ -138,5 +139,26 @@ public final class PlayerFactory {
     }
 
     return player;
+  }
+
+  /**
+   * Determines the AI search depth based on the allocated reflection time.
+   *
+   * @param reflexionTime the time allowed for the AI to think, in seconds.
+   * @return the calculated search depth (from 2 to 5).
+   */
+  private static int depthBasedOnTime(int reflexionTime) {
+    final int result;
+    if (reflexionTime <= 5) {
+      result = 2;
+    } else if (reflexionTime <= 7) {
+      result = 3;
+    } else if (reflexionTime <= 10) {
+      result = 4;
+    } else {
+      result = 5;
+    }
+
+    return result;
   }
 }

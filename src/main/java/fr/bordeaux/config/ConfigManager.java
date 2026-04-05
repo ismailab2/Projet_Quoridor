@@ -125,11 +125,13 @@ public class ConfigManager {
    * @return The integer value of the property.
    */
   public int getInt(String key, int defaultValue) {
-    try {
-      return Integer.parseInt(props.getProperty(key));
-    } catch (Exception e) {
-      return defaultValue;
-    }
+      try {
+          String value = props.getProperty(key);
+          if (value == null) return defaultValue;
+          return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+          return defaultValue;
+      }
   }
 
     /**
