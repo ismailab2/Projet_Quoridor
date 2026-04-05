@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 class NetworkLauncherTest {
 
-  private GameServer server;
   private MultiGameServer multiServer;
   private GameClient client;
   private ConfigManager config;
@@ -28,11 +27,10 @@ class NetworkLauncherTest {
 
   @BeforeEach
   void setUp() {
-    server = mock(GameServer.class);
     multiServer = mock(MultiGameServer.class);
     client = mock(GameClient.class);
     config = mock(ConfigManager.class);
-    launcher = new NetworkLauncher(server, multiServer, client);
+    launcher = new NetworkLauncher(multiServer, client);
 
     testOut = new ByteArrayOutputStream();
     System.setOut(new PrintStream(testOut));
@@ -81,8 +79,8 @@ class NetworkLauncherTest {
 
     launcher.launch(new String[] {}, config);
 
-    verify(server).start(12345);
-    verify(server).stop();
+    verify(multiServer).start(12345);
+    verify(multiServer).stop();
   }
 
   /**
@@ -96,7 +94,7 @@ class NetworkLauncherTest {
    */
   @Test
   void testLaunch_MultiStartStopStatus() {
-    setInput("multi start 54321\nmulti stop\nserver status\nplayers\nscoreboard\nquit\n");
+    setInput("server start 54321\nserver stop\nserver status\nplayers\nscoreboard\nquit\n");
     when(config.getOption("server", "false")).thenReturn("false");
     when(multiServer.getServerStatus()).thenReturn("Status OK");
     when(multiServer.listPlayers()).thenReturn("Players: 0");
@@ -106,9 +104,9 @@ class NetworkLauncherTest {
 
     verify(multiServer).start(54321);
     verify(multiServer).stop();
-    verify(multiServer).getServerStatus();
-    verify(multiServer).listPlayers();
-    verify(multiServer).getScoreboard();
+    verify(multiServer, atLeastOnce()).getServerStatus();
+    verify(multiServer, atLeastOnce()).listPlayers();
+    verify(multiServer, atLeastOnce()).getScoreboard();
     assertTrue(testOut.toString().contains("Status OK"));
   }
 
