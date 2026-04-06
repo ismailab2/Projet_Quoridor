@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
@@ -36,15 +36,16 @@ public final class OptionsParser {
    * @param config Configuration manager instance to apply parsed options.
    * @throws IllegalArgumentException if an invalid argument or missing value is provided.
    */
-  public static void parse(String[] args, ConfigManager config) {
+  public static void parse(final String[] args, final ConfigManager config) {
     // Reset session-specific flags to their default values
     config.setOption("blitz", "false");
     config.setOption("contest", "false");
     config.setOption("ai1", "false");
     config.setOption("ai2", "false");
 
-    for (int i = 0; i < args.length; i++) {
-      String arg = args[i];
+    int i = 0;
+    while (i < args.length) {
+      final String arg = args[i];
 
       switch (arg) {
         case "-h", "--help" -> {
@@ -57,7 +58,8 @@ public final class OptionsParser {
 
         case "--contest", "-c" -> {
           if (i + 1 < args.length) {
-            String file = args[++i];
+            i++;
+            final String file = args[i];
             config.enableContest(file);
 
           } else {
@@ -81,7 +83,8 @@ public final class OptionsParser {
         case "-a", "--ai" -> {
           String aiOption = "";
           if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
-            aiOption = args[++i].toLowerCase();
+            i++;
+            aiOption = args[i].toLowerCase(java.util.Locale.ROOT);
           }
 
           if ("a".equals(aiOption)) {
@@ -162,6 +165,7 @@ public final class OptionsParser {
 
         default -> throw new IllegalArgumentException("Invalid option: " + arg);
       }
+      i++;
     }
   }
 
@@ -188,7 +192,7 @@ public final class OptionsParser {
     final String[] values = value.split(",");
     for (final String v : values) {
       final String trimmed = v.trim();
-      if (!trimmed.equals("UCT") && !trimmed.equals("ML")) {
+      if (!"UCT".equals(trimmed) && !"ML".equals(trimmed)) {
         throw new IllegalArgumentException("Invalid option: " + trimmed + " for MCTS selection.");
       }
     }

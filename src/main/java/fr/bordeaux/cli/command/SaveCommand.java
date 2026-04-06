@@ -43,11 +43,11 @@ public class SaveCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info("Attempting to save game to: " + tokens[1]);
+      LOGGER.info("Attempting to save game to: {0}", tokens[1]);
       engine.saveGame(tokens[1]);
       LOGGER.info("Game saved successfully.");
     } catch (Exception e) {
-      LOGGER.error("Failed to save game at path: " + tokens[1], e);
+      LOGGER.error("Failed to save game at path: {0}", tokens[1]);
     }
     return engine;
   }

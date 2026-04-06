@@ -31,7 +31,8 @@ public class HelpCommand implements Command {
    * @param userTokens the tokens entered by the user in the CLI
    * @param registryCli the mapping of command names to their respective factory functions
    */
-  public HelpCommand(String[] userTokens, Map<String, Function<String[], Command>> registryCli) {
+  public HelpCommand(
+      final String[] userTokens, final Map<String, Function<String[], Command>> registryCli) {
     this.tokens = userTokens;
     this.registry = registryCli;
   }
@@ -44,14 +45,14 @@ public class HelpCommand implements Command {
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (tokens == null) {
       LOGGER.debug("Any command has been given.");
     } else if (tokens.length == 1) {
       LOGGER.debug("Showing all commands help.");
       helpCli();
     } else {
-      LOGGER.debug("Displaying help for the command " + tokens[1]);
+      LOGGER.debug("Displaying help for the command {0}", tokens[1]);
       helpFetch();
     }
     return engine;
@@ -96,14 +97,14 @@ public class HelpCommand implements Command {
   public void helpFetch() {
     if (this.tokens.length <= 1) {
       LOGGER.info("Usage: help [CMD]");
-      return;
     } else {
-      if (registry.containsKey(tokens[1])) {
+      final String commandName = tokens[1];
+      if (registry.containsKey(commandName)) {
         // Temporary instance of the command to use helpText()
-        Command cmd = registry.get(tokens[1]).apply(new String[] {tokens[1]});
+        final Command cmd = registry.get(commandName).apply(new String[] {commandName});
         cmd.helpText();
       } else {
-        LOGGER.debug("Unknown command : " + tokens[1]);
+        LOGGER.debug("Unknown command : {0}", commandName);
         LOGGER.info("Usage : help [CMD]");
       }
     }

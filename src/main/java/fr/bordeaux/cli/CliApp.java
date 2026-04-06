@@ -190,7 +190,12 @@ public class CliApp {
         final String line = reader.readLine(">> ");
         fetch(line);
       } else {
-        System.out.println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+        if (terminal != null && terminal.writer() != null) {
+          terminal
+              .writer()
+              .println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+          terminal.flush();
+        }
         executeAiTurn();
         new ShowCommand(new String[] {"show", "board"}).execute(engine);
       }
@@ -206,13 +211,13 @@ public class CliApp {
   }
 
   void executeAiTurn() {
-    Player ai = engine.getState().getCurrentPlayer();
-
-    Move move = ai.getNextMove(engine.getState());
-
+    final Player ai = engine.getState().getCurrentPlayer();
+    final Move move = ai.getNextMove(engine.getState());
     engine.play(move);
 
-    LOGGER.info("L'IA a joué : " + move.toString());
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("L''IA a joué : {0}", move);
+    }
   }
 
   /**
@@ -247,8 +252,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        LOGGER.debug("Unknown command: '" + command + "'");
-        LOGGER.info("Did you mean: " + suggestion + " ? ");
+        LOGGER.debug("Unknown command: ''{0}''", command);
+        LOGGER.info("Did you mean: {0} ? ", suggestion);
       }
 
       // Default behavior (interpret as move)
@@ -258,43 +263,47 @@ public class CliApp {
   }
 
   private int calculateDistance(final String userCmd, final String command) {
-    final int[][] distance = new int[userCmd.length() + 1][command.length() + 1];
-    for (int i = 0; i <= userCmd.length(); i++) {
-      for (int j = 0; j <= command.length(); j++) {
+    final int userLen = userCmd.length();
+    final int cmdLen = command.length();
+    final int[][] distance = new int[userLen + 1][cmdLen + 1];
+    for (int i = 0; i <= userLen; i++) {
+      for (int j = 0; j <= cmdLen; j++) {
         if (i == 0) {
           distance[i][j] = j;
         } else if (j == 0) {
           distance[i][j] = i;
         } else {
+          final int substitutionCost = userCmd.charAt(i - 1) == command.charAt(j - 1) ? 0 : 1;
           distance[i][j] =
               Math.min(
-                  distance[i - 1][j - 1] + (userCmd.charAt(i - 1) == command.charAt(j - 1) ? 0 : 1),
+                  distance[i - 1][j - 1] + substitutionCost,
                   Math.min(distance[i - 1][j] + 1, distance[i][j - 1] + 1));
         }
       }
     }
-    return distance[userCmd.length()][command.length()];
+    return distance[userLen][cmdLen];
   }
 
   /** Package-private inner class to handle smart tab-completion for the CLI. */
   class SmartCompleter implements Completer {
     @Override
-    public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-      String buffer = line.line();
+    public void complete(
+        final LineReader reader, final ParsedLine line, final List<Candidate> candidates) {
+      final String buffer = line.line();
       // Finding the current token
-      String[] tokens = buffer.trim().split("\\s+");
+      final String[] tokens = buffer.trim().split("\\s+");
 
       if (buffer.isEmpty()) {
         firstTab = true;
         return;
       }
 
-      List<String> mainCommands =
+      final List<String> mainCommands =
           List.of(
               "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
               "set");
-      List<String> showOptions = List.of("board", "time", "configurations", "history");
-      List<String> helpOptions =
+      final List<String> showOptions = List.of("board", "time", "configurations", "history");
+      final List<String> helpOptions =
           List.of(
               "help",
               "hint",
@@ -311,13 +320,13 @@ public class CliApp {
               "show configurations",
               "show history");
 
-      List<String> matches;
+      final List<String> matches;
 
-      if (tokens.length >= 1 && tokens[0].equals("show")) {
-        String subToken = (tokens.length == 2) ? tokens[1] : "";
+      if (tokens.length >= 1 && "show".equals(tokens[0])) {
+        final String subToken = (tokens.length == 2) ? tokens[1] : "";
         matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
-      } else if (tokens.length >= 1 && tokens[0].equals("help")) {
-        String subToken = (tokens.length == 2) ? tokens[1] : "";
+      } else if (tokens.length >= 1 && "help".equals(tokens[0])) {
+        final String subToken = (tokens.length == 2) ? tokens[1] : "";
         matches = helpOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
       } else {
         matches = mainCommands.stream().filter(cmd -> cmd.startsWith(tokens[0])).toList();

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Utility class used to build graph instances. */
-public class GraphBuilder {
+public final class GraphBuilder {
 
   /** Private constructor to prevent instantiation. */
   private GraphBuilder() {}
@@ -17,9 +17,9 @@ public class GraphBuilder {
    * @param size number of rows and columns in the grid
    * @return a graph representing the empty grid
    */
-  public static Graph buildEmptyGrid(int size) {
-    Map<Integer, List<Integer>> adj = new HashMap<>();
-    int nbVertices = size * size;
+  public static Graph buildEmptyGrid(final int size) {
+    final Map<Integer, List<Integer>> adj = new HashMap<>();
+    final int nbVertices = size * size;
 
     for (int v = 0; v < nbVertices; v++) {
       adj.put(v, new ArrayList<>(4));
@@ -27,7 +27,7 @@ public class GraphBuilder {
 
     for (int row = 0; row < size; row++) {
       for (int col = 0; col < size; col++) {
-        int u = row * size + col;
+        final int u = row * size + col;
 
         if (row < size - 1) {
           addUndirectedEdge(adj, u, (row + 1) * size + col);
@@ -47,7 +47,8 @@ public class GraphBuilder {
    * @param u first vertex
    * @param v second vertex
    */
-  private static void addUndirectedEdge(Map<Integer, List<Integer>> adj, int u, int v) {
+  private static void addUndirectedEdge(
+      final Map<Integer, List<Integer>> adj, final int u, final int v) {
     adj.get(u).add(v);
     adj.get(v).add(u);
   }

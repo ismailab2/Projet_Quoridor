@@ -50,7 +50,8 @@ public class MainMenuBar extends MenuBar {
 
   private Menu createNetworkMenu() {
     Menu network = new Menu("Network");
-    network.getItems()
+    network
+        .getItems()
         .addAll(
             menuItem("Start Server", Action.START_SERVER),
             menuItem("Stop Server", Action.STOP_SERVER),
@@ -75,7 +76,7 @@ public class MainMenuBar extends MenuBar {
           try {
             dispatcher.dispatch(action);
           } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new java.io.UncheckedIOException(e);
           }
         });
 

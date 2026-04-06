@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;

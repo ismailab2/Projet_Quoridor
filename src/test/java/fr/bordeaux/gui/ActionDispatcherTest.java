@@ -1,9 +1,8 @@
 package fr.bordeaux.gui;
 
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
 import java.io.IOException;
 import javafx.application.Platform;
@@ -14,14 +13,13 @@ class ActionDispatcherTest {
 
   @Test
   void testNewGame() throws IOException {
-    GameEngine engine = mock(GameEngine.class);
-    FileHandler fileHandler = mock(FileHandler.class);
-    ConfigManager configManager = ConfigManager.getInstance();
-    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
+    final GameEngine engine = mock(GameEngine.class);
+    final FileHandler fileHandler = mock(FileHandler.class);
+    final ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     dispatcher.dispatch(Action.NEW_GAME);
 
-    verify(engine).newGame(configManager);
+    verify(engine).newGame(anyInt(), anyList(), any());
   }
 
   @Test
@@ -142,7 +140,8 @@ class ActionDispatcherTest {
 
     dispatcher.dispatch(Action.SERVER_STATUS);
 
-    verify(dispatcher).showMessage(eq("Network"), eq("Server Status"), contains("Connected clients"));
+    verify(dispatcher)
+        .showMessage(eq("Network"), eq("Server Status"), contains("Connected clients"));
   }
 
   @Test

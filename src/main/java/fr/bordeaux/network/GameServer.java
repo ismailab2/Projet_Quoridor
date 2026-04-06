@@ -1,11 +1,14 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class implements a simple TCP server capable of: - Accepting a single client connection -
@@ -28,7 +31,7 @@ public class GameServer {
   private Socket clientSocket;
 
   /** Indicates whether the server is running */
-  private volatile boolean running = false;
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   /** UDP broadcaster for server discovery */
   private ServerBroadcaster broadcaster;
@@ -45,14 +48,14 @@ public class GameServer {
    *
    * @param port TCP port to listen on.
    */
-  public void start(int port) {
+  public void start(final int port) {
     new Thread(
             () -> {
               try {
                 serverSocket = new ServerSocket(port);
-                running = true;
+                running.set(true);
 
-                System.out.println("Server started on port " + port);
+                Log.info("Server started on port {0}", port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -61,13 +64,15 @@ public class GameServer {
                 startTimeoutChecker();
 
                 clientSocket = serverSocket.accept();
-                System.out.println("Client connected");
+                Log.info("Client connected");
 
                 new Thread(() -> handleClient(clientSocket)).start();
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                System.out.println("Port already used or error: " + e.getMessage());
+                if (Log.isErrorEnabled()) {
+                  Log.error("Port already used or error: {0}", e.getMessage());
+                }
               }
             })
         .start();
@@ -80,10 +85,10 @@ public class GameServer {
   private void startTimeoutChecker() {
     new Thread(
             () -> {
-              while (running) {
+              while (running.get()) {
 
                 if (System.currentTimeMillis() - lastPing > 60000) {
-                  System.out.println("Client timeout");
+                  Log.info("Client timeout");
                   stop();
                   break;
                 }
@@ -91,6 +96,7 @@ public class GameServer {
                 try {
                   Thread.sleep(5000);
                 } catch (InterruptedException ignored) {
+                  Thread.currentThread().interrupt();
                 }
               }
             })
@@ -103,14 +109,19 @@ public class GameServer {
    *
    * @param socket Client socket.
    */
-  private void handleClient(Socket socket) {
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+  private void handleClient(final Socket socket) {
+    try (BufferedReader in =
+            new BufferedReader(
+                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        PrintWriter out =
+            new PrintWriter(
+                new java.io.OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),
+                true)) {
 
       String line;
 
-      while ((line = in.readLine()) != null && running) {
-        System.out.println("CLIENT -> " + line);
+      while ((line = in.readLine()) != null && running.get()) {
+        Log.info("CLIENT -> {0}", line);
 
         if (line.startsWith("PING")) {
           lastPing = System.currentTimeMillis();
@@ -126,7 +137,7 @@ public class GameServer {
       }
 
     } catch (IOException e) {
-      System.out.println("Client disconnected");
+      Log.info("Client disconnected");
     }
 
     stop();
@@ -136,7 +147,7 @@ public class GameServer {
    * Stops the UDP broadcaster, interrupts its thread, closes all sockets, and releases resources.
    */
   public void stop() {
-    running = false;
+    running.set(false);
 
     try {
       if (broadcaster != null) {
@@ -158,6 +169,6 @@ public class GameServer {
     } catch (IOException ignored) {
     }
 
-    System.out.println("Server stopped.");
+    Log.info("Server stopped.");
   }
 }

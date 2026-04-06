@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

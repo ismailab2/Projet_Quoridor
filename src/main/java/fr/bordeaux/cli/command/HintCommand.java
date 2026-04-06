@@ -28,15 +28,15 @@ public class HintCommand implements Command {
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) throws IOException {
+  public GameEngine execute(final GameEngine engine) throws IOException {
     LOGGER.info("Calculating best move...");
-    Move hint = engine.hint();
+    final Move hint = engine.hint();
 
     if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
-      LOGGER.error("Suggested move: " + hint + " isn't legal");
+      LOGGER.error("Suggested move: {0} isn''t legal", hint);
     }
-    String bestMove = formatMove(hint);
-    LOGGER.info("Best move : " + bestMove);
+    final String bestMove = formatMove(hint);
+    LOGGER.info("Best move : {0}", bestMove);
     return engine;
   }
 
@@ -46,13 +46,17 @@ public class HintCommand implements Command {
    * @param m the move to format
    * @return the string representation of the move
    */
-  private String formatMove(Move m) {
+  private String formatMove(final Move m) {
     if (m.getType() == Move.Type.PAWN) {
       return posToString(m.getFrom()) + "-" + posToString(m.getTo());
-    } else {
-      char orientationChar = m.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
-      return posToString(m.getTo()) + orientationChar;
     }
+    final char orientationChar;
+    if (m.getOrientation() == Orientation.HORIZONTAL) {
+      orientationChar = 'h';
+    } else {
+      orientationChar = 'v';
+    }
+    return posToString(m.getTo()) + orientationChar;
   }
 
   /**
@@ -62,7 +66,7 @@ public class HintCommand implements Command {
    * @param p the position to convert
    * @return the string representation of the position
    */
-  private String posToString(Position p) {
+  private String posToString(final Position p) {
     return (char) ('a' + p.getY()) + "" + (p.getX() + 1);
   }
 

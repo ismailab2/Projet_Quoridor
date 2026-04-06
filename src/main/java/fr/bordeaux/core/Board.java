@@ -6,7 +6,10 @@ import java.util.*;
 /** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
 public class Board {
 
+  /** The number of cells in one dimension of the board. */
   private final int size;
+
+  /** The graph structure representing the board connectivity. */
   private final Graph graph;
 
   /**
@@ -15,13 +18,13 @@ public class Board {
    * @param size The width and height of the board. Must be odd and between 3 and 15.
    * @throws IllegalArgumentException If the size is even or out of the [3, 15] range.
    */
-  public Board(int size) {
+  public Board(final int size) {
     if (size < 3 || size > 15 || size % 2 == 0) {
       throw new IllegalArgumentException(
           "Size must be odd and between 3 and 15, but was : " + size);
     }
     // Create the graph representing the board
-    graph = GraphBuilder.buildEmptyGrid(size);
+    this.graph = GraphBuilder.buildEmptyGrid(size);
     this.size = size;
   }
 
@@ -31,7 +34,7 @@ public class Board {
    * @param size The size of the board.
    * @param graph The graph structure to associate with this board.
    */
-  private Board(int size, Graph graph) {
+  private Board(final int size, final Graph graph) {
     this.size = size;
     this.graph = graph;
   }
@@ -43,7 +46,7 @@ public class Board {
    * @param col The column index (Y coordinate).
    * @return A unique integer ID corresponding to the cell.
    */
-  public int id(int row, int col) {
+  public int getCellId(final int row, final int col) {
     return row * size + col;
   }
 
@@ -53,18 +56,20 @@ public class Board {
    * @param pos The top-left position of the wall.
    * @param orientation The orientation of the wall (HORIZONTAL or VERTICAL).
    */
-  public void addWall(Position pos, Orientation orientation) {
-    int u1 = id(pos.getX(), pos.getY());
-    int u2 = id(pos.getX(), pos.getY() + 1);
-    int v1 = id(pos.getX() + 1, pos.getY());
-    int v2 = id(pos.getX() + 1, pos.getY() + 1);
+  public void addWall(final Position pos, final Orientation orientation) {
+    final int posX = pos.getX();
+    final int posY = pos.getY();
+    final int cellU1 = getCellId(posX, posY);
+    final int cellU2 = getCellId(posX, posY + 1);
+    final int cellV1 = getCellId(posX + 1, posY);
+    final int cellV2 = getCellId(posX + 1, posY + 1);
 
     if (orientation == Orientation.HORIZONTAL) {
-      graph.removeEdge(u1, v1);
-      graph.removeEdge(u2, v2);
+      graph.removeEdge(cellU1, cellV1);
+      graph.removeEdge(cellU2, cellV2);
     } else {
-      graph.removeEdge(u1, u2);
-      graph.removeEdge(v1, v2);
+      graph.removeEdge(cellU1, cellU2);
+      graph.removeEdge(cellV1, cellV2);
     }
   }
 
@@ -74,18 +79,20 @@ public class Board {
    * @param pos The top-left position of the wall.
    * @param orientation The orientation of the wall.
    */
-  public void removeWall(Position pos, Orientation orientation) {
-    int u1 = id(pos.getX(), pos.getY());
-    int u2 = id(pos.getX(), pos.getY() + 1);
-    int v1 = id(pos.getX() + 1, pos.getY());
-    int v2 = id(pos.getX() + 1, pos.getY() + 1);
+  public void removeWall(final Position pos, final Orientation orientation) {
+    final int posX = pos.getX();
+    final int posY = pos.getY();
+    final int cellU1 = getCellId(posX, posY);
+    final int cellU2 = getCellId(posX, posY + 1);
+    final int cellV1 = getCellId(posX + 1, posY);
+    final int cellV2 = getCellId(posX + 1, posY + 1);
 
     if (orientation == Orientation.HORIZONTAL) {
-      graph.addEdge(u1, v1);
-      graph.addEdge(u2, v2);
+      graph.addEdge(cellU1, cellV1);
+      graph.addEdge(cellU2, cellV2);
     } else {
-      graph.addEdge(u1, u2);
-      graph.addEdge(v1, v2);
+      graph.addEdge(cellU1, cellU2);
+      graph.addEdge(cellV1, cellV2);
     }
   }
 
@@ -95,11 +102,10 @@ public class Board {
    * @param position The position to check.
    * @return {@code true} if the position is inside the board, {@code false} otherwise.
    */
-  public boolean isInside(Position position) {
-    return position.getX() >= 0
-        && position.getX() < size
-        && position.getY() >= 0
-        && position.getY() < size;
+  public boolean isInside(final Position position) {
+    final int posX = position.getX();
+    final int posY = position.getY();
+    return posX >= 0 && posX < size && posY >= 0 && posY < size;
   }
 
   /**
@@ -124,24 +130,23 @@ public class Board {
    * Checks if placing a wall at the specified position would cause a collision. This includes
    * overlapping with existing walls or crossing through another wall.
    *
-   * @param to The top-left position for the new wall.
+   * @param targetPos The top-left position for the new wall.
    * @param orientation The orientation of the new wall.
    * @return {@code true} if there is a collision, {@code false} if the placement is clear.
    */
-  public boolean isWallCollision(Position to, Orientation orientation) {
-    int u1 = id(to.getX(), to.getY());
-    int u2 = id(to.getX(), to.getY() + 1);
-    int v1 = id(to.getX() + 1, to.getY());
-    int v2 = id(to.getX() + 1, to.getY() + 1);
+  public boolean isWallCollision(final Position targetPos, final Orientation orientation) {
+    final int posX = targetPos.getX();
+    final int posY = targetPos.getY();
+    final int cellU1 = getCellId(posX, posY);
+    final int cellU2 = getCellId(posX, posY + 1);
+    final int cellV1 = getCellId(posX + 1, posY);
+    final int cellV2 = getCellId(posX + 1, posY + 1);
 
-    // Overlap : At least a part of the wall is colliding with another wall
-    // Cross : There is already a wall at the same place but different orientation, can't form a
-    // cross
-    boolean hOverlap = !graph.hasEdge(u1, v1) || !graph.hasEdge(u2, v2);
-    boolean hCross = !graph.hasEdge(u1, u2) && !graph.hasEdge(v1, v2);
+    final boolean hOverlap = !graph.hasEdge(cellU1, cellV1) || !graph.hasEdge(cellU2, cellV2);
+    final boolean hCross = !graph.hasEdge(cellU1, cellU2) && !graph.hasEdge(cellV1, cellV2);
 
-    boolean vOverlap = !graph.hasEdge(u1, u2) || !graph.hasEdge(v1, v2);
-    boolean vCross = !graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2);
+    final boolean vOverlap = !graph.hasEdge(cellU1, cellU2) || !graph.hasEdge(cellV1, cellV2);
+    final boolean vCross = !graph.hasEdge(cellU1, cellV1) && !graph.hasEdge(cellU2, cellV2);
 
     return (orientation == Orientation.HORIZONTAL) ? hOverlap || hCross : vOverlap || vCross;
   }

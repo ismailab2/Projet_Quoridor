@@ -42,7 +42,7 @@ public class NewCommand implements Command {
    * @param term the terminal used for input/output
    * @param r the line reader used to interact with the user
    */
-  public NewCommand(String[] t, Terminal term, LineReader r) {
+  public NewCommand(final String[] t, final Terminal term, final LineReader r) {
     this.tokens = t;
     this.terminal = term;
     this.reader = r;
@@ -54,7 +54,7 @@ public class NewCommand implements Command {
    * @param t the terminal used for input/output
    * @param r the line reader used to read user input
    */
-  public NewCommand(Terminal t, LineReader r) {
+  public NewCommand(final Terminal t, final LineReader r) {
     this(new String[] {"9", "2"}, t, r);
   }
 
@@ -72,48 +72,58 @@ public class NewCommand implements Command {
    * @return a new GameEngine instance representing the new game
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
-    if (tokens.length > 5) LOGGER.error("wrong amount of arguments...");
+  public GameEngine execute(final GameEngine engine) {
+    GameEngine result = engine;
+    if (tokens.length > 5) {
+      LOGGER.error("wrong amount of arguments...");
+    }
 
-    int size = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9) - 1;
-    Position[] positions = {
+    final int boardSizeInput = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9);
+    final int size = boardSizeInput - 1;
+    final Position[] positions = {
       new Position(0, size / 2), new Position(size, size / 2),
       new Position(size / 2, 0), new Position(size / 2, size)
     };
-    if (tokens.length == 1)
-      return new GameEngine(
-          new GameState(
-              new Board(size + 1),
-              List.of(
-                  new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
-                  new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
-          engine.isBlitz(),
-          engine.isVerbose(),
-          engine.isContest(),
-          engine.isDebug(),
-          engine.getInitialWalls());
-    else {
-      int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
-      Board board = new Board(size + 1);
-      Player[] players = new Player[nbPlayer];
 
-      for (int i = 0; i < nbPlayer; i++) {
+    if (tokens.length == 1) {
+      result =
+          new GameEngine(
+              new GameState(
+                  new Board(size + 1),
+                  List.of(
+                      new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                      new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
+              engine.isBlitz(),
+              engine.isVerbose(),
+              engine.isContest(),
+              engine.isDebug(),
+              engine.getInitialWalls());
+    } else {
+      final int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
+      final Board board = new Board(size + 1);
+      final Player[] players = new Player[nbPlayer];
+
+      boolean interrupted = false;
+      for (int index = 0; index < nbPlayer; index++) {
         try {
           LOGGER.info("Player's type available :");
           LOGGER.info(
-              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [mctsnn] Monte Carlo ia with NeuralNetwork selector  - [r]andom ia");
-          String typePlayer = reader.readLine("Player's type >> ");
-          if (typePlayer == null) throw new EndOfFileException();
+              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia"
+                  + "  - [mctsnn] Monte Carlo ia with NeuralNetwork selector  - [r]andom ia");
+          final String typePlayer = reader.readLine("Player's type >> ");
+          if (typePlayer == null) {
+            throw new EndOfFileException();
+          }
           if (!typePlayer.equals("h")
               && !typePlayer.equals("mcts")
               && !typePlayer.equals("mini")
               && !typePlayer.equals("r")
               && !typePlayer.equals("mctsnn")) {
             LOGGER.error("Wrong type, please enter h / mcts / mini / mctsnn / r");
-            i--;
+            index--;
             continue;
           }
-          String inputName = reader.readLine("Player's name >> ");
+          final String inputName = reader.readLine("Player's name >> ");
           if (inputName == null) {
             LOGGER.error("Should give a name to the player...");
             throw new EndOfFileException();
@@ -121,28 +131,34 @@ public class NewCommand implements Command {
           switch (typePlayer) {
             case "h":
               {
-                players[i] = new HumanPlayer(inputName, positions[i], Color.fromId(i + 1));
+                players[index] =
+                    new HumanPlayer(inputName, positions[index], Color.fromId(index + 1));
                 break;
               }
             case "mcts":
               {
-                players[i] = new MctsPlayer(inputName, positions[i], Color.fromId(i + 1));
+                players[index] =
+                    new MctsPlayer(inputName, positions[index], Color.fromId(index + 1));
                 break;
               }
             case "mini":
               {
-                players[i] =
-                    MinimaxPlayer.builder(inputName, positions[i], Color.fromId(i + 1)).build();
+                players[index] =
+                    MinimaxPlayer.builder(inputName, positions[index], Color.fromId(index + 1))
+                        .build();
                 break;
               }
             case "mctsnn":
               {
-                players[i] =
-                    new MctsPlayer(inputName, positions[i], 2000, true, Color.fromId(i + 1));
+                players[index] =
+                    new MctsPlayer(
+                        inputName, positions[index], 2000, true, Color.fromId(index + 1));
+                break;
               }
             default:
               {
-                players[i] = new RandomPlayer(inputName, positions[i], Color.fromId(i + 1));
+                players[index] =
+                    new RandomPlayer(inputName, positions[index], Color.fromId(index + 1));
                 break;
               }
           }
@@ -150,25 +166,30 @@ public class NewCommand implements Command {
           LOGGER.debug("You choose to interrupt the interaction.");
           try {
             terminal.close();
-          } catch (Exception exc) {
+          } catch (final Exception exc) {
             LOGGER.error("Terminal closed.");
           }
-          return engine;
-        } catch (
-            IOException e) { // IOException can be caused by loading default NN for mctsnn option
-          throw new RuntimeException(e);
+          interrupted = true;
+          break;
+        } catch (final IOException e) {
+          throw new java.io.UncheckedIOException(e);
         }
       }
-      String setNbPlayers = "nb-players=" + nbPlayer;
-      new SetCommand(setNbPlayers).execute(engine);
-      return new GameEngine(
-          new GameState(board, Arrays.stream(players).toList()),
-          engine.isBlitz(),
-          engine.isVerbose(),
-          engine.isContest(),
-          engine.isDebug(),
-          engine.getInitialWalls());
+
+      if (!interrupted) {
+        final String setNbPlayers = "nb-players=" + nbPlayer;
+        new SetCommand(setNbPlayers).execute(engine);
+        result =
+            new GameEngine(
+                new GameState(board, Arrays.stream(players).toList()),
+                engine.isBlitz(),
+                engine.isVerbose(),
+                engine.isContest(),
+                engine.isDebug(),
+                engine.getInitialWalls());
+      }
     }
+    return result;
   }
 
   /**

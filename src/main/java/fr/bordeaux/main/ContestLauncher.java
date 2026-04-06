@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.config.ConfigManager;
@@ -16,9 +16,12 @@ import java.util.List;
  * <p>Reads a game position from a save file (standard persistence format), computes the best move
  * for the current player using MCTS, and prints it in algebraic notation.
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public final class ContestLauncher implements AppLauncher {
 
-  ContestLauncher() {}
+  ContestLauncher() {
+    // Hidden constructor
+  }
 
   @Override
   public void launch(String[] args, ConfigManager config) {
@@ -72,7 +75,7 @@ public final class ContestLauncher implements AppLauncher {
   }
 
   private static Move computeBestMove(GameState state, ConfigManager config) {
-    long timeBudgetMs = (long) config.getInt("ai1.time", 3) * 1000L;
+    long timeBudgetMs = config.getInt("ai1.time", 3) * 1000L;
 
     try {
       return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, false);
@@ -80,20 +83,23 @@ public final class ContestLauncher implements AppLauncher {
       System.err.println(
           "[contest] MCTS failed (" + e.getMessage() + "), falling back to first legal move.");
       List<Move> legal = state.generateLegalMoves();
-      if (legal.isEmpty()) throw new IllegalStateException("No legal moves available.");
+      if (legal.isEmpty()) {
+        throw new IllegalStateException("No legal moves available.", e);
+      }
       return legal.get(0);
     }
   }
 
   private static String moveToString(Move move) {
-    if (move.getType() == Move.Type.PAWN)
+    if (move.getType() == Move.Type.PAWN) {
       return posToString(move.getFrom()) + "-" + posToString(move.getTo());
+    }
     char orientation = move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
     return posToString(move.getTo()) + orientation;
   }
 
   private static String posToString(Position p) {
     char letter = (char) ('a' + p.getX());
-    return "" + letter + p.getY();
+    return String.valueOf(letter) + p.getY();
   }
 }

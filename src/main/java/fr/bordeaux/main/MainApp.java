@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
 
@@ -15,10 +15,11 @@ import fr.bordeaux.config.ConfigManager;
  * java -jar quoridor.jar --net
  * </pre>
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public final class MainApp {
 
   /** Default constructor. Constructs a new MainApp instance. */
-  public MainApp() {}
+  private MainApp() {}
 
   /**
    * This method performs the following steps:
@@ -33,8 +34,8 @@ public final class MainApp {
    *
    * @param args Command-line arguments passed to the application
    */
-  public static void main(String[] args) {
-    ConfigManager config = ConfigManager.getInstance();
+  public static void main(final String[] args) {
+    final ConfigManager config = ConfigManager.getInstance();
     config.load();
 
     try {
@@ -43,9 +44,9 @@ public final class MainApp {
       if (config.isContestMode()) {
         new ContestLauncher().launch(args, config);
       }
-      AppMode mode = AppModeResolver.resolve(args);
+      final AppMode mode = AppModeResolver.resolve(args);
 
-      AppLauncher launcher = AppLauncherFactory.create(mode);
+      final AppLauncher launcher = AppLauncherFactory.create(mode);
       launcher.launch(args, config);
 
     } catch (IllegalArgumentException e) {

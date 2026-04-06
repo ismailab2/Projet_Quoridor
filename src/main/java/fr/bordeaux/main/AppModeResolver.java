@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 /**
  * Utility class used to resolve the application execution mode from command-line arguments.

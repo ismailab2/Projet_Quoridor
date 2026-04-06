@@ -1,9 +1,10 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.Main.GuiLauncher;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.main.GuiLauncher;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,6 +25,12 @@ import javafx.stage.Stage;
 public class QuoridorApp extends Application {
 
   private static final double PANEL_WIDTH = 200.0;
+  private static final double MIN_WIDTH = 800.0;
+  private static final double MIN_HEIGHT = 600.0;
+  private static final double DEFAULT_MARGIN = 20.0;
+  private static final int OVERLAY_SPACING = 20;
+  private static final double OVERLAY_WIDTH = 400.0;
+  private static final double OVERLAY_HEIGHT = 200.0;
 
   /** Default constructor for the Quoridor JavaFX application. */
   public QuoridorApp() {
@@ -38,34 +45,35 @@ public class QuoridorApp extends Application {
    * @throws IOException if the game engine cannot be built
    */
   @Override
-  public void start(Stage stage) throws IOException {
-    GuiLauncher guiLauncher = new GuiLauncher();
-    GameEngine engine = guiLauncher.buildEngine();
-    GameState state = engine.getState();
+  public void start(final Stage stage) throws IOException {
+    final GuiLauncher guiLauncher = new GuiLauncher();
+    final GameEngine engine = guiLauncher.buildEngine();
+    final GameState state = engine.getState();
 
-    FileHandler fileHandler = new FileHandler(stage);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
+    final FileHandler fileHandler = new FileHandler(stage);
+    final ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
-    PlayerPanel player1Panel = new PlayerPanel(state.getPlayers().get(0).getName(), state, 0);
-    PlayerPanel player2Panel = new PlayerPanel(state.getPlayers().get(1).getName(), state, 1);
+    final List<Player> players = state.getPlayers();
+    final PlayerPanel player1Panel = new PlayerPanel(players.get(0).getName(), state, 0);
+    final PlayerPanel player2Panel = new PlayerPanel(players.get(1).getName(), state, 1);
     setupPanelSize(player1Panel);
     setupPanelSize(player2Panel);
 
-    BoardView boardView = new BoardView(engine);
-    StackPane boardContainer = buildBoardContainer(boardView);
+    final BoardView boardView = new BoardView(engine);
+    final StackPane boardContainer = buildBoardContainer(boardView);
 
-    MainMenuBar menuBar = new MainMenuBar(dispatcher);
-    BorderPane root = buildRootLayout(menuBar, boardContainer, player1Panel, player2Panel);
+    final MainMenuBar menuBar = new MainMenuBar(dispatcher);
+    final BorderPane root = buildRootLayout(menuBar, boardContainer, player1Panel, player2Panel);
 
     DragAndDrop.install(engine, boardView);
 
-    Scene scene = new Scene(root);
+    final Scene scene = new Scene(root);
     setupShortcuts(scene, dispatcher);
 
     stage.setTitle("Quoridor");
     stage.setScene(scene);
-    stage.setMinWidth(800);
-    stage.setMinHeight(600);
+    stage.setMinWidth(MIN_WIDTH);
+    stage.setMinHeight(MIN_HEIGHT);
     stage.setMaximized(true);
     stage.show();
 
@@ -79,7 +87,7 @@ public class QuoridorApp extends Application {
    *
    * @param panel the panel to configure
    */
-  private void setupPanelSize(PlayerPanel panel) {
+  private void setupPanelSize(final PlayerPanel panel) {
     panel.setMinWidth(PANEL_WIDTH);
     panel.setMaxWidth(PANEL_WIDTH);
     panel.setPrefWidth(PANEL_WIDTH);
@@ -91,8 +99,8 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to wrap
    * @return a StackPane containing the board view
    */
-  private StackPane buildBoardContainer(BoardView boardView) {
-    StackPane container = new StackPane(boardView);
+  private StackPane buildBoardContainer(final BoardView boardView) {
+    final StackPane container = new StackPane(boardView);
     container.setAlignment(Pos.CENTER);
     BorderPane.setAlignment(container, Pos.CENTER);
     return container;
@@ -108,16 +116,17 @@ public class QuoridorApp extends Application {
    * @return the configured BorderPane
    */
   private BorderPane buildRootLayout(
-      MainMenuBar menuBar,
-      StackPane boardContainer,
-      PlayerPanel player1Panel,
-      PlayerPanel player2Panel) {
+      final MainMenuBar menuBar,
+      final StackPane boardContainer,
+      final PlayerPanel player1Panel,
+      final PlayerPanel player2Panel) {
     BorderPane.setAlignment(player1Panel, Pos.CENTER);
     BorderPane.setAlignment(player2Panel, Pos.CENTER);
-    BorderPane.setMargin(player1Panel, new Insets(20));
-    BorderPane.setMargin(player2Panel, new Insets(20));
+    final Insets margin = new Insets(DEFAULT_MARGIN);
+    BorderPane.setMargin(player1Panel, margin);
+    BorderPane.setMargin(player2Panel, margin);
 
-    BorderPane root = new BorderPane();
+    final BorderPane root = new BorderPane();
     root.setTop(menuBar);
     root.setCenter(boardContainer);
     root.setLeft(player1Panel);
@@ -131,8 +140,8 @@ public class QuoridorApp extends Application {
    * @param scene the JavaFX scene
    * @param dispatcher the action dispatcher
    */
-  private void setupShortcuts(Scene scene, ActionDispatcher dispatcher) {
-    ShortcutManager manager = ShortcutManager.getInstance();
+  private void setupShortcuts(final Scene scene, final ActionDispatcher dispatcher) {
+    final ShortcutManager manager = ShortcutManager.getInstance();
     manager.setDispatcher(dispatcher);
     manager.register(scene);
   }
@@ -144,14 +153,24 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to resize
    * @param menuBar the menu bar (its height is excluded from available space)
    */
-  private void setupResizeListeners(Scene scene, BoardView boardView, MainMenuBar menuBar) {
+  private void setupResizeListeners(
+      final Scene scene, final BoardView boardView, final MainMenuBar menuBar) {
     scene
         .widthProperty()
-        .addListener((obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              resizeBoard(boardView, scene, menuBar.getHeight());
+            });
     scene
         .heightProperty()
-        .addListener((obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
-    Platform.runLater(() -> resizeBoard(boardView, scene, menuBar.getHeight()));
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              resizeBoard(boardView, scene, menuBar.getHeight());
+            });
+    Platform.runLater(
+        () -> {
+          resizeBoard(boardView, scene, menuBar.getHeight());
+        });
   }
 
   /**
@@ -161,11 +180,11 @@ public class QuoridorApp extends Application {
    * @param scene the current scene
    * @param menuHeight the height of the menu bar to subtract
    */
-  private void resizeBoard(BoardView boardView, Scene scene, double menuHeight) {
-    double availableWidth = scene.getWidth() - (PANEL_WIDTH + 40) * 2;
-    double availableHeight = scene.getHeight() - menuHeight;
-    double size = Math.min(availableWidth, availableHeight);
-    if (size > 0) {
+  private void resizeBoard(final BoardView boardView, final Scene scene, final double menuHeight) {
+    final double availableWidth = scene.getWidth() - (PANEL_WIDTH + DEFAULT_MARGIN * 2) * 2;
+    final double availableHeight = scene.getHeight() - menuHeight;
+    final double size = Math.min(availableWidth, availableHeight);
+    if (size > 0.0) {
       boardView.setPrefSize(size, size);
       boardView.setMinSize(size, size);
       boardView.setMaxSize(size, size);
@@ -178,28 +197,26 @@ public class QuoridorApp extends Application {
    * @param engine the game engine to observe
    * @param container the container where the overlay will be displayed
    */
-  void setupGameOverListener(GameEngine engine, StackPane container) {
-    AtomicBoolean popupShown = new AtomicBoolean(false);
+  void setupGameOverListener(final GameEngine engine, final StackPane container) {
+    final AtomicBoolean popupShown = new AtomicBoolean(false);
+    final GameState state = engine.getState();
 
-    engine
-        .getState()
-        .addListener(
-            () -> {
-              GameState state = engine.getState();
-              if (state.isGameOver()) {
-                if (popupShown.compareAndSet(false, true)) {
-                  findWinner(state)
-                      .ifPresent(
-                          winner ->
-                              Platform.runLater(
-                                  () ->
-                                      showGameOverOverlay(
-                                          container, winner.getName(), popupShown)));
-                }
-              } else {
-                popupShown.set(false);
-              }
-            });
+    state.addListener(
+        () -> {
+          if (state.isGameOver()) {
+            if (popupShown.compareAndSet(false, true)) {
+              findWinner(state)
+                  .ifPresent(
+                      winner ->
+                          Platform.runLater(
+                              () -> {
+                                showGameOverOverlay(container, winner.getName(), popupShown);
+                              }));
+            }
+          } else {
+            popupShown.set(false);
+          }
+        });
   }
 
   /**
@@ -208,7 +225,7 @@ public class QuoridorApp extends Application {
    * @param state the current game state
    * @return an Optional containing the winning player, or empty if none found
    */
-  private java.util.Optional<Player> findWinner(GameState state) {
+  private java.util.Optional<Player> findWinner(final GameState state) {
     return state.getPlayers().stream().filter(state::hasReachedGoal).findFirst();
   }
 
@@ -219,10 +236,11 @@ public class QuoridorApp extends Application {
    * @param winnerName the name of the winning player
    * @param popupShown the flag to reset when the overlay is closed
    */
-  void showGameOverOverlay(StackPane container, String winnerName, AtomicBoolean popupShown) {
-    VBox overlay = new VBox(20);
+  void showGameOverOverlay(
+      final StackPane container, final String winnerName, final AtomicBoolean popupShown) {
+    final VBox overlay = new VBox(OVERLAY_SPACING);
     overlay.setAlignment(Pos.CENTER);
-    overlay.setMaxSize(400, 200);
+    overlay.setMaxSize(OVERLAY_WIDTH, OVERLAY_HEIGHT);
     overlay.setStyle(
         "-fx-background-color: rgba(0, 0, 0, 0.85);"
             + "-fx-padding: 30;"
@@ -231,13 +249,13 @@ public class QuoridorApp extends Application {
             + "-fx-border-radius: 15;"
             + "-fx-border-width: 2;");
 
-    Label titleLabel = new Label("Game Over");
+    final Label titleLabel = new Label("Game Over");
     titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;");
 
-    Label winLabel = new Label(winnerName + " won the game!");
+    final Label winLabel = new Label(winnerName + " won the game!");
     winLabel.setStyle("-fx-text-fill: lightgreen; -fx-font-size: 20px;");
 
-    Button closeBtn = new Button("Close");
+    final Button closeBtn = new Button("Close");
     closeBtn.setStyle("-fx-font-size: 16px; -fx-padding: 8 20; -fx-cursor: hand;");
     closeBtn.setOnAction(
         e -> {
@@ -255,24 +273,25 @@ public class QuoridorApp extends Application {
    * @param engine the game engine to interact with
    * @param boardView the board view to redraw after an AI move
    */
-  void setupAITurnListener(GameEngine engine, BoardView boardView) {
-    AtomicBoolean aiComputing = new AtomicBoolean(false);
+  void setupAITurnListener(final GameEngine engine, final BoardView boardView) {
+    final AtomicBoolean aiComputing = new AtomicBoolean(false);
+    final GameState state = engine.getState();
 
-    Runnable aiTurnTask =
+    final Runnable aiTurnTask =
         () -> {
-          GameState state = engine.getState();
           if (!state.isGameOver() && !state.isPaused()) {
-            Player currentPlayer = state.getCurrentPlayer();
+            final Player currentPlayer = state.getCurrentPlayer();
             if (currentPlayer.isAI() && aiComputing.compareAndSet(false, true)) {
-              new Thread(
+              final Thread aiThread =
+                  new Thread(
                       () -> {
                         Move move = null;
                         try {
                           move = currentPlayer.getNextMove(state);
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                           e.printStackTrace();
                         } finally {
-                          Move finalMove = move;
+                          final Move finalMove = move;
                           Platform.runLater(
                               () -> {
                                 aiComputing.set(false);
@@ -286,13 +305,13 @@ public class QuoridorApp extends Application {
                                 }
                               });
                         }
-                      })
-                  .start();
+                      });
+              aiThread.start();
             }
           }
         };
 
-    engine.getState().addListener(aiTurnTask);
+    state.addListener(aiTurnTask);
     Platform.runLater(aiTurnTask);
   }
 

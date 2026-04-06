@@ -40,7 +40,7 @@ public class UndoCommand implements Command {
       return engine;
     }
     int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
-    LOGGER.info("Undoing " + count + " move(s)...");
+    LOGGER.info("Undoing {0} move(s)...", count);
 
     for (int i = 0; i < count; i++) {
       engine.getState().undo();

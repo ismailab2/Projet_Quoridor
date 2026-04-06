@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import fr.bordeaux.ai.base.*;
 import fr.bordeaux.ai.mcts.*;
@@ -35,8 +35,8 @@ public final class PlayerFactory {
    * @return A {@link List} of {@link Player} objects ready to start the game.
    */
   public static List<Player> createPlayers(final ConfigManager config) {
-    List<Player> players = new ArrayList<>();
-    int size = ConfigManager.getInstance().getInt("board-size", 9);
+    final List<Player> players = new ArrayList<>();
+    final int size = ConfigManager.getInstance().getInt("board-size", 9);
     if (config.getBoolean("ai1", false)) {
       players.add(buildAi("AI WHITE", new Position(0, size / 2), config, Color.WHITE));
     } else {
@@ -49,8 +49,8 @@ public final class PlayerFactory {
       players.add(new HumanPlayer("Human Black", new Position(size - 1, size / 2), Color.BLACK));
     }
 
-    int nbPlayers = Integer.parseInt(config.getOption("nb-players", "2"));
-    if (nbPlayers <= 4 && nbPlayers > 2) {
+    final int nbPlayers = Integer.parseInt(config.getOption("nb-players", "2"));
+    if (nbPlayers > 2 && nbPlayers <= 4) {
       players.add(new HumanPlayer("Human Blue", new Position(size / 2, 0), Color.BLUE));
       if (nbPlayers == 4) {
         players.add(new HumanPlayer("Human Red", new Position(size / 2, size - 1), Color.RED));
@@ -80,7 +80,7 @@ public final class PlayerFactory {
    * @throws UnsupportedOperationException if an unimplemented mode (MCTS/Neural) is requested.
    */
   private static Player buildAi(
-      final String name, final Position pos, final ConfigManager config, Color color) {
+      final String name, final Position pos, final ConfigManager config, final Color color) {
 
     // Convert the Color enum to its ID string (e.g., "0" or "1") to match config keys
     final String colorId = String.valueOf(color.getId());
@@ -99,7 +99,7 @@ public final class PlayerFactory {
         try {
           player = new MctsPlayer(name, pos, reflexionTimeMs, useNN, color);
         } catch (java.io.IOException e) {
-          throw new RuntimeException(
+          throw new IllegalStateException(
               "Error initializing MCTS AI (" + selection + "): " + e.getMessage(), e);
         }
         break;
@@ -111,7 +111,7 @@ public final class PlayerFactory {
         final int depth = config.getInt(prefix + ".depth", depthBasedOnTime(reflexionTime));
         final String scoring = config.getOption(prefix + ".scoring", "simple");
 
-        MinimaxBuilder builder =
+        final MinimaxBuilder builder =
             MinimaxPlayer.builder(name, pos, color)
                 .withDepth(depth)
                 .withHeuristic(scoring)
@@ -133,7 +133,7 @@ public final class PlayerFactory {
    * @param reflexionTime the time allowed for the AI to think, in seconds.
    * @return the calculated search depth (from 2 to 5).
    */
-  private static int depthBasedOnTime(int reflexionTime) {
+  private static int depthBasedOnTime(final int reflexionTime) {
     final int result;
     if (reflexionTime <= 5) {
       result = 2;

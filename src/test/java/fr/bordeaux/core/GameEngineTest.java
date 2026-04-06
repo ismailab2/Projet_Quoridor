@@ -95,9 +95,9 @@ public class GameEngineTest {
 
   @Test
   public void newGame_resets_state() {
-    GameState old = engine.getState();
-    engine.newGame(configManager);
-    GameState fresh = engine.getState();
+    final GameState old = engine.getState();
+    engine.newGame(9, fr.bordeaux.main.PlayerFactory.createPlayers(configManager), null);
+    final GameState fresh = engine.getState();
     assertSame(old, fresh);
     assertEquals(2, fresh.getPlayers().size());
     // System.out.println(fresh.getBoard().getSize());
@@ -106,9 +106,9 @@ public class GameEngineTest {
 
   @Test
   public void save_and_load_game() {
-    String file = "engine_test.json";
+    final String file = "engine_test.json";
     engine.saveGame(file);
-    engine.newGame(configManager);
+    engine.newGame(9, fr.bordeaux.main.PlayerFactory.createPlayers(configManager), null);
     engine.loadGame(file);
     assertEquals(2, engine.getState().getPlayers().size());
     new File(file).delete();

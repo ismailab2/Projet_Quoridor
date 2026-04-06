@@ -132,8 +132,8 @@ public class GameStateTest {
   @Test
   public void winConditionFromTopRow() {
     Predicate<Integer> predicate = game.getWinCondition(human);
-    int id = board.id(8, 4);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(8, 4);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
@@ -141,8 +141,8 @@ public class GameStateTest {
     Player p = new HumanPlayer("P", new Position(8, 4), Color.BLACK);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
-    int id = board.id(0, 4);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(0, 4);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
@@ -150,8 +150,8 @@ public class GameStateTest {
     Player p = new HumanPlayer("P", new Position(4, 0), Color.BLUE);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
-    int id = board.id(4, 8);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(4, 8);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
@@ -159,32 +159,32 @@ public class GameStateTest {
     Player p = new HumanPlayer("P", new Position(4, 8), Color.RED);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
-    int id = board.id(4, 0);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(4, 0);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
   public void resetCreatesNewGame() {
-
-    game.reset(ConfigManager.getInstance());
+    final ConfigManager config = ConfigManager.getInstance();
+    game.reset(9, fr.bordeaux.main.PlayerFactory.createPlayers(config), null);
     assertEquals(2, game.getPlayers().size());
     assertEquals(9, game.getBoard().getSize());
   }
 
   @Test
   public void testResetWithBlitz() {
-    ConfigManager config = ConfigManager.getInstance();
-    String oldBlitz = config.getOption("blitz", "false");
-    String oldTimeout = config.getOption("timeout", "30");
+    final ConfigManager config = ConfigManager.getInstance();
+    final String oldBlitz = config.getOption("blitz", "false");
+    final String oldTimeout = config.getOption("timeout", "30");
 
     try {
       config.setOption("blitz", "true");
       config.setOption("timeout", "10"); // 10 minutes
 
-      game.reset(config);
-
       // 10 minutes = 10 * 60 * 1000 = 600,000 ms
-      for (Player p : game.getPlayers()) {
+      game.reset(9, fr.bordeaux.main.PlayerFactory.createPlayers(config), 600000L);
+
+      for (final Player p : game.getPlayers()) {
         assertEquals(600000L, p.getRemainingTime());
       }
     } finally {

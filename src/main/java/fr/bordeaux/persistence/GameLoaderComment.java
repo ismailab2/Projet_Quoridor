@@ -1,8 +1,10 @@
 package fr.bordeaux.persistence;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,17 +39,18 @@ public final class GameLoaderComment {
    * @return a list of cleaned, non-empty lines
    * @throws IOException if an error occurs while reading the file
    */
-  public static List<String> readCleanLines(String filename) throws IOException {
-    List<String> result = new ArrayList<>();
-    try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+  public static List<String> readCleanLines(final String filename) throws IOException {
+    final List<String> result = new ArrayList<>();
+    try (BufferedReader reader =
+        Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {
       String line;
       boolean inBlockComment = false;
       boolean inGameSection = false;
 
       while ((line = reader.readLine()) != null) {
-        StringBuilder cleanLine = new StringBuilder();
+        final StringBuilder cleanLine = new StringBuilder();
         for (int i = 0; i < line.length(); i++) {
-          char currentChar = line.charAt(i);
+          final char currentChar = line.charAt(i);
           // If currently inside a block comment, ignore everything
           if (inBlockComment) {
             if (currentChar == '}') {
@@ -65,8 +68,8 @@ public final class GameLoaderComment {
           cleanLine.append(currentChar);
         }
 
-        String rawCleaned = cleanLine.toString();
-        String cleaned = rawCleaned.trim();
+        final String rawCleaned = cleanLine.toString();
+        final String cleaned = rawCleaned.trim();
 
         if ("[game]".equals(cleaned)) {
           inGameSection = true;

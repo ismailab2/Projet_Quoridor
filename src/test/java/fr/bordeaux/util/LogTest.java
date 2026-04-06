@@ -9,38 +9,32 @@ public class LogTest {
 
   @BeforeEach
   void reset() {
-    Log.logger.setLevel(Level.INFO);
-  }
-
-  @Test
-  void testConstructor() {
-    Log log = new Log();
-    assertNotNull(log);
+    Log.LOGGER.setLevel(Level.INFO);
   }
 
   @Test
   void testSetVerboseTrue() {
     Log.setVerbose(true);
-    assertEquals(Level.INFO, Log.logger.getLevel());
+    assertEquals(Level.INFO, Log.LOGGER.getLevel());
   }
 
   @Test
   void testSetVerboseFalse() {
     Log.setVerbose(false);
-    assertEquals(Level.FINE, Log.logger.getLevel());
+    assertEquals(Level.FINE, Log.LOGGER.getLevel());
   }
 
   @Test
   void testSetDebugTrue() {
     Log.setDebug(true);
-    assertEquals(Level.FINEST, Log.logger.getLevel());
+    assertEquals(Level.FINEST, Log.LOGGER.getLevel());
   }
 
   @Test
   void testSetDebugFalseDoesNothing() {
     Log.setVerbose(true);
     Log.setDebug(false);
-    assertEquals(Level.INFO, Log.logger.getLevel());
+    assertEquals(Level.INFO, Log.LOGGER.getLevel());
   }
 
   @Test
@@ -71,7 +65,7 @@ public class LogTest {
 
   @Test
   void testStaticInit() {
-    assertNotNull(Log.logger);
+    assertNotNull(Log.LOGGER);
     assertDoesNotThrow(() -> Log.info("init test"));
   }
 }

@@ -14,7 +14,7 @@ public class Position {
    * @param x The x-coordinate.
    * @param y The y-coordinate.
    */
-  public Position(int x, int y) {
+  public Position(final int x, final int y) {
     this.x = x;
     this.y = y;
   }
@@ -54,10 +54,14 @@ public class Position {
    * @return {@code true} if the coordinates are identical, {@code false} otherwise.
    */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    Position position = (Position) obj;
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    final Position position = (Position) obj;
     return this.x == position.x && this.y == position.y;
   }
 

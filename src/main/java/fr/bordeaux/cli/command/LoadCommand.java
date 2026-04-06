@@ -39,11 +39,10 @@ public class LoadCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info("Loading game state from file: " + tokens[1]);
+      LOGGER.info("Loading game state from file: {0}", tokens[1]);
       engine.loadGame(tokens[1]);
     } catch (Exception e) {
-      e.printStackTrace();
-      LOGGER.error("Error while loading file " + tokens[1], e);
+      LOGGER.error("Error while loading file {0}", tokens[1]);
     }
     return engine;
   }

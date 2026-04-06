@@ -2,13 +2,16 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.Player;
+import fr.bordeaux.main.PlayerFactory;
+import fr.bordeaux.network.GameClient;
+import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
-import fr.bordeaux.network.GameClient;
-import fr.bordeaux.network.MultiGameServer;
 
 /**
  * Dispatches actions from the GUI to the GameEngine or other dialogs.
@@ -35,7 +38,7 @@ public class ActionDispatcher {
    * @param engine The GameEngine instance to control the game.
    * @param fileHandler The FileHandler used to save and load.
    */
-  public ActionDispatcher(GameEngine engine, FileHandler fileHandler) {
+  public ActionDispatcher(final GameEngine engine, final FileHandler fileHandler) {
     this.engine = engine;
     this.fileHandler = fileHandler;
   }
@@ -50,16 +53,32 @@ public class ActionDispatcher {
    * @param action The Action enum representing the user command.
    * @throws IOException If an I/O error occurs during command execution.
    */
-  public void dispatch(Action action) throws IOException {
+  public void dispatch(final Action action) throws IOException {
     switch (action) {
-      case NEW_GAME -> engine.newGame(configManager);
+      case NEW_GAME -> {
+        final int size = configManager.getInt("board-size", 9);
+        final List<Player> players = PlayerFactory.createPlayers(configManager);
+        final boolean isBlitz = configManager.getBoolean("blitz", false);
+        final Long timeout;
+        if (isBlitz) {
+          final int timeoutMinutes = configManager.getInt("timeout", 30);
+          timeout = timeoutMinutes * 60 * 1000L;
+        } else {
+          timeout = null;
+        }
+        engine.newGame(size, players, timeout);
+      }
       case LOAD_GAME -> {
-        String path = fileHandler.chooseLoadFile();
-        if (path != null) engine.loadGame(path);
+        final String path = fileHandler.chooseLoadFile();
+        if (path != null) {
+          engine.loadGame(path);
+        }
       }
       case SAVE_GAME -> {
-        String path = fileHandler.chooseSaveFile();
-        if (path != null) engine.saveGame(path);
+        final String path = fileHandler.chooseSaveFile();
+        if (path != null) {
+          engine.saveGame(path);
+        }
       }
       case CONFIGURATION -> ConfigDialog.show();
       case INFO -> InfoDialog.show();
@@ -88,6 +107,7 @@ public class ActionDispatcher {
       case PING_SERVER -> networkClient.ping();
       case QUIT_SERVER -> networkClient.quit();
       case QUIT -> Platform.exit();
+      default -> {}
     }
   }
 
@@ -118,15 +138,20 @@ public class ActionDispatcher {
   }
 
   private void joinServer() {
-    String input =
+    final String input =
         promptUser("Join Server", "Host and Port", "Enter host[:port]:", "localhost:12345");
     if (input == null || input.isBlank()) {
       return;
     }
 
-    String[] hp = input.trim().split(":");
-    String host = hp[0];
-    int port = hp.length > 1 ? Integer.parseInt(hp[1]) : 12345;
+    final String[] hostPort = input.trim().split(":");
+    final String host = hostPort[0];
+    final int port;
+    if (hostPort.length > 1) {
+      port = Integer.parseInt(hostPort[1]);
+    } else {
+      port = 12345;
+    }
 
     if (networkClient.join(host, port)) {
       showMessage("Network", "Join Server", "Connected to " + host + ":" + port + ".");
@@ -145,6 +170,15 @@ public class ActionDispatcher {
     showMessage("Network", "Player Name", "Name sent to server.");
   }
 
+  /**
+   * Prompts the user for a text input using a JavaFX TextInputDialog.
+   *
+   * @param title the title of the dialog
+   * @param header the header text of the dialog
+   * @param content the content text of the dialog
+   * @param defaultValue the default value to display in the text field
+   * @return the user input as a String, or null if the user cancelled
+   */
   protected String promptUser(String title, String header, String content, String defaultValue) {
     TextInputDialog dialog = new TextInputDialog(defaultValue);
     dialog.setTitle(title);
@@ -154,6 +188,13 @@ public class ActionDispatcher {
     return result.orElse(null);
   }
 
+  /**
+   * Displays an information message to the user using a JavaFX Alert.
+   *
+   * @param title the title of the alert
+   * @param header the header text of the alert
+   * @param content the content text (description) of the alert
+   */
   protected void showMessage(String title, String header, String content) {
     Alert alert = new Alert(Alert.AlertType.INFORMATION);
     alert.setTitle(title);

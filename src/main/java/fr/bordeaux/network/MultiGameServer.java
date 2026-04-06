@@ -1,16 +1,19 @@
 package fr.bordeaux.network;
 
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Multi-client Quoridor server allowing several players to connect, create games, and exchange
@@ -22,7 +25,7 @@ public class MultiGameServer {
   private ServerSocket serverSocket;
 
   /** Indicates whether the server is currently running. */
-  private volatile boolean running = false;
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   /** UDP broadcaster announcing the server on the local network. */
   private ServerBroadcaster broadcaster;
@@ -57,6 +60,11 @@ public class MultiGameServer {
   /** Delay between timeout checks. */
   private static final long TIMEOUT_CHECK_INTERVAL_MS = 5000;
 
+  private static final String CLIENT_ID_PREFIX = "C";
+  private static final String GAME_ID_PREFIX = "G";
+  private static final int MIN_PLAYERS = 2;
+  private static final int MAX_PLAYERS = 4;
+
   /** Default constructor. */
   public MultiGameServer() {}
 
@@ -65,53 +73,65 @@ public class MultiGameServer {
    *
    * @param port TCP port used by the server
    */
-  public void start(int port) {
-    new Thread(
+  public void start(final int port) {
+    final Thread serverThread =
+        new Thread(
             () -> {
               try {
                 this.port = port;
                 serverSocket = new ServerSocket(port);
-                running = true;
+                running.set(true);
 
-                System.out.println("Server started on port " + port);
+                Log.info("Server started on port {0}", port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
                 broadcastThread.start();
                 startTimeoutChecker();
 
-                while (running) {
-                  Socket socket = serverSocket.accept();
+                while (running.get()) {
+                  final Socket socket = serverSocket.accept();
 
-                  BufferedReader in =
-                      new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                  final BufferedReader in =
+                      new BufferedReader(
+                          new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+                  final PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                  String clientId;
+                  final String clientId;
                   synchronized (lock) {
-                    clientId = "C" + nextClientId++;
+                    clientId = CLIENT_ID_PREFIX + nextClientId;
+                    nextClientId++;
                   }
 
-                  ClientSession client = new ClientSession(clientId, socket, in, out);
+                  final ClientSession client = new ClientSession(clientId, socket, in, out);
 
                   synchronized (lock) {
-                    clients.put(client.getId(), client);
-                    scoreboard.put(
-                        client.getId(), new ScoreEntry(client.getId(), client.getName()));
+                    final String cid = client.getId();
+                    clients.put(cid, client);
+                    scoreboard.put(cid, new ScoreEntry(cid, client.getName()));
                   }
 
-                  System.out.println("Client connected: " + clientId);
+                  if (Log.isInfoEnabled()) {
+                    Log.info("Client connected: {0}", clientId);
+                  }
 
-                  new Thread(() -> handleClient(client)).start();
+                  final Thread clientThread =
+                      new Thread(
+                          () -> {
+                            handleClient(client);
+                          });
+                  clientThread.start();
                 }
 
-              } catch (IOException e) {
-                if (running) {
-                  System.out.println("Server error: " + e.getMessage());
+              } catch (final IOException e) {
+                if (running.get()) {
+                  if (Log.isErrorEnabled()) {
+                    Log.error("Server error: {0}", e.getMessage());
+                  }
                 }
               }
-            })
-        .start();
+            });
+    serverThread.start();
   }
 
   /**
@@ -119,19 +139,24 @@ public class MultiGameServer {
    *
    * @param client the connected client session
    */
-  private void handleClient(ClientSession client) {
+  private void handleClient(final ClientSession client) {
     try {
-      String line;
-
-      while ((line = client.getIn().readLine()) != null && running) {
+      final BufferedReader reader = client.getIn();
+      while (this.running.get()) {
+        final String line = reader.readLine();
+        if (line == null) {
+          break;
+        }
         client.setLastPing(System.currentTimeMillis());
-        System.out.println(client.getId() + " -> " + line);
+        if (Log.isInfoEnabled()) {
+          Log.info("{0} -> {1}", client.getId(), line);
+        }
 
         if (line.startsWith("HELLO ")) {
           processHello(client, line);
-        } else if (line.equals("PING")) {
+        } else if ("PING".equals(line)) {
           processPing(client);
-        } else if (line.equals("QUIT")) {
+        } else if ("QUIT".equals(line)) {
           processQuit(client);
           break;
         } else if (line.startsWith("MOVE ")) {
@@ -140,9 +165,10 @@ public class MultiGameServer {
           client.send("ERROR unknown command");
         }
       }
-
-    } catch (IOException e) {
-      System.out.println("Client disconnected: " + e.getMessage());
+    } catch (final IOException e) {
+      if (Log.isInfoEnabled()) {
+        Log.info("Client disconnected: {0}", e.getMessage());
+      }
     } finally {
       unregisterClient(client);
     }
@@ -153,32 +179,33 @@ public class MultiGameServer {
    *
    * @param client the disconnected client
    */
-  private void unregisterClient(ClientSession client) {
-    boolean removed;
+  private void unregisterClient(final ClientSession client) {
+    final boolean removed;
+    final String clientId = client.getId();
     synchronized (lock) {
-      removed = clients.remove(client.getId()) != null;
-      if (!removed) {
-        return;
-      }
-
-      String gameId = client.getCurrentGameId();
-      if (gameId != null) {
-        ServerGameSession game = games.get(gameId);
-        if (game != null) {
-          for (ClientSession player : game.getPlayers()) {
-            if (!player.getId().equals(client.getId())) {
-              player.setStatus(PlayerStatus.IDLE);
-              player.setCurrentGameId(null);
-              player.send("ERROR opponent disconnected");
+      removed = clients.remove(clientId) != null;
+      if (removed) {
+        final String gameId = client.getCurrentGameId();
+        if (gameId != null) {
+          final ServerGameSession game = games.get(gameId);
+          if (game != null) {
+            for (final ClientSession player : game.getPlayers()) {
+              if (!player.getId().equals(clientId)) {
+                player.setStatus(PlayerStatus.IDLE);
+                player.setCurrentGameId(null);
+                player.send("ERROR opponent disconnected");
+              }
             }
+            games.remove(gameId);
           }
-          games.remove(gameId);
         }
       }
     }
 
     client.close();
-    System.out.println("Client disconnected: " + client.getId());
+    if (Log.isInfoEnabled()) {
+      Log.info("Client disconnected: {0}", clientId);
+    }
   }
 
   /**
@@ -187,77 +214,67 @@ public class MultiGameServer {
    * @param client the connected client
    * @param line the received HELLO command
    */
-  private void processHello(ClientSession client, String line) {
-    String name = line.substring("HELLO ".length()).trim();
+  private void processHello(final ClientSession client, final String line) {
+    final String name = line.substring("HELLO ".length()).trim();
     if (name.isEmpty()) {
       client.send("ERROR invalid name");
-      return;
-    }
-
-    synchronized (lock) {
-      client.setName(name);
-      ScoreEntry entry = scoreboard.get(client.getId());
-      if (entry != null) {
-        entry.setPlayerName(name);
+    } else {
+      final String clientId = client.getId();
+      synchronized (lock) {
+        client.setName(name);
+        final ScoreEntry entry = scoreboard.get(clientId);
+        if (entry != null) {
+          entry.setPlayerName(name);
+        }
       }
+      client.send("WELCOME " + clientId);
     }
-
-    client.send("WELCOME " + client.getId());
   }
 
   /** Handles the PING command by sending PONG back to the client. */
-  private void processPing(ClientSession client) {
+  private void processPing(final ClientSession client) {
     client.send("PONG");
   }
 
   /** Handles a QUIT command. */
-  private void processQuit(ClientSession client) {
+  private void processQuit(final ClientSession client) {
     client.send("BYE");
   }
 
   /** Validates and applies a move sent by a client. */
-  private void processMove(ClientSession client, String line) {
-    String moveText = line.substring("MOVE ".length()).trim();
+  private void processMove(final ClientSession client, final String line) {
+    final String moveText = line.substring("MOVE ".length()).trim();
+    final String clientId = client.getId();
 
     synchronized (lock) {
-      String gameId = client.getCurrentGameId();
+      final String gameId = client.getCurrentGameId();
       if (gameId == null) {
         client.send("ERROR not in game");
-        return;
-      }
-
-      ServerGameSession game = games.get(gameId);
-      if (game == null) {
-        client.send("ERROR game not found");
-        return;
-      }
-
-      if (!game.isPlayerTurn(client.getId())) {
-        client.send("ERROR not your turn");
-        return;
-      }
-
-      try {
-        Move move = NetworkMoveParser.parseMove(moveText);
-
-        if (!game.applyMove(move)) {
-          client.send("ERROR illegal move");
-          return;
+      } else {
+        final ServerGameSession game = games.get(gameId);
+        if (game == null) {
+          client.send("ERROR game not found");
+        } else if (!game.isPlayerTurn(clientId)) {
+          client.send("ERROR not your turn");
+        } else {
+          try {
+            final Move move = NetworkMoveParser.parseMove(moveText);
+            if (!game.applyMove(move)) {
+              client.send("ERROR illegal move");
+            } else {
+              client.send("OK");
+              for (final ClientSession otherPlayer : game.getOtherPlayers(clientId)) {
+                otherPlayer.send("OPPONENT_MOVE " + moveText);
+              }
+              final ClientSession winner = game.getWinnerSession();
+              if (winner != null) {
+                finishGame(game, winner);
+              }
+            }
+          } catch (final IllegalArgumentException e) {
+            client.send("ERROR invalid move format");
+          }
         }
-
-        client.send("OK");
-
-        for (ClientSession otherPlayer : game.getOtherPlayers(client.getId())) {
-          otherPlayer.send("OPPONENT_MOVE " + moveText);
-        }
-
-        ClientSession winner = game.getWinnerSession();
-        if (winner != null) {
-          finishGame(game, winner);
-        }
-
-      } catch (IllegalArgumentException e) {
-        client.send("ERROR invalid move format");
       }
     }
   }
@@ -268,26 +285,28 @@ public class MultiGameServer {
    * @param game the finished game session
    * @param winner the winning client
    */
-  private void finishGame(ServerGameSession game, ClientSession winner) {
-    ScoreEntry winnerScore = scoreboard.get(winner.getId());
+  private void finishGame(final ServerGameSession game, final ClientSession winner) {
+    final String winnerId = winner.getId();
+    final ScoreEntry winnerScore = scoreboard.get(winnerId);
     if (winnerScore != null) {
       winnerScore.recordWin();
     }
 
-    for (ClientSession player : game.getPlayers()) {
-      if (!player.getId().equals(winner.getId())) {
-        ScoreEntry loserScore = scoreboard.get(player.getId());
+    for (final ClientSession player : game.getPlayers()) {
+      final String pid = player.getId();
+      if (!pid.equals(winnerId)) {
+        final ScoreEntry loserScore = scoreboard.get(pid);
         if (loserScore != null) {
           loserScore.recordLoss();
         }
       }
     }
 
-    for (ClientSession player : game.getPlayers()) {
+    for (final ClientSession player : game.getPlayers()) {
       player.setStatus(PlayerStatus.IDLE);
       player.setCurrentGameId(null);
 
-      if (player.getId().equals(winner.getId())) {
+      if (player.getId().equals(winnerId)) {
         player.send("GAME_OVER WIN");
       } else {
         player.send("GAME_OVER LOSE");
@@ -324,8 +343,8 @@ public class MultiGameServer {
         return "No connected players.";
       }
 
-      StringBuilder sb = new StringBuilder();
-      for (ClientSession client : clients.values()) {
+      final StringBuilder sb = new StringBuilder();
+      for (final ClientSession client : clients.values()) {
         sb.append(client.getId())
             .append(" ")
             .append(client.getName())
@@ -348,8 +367,8 @@ public class MultiGameServer {
         return "Scoreboard is empty.";
       }
 
-      StringBuilder sb = new StringBuilder();
-      for (ScoreEntry entry : scoreboard.values()) {
+      final StringBuilder sb = new StringBuilder();
+      for (final ScoreEntry entry : scoreboard.values()) {
         sb.append(entry).append("\n");
       }
       return sb.toString().trim();
@@ -362,51 +381,63 @@ public class MultiGameServer {
    * @param playerIds identifiers of the players
    * @return a success or error message
    */
-  public String createGame(String... playerIds) {
+  public String createGame(final String... playerIds) {
+    String result = "";
     synchronized (lock) {
-      if (playerIds.length != 2 && playerIds.length != 4) {
-        return "ERROR need exactly 2 or 4 players";
-      }
+      final int playerCount = playerIds.length;
+      if (playerCount != MIN_PLAYERS && playerCount != MAX_PLAYERS) {
+        result = "ERROR need exactly 2 or 4 players";
+      } else {
+        final java.util.Set<String> seenIds = new java.util.HashSet<>();
+        final java.util.List<ClientSession> sessions = new java.util.ArrayList<>();
+        boolean errorFound = false;
 
-      java.util.Set<String> seenIds = new java.util.HashSet<>();
-      java.util.List<ClientSession> sessions = new java.util.ArrayList<>();
+        for (final String playerId : playerIds) {
+          if (!seenIds.add(playerId)) {
+            result = "ERROR duplicate player";
+            errorFound = true;
+            break;
+          }
 
-      for (String playerId : playerIds) {
-        if (!seenIds.add(playerId)) {
-          return "ERROR duplicate player";
+          final ClientSession player = clients.get(playerId);
+          if (player == null) {
+            result = "ERROR player not found";
+            errorFound = true;
+            break;
+          }
+
+          if (player.getStatus() != PlayerStatus.IDLE) {
+            result = "ERROR player not available";
+            errorFound = true;
+            break;
+          }
+
+          sessions.add(player);
         }
 
-        ClientSession player = clients.get(playerId);
-        if (player == null) {
-          return "ERROR player not found";
+        if (!errorFound) {
+          final String gameId = GAME_ID_PREFIX + nextGameId;
+          nextGameId++;
+          final ServerGameSession game = new ServerGameSession(gameId, sessions);
+          games.put(gameId, game);
+
+          for (int index = 0; index < sessions.size(); index++) {
+            final ClientSession session = sessions.get(index);
+            session.setStatus(PlayerStatus.INGAME);
+            session.setCurrentGameId(gameId);
+            final String turnInfo = (index == 0) ? " YOUR_TURN" : " WAIT";
+            session.send("GAME_START " + gameId + turnInfo);
+          }
+          result = "Game created: " + gameId;
         }
-
-        if (player.getStatus() != PlayerStatus.IDLE) {
-          return "ERROR player not available";
-        }
-
-        sessions.add(player);
       }
-
-      String gameId = "G" + nextGameId++;
-      ServerGameSession game = new ServerGameSession(gameId, sessions);
-
-      games.put(gameId, game);
-
-      for (int i = 0; i < sessions.size(); i++) {
-        ClientSession player = sessions.get(i);
-        player.setStatus(PlayerStatus.INGAME);
-        player.setCurrentGameId(gameId);
-        player.send("GAME_START " + gameId + (i == 0 ? " YOUR_TURN" : " WAIT"));
-      }
-
-      return "Game created: " + gameId;
     }
+    return result;
   }
 
   /** Stops the server and closes all active client connections. */
   public void stop() {
-    running = false;
+    running.set(false);
 
     try {
       if (broadcaster != null) {
@@ -418,7 +449,7 @@ public class MultiGameServer {
       }
 
       synchronized (lock) {
-        for (ClientSession client : clients.values()) {
+        for (final ClientSession client : clients.values()) {
           client.send("SERVER_STOPPED");
           client.close();
         }
@@ -433,27 +464,27 @@ public class MultiGameServer {
     } catch (IOException ignored) {
     }
 
-    System.out.println("Server stopped.");
+    Log.info("Server stopped.");
   }
 
   /** Disconnects every client that has been inactive for more than one minute. */
   private void startTimeoutChecker() {
-    Thread timeoutThread =
+    final Thread timeoutThread =
         new Thread(
             () -> {
-              while (running) {
-                List<ClientSession> expiredClients = new ArrayList<>();
+              while (running.get()) {
+                final List<ClientSession> expiredClients = new ArrayList<>();
 
                 synchronized (lock) {
-                  long now = System.currentTimeMillis();
-                  for (ClientSession client : clients.values()) {
+                  final long now = System.currentTimeMillis();
+                  for (final ClientSession client : clients.values()) {
                     if (now - client.getLastPing() > CLIENT_TIMEOUT_MS) {
                       expiredClients.add(client);
                     }
                   }
                 }
 
-                for (ClientSession client : expiredClients) {
+                for (final ClientSession client : expiredClients) {
                   client.send("ERROR timeout");
                   client.close();
                   unregisterClient(client);

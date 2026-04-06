@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 import fr.bordeaux.cli.CliApp;
 import fr.bordeaux.config.ConfigManager;
@@ -14,7 +14,7 @@ import fr.bordeaux.util.Logger;
 public class CliLauncher implements AppLauncher {
 
   /** Default board size for Quoridor (9x9) */
-  public static int BOARD_SIZE = 9;
+  private static final int DEFAULT_BOARD_SIZE = 9;
 
   /** CliLaucher */
   public CliLauncher() {}
@@ -32,7 +32,9 @@ public class CliLauncher implements AppLauncher {
       GameEngine engine = GameEngineFactory.createGameEngine(config);
       new CliApp(engine).run();
     } catch (Exception e) {
-      Logger.getInstance().error("CLI Error: " + e.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("CLI Error: " + e.getMessage());
+      }
     }
   }
 }

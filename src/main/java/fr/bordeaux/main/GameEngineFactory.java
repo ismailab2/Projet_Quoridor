@@ -1,7 +1,7 @@
-package fr.bordeaux.core;
+package fr.bordeaux.main;
 
-import fr.bordeaux.Main.PlayerFactory;
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.core.*;
 import java.util.List;
 
 /** Factory used to create and configure a GameEngine. */
@@ -16,21 +16,21 @@ public class GameEngineFactory {
    * @param configManager configuration manager
    * @return an initialized GameEngine
    */
-  public static GameEngine createGameEngine(ConfigManager configManager) {
-    int boardSize = configManager.getInt("board-size", 9);
-    int nbWalls = configManager.getInt("nb-walls", 10);
-    boolean blitz = configManager.getBoolean("blitz", false);
+  public static GameEngine createGameEngine(final ConfigManager configManager) {
+    final int boardSize = configManager.getInt("board-size", 9);
+    final int nbWalls = configManager.getInt("nb-walls", 10);
+    final boolean blitz = configManager.getBoolean("blitz", false);
 
-    Board board = new Board(boardSize);
-    List<Player> players = PlayerFactory.createPlayers(configManager);
-    GameState state = new GameState(board, players);
+    final Board board = new Board(boardSize);
+    final List<Player> players = PlayerFactory.createPlayers(configManager);
+    final GameState state = new GameState(board, players);
 
     if (blitz) {
-      int timeout = configManager.getInt("timeout", 30);
+      final int timeout = configManager.getInt("timeout", 30);
       state.setLimitTimePlayer(timeout * 60 * 1000L);
     }
 
-    GameEngine engine =
+    final GameEngine engine =
         new GameEngine(
             state,
             blitz,
@@ -48,8 +48,8 @@ public class GameEngineFactory {
    *
    * @param engine game engine
    */
-  private static void initializeWalls(GameEngine engine) {
-    for (Player p : engine.getState().getPlayers()) {
+  private static void initializeWalls(final GameEngine engine) {
+    for (final Player p : engine.getState().getPlayers()) {
       p.setRemainingWalls(engine.getInitialWalls());
     }
   }

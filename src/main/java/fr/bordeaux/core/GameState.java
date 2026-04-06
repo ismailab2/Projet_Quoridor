@@ -1,43 +1,58 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.Main.PlayerFactory;
-import fr.bordeaux.config.ConfigManager;
 import java.util.*;
 import java.util.function.Predicate;
 
-/**
- * Manages the current state of a Quoridor game. It tracks the board, players, current turn, and
- * maintains the history for undo/redo functionality.
- */
+/** Manages the current state of a Quoridor game. Tracks the board, players, and turn history. */
 public class GameState {
 
+  /** The board used for the game. */
   private Board board;
+
+  /** The list of participants. */
   private List<Player> players;
-  private int currentIndexPlayer;
+
+  /** The index of the current active player. */
+  private int playerIndex;
+
+  /** Whether the game is paused. */
   private boolean paused;
+
+  /** Whether the game is over. */
   private boolean gameOver;
+
+  /** The stack for undo functionality. */
   private final Deque<Move> undoStack;
+
+  /** The stack for redo functionality. */
   private final Deque<Move> redoStack;
 
+  /** The list of listeners to be notified of state changes. */
   private final transient List<Runnable> listeners = new ArrayList<>();
+
+  /** The list of listeners to be notified of timer changes. */
   private final transient List<Runnable> timerListeners = new ArrayList<>();
+
+  private static final int MIN_PLAYERS = 2;
+  private static final int MAX_PLAYERS = 4;
 
   /**
    * Constructs a GameState with a board, a list of players, and an initial player index.
    *
    * @param board The board used for the game.
    * @param players The list of participants (must be 2 or 4).
-   * @param currentIndexPlayer The index of the player who starts.
+   * @param playerIndex The index of the player who starts.
    * @throws IllegalArgumentException If the number of players is not 2 or 4.
    */
-  public GameState(Board board, List<Player> players, int currentIndexPlayer) {
-    if (players.size() != 2 && players.size() != 4)
+  public GameState(final Board board, final List<Player> players, final int playerIndex) {
+    if (players.size() != MIN_PLAYERS && players.size() != MAX_PLAYERS) {
       throw new IllegalArgumentException(
           "Number of players must be 2 or 4, but was: " + players.size());
+    }
 
     this.board = board;
     this.players = players;
-    this.currentIndexPlayer = currentIndexPlayer;
+    this.playerIndex = playerIndex;
     this.paused = false;
     this.gameOver = false;
     this.undoStack = new ArrayDeque<>();
@@ -50,7 +65,7 @@ public class GameState {
    * @param board The board used for the game.
    * @param players The list of participants.
    */
-  public GameState(Board board, List<Player> players) {
+  public GameState(final Board board, final List<Player> players) {
     this(board, players, 0);
   }
 
@@ -59,7 +74,7 @@ public class GameState {
    *
    * @param listener The {@link Runnable} to execute on change.
    */
-  public void addListener(Runnable listener) {
+  public void addListener(final Runnable listener) {
     listeners.add(listener);
   }
 
@@ -68,7 +83,7 @@ public class GameState {
    *
    * @param listener The {@link Runnable} to execute on change.
    */
-  public void addTimerListener(Runnable listener) {
+  public void addTimerListener(final Runnable listener) {
     timerListeners.add(listener);
   }
 
@@ -77,7 +92,7 @@ public class GameState {
    *
    * @param amountInMillis amount to subtract in milliseconds.
    */
-  public void decrementCurrentPlayerTime(long amountInMillis) {
+  public void decrementCurrentPlayerTime(final long amountInMillis) {
     final Player target = getCurrentPlayer();
     final long newTime = target.getRemainingTime() - amountInMillis;
     target.setRemainingTime(newTime);
@@ -90,22 +105,26 @@ public class GameState {
 
   /** Notifies all registered listeners of a state change. */
   private void notifyListeners() {
-    for (Runnable l : listeners) l.run();
+    for (final Runnable listener : listeners) {
+      listener.run();
+    }
   }
 
   /** Notifies all registered listeners of a timer change. */
   private void notifyTimerListeners() {
-    for (Runnable l : timerListeners) l.run();
+    for (final Runnable listener : timerListeners) {
+      listener.run();
+    }
   }
 
   /**
-   * Applies a move to the current state. Updates player position or board walls, manages history,
-   * and moves to the next turn.
+   * Applies a move. Updates player position or board walls, manages history, and moves to next
+   * turn.
    *
    * @param move The {@link Move} to apply.
    */
-  public void applyMove(Move move) {
-    Player player = getCurrentPlayer();
+  public void applyMove(final Move move) {
+    final Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
     } else {
@@ -120,13 +139,12 @@ public class GameState {
   }
 
   /**
-   * Applies a move without clearing the redo stack. Useful for internal state manipulations or
-   * redoing moves.
+   * Applies a move without clearing the redo stack. Useful for redoing moves.
    *
    * @param move The {@link Move} to apply.
    */
-  public void applyMoveWithoutClearingRedo(Move move) {
-    Player player = getCurrentPlayer();
+  public void applyMoveWithoutClearingRedo(final Move move) {
+    final Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
     } else {
@@ -143,27 +161,26 @@ public class GameState {
    * @return An array of {@link Move} objects representing the history.
    */
   public Move[] getMovesPlayed() {
-    Object[] obj = undoStack.toArray();
-    Move[] moves = new Move[obj.length];
-    for (int i = 0; i < obj.length; i++) {
-      moves[i] = (Move) obj[i];
+    final Object[] objects = undoStack.toArray();
+    final Move[] moves = new Move[objects.length];
+    for (int index = 0; index < objects.length; index++) {
+      moves[index] = (Move) objects[index];
     }
     return moves;
   }
 
-  /**
-   * Reverts the last move. If the previous player was an AI, it continues reverting until a human
-   * player is reached.
-   */
+  /** Reverts the last move. Continues reverting AI moves until a human player is reached. */
   public void undo() {
-    if (paused || gameOver) return;
-    if (undoStack.isEmpty()) return;
+    if (paused || gameOver || undoStack.isEmpty()) {
+      return;
+    }
 
+    boolean continueUndo;
     do {
-      Move last = undoStack.pop();
+      final Move last = undoStack.pop();
       redoStack.push(last);
       previousPlayer();
-      Player player = getCurrentPlayer();
+      final Player player = getCurrentPlayer();
       if (last.isPawn()) {
         player.setPosition(last.getFrom());
       } else {
@@ -171,19 +188,23 @@ public class GameState {
         player.giveBackWall();
       }
       gameOver = false;
-    } while (!undoStack.isEmpty() && getCurrentPlayer().isAI());
+      continueUndo = !undoStack.isEmpty() && getCurrentPlayer().isAI();
+    } while (continueUndo);
     notifyListeners();
   }
 
   /** Re-applies the last undone move. If the next player is an AI, it continues redoing. */
   public void redo() {
-    if (paused || gameOver) return;
-    if (redoStack.isEmpty()) return;
+    if (paused || gameOver || redoStack.isEmpty()) {
+      return;
+    }
 
+    boolean continueRedo;
     do {
-      Move move = redoStack.pop();
+      final Move move = redoStack.pop();
       applyMoveWithoutClearingRedo(move);
-    } while (!redoStack.isEmpty() && getCurrentPlayer().isAI());
+      continueRedo = !redoStack.isEmpty() && getCurrentPlayer().isAI();
+    } while (continueRedo);
     notifyListeners();
   }
 
@@ -202,9 +223,11 @@ public class GameState {
    * @param player The player to check.
    * @return {@code true} if the player is on a winning cell.
    */
-  public boolean hasReachedGoal(Player player) {
-    int id = board.id(player.getPosition().getX(), player.getPosition().getY());
-    return getWinCondition(player).test(id);
+  public boolean hasReachedGoal(final Player player) {
+    final Position playerPos = player.getPosition();
+    final int cellId = board.getCellId(playerPos.getX(), playerPos.getY());
+    final Predicate<Integer> condition = getWinCondition(player);
+    return condition.test(cellId);
   }
 
   /**
@@ -213,24 +236,31 @@ public class GameState {
    * @param player The player whose win condition is needed.
    * @return A {@link Predicate} that returns true if a cell ID is a winning cell.
    */
-  public Predicate<Integer> getWinCondition(Player player) {
-    Position start = player.getStartingPosition();
-    int size = board.getSize();
+  public Predicate<Integer> getWinCondition(final Player player) {
+    final Position start = player.getStartingPosition();
+    final int boardSize = board.getSize();
+    final Predicate<Integer> condition;
 
-    if (start.getX() == 0) return id -> (id / size) == size - 1; // last row
-    if (start.getX() == size - 1) return id -> (id / size) == 0; // first row
-    if (start.getY() == 0) return id -> (id % size) == size - 1; // last col
-    return id -> (id % size) == 0; // first col
+    if (start.getX() == 0) {
+      condition = id -> (id / boardSize) == boardSize - 1;
+    } else if (start.getX() == boardSize - 1) {
+      condition = id -> (id / boardSize) == 0;
+    } else if (start.getY() == 0) {
+      condition = id -> (id % boardSize) == boardSize - 1;
+    } else {
+      condition = id -> (id % boardSize) == 0;
+    }
+    return condition;
   }
 
   /** Moves the turn to the next player. */
   public void nextPlayer() {
-    currentIndexPlayer = (currentIndexPlayer + 1) % players.size();
+    playerIndex = (playerIndex + 1) % players.size();
   }
 
   /** Moves the turn to the previous player. */
   public void previousPlayer() {
-    currentIndexPlayer = (currentIndexPlayer - 1 + players.size()) % players.size();
+    playerIndex = (playerIndex - 1 + players.size()) % players.size();
   }
 
   /**
@@ -239,7 +269,7 @@ public class GameState {
    * @return The previous player's index.
    */
   public int getPreviousIndexPlayer() {
-    return (currentIndexPlayer - 1 + players.size()) % players.size();
+    return (playerIndex - 1 + players.size()) % players.size();
   }
 
   /**
@@ -248,7 +278,7 @@ public class GameState {
    * @return The current {@link Player}.
    */
   public Player getCurrentPlayer() {
-    return players.get(currentIndexPlayer);
+    return players.get(playerIndex);
   }
 
   /**
@@ -257,7 +287,7 @@ public class GameState {
    * @return The current index.
    */
   public int getCurrentIndexPlayer() {
-    return currentIndexPlayer;
+    return playerIndex;
   }
 
   /**
@@ -283,7 +313,7 @@ public class GameState {
    *
    * @param paused {@code true} to pause, {@code false} to resume.
    */
-  public void setPaused(boolean paused) {
+  public void setPaused(final boolean paused) {
     this.paused = paused;
   }
 
@@ -297,33 +327,35 @@ public class GameState {
   }
 
   /**
-   * Copies the board, players and current player index from another {@link GameState} into this
-   * instance, then notifies all registered listeners.
+   * Copies the board, players and player index from another state, then notifies listeners.
    *
    * @param loaded the game state to copy from
    */
-  public void loadState(GameState loaded) {
+  public void loadState(final GameState loaded) {
     this.board = loaded.board;
     this.players = loaded.players;
-    this.currentIndexPlayer = loaded.currentIndexPlayer;
+    this.playerIndex = loaded.playerIndex;
     notifyListeners();
   }
 
   /**
-   * Resets the game to a default state (9x9 board with two human players).
+   * Resets the game to a specified state.
    *
-   * @param config the game config
+   * @param size the board size
+   * @param newPlayers the list of players
+   * @param blitzTimeoutMs the blitz timeout in milliseconds, or null if not blitz
    */
-  public void reset(ConfigManager config) {
-    int size = config.getInt("board-size", 9);
+  public void reset(final int size, final List<Player> newPlayers, final Long blitzTimeoutMs) {
     this.board = new Board(size);
-    this.players = PlayerFactory.createPlayers(config);
-    this.currentIndexPlayer = 0;
-    boolean blitz = config.getBoolean("blitz", false);
-    if (blitz) {
-      int timeout = config.getInt("timeout", 30);
-      setLimitTimePlayer(timeout * 60 * 1000L);
+    this.players = newPlayers;
+    this.playerIndex = 0;
+    if (blitzTimeoutMs != null) {
+      setLimitTimePlayer(blitzTimeoutMs);
     }
+    this.paused = false;
+    this.gameOver = false;
+    this.undoStack.clear();
+    this.redoStack.clear();
     notifyListeners();
   }
 
@@ -333,13 +365,13 @@ public class GameState {
    * @return A cloned {@link GameState}.
    */
   public GameState copy() {
-    Board boardCopy = this.board.copy();
-    List<Player> playersCopy = new ArrayList<>();
-    for (Player p : this.players) {
+    final Board boardCopy = this.board.copy();
+    final List<Player> playersCopy = new ArrayList<>();
+    for (final Player p : this.players) {
       playersCopy.add(p.copy());
     }
 
-    GameState copy = new GameState(boardCopy, playersCopy, this.currentIndexPlayer);
+    final GameState copy = new GameState(boardCopy, playersCopy, this.playerIndex);
 
     copy.gameOver = this.gameOver;
     copy.paused = this.paused;
@@ -352,10 +384,12 @@ public class GameState {
    * @return A list of legal {@link Move} objects.
    */
   public List<Move> generateLegalMoves() {
-    List<Move> legalMoves = new ArrayList<>(generateLegalPawnMoves(getCurrentPlayer()));
-    for (Move m : generatePseudoLegalWallMoves(getCurrentPlayer())) {
-      if (RuleChecker.isMoveLegal(this, m)) {
-        legalMoves.add(m);
+    final Player current = getCurrentPlayer();
+    final List<Move> legalMoves = new ArrayList<>(generateLegalPawnMoves(current));
+    final List<Move> wallMovesCandidate = generatePseudoLegalWallMoves(current);
+    for (final Move wallMove : wallMovesCandidate) {
+      if (RuleChecker.isMoveLegal(this, wallMove)) {
+        legalMoves.add(wallMove);
       }
     }
     return legalMoves;
@@ -367,41 +401,41 @@ public class GameState {
    * @return A list of pseudo-legal {@link Move} objects.
    */
   public List<Move> generatePseudoLegalMoves() {
-    List<Move> all_possible_moves =
+    final List<Move> allPossibleMoves =
         new ArrayList<>(generatePseudoLegalPawnMoves(getCurrentPlayer()));
-    all_possible_moves.addAll(generatePseudoLegalWallMoves(getCurrentPlayer()));
-    return all_possible_moves;
+    allPossibleMoves.addAll(generatePseudoLegalWallMoves(getCurrentPlayer()));
+    return allPossibleMoves;
   }
 
   /**
-   * Generates all potential pawn move candidates for a player without rule validation.
+   * Generates potential pawn move candidates for a player without rule validation.
    *
    * @param player The player to generate moves for.
    * @return A list of pseudo-legal pawn {@link Move} objects.
    */
-  public List<Move> generatePseudoLegalPawnMoves(Player player) {
-    List<Move> pawnMoves = new ArrayList<>();
-    Position pos = player.getPosition();
-    int x = pos.getX();
-    int y = pos.getY();
+  public List<Move> generatePseudoLegalPawnMoves(final Player player) {
+    final List<Move> pawnMoves = new ArrayList<>();
+    final Position pos = player.getPosition();
+    final int posX = pos.getX();
+    final int posY = pos.getY();
 
     // 4 Cardinal directions (distance 1)
-    pawnMoves.add(Move.pawn(pos, new Position(x + 1, y)));
-    pawnMoves.add(Move.pawn(pos, new Position(x - 1, y)));
-    pawnMoves.add(Move.pawn(pos, new Position(x, y + 1)));
-    pawnMoves.add(Move.pawn(pos, new Position(x, y - 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX + 1, posY)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX - 1, posY)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX, posY + 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX, posY - 1)));
 
     // 4 Jumps (distance 2)
-    pawnMoves.add(Move.pawn(pos, new Position(x + 2, y)));
-    pawnMoves.add(Move.pawn(pos, new Position(x - 2, y)));
-    pawnMoves.add(Move.pawn(pos, new Position(x, y + 2)));
-    pawnMoves.add(Move.pawn(pos, new Position(x, y - 2)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX + 2, posY)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX - 2, posY)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX, posY + 2)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX, posY - 2)));
 
     // 4 Diagonals
-    pawnMoves.add(Move.pawn(pos, new Position(x + 1, y + 1)));
-    pawnMoves.add(Move.pawn(pos, new Position(x - 1, y - 1)));
-    pawnMoves.add(Move.pawn(pos, new Position(x + 1, y - 1)));
-    pawnMoves.add(Move.pawn(pos, new Position(x - 1, y + 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX + 1, posY + 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX - 1, posY - 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX + 1, posY - 1)));
+    pawnMoves.add(Move.pawn(pos, new Position(posX - 1, posY + 1)));
 
     return pawnMoves;
   }
@@ -412,13 +446,13 @@ public class GameState {
    * @param player The player to generate wall moves for.
    * @return A list of pseudo-legal wall {@link Move} objects.
    */
-  public List<Move> generatePseudoLegalWallMoves(Player player) {
-    List<Move> wallMoves = new ArrayList<>();
+  public List<Move> generatePseudoLegalWallMoves(final Player player) {
+    final List<Move> wallMoves = new ArrayList<>();
     if (player.getRemainingWalls() > 0) {
-      int size = board.getSize();
-      for (int x = 0; x < size - 1; x++) {
-        for (int y = 0; y < size - 1; y++) {
-          Position pos = new Position(x, y);
+      final int boardSize = board.getSize();
+      for (int posX = 0; posX < boardSize - 1; posX++) {
+        for (int posY = 0; posY < boardSize - 1; posY++) {
+          final Position pos = new Position(posX, posY);
           wallMoves.add(Move.wall(pos, Orientation.HORIZONTAL));
           wallMoves.add(Move.wall(pos, Orientation.VERTICAL));
         }
@@ -433,9 +467,9 @@ public class GameState {
    * @param player The player to check.
    * @return A list of legal pawn {@link Move} objects.
    */
-  public List<Move> generateLegalPawnMoves(Player player) {
-    List<Move> legalPawnMoves = new ArrayList<>();
-    for (Move m : generatePseudoLegalPawnMoves(player)) {
+  public List<Move> generateLegalPawnMoves(final Player player) {
+    final List<Move> legalPawnMoves = new ArrayList<>();
+    for (final Move m : generatePseudoLegalPawnMoves(player)) {
       if (RuleChecker.isMoveLegal(this, m)) {
         legalPawnMoves.add(m);
       }
@@ -449,35 +483,34 @@ public class GameState {
    * @param player The player to check.
    * @return A list of legal target {@link Position}s.
    */
-  public List<Position> getLegalMoves(Player player) {
-    List<Position> res = new ArrayList<>();
-    for (Move m : generateLegalPawnMoves(player)) {
-      res.add(m.getTo());
+  public List<Position> getLegalMoves(final Player player) {
+    final List<Position> positions = new ArrayList<>();
+    final List<Move> legalPawnMoves = generateLegalPawnMoves(player);
+    for (final Move move : legalPawnMoves) {
+      positions.add(move.getTo());
     }
-    return res;
+    return positions;
   }
 
   /**
-   * Initializes the reflection time for all players in the game. This should be called at the start
-   * of a Blitz game to set the countdown timers to the specified limit.
+   * Initializes the reflection time for all players. Sets countdown timers to the limit.
    *
    * @param timeLimit The initial time allowed for each player in milliseconds.
    */
-  public void setLimitTimePlayer(long timeLimit) {
-    for (Player player : getPlayers()) {
+  public void setLimitTimePlayer(final long timeLimit) {
+    for (final Player player : getPlayers()) {
       player.setRemainingTime(timeLimit);
     }
   }
 
   /**
-   * Populates the history without applying the moves to the board. Useful for loading a saved game
-   * history.
+   * Populates the history without applying moves. Useful for loading history stack.
    *
    * @param history The list of {@link Move} objects to load into the history stack.
    */
-  public void loadHistoryWithoutApplying(List<Move> history) {
+  public void loadHistoryWithoutApplying(final List<Move> history) {
     this.undoStack.clear();
-    for (Move m : history) {
+    for (final Move m : history) {
       this.undoStack.push(m);
     }
   }
@@ -485,19 +518,19 @@ public class GameState {
   /**
    * Sets the game over status.
    *
-   * @param b {@code true} to end the game.
+   * @param over {@code true} to end the game.
    */
-  public void setGameOver(boolean b) {
-    this.gameOver = b;
+  public void setGameOver(final boolean over) {
+    this.gameOver = over;
     notifyListeners();
   }
 
   /**
-   * Sets the game over status without nottify listeners.
+   * Sets the game over status without notifying listeners.
    *
-   * @param b {@code true} to end the game.
+   * @param over {@code true} to end the game.
    */
-  public void setGameOverSilent(boolean b) {
-    this.gameOver = b;
+  public void setGameOverSilent(final boolean over) {
+    this.gameOver = over;
   }
 }

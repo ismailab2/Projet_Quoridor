@@ -23,7 +23,7 @@ import javafx.scene.layout.*;
  *
  * It automatically updates its information when changes occur in the {@link GameState}.
  */
-public class PlayerPanel extends VBox {
+public final class PlayerPanel extends VBox {
   /** Label displaying the player's name. */
   private final Label nameLabel;
 
@@ -46,7 +46,8 @@ public class PlayerPanel extends VBox {
    * @param state The game state the player belongs to, used to automatically update the panel.
    * @param playerIndex The index of the player in the {@link GameState}'s list of players.
    */
-  public PlayerPanel(String playerName, GameState state, int playerIndex) {
+  public PlayerPanel(final String playerName, final GameState state, final int playerIndex) {
+    super();
     this.playerIndex = playerIndex;
 
     String accentColor = (playerIndex == 0) ? "#e74c3c" : "#2c3e50";
@@ -156,7 +157,7 @@ public class PlayerPanel extends VBox {
    *
    * @param player The player whose information should be displayed.
    */
-  public void update(Player player) {
+  public void update(final Player player) {
     wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
     scoreLabel.setText(String.valueOf(player.getScore()));
   }

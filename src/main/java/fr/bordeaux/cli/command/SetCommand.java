@@ -100,9 +100,9 @@ public class SetCommand implements Command {
       // Persist the change to the file (.quoridorrc)
       config.save();
 
-      LOGGER.debug("Configuration updated: " + key + " set to " + value);
+      LOGGER.debug("Configuration updated: {0} set to {1}", key, value);
     } catch (Exception e) {
-      LOGGER.error("Failed to update configuration for key: " + key, e);
+      LOGGER.error("Failed to update configuration for key: {0}", key);
     }
 
     return engine;

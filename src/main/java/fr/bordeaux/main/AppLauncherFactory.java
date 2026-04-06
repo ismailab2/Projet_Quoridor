@@ -1,4 +1,4 @@
-package fr.bordeaux.Main;
+package fr.bordeaux.main;
 
 /**
  * Factory class responsible for creating the appropriate {@link AppLauncher} based on the selected

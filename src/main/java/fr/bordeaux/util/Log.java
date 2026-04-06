@@ -8,21 +8,57 @@ import java.util.logging.Logger;
  * Utility class for logging application events, error messages, and debug information. Provides a
  * centralized mechanism to output runtime information to the console or log files.
  */
-public class Log {
+public final class Log {
 
   /** Centralized Logger instance for the Quoridor application. */
-  public static final Logger logger = Logger.getLogger("Quoridor");
+  public static final Logger LOGGER = Logger.getLogger("Quoridor");
 
   static {
-    ConsoleHandler consoleHandler = new ConsoleHandler();
+    final ConsoleHandler consoleHandler = new ConsoleHandler();
     consoleHandler.setLevel(Level.ALL);
-    logger.addHandler(consoleHandler);
-    logger.setUseParentHandlers(false);
-    logger.setLevel(Level.INFO);
+    LOGGER.addHandler(consoleHandler);
+    LOGGER.setUseParentHandlers(false);
+    LOGGER.setLevel(Level.INFO);
   }
 
-  /** Constructs a new Log instance. */
-  public Log() {}
+  /** Private constructor to prevent instantiation. */
+  private Log() {}
+
+  /**
+   * Checks if the INFO level is enabled for the logger.
+   *
+   * @return true if INFO level is enabled
+   */
+  public static boolean isInfoEnabled() {
+    return LOGGER.isLoggable(Level.INFO);
+  }
+
+  /**
+   * Checks if the SEVERE (ERROR) level is enabled for the logger.
+   *
+   * @return true if SEVERE (ERROR) level is enabled
+   */
+  public static boolean isErrorEnabled() {
+    return LOGGER.isLoggable(Level.SEVERE);
+  }
+
+  /**
+   * Checks if the FINE (DEBUG) level is enabled for the logger.
+   *
+   * @return true if FINE (DEBUG) level is enabled
+   */
+  public static boolean isDebugEnabled() {
+    return LOGGER.isLoggable(Level.FINE);
+  }
+
+  /**
+   * Checks if the WARNING level is enabled for the logger.
+   *
+   * @return true if WARNING level is enabled
+   */
+  public static boolean isWarningEnabled() {
+    return LOGGER.isLoggable(Level.WARNING);
+  }
 
   /**
    * Sets verbose mode. In verbose mode, info-level messages are logged; otherwise, only fine-level
@@ -30,11 +66,11 @@ public class Log {
    *
    * @param verbose true to enable verbose logging, false to disable
    */
-  public static void setVerbose(boolean verbose) {
+  public static void setVerbose(final boolean verbose) {
     if (verbose) {
-      logger.setLevel(Level.INFO);
+      LOGGER.setLevel(Level.INFO);
     } else {
-      logger.setLevel(Level.FINE);
+      LOGGER.setLevel(Level.FINE);
     }
   }
 
@@ -43,9 +79,9 @@ public class Log {
    *
    * @param debug true to enable debug logging, false to leave current logging level
    */
-  public static void setDebug(boolean debug) {
+  public static void setDebug(final boolean debug) {
     if (debug) {
-      logger.setLevel(Level.FINEST);
+      LOGGER.setLevel(Level.FINEST);
     }
   }
 
@@ -54,8 +90,22 @@ public class Log {
    *
    * @param msg the message to log
    */
-  public static void info(String msg) {
-    logger.info(msg);
+  public static void info(final String msg) {
+    if (LOGGER.isLoggable(Level.INFO)) {
+      LOGGER.info(msg);
+    }
+  }
+
+  /**
+   * Logs an informational message with parameters.
+   *
+   * @param msg the message to log
+   * @param params parameters for the message
+   */
+  public static void info(final String msg, final Object... params) {
+    if (LOGGER.isLoggable(Level.INFO)) {
+      LOGGER.log(Level.INFO, msg, params);
+    }
   }
 
   /**
@@ -64,8 +114,22 @@ public class Log {
    * @param msg the error message
    * @param t the exception to log
    */
-  public static void error(String msg, Throwable t) {
-    logger.log(Level.SEVERE, msg, t);
+  public static void error(final String msg, final Throwable t) {
+    if (LOGGER.isLoggable(Level.SEVERE)) {
+      LOGGER.log(Level.SEVERE, msg, t);
+    }
+  }
+
+  /**
+   * Logs an error message with parameters.
+   *
+   * @param msg the error message
+   * @param params parameters for the message
+   */
+  public static void error(final String msg, final Object... params) {
+    if (LOGGER.isLoggable(Level.SEVERE)) {
+      LOGGER.log(Level.SEVERE, msg, params);
+    }
   }
 
   /**
@@ -73,8 +137,22 @@ public class Log {
    *
    * @param msg the message to log
    */
-  public static void debug(String msg) {
-    logger.fine(msg);
+  public static void debug(final String msg) {
+    if (LOGGER.isLoggable(Level.FINE)) {
+      LOGGER.fine(msg);
+    }
+  }
+
+  /**
+   * Logs a debug-level message with parameters.
+   *
+   * @param msg the message to log
+   * @param params parameters for the message
+   */
+  public static void debug(final String msg, final Object... params) {
+    if (LOGGER.isLoggable(Level.FINE)) {
+      LOGGER.log(Level.FINE, msg, params);
+    }
   }
 
   /**
@@ -82,8 +160,8 @@ public class Log {
    *
    * @param msg the message to log
    */
-  public static void trace(String msg) {
-    logger.finest(msg);
+  public static void trace(final String msg) {
+    LOGGER.finest(msg);
   }
 
   /**
@@ -91,7 +169,21 @@ public class Log {
    *
    * @param msg the message to log
    */
-  public static void warning(String msg) {
-    logger.warning(msg);
+  public static void warning(final String msg) {
+    if (LOGGER.isLoggable(Level.WARNING)) {
+      LOGGER.warning(msg);
+    }
+  }
+
+  /**
+   * Logs a warning message with parameters.
+   *
+   * @param msg the message to log
+   * @param params parameters for the message
+   */
+  public static void warning(final String msg, final Object... params) {
+    if (LOGGER.isLoggable(Level.WARNING)) {
+      LOGGER.log(Level.WARNING, msg, params);
+    }
   }
 }

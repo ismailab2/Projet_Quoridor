@@ -16,7 +16,7 @@ public abstract class AiPlayer extends Player {
    * @param positionStart The starting position of the AI on the board.
    * @param color The color of the player.
    */
-  public AiPlayer(final String name, final Position positionStart, Color color) {
+  public AiPlayer(final String name, final Position positionStart, final Color color) {
     super(name, positionStart, color);
   }
 

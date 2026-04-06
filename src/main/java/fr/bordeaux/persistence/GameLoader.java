@@ -11,7 +11,7 @@ import java.util.*;
 /** Utility class used to load a game state from a save file. */
 public final class GameLoader {
   // Board size : always 9x9
-  private static int SIZE = 9;
+  private static int size = 9;
 
   private static final int BOARD_START = 3;
 
@@ -27,22 +27,23 @@ public final class GameLoader {
    * @throws IOException if an input/output error occurs while reading the file
    * @throws GameLoadException if the file content is invalid or inconsistent
    */
-  public static GameState loadGame(GameEngine engine, String filename)
+  public static GameState loadGame(final GameEngine engine, final String filename)
       throws IOException, GameLoadException {
-    List<String> lines = GameLoaderComment.readCleanLines(filename);
-    validateSettingsHeader(lines); // checks [settings] header
-    AllPlayerAndLine allp_l = readAllPlayer(lines); // get players and the last line read
-    List<Player> players = allp_l.players; // creates all players
-    int currentLine = allp_l.nextLine; // Line after settings
-    validateHeader(lines, currentLine); // checks [game] header
-    SIZE = readBoardSize(lines, currentLine);
-    Board board = new Board(SIZE); // creates empty 9x9 board
-    readBoard(lines, board, players, currentLine); // places walls and players
-    readRemainingWalls(lines, players, currentLine); // restores wall counts
+    final List<String> lines = GameLoaderComment.readCleanLines(filename);
+    validateSettingsHeader(lines);
+    final AllPlayerAndLine resultBundle = readAllPlayer(lines);
+    final List<Player> players = resultBundle.players;
+    final int currentLine = resultBundle.nextLine;
+    validateHeader(lines, currentLine);
+    size = readBoardSize(lines, currentLine);
+    final Board board = new Board(size);
+    readBoard(lines, board, players, currentLine);
+    readRemainingWalls(lines, players, currentLine);
 
-    List<Move> history = new ArrayList<>();
+    final List<Move> history = new ArrayList<>();
     readHistory(lines, history);
-    GameState gameState = new GameState(board, players, readCurrentPlayer(lines, currentLine));
+    final int currentPlayerIndex = readCurrentPlayer(lines, currentLine);
+    final GameState gameState = new GameState(board, players, currentPlayerIndex);
     applyMode(engine, gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
@@ -50,10 +51,12 @@ public final class GameLoader {
 
   // Checks that the first line is "[game]"
   // If not, throws GameLoadException with error type and line number
-  private static void validateHeader(List<String> lines, int currentLine) throws GameLoadException {
-    if (!lines.get(currentLine).equals("[game]"))
+  private static void validateHeader(final List<String> lines, final int currentLine)
+      throws GameLoadException {
+    if (!lines.get(currentLine).equals("[game]")) {
       throw new GameLoadException(
           "ERREUR_ENTETE", 1, "Expected [game] but found : " + lines.get(currentLine));
+    }
   }
 
   /**
@@ -71,52 +74,65 @@ public final class GameLoader {
 
   // Reads the current player index from line 2
   // Example : "2  # Current player color" , returns 1
-  private static int readCurrentPlayer(List<String> lines, int currentLine) {
+  private static int readCurrentPlayer(final List<String> lines, final int currentLine) {
     return Integer.parseInt(lines.get(currentLine + 1).trim().split("#")[0].trim()) - 1;
   }
 
-  private static int readBoardSize(List<String> lines, int currentLine) {
+  private static int readBoardSize(final List<String> lines, final int currentLine) {
     return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
   }
 
   // Reads the full board, repositions players and places all walls
   private static void readBoard(
-      List<String> lines, Board board, List<Player> players, int currentLine) {
-    for (int row = 0; row < SIZE; row++) {
+      final List<String> lines,
+      final Board board,
+      final List<Player> players,
+      final int currentLine) {
+    for (int row = 0; row < size; row++) {
       readCellLine(lines.get(BOARD_START + currentLine + row * 2), row, board, players);
-      if (row < SIZE - 1)
+      if (row < size - 1) {
         readHorizontalWalls(lines.get(BOARD_START + currentLine + row * 2 + 1), row, board);
+      }
     }
   }
 
   // Reads one cell line : repositions players and places vertical walls
-  private static void readCellLine(String line, int row, Board board, List<Player> players) {
-    for (int col = 0; col < SIZE; col++) {
+  private static void readCellLine(
+      final String line, final int row, final Board board, final List<Player> players) {
+    for (int col = 0; col < size; col++) {
       // Each cell character is at index col*2 in the line
-      char cell = line.charAt(col * 2);
-      if (cell == '1') players.get(0).setPosition(new Position(row, col));
-      else if (cell == '2') players.get(1).setPosition(new Position(row, col));
-      if (col < SIZE - 1 && line.charAt(col * 2 + 1) == '|')
-        board.getGraph().removeEdge(board.id(row, col), board.id(row, col + 1));
+      final char cell = line.charAt(col * 2);
+      if (cell == '1') {
+        players.get(0).setPosition(new Position(row, col));
+      } else if (cell == '2') {
+        players.get(1).setPosition(new Position(row, col));
+      }
+      if (col < size - 1 && line.charAt(col * 2 + 1) == '|') {
+        board.getGraph().removeEdge(board.getCellId(row, col), board.getCellId(row, col + 1));
+      }
     }
   }
 
   // Reads one horizontal wall line and places horizontal walls on the board
-  private static void readHorizontalWalls(String line, int row, Board board) {
-    for (int col = 0; col < SIZE; col++)
-      if (line.charAt(col * 2) == '_')
-        board.getGraph().removeEdge(board.id(row, col), board.id(row + 1, col));
+  private static void readHorizontalWalls(final String line, final int row, final Board board) {
+    for (int col = 0; col < size; col++) {
+      if (line.charAt(col * 2) == '_') {
+        board.getGraph().removeEdge(board.getCellId(row, col), board.getCellId(row + 1, col));
+      }
+    }
   }
 
   // Reads "walls: 10 10" and restores the correct number of walls for each player
   private static void readRemainingWalls(
-      List<String> lines, List<Player> players, int currentLine) {
-    String[] parts =
-        lines.get(BOARD_START + currentLine + SIZE * 2 - 1).replace("walls:", "").trim().split(" ");
-    for (int i = 0; i < players.size(); i++) {
-      int walls = Integer.parseInt(parts[i]);
-      // Call useWall() until the player has the correct number of walls
-      while (players.get(i).getRemainingWalls() > walls) players.get(i).useWall();
+      final List<String> lines, final List<Player> players, final int currentLine) {
+    final String wallLine = lines.get(BOARD_START + currentLine + size * 2 - 1);
+    final String[] parts = wallLine.replace("walls:", "").trim().split(" ");
+    for (int index = 0; index < players.size(); index++) {
+      final int walls = Integer.parseInt(parts[index]);
+      final Player player = players.get(index);
+      while (player.getRemainingWalls() > walls) {
+        player.useWall();
+      }
     }
   }
 
@@ -145,7 +161,7 @@ public final class GameLoader {
    *     index.
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
-    List<Player> lPlayers = new ArrayList<>();
+    final List<Player> lPlayers = new ArrayList<>();
     // Find the start of the [game] section first to know where players end
     int gameSectionIndex = -1;
     for (int i = 0; i < lines.size(); i++) {
@@ -181,27 +197,31 @@ public final class GameLoader {
    * @return A {@link PlayerAndLine} record containing the instantiated player and the updated line
    *     index.
    */
-  private static PlayerAndLine readPlayer(List<String> lines, int currentLine) {
-
-    String player = lines.get(currentLine);
-    final String pType = player.split("=")[0].split("-")[0];
-    final String pName = player.split("=")[1];
+  private static PlayerAndLine readPlayer(final List<String> lines, final int currentLine) {
+    final String playerLine = lines.get(currentLine);
+    final String typePart = playerLine.split("=")[0].split("-")[0];
+    final String playerName = playerLine.split("=")[1];
     int myCurrentLine = currentLine + 1;
 
-    String line = lines.get(myCurrentLine);
-    final Color pColor = Color.valueOf(line.split("=")[1].trim().toUpperCase());
+    final String colorLine = lines.get(myCurrentLine);
+    final String colorValue = colorLine.split("=")[1].trim().toUpperCase(Locale.ENGLISH);
+    final Color playerColor = Color.valueOf(colorValue);
     myCurrentLine++;
 
-    player = lines.get(myCurrentLine);
-    final Position pPostion = readPlayerStartPosition(player);
-    myCurrentLine += 1;
-    final long remainingTime = Long.parseLong(lines.get(myCurrentLine).split("=")[1]);
-    PlayerAndLine result = null;
-    if (pType.equals("ai")) {
-      result = readAiPlayer(lines, myCurrentLine, pName, pPostion, pColor);
+    final String posLine = lines.get(myCurrentLine);
+    final Position playerPosition = readPlayerStartPosition(posLine);
+    myCurrentLine++;
 
+    final String timeLine = lines.get(myCurrentLine);
+    final long remainingTime = Long.parseLong(timeLine.split("=")[1]);
+
+    final PlayerAndLine result;
+    if ("ai".equals(typePart)) {
+      result = readAiPlayer(lines, myCurrentLine, playerName, playerPosition, playerColor);
     } else {
-      result = new PlayerAndLine(new HumanPlayer(pName, pPostion, pColor), myCurrentLine + 1);
+      result =
+          new PlayerAndLine(
+              new HumanPlayer(playerName, playerPosition, playerColor), myCurrentLine + 1);
     }
     result.player.setRemainingTime(remainingTime);
     return result;
@@ -213,15 +233,13 @@ public final class GameLoader {
    * @param p The string containing the position data (e.g., "key=Position: 4, 0").
    * @return A {@link Position} object representing the parsed coordinates.
    */
-  private static Position readPlayerStartPosition(final String p) {
-    final String pStartPos = p.split("=")[1];
-    final String pStartPosCoord = pStartPos.split(":")[1];
-    final int x =
-        Integer.parseInt(
-            pStartPosCoord.split(",")[0].replaceAll(
-                " ", "")); // Spaces must be removed because ParseInt does not handle them.
-    final int y = Integer.parseInt(pStartPosCoord.split(",")[1].replaceAll(" ", ""));
-    return new Position(x, y);
+  private static Position readPlayerStartPosition(final String positionString) {
+    final String posValue = positionString.split("=")[1];
+    final String coordPart = posValue.split(":")[1];
+    final String[] coords = coordPart.split(",");
+    final int posX = Integer.parseInt(coords[0].trim());
+    final int posY = Integer.parseInt(coords[1].trim());
+    return new Position(posX, posY);
   }
 
   /**
@@ -234,65 +252,75 @@ public final class GameLoader {
    */
   private static PlayerAndLine readAiPlayer(
       final List<String> lines,
-      int currentLine,
+      final int currentLine,
       final String pName,
       final Position pPostion,
       final Color pColor) {
-    Map<String, String> aiSettings = new HashMap<>();
+    final Map<String, String> aiSettings = new HashMap<>();
     int myCurrentLine = currentLine + 1;
-    int index = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
-    while (checkSameIndex(lines, myCurrentLine, index)) {
-      final String[] ls = lines.get(myCurrentLine).split("=");
-      final String[] aiParameter = ls[0].split("-");
-      aiSettings.put(aiParameter[aiParameter.length - 1], ls[1]);
+    final int targetIndex = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
+    while (checkSameIndex(lines, myCurrentLine, targetIndex)) {
+      final String[] lineSplit = lines.get(myCurrentLine).split("=");
+      final String[] aiParameter = lineSplit[0].split("-");
+      aiSettings.put(aiParameter[aiParameter.length - 1], lineSplit[1]);
       myCurrentLine++;
     }
 
-    switch (aiSettings.get("mode")) {
+    final PlayerAndLine result;
+    final String mode = aiSettings.get("mode");
+    switch (mode) {
       case "minimax":
         {
           final String heuristicName = aiSettings.get("heuristic");
           final int depth = Integer.parseInt(aiSettings.get("depth"));
           final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
-          return new PlayerAndLine(
-              MinimaxPlayer.builder(pName, pPostion, pColor)
-                  .withHeuristic(heuristicName)
-                  .withDepth(depth)
-                  .withReflexion(reflexionTime)
-                  .build(),
-              myCurrentLine);
+          result =
+              new PlayerAndLine(
+                  MinimaxPlayer.builder(pName, pPostion, pColor)
+                      .withHeuristic(heuristicName)
+                      .withDepth(depth)
+                      .withReflexion(reflexionTime)
+                      .build(),
+                  myCurrentLine);
+          break;
         }
       case "mcts":
         long reflexionTimeMcts = 2000;
         if (aiSettings.containsKey("reflexion")) {
           reflexionTimeMcts = Long.parseLong(aiSettings.get("reflexion"));
         }
-        boolean useNN = "ML".equals(aiSettings.get("selection"));
+        final boolean useNN = "ML".equals(aiSettings.get("selection"));
         try {
-          return new PlayerAndLine(
-              new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
-        } catch (java.io.IOException e) {
+          result =
+              new PlayerAndLine(
+                  new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
+          break;
+        } catch (final java.io.IOException e) {
           throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
         }
 
       case "random":
-        return new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor), myCurrentLine);
+        result = new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor), myCurrentLine);
+        break;
 
       case "minimax-iterative-deepening":
         {
           final String heuristicName = aiSettings.get("heuristic");
           final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
-          return new PlayerAndLine(
-              MinimaxPlayer.builder(pName, pPostion, pColor)
-                  .withHeuristic(heuristicName)
-                  .withReflexion(reflexionTime)
-                  .withIterativeDeepening(true)
-                  .build(),
-              myCurrentLine);
+          result =
+              new PlayerAndLine(
+                  MinimaxPlayer.builder(pName, pPostion, pColor)
+                      .withHeuristic(heuristicName)
+                      .withReflexion(reflexionTime)
+                      .withIterativeDeepening(true)
+                      .build(),
+                  myCurrentLine);
+          break;
         }
       default:
-        throw new IllegalArgumentException("Unknow Ai Type : " + aiSettings.get("mode"));
+        throw new IllegalArgumentException("Unknow Ai Type : " + mode);
     }
+    return result;
   }
 
   /**
@@ -326,14 +354,19 @@ public final class GameLoader {
    * @throws IndexOutOfBoundsException if the file is shorter than expected
    * @throws NumberFormatException if a numeric value (nbPlayers) is improperly formatted
    */
-  private static void applyMode(GameEngine engine, GameState gameState, final List<String> lines) {
+  private static void applyMode(
+      final GameEngine engine, final GameState gameState, final List<String> lines) {
     int nbPlayers = 0;
-    for (String line : lines) {
-      if (line.equals("[game]")) break;
-      if (!line.contains("=")) continue;
-      String[] parts = line.split("=");
-      String key = parts[0].trim();
-      String value = parts[1].trim();
+    for (final String line : lines) {
+      if ("[game]".equals(line)) {
+        break;
+      }
+      if (!line.contains("=")) {
+        continue;
+      }
+      final String[] parts = line.split("=");
+      final String key = parts[0].trim();
+      final String value = parts[1].trim();
 
       switch (key) {
         case "verbose":
@@ -351,6 +384,8 @@ public final class GameLoader {
         case "nb-players":
           nbPlayers = Integer.parseInt(value);
           break;
+        default:
+          break;
       }
     }
 
@@ -364,56 +399,67 @@ public final class GameLoader {
     }
   }
 
-  private static Position coordToPos(String coord) {
-    int y = coord.charAt(0) - 'a';
-    int x = Integer.parseInt(coord.substring(1)) - 1;
-    return new Position(x, y);
+  private static Position coordToPos(final String coord) {
+    final int posY = coord.charAt(0) - 'a';
+    final int posX = Integer.parseInt(coord.substring(1)) - 1;
+    return new Position(posX, posY);
   }
 
-  private static void readHistory(List<String> lines, List<Move> history) {
+  private static void readHistory(final List<String> lines, final List<Move> history) {
     boolean inHistory = false;
 
-    for (String line : lines) {
-      String trimmed = line.trim();
+    for (final String line : lines) {
+      final String trimmed = line.trim();
 
       // Detect section start
-      if (trimmed.equals("[History]")) {
+      if ("[History]".equals(trimmed)) {
         inHistory = true;
         continue;
       }
 
       // Skip until we reach the section
-      if (!inHistory) continue;
+      if (!inHistory) {
+        continue;
+      }
 
       // Stop if a new section starts
-      if (trimmed.startsWith("[")) break;
+      if (trimmed.startsWith("[")) {
+        break;
+      }
 
       // Skip empty lines
-      if (trimmed.isEmpty()) continue;
+      if (trimmed.isEmpty()) {
+        continue;
+      }
 
       // Split line by ';' to get individual moves: "1 e2-e3"
-      String[] parts = trimmed.split(";");
-      for (String part : parts) {
-        String moveStr = part.trim();
-        if (moveStr.isEmpty()) continue;
+      final String[] parts = trimmed.split(";");
+      for (final String part : parts) {
+        final String moveStr = part.trim();
+        if (moveStr.isEmpty()) {
+          continue;
+        }
 
         // Split player number and move: ["1", "e2-e3"]
-        String[] tokens = moveStr.split(" ");
-        if (tokens.length < 2) continue;
+        final String[] tokens = moveStr.split(" ");
+        if (tokens.length < 2) {
+          continue;
+        }
 
-        String desc = tokens[1]; // e.g., "e2-e3" or "e3v"
-        Move move;
+        final String desc = tokens[1]; // e.g., "e2-e3" or "e3v"
+        final Move move;
 
         if (desc.contains("-")) {
           // Handle Pawn Move: "e2-e3"
-          String[] coords = desc.split("-");
+          final String[] coords = desc.split("-");
           move = Move.pawn(coordToPos(coords[0]), coordToPos(coords[1]));
         } else {
           // Handle Wall Placement: "e3v"
-          String posStr = desc.substring(0, desc.length() - 1); // "e3"
-          char orientChar = desc.charAt(desc.length() - 1); // 'v' or 'h'
+          final String posStr = desc.substring(0, desc.length() - 1); // "e3"
+          final char orientChar = desc.charAt(desc.length() - 1); // 'v' or 'h'
 
-          Orientation orient = (orientChar == 'h') ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+          final Orientation orient =
+              (orientChar == 'h') ? Orientation.HORIZONTAL : Orientation.VERTICAL;
           move = Move.wall(coordToPos(posStr), orient);
         }
 

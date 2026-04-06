@@ -89,7 +89,8 @@ class MainMenuBarTest {
     assertTrue(network.getItems().stream().anyMatch(item -> "Start Server".equals(item.getText())));
     assertTrue(network.getItems().stream().anyMatch(item -> "Stop Server".equals(item.getText())));
     assertTrue(network.getItems().stream().anyMatch(item -> "Server List".equals(item.getText())));
-    assertTrue(network.getItems().stream().anyMatch(item -> "Server Status".equals(item.getText())));
+    assertTrue(
+        network.getItems().stream().anyMatch(item -> "Server Status".equals(item.getText())));
     assertTrue(network.getItems().stream().anyMatch(item -> "Players".equals(item.getText())));
     assertTrue(network.getItems().stream().anyMatch(item -> "Scoreboard".equals(item.getText())));
     assertTrue(

@@ -21,7 +21,7 @@ public class ConfigManagerTest {
 
   private void resetSingleton() {
     try {
-      var field = ConfigManager.class.getDeclaredField("INSTANCE");
+      var field = ConfigManager.class.getDeclaredField("instance");
       field.setAccessible(true);
       field.set(null, null);
     } catch (Exception e) {

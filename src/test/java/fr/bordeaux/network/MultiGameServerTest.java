@@ -429,7 +429,9 @@ public class MultiGameServerTest {
     try {
       Field field = MultiGameServer.class.getDeclaredField("running");
       field.setAccessible(true);
-      field.setBoolean(server, value);
+      java.util.concurrent.atomic.AtomicBoolean running =
+          (java.util.concurrent.atomic.AtomicBoolean) field.get(server);
+      running.set(value);
     } catch (ReflectiveOperationException e) {
       throw new AssertionError(e);
     }

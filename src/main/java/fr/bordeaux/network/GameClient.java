@@ -4,9 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class allows a client to connect to a Quoridor server via TCP, send simple commands (PING,
@@ -15,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  * <p>Communication protocol: - Messages are ASCII strings terminated by '\n' - Commands include
  * PING, QUIT - Server responds with PONG, BYE, etc.
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public class GameClient {
 
   /** TCP socket used for the connection */
@@ -30,8 +38,8 @@ public class GameClient {
   private Thread listenerThread;
 
   /**
-   * <<<<<<< HEAD Synchronization queue used to transfer an expected response from the listener
-   * thread to the calling method (ping, quit).
+   * Synchronization queue used to transfer an expected response from the listener thread to the
+   * calling method (ping, quit).
    */
   private final SynchronousQueue<String> syncResponse = new SynchronousQueue<>();
 
@@ -39,11 +47,11 @@ public class GameClient {
    * Indicates whether the next received message should be treated as a direct reply to a
    * synchronous command instead of an asynchronous one.
    */
-  private volatile boolean expectingDirectReply = false;
+  private final AtomicBoolean expectingDirectReply = new AtomicBoolean(false);
 
   /**
-   * ======= >>>>>>> main Constructs a new GameClient. This instance can be used to join a specific
-   * server or perform network discovery.
+   * Constructs a new GameClient. This instance can be used to join a specific server or perform
+   * network discovery.
    */
   public GameClient() {
     // Explicit default constructor to satisfy Javadoc requirements
@@ -56,12 +64,14 @@ public class GameClient {
    * @param port Server TCP port.
    * @return true if the connection succeeds, false otherwise.
    */
-  public boolean join(String host, int port) {
+  public boolean join(final String host, final int port) {
     try {
       socket = new Socket();
       socket.connect(new InetSocketAddress(host, port), 5000);
 
-      in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+      in =
+          new BufferedReader(
+              new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       out = new PrintWriter(socket.getOutputStream(), true);
       System.out.println("Connected to " + host + ":" + port);
 
@@ -86,16 +96,16 @@ public class GameClient {
               try {
                 String line;
                 while ((line = in.readLine()) != null) {
-                  if (expectingDirectReply) {
+                  if (expectingDirectReply.get()) {
                     try {
-                      boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
+                      final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
                         System.out.println("Server: " + line);
                       }
                     } catch (InterruptedException ie) {
                       Thread.currentThread().interrupt();
                     } finally {
-                      expectingDirectReply = false;
+                      expectingDirectReply.set(false);
                     }
                   } else {
                     System.out.println("Server: " + line);
@@ -114,22 +124,24 @@ public class GameClient {
    * receiving is measured and displayed.
    */
   public void ping() {
-    if (!checkConnection()) return;
+    if (!checkConnection()) {
+      return;
+    }
 
     try {
-      long start = System.currentTimeMillis();
+      final long start = System.currentTimeMillis();
 
-      expectingDirectReply = true;
+      expectingDirectReply.set(true);
       System.out.println("Client: PING");
       out.println("PING");
 
-      String res = syncResponse.poll(5, TimeUnit.SECONDS);
-      long rtt = System.currentTimeMillis() - start;
+      final String res = syncResponse.poll(5, TimeUnit.SECONDS);
+      final long rtt = System.currentTimeMillis() - start;
 
       if (res != null) {
         System.out.println("Server: " + res + " TIME=" + rtt + "ms");
       } else {
-        expectingDirectReply = false;
+        expectingDirectReply.set(false);
         System.out.println("Ping timeout: no response within 5 seconds.");
       }
     } catch (InterruptedException e) {
@@ -145,17 +157,17 @@ public class GameClient {
   public void quit() {
     if (checkConnection()) {
       try {
-        expectingDirectReply = true;
+        expectingDirectReply.set(true);
         System.out.println("Client: QUIT");
         out.println("QUIT");
 
-        String res = syncResponse.poll(5, TimeUnit.SECONDS);
+        final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
           System.out.println("Server: BYE");
         } else if (res != null) {
           System.out.println("Server: " + res);
         } else {
-          expectingDirectReply = false;
+          expectingDirectReply.set(false);
           System.out.println("No BYE received, closing anyway.");
         }
 
@@ -184,11 +196,11 @@ public class GameClient {
                 ds.setBroadcast(true);
                 ds.setSoTimeout(5000);
 
-                String msg = "DISCOVER";
+                final String msg = "DISCOVER";
 
-                DatagramPacket packet =
+                final DatagramPacket packet =
                     new DatagramPacket(
-                        msg.getBytes(),
+                        msg.getBytes(StandardCharsets.UTF_8),
                         msg.length(),
                         InetAddress.getByName("255.255.255.255"),
                         12346);
@@ -197,16 +209,17 @@ public class GameClient {
 
                 System.out.println("Broadcast sent, waiting for responses...");
 
-                long start = System.currentTimeMillis();
+                final long start = System.currentTimeMillis();
 
                 while (System.currentTimeMillis() - start < 5000) {
                   try {
-                    byte[] buf = new byte[1024];
-                    DatagramPacket rcv = new DatagramPacket(buf, buf.length);
+                    final byte[] buf = new byte[1024];
+                    final DatagramPacket rcv = new DatagramPacket(buf, buf.length);
 
                     ds.receive(rcv);
 
-                    String serverInfo = new String(rcv.getData(), 0, rcv.getLength());
+                    final String serverInfo =
+                        new String(rcv.getData(), 0, rcv.getLength(), StandardCharsets.UTF_8);
                     System.out.println("Server found: " + serverInfo);
 
                   } catch (SocketTimeoutException ignored) {
@@ -240,8 +253,10 @@ public class GameClient {
    *
    * @param name player name
    */
-  public void hello(String name) {
-    if (!checkConnection()) return;
+  public void hello(final String name) {
+    if (!checkConnection()) {
+      return;
+    }
     out.println("HELLO " + name);
   }
 
@@ -250,8 +265,10 @@ public class GameClient {
    *
    * @param move move to send
    */
-  public void sendMove(String move) {
-    if (!checkConnection()) return;
+  public void sendMove(final String move) {
+    if (!checkConnection()) {
+      return;
+    }
     out.println("MOVE " + move);
   }
 }

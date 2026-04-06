@@ -32,31 +32,33 @@ public final class NetworkMoveParser {
    * @param move move in textual format
    * @return corresponding Move object
    */
-  public static Move parseMove(String move) {
+  public static Move parseMove(final String move) {
     if (move == null || move.isBlank()) {
       throw new IllegalArgumentException("Empty move");
     }
 
-    move = move.trim();
+    final String trimmedMove = move.trim();
 
-    if (move.contains("-")) {
-      String[] parts = move.split("-");
+    if (trimmedMove.contains("-")) {
+      final String[] parts = trimmedMove.split("-");
       if (parts.length != 2) {
-        throw new IllegalArgumentException("Invalid pawn move: " + move);
+        throw new IllegalArgumentException("Invalid pawn move: " + trimmedMove);
       }
 
-      Position from = parsePosition(parts[0]);
-      Position to = parsePosition(parts[1]);
+      final Position from = parsePosition(parts[0]);
+      final Position to = parsePosition(parts[1]);
       return Move.pawn(from, to);
     }
 
-    if (move.endsWith("h") || move.endsWith("v")) {
-      Position pos = parsePosition(move.substring(0, move.length() - 1));
-      Orientation orientation =
-          move.charAt(move.length() - 1) == 'v' ? Orientation.VERTICAL : Orientation.HORIZONTAL;
+    if (trimmedMove.endsWith("h") || trimmedMove.endsWith("v")) {
+      final Position pos = parsePosition(trimmedMove.substring(0, trimmedMove.length() - 1));
+      final Orientation orientation =
+          trimmedMove.charAt(trimmedMove.length() - 1) == 'v'
+              ? Orientation.VERTICAL
+              : Orientation.HORIZONTAL;
       return Move.wall(pos, orientation);
     }
 
-    throw new IllegalArgumentException("Unknown move format: " + move);
+    throw new IllegalArgumentException("Unknown move format: " + trimmedMove);
   }
 }

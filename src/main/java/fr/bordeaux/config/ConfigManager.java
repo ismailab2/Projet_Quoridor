@@ -1,5 +1,6 @@
 package fr.bordeaux.config;
 
+import fr.bordeaux.util.Log;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
@@ -9,10 +10,9 @@ import java.util.Properties;
  * saving settings (like timeouts, blitz mode, or shortcuts) from a persistent file located in the
  * user's home directory.
  */
-public class ConfigManager {
+public final class ConfigManager {
 
-  /** Singleton instance of ConfigManager */
-  private static ConfigManager INSTANCE;
+  private static ConfigManager instance;
 
   /** Stores all configuration properties and shortcuts */
   private final Properties props = new Properties();
@@ -26,13 +26,11 @@ public class ConfigManager {
    *
    * @return The unique {@link ConfigManager} instance.
    */
-  public static ConfigManager getInstance() {
-
-    if (INSTANCE == null) {
-      INSTANCE = new ConfigManager();
+  public static synchronized ConfigManager getInstance() {
+    if (instance == null) {
+      instance = new ConfigManager();
     }
-
-    return INSTANCE;
+    return instance;
   }
 
   /**
@@ -58,7 +56,7 @@ public class ConfigManager {
 
       } catch (IOException e) {
 
-        System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
+        Log.error("Warning: invalid .quoridorrc file. Using defaults.", e);
       }
     } else {
       props.setProperty("verbose", "true");
@@ -81,7 +79,7 @@ public class ConfigManager {
       props.store(out, "Quoridor configuration");
 
     } catch (IOException e) {
-      System.err.println("Error saving .quoridorrc");
+      Log.error("Error saving .quoridorrc", e);
     }
   }
 

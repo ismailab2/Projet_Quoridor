@@ -221,7 +221,7 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     final Board board = state.getBoard();
     final fr.bordeaux.graph.Graph gameGraph = board.getGraph();
     final int startNode =
-        state.getBoard().id(player.getPosition().getX(), player.getPosition().getY());
+        state.getBoard().getCellId(player.getPosition().getX(), player.getPosition().getY());
     final Predicate<Integer> winCond = state.getWinCondition(player);
     final List<Integer> path = gameGraph.findPathBFS(startNode, winCond);
     return path.isEmpty() ? 20 : path.size() - 1;

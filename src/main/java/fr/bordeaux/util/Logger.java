@@ -13,6 +13,7 @@ import java.io.PrintStream;
  *
  * <p>Implémente le pattern Singleton thread-safe.
  */
+@SuppressWarnings({"PMD.SystemPrintln", "PMD.SingleMethodSingleton"})
 public final class Logger {
 
   /** Code ANSI pour reset le style */
@@ -30,8 +31,7 @@ public final class Logger {
   /** Couleur ERROR */
   private static final String RED = "\u001B[31m";
 
-  /** Instance unique du Logger */
-  private static volatile Logger instance;
+  private static Logger instance;
 
   /** Flux de sortie */
   private final PrintStream writer;
@@ -73,13 +73,9 @@ public final class Logger {
    *
    * @return instance unique du logger
    */
-  public static Logger getInstance() {
+  public static synchronized Logger getInstance() {
     if (instance == null) {
-      synchronized (Logger.class) {
-        if (instance == null) {
-          instance = new Logger();
-        }
-      }
+      instance = new Logger();
     }
     return instance;
   }
@@ -90,13 +86,9 @@ public final class Logger {
    * @param logFile nom du fichier de log
    * @return instance unique du logger
    */
-  public static Logger getInstance(final String logFile) {
+  public static synchronized Logger getInstance(final String logFile) {
     if (instance == null) {
-      synchronized (Logger.class) {
-        if (instance == null) {
-          instance = new Logger(logFile);
-        }
-      }
+      instance = new Logger(logFile);
     }
     return instance;
   }
@@ -117,6 +109,18 @@ public final class Logger {
   }
 
   /**
+   * Log un message de niveau INFO avec des paramètres.
+   *
+   * @param format le format du message (style MessageFormat, ex: "{0}")
+   * @param args les arguments du message
+   */
+  public void info(final String format, final Object... args) {
+    if (isInfoEnabled()) {
+      log("[INFO]", java.text.MessageFormat.format(format, args), CYAN);
+    }
+  }
+
+  /**
    * Log un message de niveau DEBUG.
    *
    * @param message message à afficher
@@ -124,6 +128,18 @@ public final class Logger {
   public void debug(final String message) {
     if (isDebugEnabled()) {
       log("[DEBUG]", message, YELLOW);
+    }
+  }
+
+  /**
+   * Log un message de niveau DEBUG avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void debug(final String format, final Object... args) {
+    if (isDebugEnabled()) {
+      log("[DEBUG]", java.text.MessageFormat.format(format, args), YELLOW);
     }
   }
 
@@ -139,6 +155,18 @@ public final class Logger {
   }
 
   /**
+   * Log un message de niveau VERBOSE avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void verbose(final String format, final Object... args) {
+    if (isVerboseEnabled()) {
+      log("[VERBOSE]", java.text.MessageFormat.format(format, args), GREEN);
+    }
+  }
+
+  /**
    * Log un message d'erreur.
    *
    * @param message message d'erreur
@@ -146,6 +174,18 @@ public final class Logger {
   public void error(final String message) {
     if (isErrorEnabled()) {
       log("[ERROR]", message, RED);
+    }
+  }
+
+  /**
+   * Log un message de niveau ERROR avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void error(final String format, final Object... args) {
+    if (isErrorEnabled()) {
+      log("[ERROR]", java.text.MessageFormat.format(format, args), RED);
     }
   }
 

@@ -36,7 +36,7 @@ public class ShowCommand implements Command {
    *
    * @param t the tokens entered by the user
    */
-  public ShowCommand(String[] t) {
+  public ShowCommand(final String[] t) {
     this.tokens = t;
   }
 
@@ -45,7 +45,7 @@ public class ShowCommand implements Command {
    *
    * @param t the option specifying what should be displayed
    */
-  public ShowCommand(String t) {
+  public ShowCommand(final String t) {
     this(new String[] {"show", t});
   }
 
@@ -57,8 +57,9 @@ public class ShowCommand implements Command {
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
-    switch (tokens[1]) {
+  public GameEngine execute(final GameEngine engine) {
+    final String option = tokens[1];
+    switch (option) {
       case "board":
         {
           printBoard(engine);
@@ -77,9 +78,10 @@ public class ShowCommand implements Command {
         }
       case "time":
         {
-          List<Player> players = engine.getState().getPlayers();
-          for (Player player : players) {
-            if (player.equals(engine.getState().getCurrentPlayer())) {
+          final List<Player> players = engine.getState().getPlayers();
+          final Player currentPlayer = engine.getState().getCurrentPlayer();
+          for (final Player player : players) {
+            if (player.equals(currentPlayer)) {
               writer.println(
                   "Your time left : " + TimeConvertor.formatTime(player.getRemainingTime()));
             } else {
@@ -99,7 +101,7 @@ public class ShowCommand implements Command {
           break;
         }
       default:
-        LOGGER.error("The command  \"show" + tokens[1] + "\" doesn't exist...");
+        LOGGER.error("The command \"show{0}\" doesn't exist...", option);
         break;
     }
     return engine;
@@ -175,30 +177,37 @@ public class ShowCommand implements Command {
    *
    * @param engine the current game engine
    */
-  private void printBoard(GameEngine engine) {
-    int boardSize = engine.getState().getBoard().getSize();
-    Board b = engine.getState().getBoard();
-    for (int i = 0; i < boardSize; i++) writer.print(((char) ('A' + i)) + " ");
+  private void printBoard(final GameEngine engine) {
+    final Board b = engine.getState().getBoard();
+    final int boardSize = b.getSize();
+    for (int i = 0; i < boardSize; i++) {
+      writer.print(((char) ('A' + i)) + " ");
+    }
     writer.println("");
     for (int i = 0; i < boardSize; i++) {
-      boolean empty = true;
       for (int j = 0; j < boardSize; j++) {
-        for (Player player : engine.getState().getPlayers()) {
+        boolean playerFound = false;
+        for (final Player player : engine.getState().getPlayers()) {
           if (player.getPosition().equals(new Position(i, j))) {
             writer.print(player.getColor().getId() + printWall(b, i, j, false));
-            empty = false;
+            playerFound = true;
+            break;
           }
         }
-        if (empty) writer.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
-        empty = true;
-        if (j == boardSize - 1) writer.print(i + 1);
+        if (!playerFound) {
+          writer.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
+        }
+        if (j == boardSize - 1) {
+          writer.print(i + 1);
+        }
       }
-      if (i == boardSize - 1) break;
-      writer.println("");
-      for (int j = 0; j < boardSize; j++) {
-        writer.print(printWall(b, i, j, true));
+      if (i != boardSize - 1) {
+        writer.println("");
+        for (int j = 0; j < boardSize; j++) {
+          writer.print(printWall(b, i, j, true));
+        }
+        writer.println("");
       }
-      writer.println("");
     }
     writer.println("");
   }
@@ -213,16 +222,22 @@ public class ShowCommand implements Command {
    * @param under indicates whether the wall is printed under the cell
    * @return the string representation of the wall
    */
-  private String printWall(Board b, int i, int j, boolean under) {
+  private String printWall(final Board b, final int i, final int j, final boolean under) {
+    final String result;
     if (under) {
-      if (i >= b.getSize() - 1) return "X ";
-      if (b.getGraph().hasEdge(b.id(i, j), b.id(i + 1, j))) return ". ";
-      else return "X ";
+      if (i >= b.getSize() - 1 || !b.getGraph().hasEdge(b.getCellId(i, j), b.getCellId(i + 1, j))) {
+        result = "X ";
+      } else {
+        result = ". ";
+      }
     } else {
-      if (j >= b.getSize() - 1) return "X";
-      if (b.getGraph().hasEdge(b.id(i, j), b.id(i, j + 1))) return " ";
-      else return "X";
+      if (j >= b.getSize() - 1 || !b.getGraph().hasEdge(b.getCellId(i, j), b.getCellId(i, j + 1))) {
+        result = "X";
+      } else {
+        result = " ";
+      }
     }
+    return result;
   }
 
   /**
@@ -232,10 +247,10 @@ public class ShowCommand implements Command {
    * @param p the position to convert
    * @return the string representation of the position
    */
-  private String posToString(Position p) {
-    char letter = (char) ('a' + p.getY());
-    int number = p.getX() + 1;
-    return "" + letter + number;
+  private String posToString(final Position p) {
+    final char letter = (char) ('a' + p.getY());
+    final int number = p.getX() + 1;
+    return String.valueOf(letter) + number;
   }
 
   /**
@@ -244,35 +259,25 @@ public class ShowCommand implements Command {
    *
    * @param engine The game engine containing the current state and move history.
    */
-  public void showHistory(GameEngine engine) {
+  public void showHistory(final GameEngine engine) {
     writer.println("Oldest move");
-    List<Player> players = engine.getState().getPlayers();
-    int nbPlayers = engine.getState().getPlayers().size();
+    final List<Player> players = engine.getState().getPlayers();
+    final int nbPlayers = players.size();
     int count = 0;
-    Move[] moves = engine.getState().getMovesPlayed();
-    for (Move move : moves) {
-      String strMove = "";
+    final Move[] moves = engine.getState().getMovesPlayed();
+    for (final Move move : moves) {
+      final StringBuilder strMove = new StringBuilder();
+      strMove.append("Player ").append(players.get(count % nbPlayers).getName()).append(" - ");
       if (move.isPawn()) {
-        Position from = move.getFrom();
-        strMove +=
-            "Player "
-                + players.get(count % nbPlayers).getName()
-                + " - "
-                + posToString(from)
-                + '-'
-                + posToString(move.getTo());
+        final Position from = move.getFrom();
+        strMove.append(posToString(from)).append('-').append(posToString(move.getTo()));
       } else {
-        Orientation orientation = move.getOrientation();
-        strMove +=
-            "Player "
-                + players.get(count % nbPlayers).getName()
-                + " - "
-                + posToString(move.getTo())
-                + orientation.toString();
+        final Orientation orientation = move.getOrientation();
+        strMove.append(posToString(move.getTo())).append(orientation.toString());
       }
       count++;
-      strMove += ";";
-      writer.println(strMove);
+      strMove.append(';');
+      writer.println(strMove.toString());
     }
     writer.println("Newest move");
   }

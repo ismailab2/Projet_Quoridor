@@ -30,6 +30,7 @@ class CliAppTest {
     p1 = engine.getState().getPlayers().getFirst();
     reader = mock(LineReader.class);
     terminal = mock(Terminal.class);
+    when(terminal.writer()).thenReturn(mock(PrintWriter.class));
     app = new CliApp(engine, terminal, reader);
   }
 
