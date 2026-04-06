@@ -164,6 +164,9 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final List<Player> players = state.getPlayers();
     for (final Player player : players) {
+      if (player.isDisabled()) {
+        continue;
+      }
       final Position pos = player.getPosition();
       final Rectangle pawn =
           new Rectangle(cellSize * PAWN_SIZE_FACTOR, cellSize * PAWN_SIZE_FACTOR);

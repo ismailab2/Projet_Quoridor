@@ -54,16 +54,17 @@ public class QuoridorApp extends Application {
     final ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
     final List<Player> players = state.getPlayers();
-    final PlayerPanel player1Panel = new PlayerPanel(players.get(0).getName(), state, 0);
-    final PlayerPanel player2Panel = new PlayerPanel(players.get(1).getName(), state, 1);
-    setupPanelSize(player1Panel);
-    setupPanelSize(player2Panel);
+    final PlayerPanel[] panels = new PlayerPanel[players.size()];
+    for (int i = 0; i < players.size(); i++) {
+        panels[i] = new PlayerPanel(players.get(i).getName(), state, i);
+        setupPanelSize(panels[i]);
+    }
 
     final BoardView boardView = new BoardView(engine);
     final StackPane boardContainer = buildBoardContainer(boardView);
 
     final MainMenuBar menuBar = new MainMenuBar(dispatcher);
-    final BorderPane root = buildRootLayout(menuBar, boardContainer, player1Panel, player2Panel);
+    final BorderPane root = buildRootLayout(menuBar, boardContainer, panels);
 
     DragAndDrop.install(engine, boardView);
 
@@ -111,26 +112,49 @@ public class QuoridorApp extends Application {
    *
    * @param menuBar the top menu bar
    * @param boardContainer the center board container
-   * @param player1Panel the left player panel
-   * @param player2Panel the right player panel
+   * @param panels array of player panels
    * @return the configured BorderPane
    */
   private BorderPane buildRootLayout(
       final MainMenuBar menuBar,
       final StackPane boardContainer,
-      final PlayerPanel player1Panel,
-      final PlayerPanel player2Panel) {
-    BorderPane.setAlignment(player1Panel, Pos.CENTER);
-    BorderPane.setAlignment(player2Panel, Pos.CENTER);
-    final Insets margin = new Insets(DEFAULT_MARGIN);
-    BorderPane.setMargin(player1Panel, margin);
-    BorderPane.setMargin(player2Panel, margin);
-
+      final PlayerPanel[] panels) {
+      
     final BorderPane root = new BorderPane();
+    final Insets margin = new Insets(DEFAULT_MARGIN);
+
+    
+    final VBox leftContainer = new VBox(DEFAULT_MARGIN);
+    leftContainer.setAlignment(Pos.CENTER);
+    
+    if (panels.length > 0) {
+        leftContainer.getChildren().add(panels[0]);
+    }
+    if (panels.length > 2) {
+        leftContainer.getChildren().add(panels[2]);
+    }
+    
+    
+    final VBox rightContainer = new VBox(DEFAULT_MARGIN);
+    rightContainer.setAlignment(Pos.CENTER);
+    
+    if (panels.length > 1) {
+        rightContainer.getChildren().add(panels[1]);
+    }
+    if (panels.length > 3) {
+        rightContainer.getChildren().add(panels[3]); 
+    }
+
+    
+    BorderPane.setMargin(leftContainer, margin);
+    BorderPane.setMargin(rightContainer, margin);
+
+    
     root.setTop(menuBar);
     root.setCenter(boardContainer);
-    root.setLeft(player1Panel);
-    root.setRight(player2Panel);
+    root.setLeft(leftContainer);
+    root.setRight(rightContainer);
+
     return root;
   }
 

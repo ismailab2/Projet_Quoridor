@@ -98,7 +98,20 @@ public class GameState {
     target.setRemainingTime(newTime);
 
     if (newTime <= 0) {
-      setGameOver(true);
+      int cpt = 0;
+      List<Player> players = getPlayers();
+      for(Player player : players){
+        if(player.getRemainingTime()<=0){
+          cpt++;
+        }
+      }
+      if(players.size() - cpt <=1){
+        setGameOver(true);
+      }
+      else{
+        target.setDisabled(true);
+        notifyListeners();
+      }
     }
     notifyTimerListeners();
   }

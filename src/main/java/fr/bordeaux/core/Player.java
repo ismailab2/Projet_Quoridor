@@ -16,6 +16,7 @@ public abstract class Player {
   private long remainingTime = 30 * 60 * 1000; // Time in milliseconds
   private final Position startingPosition;
   private int score = 0;
+  private boolean disabled = false;
 
   /**
    * Constructs a new Player with a name and an initial starting position.
@@ -99,6 +100,24 @@ public abstract class Player {
    */
   public void setPosition(Position position) {
     this.position = position;
+  }
+
+    /**
+   * Gets the current disable boolean of the player's pawn.
+   *
+   * @return The current disable boolean.
+   */
+  public Boolean isDisabled() {
+    return disabled;
+  }
+
+  /**
+   * Sets the current disable boolean of the player's pawn.
+   *
+   * @param disBoolean The new boolean to set.
+   */
+  public void setDisabled(Boolean disBoolean) {
+    this.disabled = disBoolean;
   }
 
   /**

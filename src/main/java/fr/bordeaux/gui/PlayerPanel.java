@@ -158,7 +158,15 @@ public final class PlayerPanel extends VBox {
    * @param player The player whose information should be displayed.
    */
   public void update(final Player player) {
-    wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
-    scoreLabel.setText(String.valueOf(player.getScore()));
+    if (player.isDisabled()) {
+      this.setOpacity(0.4);
+      timeLabel.setText("ÉLIMINÉ");
+      timeLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 20px;");
+    }
+    else{
+      wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
+      scoreLabel.setText(String.valueOf(player.getScore()));
+    }
+
   }
 }
