@@ -2,7 +2,7 @@ package fr.bordeaux.persistence;
 
 import fr.bordeaux.ai.base.*;
 import fr.bordeaux.ai.mcts.MctsPlayer;
-import fr.bordeaux.ai.minimax.MinimaxPlayer;
+import fr.bordeaux.ai.minimax.*;
 import fr.bordeaux.ai.random.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
@@ -10,10 +10,20 @@ import java.util.*;
 
 /** Utility class used to load a game state from a save file. */
 public final class GameLoader {
-  // Board size : always 9x9
+  /** The size of the board (9x9). */
   private static int size = 9;
 
+  /** The line index where the board section starts in the save file. */
   private static final int BOARD_START = 3;
+
+  /** Default board size. */
+  private static final int BOARD_SIZE_DEFAULT = 9;
+
+  /** Default timeout in minutes. */
+  private static final int TIMEOUT_DEFAULT = 30;
+
+  /** Default MCTS reflexion time in milliseconds. */
+  private static final long MCTS_REFLEXION_DEFAULT = 2000L;
 
   /** Private constructor to prevent instantiation. */
   private GameLoader() {}
@@ -42,8 +52,8 @@ public final class GameLoader {
 
     final List<Move> history = new ArrayList<>();
     readHistory(lines, history);
-    final int currentPlayerIndex = readCurrentPlayer(lines, currentLine);
-    final GameState gameState = new GameState(board, players, currentPlayerIndex);
+    final int playerIndex = readCurrentPlayer(lines, currentLine);
+    final GameState gameState = new GameState(board, players, playerIndex);
     applyMode(engine, gameState, lines);
     gameState.loadHistoryWithoutApplying(history);
     return gameState;
@@ -53,7 +63,7 @@ public final class GameLoader {
   // If not, throws GameLoadException with error type and line number
   private static void validateHeader(final List<String> lines, final int currentLine)
       throws GameLoadException {
-    if (!lines.get(currentLine).equals("[game]")) {
+    if (!"[game]".equals(lines.get(currentLine))) {
       throw new GameLoadException(
           "ERREUR_ENTETE", 1, "Expected [game] but found : " + lines.get(currentLine));
     }
@@ -217,13 +227,14 @@ public final class GameLoader {
 
     final PlayerAndLine result;
     if ("ai".equals(typePart)) {
-      result = readAiPlayer(lines, myCurrentLine, playerName, playerPosition, playerColor);
-    } else {
       result =
-          new PlayerAndLine(
-              new HumanPlayer(playerName, playerPosition, playerColor), myCurrentLine + 1);
+          readAiPlayer(
+              lines, myCurrentLine, playerName, playerPosition, playerColor, remainingTime);
+    } else {
+      final Player human = new HumanPlayer(playerName, playerPosition, playerColor);
+      human.setRemainingTime(remainingTime);
+      result = new PlayerAndLine(human, myCurrentLine + 1);
     }
-    result.player.setRemainingTime(remainingTime);
     return result;
   }
 
@@ -243,84 +254,88 @@ public final class GameLoader {
   }
 
   /**
+   * Reads an AI player and its specific settings.
+   *
    * @param lines The list of strings representing the lines of the save file.
-   * @param currentLine The current line index after reading basic player info.
-   * @param pName The parsed name of the AI player.
-   * @param pPostion The parsed starting position of the AI.
-   * @return A {@link PlayerAndLine} record containing the fully configured AI player
-   * @throws IllegalArgumentException if the AI mode specified in the file is unknown.
+   * @param currentLine The index where AI settings start.
+   * @param name The parsed name of the AI player.
+   * @param pos The parsed starting position of the AI.
+   * @param color The color of the AI player.
+   * @param time The remaining time for the AI player.
+   * @return A {@link PlayerAndLine} record containing the fully configured AI player.
+   * @throws IllegalArgumentException if the AI mode is unknown.
    */
   private static PlayerAndLine readAiPlayer(
       final List<String> lines,
       final int currentLine,
-      final String pName,
-      final Position pPostion,
-      final Color pColor) {
-    final Map<String, String> aiSettings = new HashMap<>();
-    int myCurrentLine = currentLine + 1;
-    final int targetIndex = Integer.parseInt(lines.get(myCurrentLine).split("-")[1]);
-    while (checkSameIndex(lines, myCurrentLine, targetIndex)) {
-      final String[] lineSplit = lines.get(myCurrentLine).split("=");
-      final String[] aiParameter = lineSplit[0].split("-");
-      aiSettings.put(aiParameter[aiParameter.length - 1], lineSplit[1]);
-      myCurrentLine++;
-    }
+      final String name,
+      final Position pos,
+      final Color color,
+      final long time) {
+    final Map<String, String> settings = parseAiSettings(lines, currentLine);
+    final int nextLine = currentLine + settings.size() + 1;
 
-    final PlayerAndLine result;
-    final String mode = aiSettings.get("mode");
+    final String mode = settings.get("mode");
+    final Player ai;
     switch (mode) {
-      case "minimax":
-        {
-          final String heuristicName = aiSettings.get("heuristic");
-          final int depth = Integer.parseInt(aiSettings.get("depth"));
-          final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
-          result =
-              new PlayerAndLine(
-                  MinimaxPlayer.builder(pName, pPostion, pColor)
-                      .withHeuristic(heuristicName)
-                      .withDepth(depth)
-                      .withReflexion(reflexionTime)
-                      .build(),
-                  myCurrentLine);
-          break;
-        }
-      case "mcts":
-        long reflexionTimeMcts = 2000;
-        if (aiSettings.containsKey("reflexion")) {
-          reflexionTimeMcts = Long.parseLong(aiSettings.get("reflexion"));
-        }
-        final boolean useNN = "ML".equals(aiSettings.get("selection"));
-        try {
-          result =
-              new PlayerAndLine(
-                  new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
-          break;
-        } catch (final java.io.IOException e) {
-          throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
-        }
-
-      case "random":
-        result = new PlayerAndLine(new RandomPlayer(pName, pPostion, pColor), myCurrentLine);
-        break;
-
-      case "minimax-iterative-deepening":
-        {
-          final String heuristicName = aiSettings.get("heuristic");
-          final int reflexionTime = Integer.parseInt(aiSettings.get("reflexion"));
-          result =
-              new PlayerAndLine(
-                  MinimaxPlayer.builder(pName, pPostion, pColor)
-                      .withHeuristic(heuristicName)
-                      .withReflexion(reflexionTime)
-                      .withIterativeDeepening(true)
-                      .build(),
-                  myCurrentLine);
-          break;
-        }
-      default:
-        throw new IllegalArgumentException("Unknow Ai Type : " + mode);
+      case "minimax" -> ai = createMinimax(name, pos, color, settings, false);
+      case "minimax-iterative-deepening" -> ai = createMinimax(name, pos, color, settings, true);
+      case "mcts" -> ai = createMcts(name, pos, color, settings);
+      case "random" -> ai = new RandomPlayer(name, pos, color);
+      default -> throw new IllegalArgumentException("Unknown AI Type : " + mode);
     }
-    return result;
+    ai.setRemainingTime(time);
+    return new PlayerAndLine(ai, nextLine);
+  }
+
+  private static Map<String, String> parseAiSettings(
+      final List<String> lines, final int startLine) {
+    final Map<String, String> settings = new java.util.concurrent.ConcurrentHashMap<>();
+    int lineRef = startLine + 1;
+    final int targetIndex = Integer.parseInt(lines.get(lineRef).split("-")[1]);
+    while (checkSameIndex(lines, lineRef, targetIndex)) {
+      final String[] split = lines.get(lineRef).split("=");
+      final String[] param = split[0].split("-");
+      settings.put(param[param.length - 1], split[1]);
+      lineRef++;
+    }
+    return settings;
+  }
+
+  private static Player createMinimax(
+      final String name,
+      final Position pos,
+      final Color color,
+      final Map<String, String> settings,
+      final boolean isIterative) {
+    final String heuristic = settings.get("heuristic");
+    final int reflexion = Integer.parseInt(settings.get("reflexion"));
+    final MinimaxBuilder builder =
+        MinimaxPlayer.builder(name, pos, color).withHeuristic(heuristic).withReflexion(reflexion);
+
+    if (isIterative) {
+      builder.withIterativeDeepening(true);
+    } else {
+      builder.withDepth(Integer.parseInt(settings.get("depth")));
+    }
+    return builder.build();
+  }
+
+  private static Player createMcts(
+      final String name,
+      final Position pos,
+      final Color color,
+      final Map<String, String> settings) {
+    final long reflexion =
+        settings.containsKey("reflexion")
+            ? Long.parseLong(settings.get("reflexion"))
+            : MCTS_REFLEXION_DEFAULT;
+    final boolean useNN = "ML".equals(settings.get("selection"));
+    try {
+      return new MctsPlayer(name, pos, reflexion, useNN, color);
+    } catch (final java.io.IOException e) {
+      throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
+    }
   }
 
   /**
@@ -332,11 +347,12 @@ public final class GameLoader {
    * @return {@code true} if the line has the same index player, {@code false} otherwise.
    */
   private static boolean checkSameIndex(
-      final List<String> lines, final int currentLine, final int index) {
-    if (!lines.get(currentLine).contains("-")) {
-      return false;
+      final List<String> lines, final int myLineRef, final int targetIndex) {
+    boolean result = false;
+    if (lines.get(myLineRef).contains("-")) {
+      result = Integer.parseInt(lines.get(myLineRef).split("-")[1]) == targetIndex;
     }
-    return Integer.parseInt(lines.get(currentLine).split("-")[1]) == index;
+    return result;
   }
 
   /**
@@ -361,40 +377,38 @@ public final class GameLoader {
       if ("[game]".equals(line)) {
         break;
       }
-      if (!line.contains("=")) {
-        continue;
-      }
-      final String[] parts = line.split("=");
-      final String key = parts[0].trim();
-      final String value = parts[1].trim();
-
-      switch (key) {
-        case "verbose":
-          engine.setVerbose(Boolean.parseBoolean(value));
-          break;
-        case "blitz":
-          engine.setBlitz(Boolean.parseBoolean(value));
-          break;
-        case "constest":
-          engine.setContest(Boolean.parseBoolean(value));
-          break;
-        case "debug":
-          engine.setDebug(Boolean.parseBoolean(value));
-          break;
-        case "nb-players":
-          nbPlayers = Integer.parseInt(value);
-          break;
-        default:
-          break;
+      if (line.contains("=")) {
+        final String[] parts = line.split("=");
+        final String key = parts[0].trim();
+        final String value = parts[1].trim();
+        nbPlayers = handleModeSetting(engine, key, value, nbPlayers);
       }
     }
 
-    if (nbPlayers > 0 && gameState.getPlayers().size() != nbPlayers) {
+    validatePlayerCount(nbPlayers, gameState.getPlayers().size());
+  }
+
+  private static int handleModeSetting(
+      final GameEngine engine, final String key, final String value, final int currentNb) {
+    int nb = currentNb;
+    switch (key) {
+      case "verbose" -> engine.setVerbose(Boolean.parseBoolean(value));
+      case "blitz" -> engine.setBlitz(Boolean.parseBoolean(value));
+      case "constest" -> engine.setContest(Boolean.parseBoolean(value));
+      case "debug" -> engine.setDebug(Boolean.parseBoolean(value));
+      case "nb-players" -> nb = Integer.parseInt(value);
+      default -> {}
+    }
+    return nb;
+  }
+
+  private static void validatePlayerCount(final int expected, final int actual) {
+    if (expected > 0 && actual != expected) {
       throw new IllegalArgumentException(
           "The number of players read from the file ("
-              + nbPlayers
+              + expected
               + ") and the actual players in the game ("
-              + gameState.getPlayers().size()
+              + actual
               + ") are different");
     }
   }
@@ -407,65 +421,49 @@ public final class GameLoader {
 
   private static void readHistory(final List<String> lines, final List<Move> history) {
     boolean inHistory = false;
-
     for (final String line : lines) {
       final String trimmed = line.trim();
-
-      // Detect section start
       if ("[History]".equals(trimmed)) {
         inHistory = true;
         continue;
       }
-
-      // Skip until we reach the section
       if (!inHistory) {
         continue;
       }
-
-      // Stop if a new section starts
       if (trimmed.startsWith("[")) {
         break;
       }
-
-      // Skip empty lines
-      if (trimmed.isEmpty()) {
-        continue;
-      }
-
-      // Split line by ';' to get individual moves: "1 e2-e3"
-      final String[] parts = trimmed.split(";");
-      for (final String part : parts) {
-        final String moveStr = part.trim();
-        if (moveStr.isEmpty()) {
-          continue;
-        }
-
-        // Split player number and move: ["1", "e2-e3"]
-        final String[] tokens = moveStr.split(" ");
-        if (tokens.length < 2) {
-          continue;
-        }
-
-        final String desc = tokens[1]; // e.g., "e2-e3" or "e3v"
-        final Move move;
-
-        if (desc.contains("-")) {
-          // Handle Pawn Move: "e2-e3"
-          final String[] coords = desc.split("-");
-          move = Move.pawn(coordToPos(coords[0]), coordToPos(coords[1]));
-        } else {
-          // Handle Wall Placement: "e3v"
-          final String posStr = desc.substring(0, desc.length() - 1); // "e3"
-          final char orientChar = desc.charAt(desc.length() - 1); // 'v' or 'h'
-
-          final Orientation orient =
-              (orientChar == 'h') ? Orientation.HORIZONTAL : Orientation.VERTICAL;
-          move = Move.wall(coordToPos(posStr), orient);
-        }
-
-        // Add to list in chronological order
-        history.add(move);
+      if (!trimmed.isEmpty()) {
+        parseHistoryLine(trimmed, history);
       }
     }
+  }
+
+  private static void parseHistoryLine(final String line, final List<Move> history) {
+    final String[] parts = line.split(";");
+    for (final String part : parts) {
+      final String moveStr = part.trim();
+      if (!moveStr.isEmpty()) {
+        final String[] tokens = moveStr.split(" ");
+        if (tokens.length >= 2) {
+          history.add(parseMove(tokens[1]));
+        }
+      }
+    }
+  }
+
+  private static Move parseMove(final String desc) {
+    final Move result;
+    if (desc.contains("-")) {
+      final String[] coords = desc.split("-");
+      result = Move.pawn(coordToPos(coords[0]), coordToPos(coords[1]));
+    } else {
+      final String posStr = desc.substring(0, desc.length() - 1);
+      final char orientChar = desc.charAt(desc.length() - 1);
+      final Orientation orient =
+          (orientChar == 'h') ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+      result = Move.wall(coordToPos(posStr), orient);
+    }
+    return result;
   }
 }
