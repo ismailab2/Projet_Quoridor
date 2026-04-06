@@ -70,7 +70,7 @@ public final class GameSaver {
   }
 
   /**
-   * Writes the full board representation to the save file.
+   * Writes the board representation to the save file.
    *
    * @param writer writer used to save the data
    * @param state game state containing the board to write
@@ -107,7 +107,13 @@ public final class GameSaver {
     return line.toString();
   }
 
-  // Builds one horizontal wall line between two rows
+  /**
+   * Builds one horizontal wall line between two rows.
+   *
+   * @param row row index to build
+   * @param board board to inspect
+   * @return string representing the wall line content
+   */
   private static String buildWallLine(final int row, final Board board) {
     final StringBuilder line = new StringBuilder();
     for (int col = 0; col < size; col++) {
@@ -121,7 +127,7 @@ public final class GameSaver {
   }
 
   /**
-   * Returns the character used to represent the content of a board cell.
+   * Returns the character representing a board cell.
    *
    * @param row row of the cell
    * @param col column of the cell
@@ -190,7 +196,7 @@ public final class GameSaver {
   }
 
   /**
-   * Saves the specific settings of an AI player to the output file.
+   * Saves AI player settings to the output file.
    *
    * @param w The {@link PrintWriter} used to write to the file.
    * @param g The current game state.
@@ -211,12 +217,11 @@ public final class GameSaver {
   }
 
   /**
-   * Saves the global game parameters and all players' information to the output file. Writes the
-   * "[settings]" header followed by game rules and player configurations.
+   * Saves game parameters and player info. Writes the "[settings]" header and configurations.
    *
    * @param w the {@link PrintWriter} used to write to the file
    * @param engine the engine providing the configuration
-   * @param g the current game state containing player data
+   * @param state the game state containing player data
    */
   private static void saveParameters(
       final PrintWriter writer, final GameEngine engine, final GameState state) {
@@ -245,6 +250,12 @@ public final class GameSaver {
     }
   }
 
+  /**
+   * Writes the complete game history to the save file.
+   *
+   * @param writer writer used to save the data
+   * @param state game state containing the history
+   */
   private static void writeHistory(final PrintWriter writer, final GameState state) {
     writer.println("[History]");
     final Move[] moves = state.getMovesPlayed();
@@ -264,6 +275,12 @@ public final class GameSaver {
     }
   }
 
+  /**
+   * Formats a move into its save-file string representation.
+   *
+   * @param move move to format
+   * @return formatted string (e.g., "e2-e4" or "e2h")
+   */
   private static String formatMove(final Move move) {
     final StringBuilder builder = new StringBuilder();
     if (move.isPawn()) {
@@ -274,6 +291,12 @@ public final class GameSaver {
     return builder.toString();
   }
 
+  /**
+   * Converts a board position to its coordinate string (e.g., "e2").
+   *
+   * @param pos position to convert
+   * @return the coordinate string, or empty string if pos is null
+   */
   private static String posToCoord(final Position pos) {
     String result = "";
     if (pos != null) {

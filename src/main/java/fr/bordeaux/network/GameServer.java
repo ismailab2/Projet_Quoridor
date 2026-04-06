@@ -10,15 +10,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * This class implements a simple TCP server capable of: - Accepting a single client connection -
- * Handling basic commands (PING, QUIT) - Broadcasting its presence via UDP - Detecting client
- * timeouts (1 minute)
- *
- * <p>Communication protocol: - Messages are ASCII strings terminated by '\n' - Supported commands:
- * - PING → responds with PONG - QUIT → responds with BYE and disconnects client - Other → responds
- * with OK
- */
+/** TCP server for single client. Handles PING/QUIT and UDP broadcast. */
 public class GameServer {
 
   /** Default constructor. Initializes a new GameServer instance. */
@@ -43,8 +35,7 @@ public class GameServer {
   private long lastPing = System.currentTimeMillis();
 
   /**
-   * Creates a TCP server socket, starts the UDP broadcaster, launches the timeout checker, and
-   * waits for a client connection.
+   * Starts server on port. Launches broadcaster and timeout checker.
    *
    * @param port TCP port to listen on.
    */
@@ -78,10 +69,7 @@ public class GameServer {
         .start();
   }
 
-  /**
-   * Periodically checks if the client has sent a PING within the last 60 seconds. If not, the
-   * client is disconnected and the server stops.
-   */
+  /** Disconnects client if no PING within 60s. */
   private void startTimeoutChecker() {
     new Thread(
             () -> {
@@ -104,8 +92,7 @@ public class GameServer {
   }
 
   /**
-   * Reads incoming messages and responds according to the protocol: - PING → updates lastPing and
-   * sends PONG - QUIT → sends BYE and disconnects client - Other → sends OK
+   * Reads and handles messages (PING, QUIT, MOVE).
    *
    * @param socket Client socket.
    */
@@ -143,9 +130,7 @@ public class GameServer {
     stop();
   }
 
-  /**
-   * Stops the UDP broadcaster, interrupts its thread, closes all sockets, and releases resources.
-   */
+  /** Stops broadcaster, closes sockets, and releases resources. */
   public void stop() {
     running.set(false);
 

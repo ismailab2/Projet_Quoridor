@@ -11,12 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
-/**
- * Represents an AI player using the Minimax algorithm for the Quorridor game. Features advanced
- * capabilities such as Alpha-Beta pruning, Iterative Deepening, and a configurable reflection time
- * limit. Note: AI are currently limited to 2-player scenarios. They may not function correctly if
- * the number of players is larger.
- */
+/** AI player using Minimax with Alpha-Beta pruning and Iterative Deepening. */
 public final class MinimaxPlayer extends AiPlayer {
 
   /** The maximum depth the AI will search if iterative deepening is disabled. */
@@ -40,6 +35,9 @@ public final class MinimaxPlayer extends AiPlayer {
   /** The name of the heuristic algorithm to use. */
   private final String heuristicName;
 
+  /** High score threshold to identify a winning state. */
+  private static final int WIN_THRESHOLD = 9000;
+
   /**
    * Private constructor used by the Builder to instantiate the AI.
    *
@@ -62,21 +60,7 @@ public final class MinimaxPlayer extends AiPlayer {
     this.heuristicFunction = determineHeuristic(this.heuristicName);
   }
 
-  /**
-   * Private constructor used by the copy() method for cloning the AI player. This constructor
-   * allows for a complete state transfer including Minimax specific configurations like search
-   * depth and heuristic type.
-   *
-   * @param name The name of the AI player.
-   * @param current The current position of the pawn.
-   * @param start The starting position of the pawn.
-   * @param walls The number of remaining walls.
-   * @param score The current player score.
-   * @param depth The maximum search depth for the Minimax algorithm.
-   * @param timeLimit The maximum time allowed for reflection in seconds.
-   * @param iterativeDeepVal Whether to use iterative deepening during search.
-   * @param heuristicVal The name of the heuristic function to be used.
-   */
+  /** Internal constructor for cloning. */
   private MinimaxPlayer(
       final String name,
       final Position current,
@@ -118,7 +102,7 @@ public final class MinimaxPlayer extends AiPlayer {
   /**
    * Sets the heuristic function based on the provided name.
    *
-   * @param heuristicNameP The name of the heuristic ("simple", "intermediate", or "advanced").
+   * @param heuristicNameP The name of the heuristic.
    * @return The corresponding heuristic class.
    */
   private HeuristicEvaluator determineHeuristic(final String heuristicNameP) {
@@ -230,9 +214,9 @@ public final class MinimaxPlayer extends AiPlayer {
     if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
 
       final int rawScore = this.heuristicFunction.evaluate(gameState);
-      if (rawScore >= 9000) {
+      if (rawScore >= WIN_THRESHOLD) {
         resultScore = rawScore + currentDepth;
-      } else if (rawScore <= -9000) {
+      } else if (rawScore <= -WIN_THRESHOLD) {
         resultScore = rawScore - currentDepth;
       } else {
         resultScore = rawScore;
@@ -274,9 +258,9 @@ public final class MinimaxPlayer extends AiPlayer {
 
     if (gameState.isGameOver() || currentDepth == 0 || System.currentTimeMillis() >= endTime) {
       final int rawScore = this.heuristicFunction.evaluate(gameState);
-      if (rawScore >= 9000) {
+      if (rawScore >= WIN_THRESHOLD) {
         resultScore = rawScore + currentDepth;
-      } else if (rawScore <= -9000) {
+      } else if (rawScore <= -WIN_THRESHOLD) {
         resultScore = rawScore - currentDepth;
       } else {
         resultScore = rawScore;
@@ -300,7 +284,7 @@ public final class MinimaxPlayer extends AiPlayer {
   }
 
   /**
-   * Simulates a move and updates the game state, pushing it to the stack for backtracking.
+   * Simulates a move and updates the game state.
    *
    * @param gameState The current game state.
    * @param move The move to simulate.

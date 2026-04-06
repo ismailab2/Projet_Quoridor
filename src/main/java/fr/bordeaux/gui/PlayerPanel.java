@@ -10,18 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 
 /**
- * Represents the display panel for a player in the graphical interface.
- *
- * <p>This panel shows:
- *
- * <ul>
- *   <li>The player's name
- *   <li>The remaining time (minutes and seconds)
- *   <li>The number of walls left
- *   <li>The current score of the player
- * </ul>
- *
- * It automatically updates its information when changes occur in the {@link GameState}.
+ * Display panel for a player's stats (name, time, walls, score). Updates automatically when its
+ * {@link GameState} changes.
  */
 public final class PlayerPanel extends VBox {
   /** Label displaying the player's name. */
@@ -40,19 +30,19 @@ public final class PlayerPanel extends VBox {
   private final int playerIndex;
 
   /**
-   * Constructs a panel for a given player.
+   * Constructs panel for player.
    *
-   * @param playerName The name of the player to display.
-   * @param state The game state the player belongs to, used to automatically update the panel.
-   * @param playerIndex The index of the player in the {@link GameState}'s list of players.
+   * @param playerName player name
+   * @param state game state
+   * @param playerIndex player index
    */
   public PlayerPanel(final String playerName, final GameState state, final int playerIndex) {
     super();
     this.playerIndex = playerIndex;
 
-    String accentColor = (playerIndex == 0) ? "#e74c3c" : "#2c3e50";
+    final String accentColor = (playerIndex == 0) ? "#e74c3c" : "#2c3e50";
 
-    Region topBar = new Region();
+    final Region topBar = new Region();
     topBar.setPrefHeight(6);
     topBar.setMaxWidth(Double.MAX_VALUE);
     topBar.setStyle("-fx-background-color: " + accentColor + ";");
@@ -65,22 +55,22 @@ public final class PlayerPanel extends VBox {
             -fx-text-fill: #222222;
         """);
 
-    Region separator = makeSeparator();
+    final Region separator = makeSeparator();
 
     timeLabel = new Label("00:00");
-    VBox timeBox = makeStatBox("Temps", timeLabel, accentColor);
+    final VBox timeBox = makeStatBox("Temps", timeLabel, accentColor);
 
-    Region separator2 = makeSeparator();
+    final Region separator2 = makeSeparator();
 
     wallsLabel = new Label("10");
-    VBox wallsBox = makeStatBox("Murs restants", wallsLabel, accentColor);
+    final VBox wallsBox = makeStatBox("Murs restants", wallsLabel, accentColor);
 
-    Region separator3 = makeSeparator();
+    final Region separator3 = makeSeparator();
 
     scoreLabel = new Label("0");
-    VBox scoreBox = makeStatBox("Score", scoreLabel, accentColor);
+    final VBox scoreBox = makeStatBox("Score", scoreLabel, accentColor);
 
-    VBox content =
+    final VBox content =
         new VBox(16, nameLabel, separator, timeBox, separator2, wallsBox, separator3, scoreBox);
     content.setPadding(new Insets(15));
     content.setAlignment(Pos.TOP_CENTER);
@@ -107,14 +97,14 @@ public final class PlayerPanel extends VBox {
         () ->
             Platform.runLater(
                 () -> {
-                  Player p = state.getPlayers().get(playerIndex);
+                  final Player p = state.getPlayers().get(playerIndex);
                   update(p);
                 }));
     state.addTimerListener(
         () ->
             Platform.runLater(
                 () -> {
-                  Player p = state.getPlayers().get(playerIndex);
+                  final Player p = state.getPlayers().get(playerIndex);
                   timeLabel.setText(TimeConvertor.formatTime(p.getRemainingTime()));
                 }));
   }
@@ -127,14 +117,14 @@ public final class PlayerPanel extends VBox {
    * @param accentColor The main color to apply to the value label.
    * @return A {@link VBox} containing the title and value.
    */
-  private VBox makeStatBox(String title, Label valueLabel, String accentColor) {
-    Label titleLabel = new Label(title);
+  private VBox makeStatBox(final String title, final Label valueLabel, final String accentColor) {
+    final Label titleLabel = new Label(title);
     titleLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #888888;");
 
     valueLabel.setStyle(
         "-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + accentColor + ";");
 
-    VBox box = new VBox(4, titleLabel, valueLabel);
+    final VBox box = new VBox(4, titleLabel, valueLabel);
     box.setAlignment(Pos.CENTER);
     return box;
   }
@@ -145,7 +135,7 @@ public final class PlayerPanel extends VBox {
    * @return A {@link Region} representing the separator.
    */
   private Region makeSeparator() {
-    Region sep = new Region();
+    final Region sep = new Region();
     sep.setPrefHeight(1);
     sep.setMaxWidth(Double.MAX_VALUE);
     sep.setStyle("-fx-background-color: #e0e0e0;");

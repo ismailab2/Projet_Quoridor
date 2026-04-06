@@ -7,31 +7,27 @@ import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.util.List;
 
-/**
- * Intermediate heuristic that evaluates the relative advantage between players. This strategy
- * calculates the difference between the AI's progress and the opponent's progress to determine who
- * is closer to winning.
- */
+/** Heuristic evaluating relative progress advantage. */
 public class MediumHeuristic implements HeuristicEvaluator {
 
-  /** The identifier of the AI player. */
+  /** AI player color. */
   private final Color aiColor;
 
   /**
-   * Constructs a MediumHeuristic.
+   * Constructs MediumHeuristic with AI color.
    *
-   * @param aiColorParameter The color of the AI player.
+   * @param aiColorParameter The AI color.
    */
   public MediumHeuristic(final Color aiColorParameter) {
     this.aiColor = aiColorParameter;
   }
 
   /**
-   * Calculates a relative score by subtracting the opponent's progress from the AI's progress.
+   * Evaluates score by comparing player progress.
    *
-   * @param gameState The current game state.
-   * @return A score representing the lead (or delay) relative to the opponent.
-   * @throws IllegalStateException if a player is missing from the state.
+   * @param gameState Current state.
+   * @return lead or delay score.
+   * @throws IllegalStateException if player is missing.
    */
   @Override
   public int evaluate(final GameState gameState) {

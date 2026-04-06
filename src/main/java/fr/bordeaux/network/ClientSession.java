@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-/**
- * Represents a connected client on the server. Manages the client's socket, input/output streams,
- * name, status, and current game.
- */
+/** Represents a connected client with socket, streams, name, and status. */
 public class ClientSession {
 
   private final String id;

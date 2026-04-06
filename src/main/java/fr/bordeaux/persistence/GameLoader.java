@@ -29,13 +29,13 @@ public final class GameLoader {
   private GameLoader() {}
 
   /**
-   * Loads a saved game from a file and rebuilds the corresponding game state.
+   * Loads a saved game from a file.
    *
-   * @param engine the engine used to apply loaded configuration
-   * @param filename path of the save file to load
+   * @param engine the engine for configuration
+   * @param filename path of the save file
    * @return the reconstructed game state
-   * @throws IOException if an input/output error occurs while reading the file
-   * @throws GameLoadException if the file content is invalid or inconsistent
+   * @throws IOException on I/O error
+   * @throws GameLoadException on invalid format
    */
   public static GameState loadGame(final GameEngine engine, final String filename)
       throws IOException, GameLoadException {
@@ -59,8 +59,8 @@ public final class GameLoader {
     return gameState;
   }
 
-  // Checks that the first line is "[game]"
-  // If not, throws GameLoadException with error type and line number
+  // Checks that the first line is "[game]".
+  // Throws GameLoadException with error type if not.
   private static void validateHeader(final List<String> lines, final int currentLine)
       throws GameLoadException {
     if (!"[game]".equals(lines.get(currentLine))) {
@@ -70,7 +70,7 @@ public final class GameLoader {
   }
 
   /**
-   * Checks that the first line of the save file contains the expected settings header.
+   * Checks that the save file starts with the settings header.
    *
    * @param lines The list of strings representing the lines of the save file.
    * @throws GameLoadException if the header is missing or incorrect.
@@ -92,7 +92,7 @@ public final class GameLoader {
     return Integer.parseInt(lines.get(currentLine + 2).trim().split("#")[0].trim());
   }
 
-  // Reads the full board, repositions players and places all walls
+  // Reads board, positions players and places walls.
   private static void readBoard(
       final List<String> lines,
       final Board board,
@@ -106,7 +106,7 @@ public final class GameLoader {
     }
   }
 
-  // Reads one cell line : repositions players and places vertical walls
+  // Reads a cell line, positions players and vertical walls.
   private static void readCellLine(
       final String line, final int row, final Board board, final List<Player> players) {
     for (int col = 0; col < size; col++) {
@@ -123,7 +123,7 @@ public final class GameLoader {
     }
   }
 
-  // Reads one horizontal wall line and places horizontal walls on the board
+  // Reads and places horizontal walls.
   private static void readHorizontalWalls(final String line, final int row, final Board board) {
     for (int col = 0; col < size; col++) {
       if (line.charAt(col * 2) == '_') {
@@ -132,7 +132,7 @@ public final class GameLoader {
     }
   }
 
-  // Reads "walls: 10 10" and restores the correct number of walls for each player
+  // Restores the correct number of walls for each player.
   private static void readRemainingWalls(
       final List<String> lines, final List<Player> players, final int currentLine) {
     final String wallLine = lines.get(BOARD_START + currentLine + size * 2 - 1);
@@ -147,7 +147,7 @@ public final class GameLoader {
   }
 
   /**
-   * Internal record used to bundle a parsed player and the index of the next line to read.
+   * Record bundling a parsed player and next line index.
    *
    * @param player The parsed player instance.
    * @param nextLine The index of the next line in the file.
@@ -155,7 +155,7 @@ public final class GameLoader {
   private record PlayerAndLine(Player player, int nextLine) {}
 
   /**
-   * Internal record used to bundle the list of all parsed players and the index of the next line.
+   * Record bundling all parsed players and next line index.
    *
    * @param players The list of all parsed players.
    * @param nextLine The index of the line where player and settings parsing stopped.
@@ -163,12 +163,10 @@ public final class GameLoader {
   private record AllPlayerAndLine(List<Player> players, int nextLine) {}
 
   /**
-   * Reads and parses all players (Human and AI) from the save file. Stops reading when it
-   * encounters the "[game]" section marker.
+   * Reads all players (Human and AI) from the save file.
    *
    * @param lines The list of strings representing the lines of the save file.
-   * @return An {@link AllPlayerAndLine} object containing the list of players and the next line
-   *     index.
+   * @return AllPlayerAndLine with players and next line index.
    */
   private static AllPlayerAndLine readAllPlayer(final List<String> lines) {
     final List<Player> lPlayers = new ArrayList<>();
@@ -199,13 +197,11 @@ public final class GameLoader {
   }
 
   /**
-   * Reads a single player's basic information(type, name, starting position) and delegates to
-   * specific methods for AI configuration if necessary.
+   * Reads player info and delegates AI configuration.
    *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line where the player's information begins.
-   * @return A {@link PlayerAndLine} record containing the instantiated player and the updated line
-   *     index.
+   * @return PlayerAndLine with player and updated line index.
    */
   private static PlayerAndLine readPlayer(final List<String> lines, final int currentLine) {
     final String playerLine = lines.get(currentLine);
@@ -239,7 +235,7 @@ public final class GameLoader {
   }
 
   /**
-   * Parses the starting position coordinates from a formatted string.
+   * Parses starting position coordinates from string.
    *
    * @param p The string containing the position data (e.g., "key=Position: 4, 0").
    * @return A {@link Position} object representing the parsed coordinates.
@@ -254,16 +250,9 @@ public final class GameLoader {
   }
 
   /**
-   * Reads an AI player and its specific settings.
+   * Reads an AI player and its settings.
    *
-   * @param lines The list of strings representing the lines of the save file.
-   * @param currentLine The index where AI settings start.
-   * @param name The parsed name of the AI player.
-   * @param pos The parsed starting position of the AI.
-   * @param color The color of the AI player.
-   * @param time The remaining time for the AI player.
-   * @return A {@link PlayerAndLine} record containing the fully configured AI player.
-   * @throws IllegalArgumentException if the AI mode is unknown.
+   * @return PlayerAndLine with configured AI.
    */
   private static PlayerAndLine readAiPlayer(
       final List<String> lines,
@@ -339,7 +328,7 @@ public final class GameLoader {
   }
 
   /**
-   * Checks if the current line index player is the same of the index parameter.
+   * Checks if current line player matches target index.
    *
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
@@ -356,19 +345,9 @@ public final class GameLoader {
   }
 
   /**
-   * Applies the game configuration modes (verbose, blitz, etc.) from the save file to the provided
-   * engine's {@link fr.bordeaux.config.ConfigManager}.
+   * Applies game configuration (verbose, blitz, etc.).
    *
-   * <p>This method reads settings at specific line indices following the [settings] header, using a
-   * "key=value" format, and writes them via {@link GameEngine#getConfig()}.
-   *
-   * @param engine the engine whose configuration will be updated
-   * @param gameState the game state to configure
-   * @param lines the list of strings representing the save file content
-   * @throws IllegalArgumentException if the number of players defined in settings mismatches the
-   *     actual players list size
-   * @throws IndexOutOfBoundsException if the file is shorter than expected
-   * @throws NumberFormatException if a numeric value (nbPlayers) is improperly formatted
+   * @throws IllegalArgumentException if player count mismatch.
    */
   private static void applyMode(
       final GameEngine engine, final GameState gameState, final List<String> lines) {

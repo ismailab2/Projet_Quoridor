@@ -5,24 +5,19 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
 
-/**
- * Manages the application configuration using a singleton pattern. This class handles loading and
- * saving settings (like timeouts, blitz mode, or shortcuts) from a persistent file located in the
- * user's home directory.
- */
+/** Singleton managed configuration for loading and saving settings. */
 public final class ConfigManager {
 
   private static ConfigManager instance;
 
-  /** Stores all configuration properties and shortcuts */
+  /** Configuration properties and shortcuts. */
   private final Properties props = new Properties();
 
   /** Private constructor for singleton pattern */
   private ConfigManager() {}
 
   /**
-   * Returns the singleton instance of ConfigManager. If the instance does not exist, it is lazily
-   * initialized.
+   * Returns the singleton instance of ConfigManager. Lazily initialized. initialized.
    *
    * @return The unique {@link ConfigManager} instance.
    */
@@ -42,19 +37,16 @@ public final class ConfigManager {
     return Paths.get(System.getProperty("user.home"), ".quoridorrc");
   }
 
-  /**
-   * Loads the configuration file if it exists. If the file does not exist, initializes default
-   * values and saves them.
-   */
+  /** Loads config if it exists. Otherwise saves defaults. */
   public void load() {
-    Path path = getFilePath();
+    final Path path = getFilePath();
     if (Files.exists(path)) {
 
-      try (InputStream in = Files.newInputStream(path)) {
+      try (final InputStream in = Files.newInputStream(path)) {
 
         props.load(in);
 
-      } catch (IOException e) {
+      } catch (final IOException e) {
 
         Log.error("Warning: invalid .quoridorrc file. Using defaults.", e);
       }
@@ -74,11 +66,11 @@ public final class ConfigManager {
 
   /** Saves the current properties to the configuration file. */
   public void save() {
-    try (OutputStream out = Files.newOutputStream(getFilePath())) {
+    try (final OutputStream out = Files.newOutputStream(getFilePath())) {
 
       props.store(out, "Quoridor configuration");
 
-    } catch (IOException e) {
+    } catch (final IOException e) {
       Log.error("Error saving .quoridorrc", e);
     }
   }
@@ -90,7 +82,7 @@ public final class ConfigManager {
    * @param defaultValue The value to return if the key is not found.
    * @return The property value or the default value.
    */
-  public String getOption(String key, String defaultValue) {
+  public String getOption(final String key, final String defaultValue) {
     return props.getProperty(key, defaultValue);
   }
 
@@ -100,7 +92,7 @@ public final class ConfigManager {
    * @param key The property key.
    * @param value The value to associate with the key.
    */
-  public void setOption(String key, String value) {
+  public void setOption(final String key, final String value) {
     props.setProperty(key, value);
   }
 
@@ -111,23 +103,23 @@ public final class ConfigManager {
    * @param defaultValue The value to return if the key is not found or invalid.
    * @return The boolean value of the property.
    */
-  public boolean getBoolean(String key, boolean defaultValue) {
+  public boolean getBoolean(final String key, final boolean defaultValue) {
     return Boolean.parseBoolean(props.getProperty(key, String.valueOf(defaultValue)));
   }
 
   /**
    * Retrieves a configuration option as an integer.
    *
-   * @param key The property key.
-   * @param defaultValue The value to return if the key is not found or not an integer.
-   * @return The integer value of the property.
+   * @param key property key
+   * @param defaultValue default value
+   * @return integer value of property
    */
-  public int getInt(String key, int defaultValue) {
+  public int getInt(final String key, final int defaultValue) {
     try {
-      String value = props.getProperty(key);
+      final String value = props.getProperty(key);
       if (value == null) return defaultValue;
       return Integer.parseInt(value);
-    } catch (NumberFormatException e) {
+    } catch (final NumberFormatException e) {
       return defaultValue;
     }
   }
@@ -142,10 +134,9 @@ public final class ConfigManager {
   }
 
   /**
-   * Returns the path of the position file supplied to {@code --contest}. Returns an empty string
-   * when no file was given.
+   * Returns the path of the position file.
    *
-   * @return the contest file path, or {@code ""}
+   * @return contest file path, or ""
    */
   public String getContestFile() {
     return getOption("contest-file", "");
@@ -156,7 +147,7 @@ public final class ConfigManager {
    *
    * @param filePath absolute or relative path to the position file
    */
-  public void enableContest(String filePath) {
+  public void enableContest(final String filePath) {
     setOption("contest", "true");
     setOption("contest-file", filePath);
   }

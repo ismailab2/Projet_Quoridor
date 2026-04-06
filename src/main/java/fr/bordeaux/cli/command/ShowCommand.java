@@ -11,10 +11,7 @@ import fr.bordeaux.util.TimeConvertor;
 import java.io.PrintStream;
 import java.util.List;
 
-/**
- * Command that displays various information about the current game, such as the board state,
- * configurations, history, or remaining time.
- */
+/** CLI command that displays game information, board state, or history. */
 public class ShowCommand implements Command {
 
   /** Command entered by the user */
@@ -34,27 +31,23 @@ public class ShowCommand implements Command {
   /**
    * Creates a ShowCommand using the provided CLI tokens.
    *
-   * @param t the tokens entered by the user
+   * @param tokens the tokens entered by the user
    */
-  public ShowCommand(final String[] t) {
-    this.tokens = t;
+  public ShowCommand(final String[] tokens) {
+    this.tokens = tokens;
   }
 
   /**
    * Creates a ShowCommand with a specific option.
    *
-   * @param t the option specifying what should be displayed
+   * @param optionString the option specifying what should be displayed
    */
-  public ShowCommand(final String t) {
-    this(new String[] {"show", t});
+  public ShowCommand(final String optionString) {
+    this(new String[] {"show", optionString});
   }
 
   /**
-   * Executes the show command and displays the requested information. The specific behavior depends
-   * on the option provided in the tokens.
-   *
-   * @param engine the current game engine
-   * @return the unchanged game engine
+   * @return unchanged engine.
    */
   @Override
   public GameEngine execute(final GameEngine engine) {
@@ -172,39 +165,38 @@ public class ShowCommand implements Command {
   }
 
   /**
-   * Prints a textual representation of the current board state including player positions and
-   * walls.
+   * Prints the board state, player positions, and walls.
    *
    * @param engine the current game engine
    */
   private void printBoard(final GameEngine engine) {
-    final Board b = engine.getState().getBoard();
-    final int boardSize = b.getSize();
-    for (int i = 0; i < boardSize; i++) {
-      writer.print(((char) ('A' + i)) + " ");
+    final Board board = engine.getState().getBoard();
+    final int boardSize = board.getSize();
+    for (int col = 0; col < boardSize; col++) {
+      writer.print(((char) ('A' + col)) + " ");
     }
     writer.println("");
-    for (int i = 0; i < boardSize; i++) {
-      for (int j = 0; j < boardSize; j++) {
+    for (int row = 0; row < boardSize; row++) {
+      for (int col = 0; col < boardSize; col++) {
         boolean playerFound = false;
         for (final Player player : engine.getState().getPlayers()) {
-          if (player.getPosition().equals(new Position(i, j))) {
-            writer.print(player.getColor().getId() + printWall(b, i, j, false));
+          if (player.getPosition().equals(new Position(row, col))) {
+            writer.print(player.getColor().getId() + printWall(board, row, col, false));
             playerFound = true;
             break;
           }
         }
         if (!playerFound) {
-          writer.print("_" + ((j != boardSize - 1) ? printWall(b, i, j, false) : " "));
+          writer.print("_" + ((col != boardSize - 1) ? printWall(board, row, col, false) : " "));
         }
-        if (j == boardSize - 1) {
-          writer.print(i + 1);
+        if (col == boardSize - 1) {
+          writer.print(row + 1);
         }
       }
-      if (i != boardSize - 1) {
+      if (row != boardSize - 1) {
         writer.println("");
-        for (int j = 0; j < boardSize; j++) {
-          writer.print(printWall(b, i, j, true));
+        for (int col = 0; col < boardSize; col++) {
+          writer.print(printWall(board, row, col, true));
         }
         writer.println("");
       }
@@ -213,25 +205,20 @@ public class ShowCommand implements Command {
   }
 
   /**
-   * Returns a string representation of a wall or connection between cells depending on the board
-   * graph structure.
-   *
-   * @param b the game board
-   * @param i the row index
-   * @param j the column index
-   * @param under indicates whether the wall is printed under the cell
-   * @return the string representation of the wall
+   * @return wall representation based on graph.
    */
-  private String printWall(final Board b, final int i, final int j, final boolean under) {
+  private String printWall(final Board board, final int row, final int col, final boolean under) {
     final String result;
     if (under) {
-      if (i >= b.getSize() - 1 || !b.getGraph().hasEdge(b.getCellId(i, j), b.getCellId(i + 1, j))) {
+      if (row >= board.getSize() - 1
+          || !board.getGraph().hasEdge(board.getCellId(row, col), board.getCellId(row + 1, col))) {
         result = "X ";
       } else {
         result = ". ";
       }
     } else {
-      if (j >= b.getSize() - 1 || !b.getGraph().hasEdge(b.getCellId(i, j), b.getCellId(i, j + 1))) {
+      if (col >= board.getSize() - 1
+          || !board.getGraph().hasEdge(board.getCellId(row, col), board.getCellId(row, col + 1))) {
         result = "X";
       } else {
         result = " ";
@@ -241,23 +228,21 @@ public class ShowCommand implements Command {
   }
 
   /**
-   * Converts a board position into a human-readable string. The format follows the CLI coordinate
-   * notation (e.g., a0, b3).
+   * Converts board position to a human-readable CLI coordinate. notation (e.g., a0, b3).
    *
-   * @param p the position to convert
+   * @param position the position to convert
    * @return the string representation of the position
    */
-  private String posToString(final Position p) {
-    final char letter = (char) ('a' + p.getY());
-    final int number = p.getX() + 1;
+  private String posToString(final Position position) {
+    final char letter = (char) ('a' + position.getY());
+    final int number = position.getX() + 1;
     return String.valueOf(letter) + number;
   }
 
   /**
-   * Displays the complete history of moves played during the game. Format: [Player Number] -
-   * [StartPos]-[EndPos] for pawns, or [Player Number] - [Pos][Orientation] for walls.
+   * Displays game history. Player - Move.
    *
-   * @param engine The game engine containing the current state and move history.
+   * @param engine the current game engine
    */
   public void showHistory(final GameEngine engine) {
     writer.println("Oldest move");

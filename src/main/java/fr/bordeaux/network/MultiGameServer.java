@@ -15,10 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Multi-client Quoridor server allowing several players to connect, create games, and exchange
- * network messages.
- */
+/** Multi-client server for connectivity, creation, and communication. */
 public class MultiGameServer {
 
   /** TCP server socket used to accept client connections. */

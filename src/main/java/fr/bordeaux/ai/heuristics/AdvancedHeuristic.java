@@ -8,24 +8,7 @@ import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.util.List;
 
-/**
- * An advanced heuristic evaluator for the Quoridor game. *
- *
- * <p>This evaluator uses a combination of pathfinding (BFS), resource management, and tactical
- * analysis to score a game state. It goes beyond simple distance by calculating the actual shortest
- * path around walls and rewarding moves that force the opponent into long detours. *
- *
- * <p>The scoring pillars are:
- *
- * <ul>
- *   <li><b>Path Advantage:</b> Difference between the player's and opponent's actual distances to
- *       the goal.
- *   <li><b>Resource Management:</b> Evaluation of remaining walls, weighted by game progression.
- *   <li><b>Tactical Detours:</b> Bonuses for walls that significantly increase the opponent's path
- *       length compared to a free board.
- *   <li><b>Momentum:</b> A small bonus for physical advancement toward the goal.
- * </ul>
- */
+/** Advanced heuristic using pathfinding, resources, and tactical detours. */
 public class AdvancedHeuristic implements HeuristicEvaluator {
 
   /** Maximum possible score for a winning state. */
@@ -38,101 +21,125 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   private static final int PATH_WEIGHT = 40;
 
   /** Bonus for placing a wall on the opponent's path. */
-  private static final int WALL_ON_PATH_BONUS = 80;
+  private static final int WALL_BONUS = 80;
 
   /** Base value of a single wall in resource scoring. */
   private static final int WALL_BASE_VALUE = 8;
 
   /** Multiplier for the progress bonus based on distance from start. */
-  private static final int PROGRESS_MULTIPLIER = 5;
+  private static final int MULTIPLIER = 5;
 
+  /** Score used for neutral or error states. */
+  private static final int NEUTRAL_SCORE = 0;
+
+  /** Distance threshold to consider a goal reached. */
+  private static final int WIN_THRESHOLD = 1;
+
+  /** Color of the ai player for whom the heuristic is evaluated. */
   private final Color aiColor;
 
   /**
-   * Constructs a AdvancedHeuristic.
+   * Constructs AdvancedHeuristic with AI color.
    *
-   * @param aiColor The color of the AI player.
+   * @param aiColor The AI color identifier.
    */
   public AdvancedHeuristic(final Color aiColor) {
     this.aiColor = aiColor;
   }
 
   /**
-   * Evaluates the current game state from the perspective of the AI player.
+   * Evaluates state from AI perspective.
    *
-   * @param gameState The current state of the game to evaluate.
-   * @return An integer score where higher values favor the AI and lower values favor the opponent.
+   * @param state Current state.
+   * @return Advantage score.
    */
   @Override
-  public int evaluate(final GameState gameState) {
-    Player player = null;
-    Player enemy = null;
-    final List<Player> players = gameState.getPlayers();
-    for (final Player eachPlayer : players) {
-      if (eachPlayer.getColor() == aiColor) {
-        player = eachPlayer;
+  public int evaluate(final GameState state) {
+    int evaluationResult = NEUTRAL_SCORE;
+    final Player player = findByColor(state, true);
+    final Player enemy = findByColor(state, false);
+
+    if (player != null && enemy != null) {
+      final int playerDistance = bfsPath(state, player).size();
+      final int enemyDistance = bfsPath(state, enemy).size();
+
+      if (playerDistance <= WIN_THRESHOLD) {
+        evaluationResult = MAX_SCORE;
+      } else if (enemyDistance <= WIN_THRESHOLD) {
+        evaluationResult = MIN_SCORE;
       } else {
-        enemy = eachPlayer;
+        evaluationResult = computeDynamicScore(state, player, enemy, playerDistance, enemyDistance);
       }
     }
 
-    if (player == null || enemy == null) {
-      return 0;
-    }
+    return evaluationResult;
+  }
 
-    final List<Integer> playerPath = bfsPath(gameState, player);
-    final List<Integer> enemyPath = bfsPath(gameState, enemy);
+  private int computeDynamicScore(
+      final GameState state,
+      final Player player,
+      final Player enemy,
+      final int playerDistance,
+      final int enemyDistance) {
 
-    final int result;
-    if (playerPath.size() <= 1) {
-      result = MAX_SCORE;
-    } else if (enemyPath.size() <= 1) {
-      result = MIN_SCORE;
+    final int score;
+    final int totalWalls = player.getRemainingWalls() + enemy.getRemainingWalls();
+
+    if (totalWalls == NEUTRAL_SCORE) {
+      score = computeEndgameScore(playerDistance, enemyDistance);
     } else {
-      final int playerDist = playerPath.size();
-      final int enemyDist = enemyPath.size();
-      final int remainingWalls = player.getRemainingWalls() + enemy.getRemainingWalls();
-
-      if (remainingWalls == 0) {
-        final int diff = enemyDist - playerDist;
-        if (diff > 0) {
-          result = MAX_SCORE - playerDist;
-        } else if (diff < 0) {
-          result = MIN_SCORE + enemyDist;
-        } else {
-          result = 0;
-        }
-      } else {
-        final int scorePath = (enemyDist - playerDist) * PATH_WEIGHT;
-        final Board board = gameState.getBoard();
-        final int boardSize = board.getSize();
-        final double progress = 1.0 - (double) playerDist / boardSize;
-        final double wallCoeff = 1.0 - 0.5 * progress;
-
-        final int scoreWalls =
-            (int)
-                ((player.getRemainingWalls() - enemy.getRemainingWalls())
-                    * WALL_BASE_VALUE
-                    * wallCoeff);
-
-        final int enemyDetour = enemyDist - manhattanToGoal(gameState, enemy);
-        final int scoreDetour = enemyDetour * WALL_ON_PATH_BONUS;
-        final int progressBonus = getDistanceFromStart(gameState, player) * PROGRESS_MULTIPLIER;
-
-        result = scorePath + scoreWalls + scoreDetour + progressBonus;
-      }
+      score = computeMidgameScore(state, player, enemy, playerDistance, enemyDistance);
     }
-    return result;
+
+    return score;
+  }
+
+  private int computeEndgameScore(final int playerDistance, final int enemyDistance) {
+    int endgameResult = NEUTRAL_SCORE;
+    if (enemyDistance > playerDistance) {
+      endgameResult = MAX_SCORE - playerDistance;
+    } else if (playerDistance > enemyDistance) {
+      endgameResult = MIN_SCORE + enemyDistance;
+    }
+    return endgameResult;
+  }
+
+  private int computeMidgameScore(
+      final GameState state,
+      final Player player,
+      final Player enemy,
+      final int playerDistance,
+      final int enemyDistance) {
+
+    final int boardSize = state.getBoard().getSize();
+    final double progress = 1.0 - (double) playerDistance / boardSize;
+    final double wallCoeff = 1.0 - 0.5 * progress;
+
+    final int scorePath = (enemyDistance - playerDistance) * PATH_WEIGHT;
+    final int scoreWalls =
+        (int)
+            ((player.getRemainingWalls() - enemy.getRemainingWalls())
+                * WALL_BASE_VALUE
+                * wallCoeff);
+    final int scoreDetour = (enemyDistance - manhattanToGoal(state, enemy)) * WALL_BONUS;
+    final int progressBonus = getDistanceFromStart(state, player) * MULTIPLIER;
+
+    return scorePath + scoreWalls + scoreDetour + progressBonus;
+  }
+
+  private Player findByColor(final GameState state, final boolean isAi) {
+    return state.getPlayers().stream()
+        .filter(p -> (p.getColor() == aiColor) == isAi)
+        .findFirst()
+        .orElse(null);
   }
 
   /**
-   * Calculates the shortest path to the goal using Breadth-First Search (BFS). This accounts for
-   * all walls currently placed on the board.
+   * Finds shortest path with BFS.
    *
-   * @param state The current game state.
-   * @param player The player for whom the path is being calculated.
-   * @return A list of node IDs representing the shortest path. An empty list or size <= 1 indicates
-   *     the goal has been reached.
+   * @param state State.
+   * @param player Player.
+   * @return Path node IDs.
    */
   private List<Integer> bfsPath(final GameState state, final Player player) {
     final Board board = state.getBoard();
@@ -142,14 +149,11 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   }
 
   /**
-   * Calculates the Manhattan distance to the goal as if the board were empty.
+   * Calculates Manhattan distance baseline (ignoring walls).
    *
-   * <p>This serves as a "free-grid" baseline. By comparing this to the actual BFS path, the AI can
-   * determine how much a player has been delayed by walls.
-   *
-   * @param state The current game state.
-   * @param player The player to evaluate.
-   * @return The minimum number of moves to the goal ignoring all walls.
+   * @param state State.
+   * @param player Player.
+   * @return Distance to goal.
    */
   private int manhattanToGoal(final GameState state, final Player player) {
     final Board board = state.getBoard();
@@ -175,14 +179,11 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
   }
 
   /**
-   * Measures the physical distance a player has traveled from their starting line.
+   * Calculates physical progress from start line.
    *
-   * <p>This is used to provide a "progress bonus," encouraging the AI to move forward even when the
-   * shortest path length remains unchanged.
-   *
-   * @param state The current game state.
-   * @param player The player to evaluate.
-   * @return The number of steps taken from the starting edge.
+   * @param state State.
+   * @param player Player.
+   * @return Steps taken.
    */
   private int getDistanceFromStart(final GameState state, final Player player) {
     final Board board = state.getBoard();

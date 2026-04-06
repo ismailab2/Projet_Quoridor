@@ -5,10 +5,7 @@ import fr.bordeaux.core.Position;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Utility class implementing the Builder design pattern to configure and instantiate a
- * MinimaxPlayer.
- */
+/** Builder for MinimaxPlayer. */
 public class MinimaxBuilder {
 
   /** The player's unique name identifier. */
@@ -24,10 +21,10 @@ public class MinimaxBuilder {
   private int searchDepth = 2;
 
   /** Default reflection time in seconds for the AI engine. */
-  private static final int DEFAULT_REFLEXION_TIME = 5;
+  private static final int BASE_TIME_LIMIT = 5;
 
   /** The maximum reflection time allowed for the AI in seconds. */
-  private int reflexionTime = DEFAULT_REFLEXION_TIME;
+  private int reflexionTime = BASE_TIME_LIMIT;
 
   /** Flag indicating whether iterative deepening is enabled. */
   private boolean useIterativeD;

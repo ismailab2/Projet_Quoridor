@@ -5,12 +5,7 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.util.Logger;
 
-/**
- * This launcher initializes the Quoridor game board, the game state, and the game engine. It then
- * starts the CLI interface for user interaction.
- *
- * <p>The CLI handles user commands, moves, and displays the game board and state in the console.
- */
+/** Initializes board, state, engine, and starts CLI interface. */
 public class CliLauncher implements AppLauncher {
 
   /** Default board size for Quoridor (9x9) */
@@ -19,19 +14,13 @@ public class CliLauncher implements AppLauncher {
   /** CliLaucher */
   public CliLauncher() {}
 
-  /**
-   * Initializes the board, game state, and engine, then starts the CLI interface. Exceptions are
-   * logged using the Logger utility.
-   *
-   * @param args command-line arguments (not currently used)
-   * @param config configuration manager instance for loading settings
-   */
+  /** Starts the CLI interface. Exceptions are logged via Logger. */
   @Override
-  public void launch(String[] args, ConfigManager config) {
+  public void launch(final String[] args, final ConfigManager config) {
     try {
-      GameEngine engine = GameEngineFactory.createGameEngine(config);
+      final GameEngine engine = GameEngineFactory.createGameEngine(config);
       new CliApp(engine).run();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       if (Logger.getInstance().isErrorEnabled()) {
         Logger.getInstance().error("CLI Error: " + e.getMessage());
       }

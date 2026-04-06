@@ -1,9 +1,6 @@
 package fr.bordeaux.core;
 
-/**
- * Defines the possible orientations for wall placement on the board. A wall can either be placed
- * horizontally or vertically, spanning two cell edges.
- */
+/** Possible orientations for wall placement. A wall can be horizontal or vertical. */
 public enum Orientation {
 
   /** Represents a wall placed horizontally between rows. */

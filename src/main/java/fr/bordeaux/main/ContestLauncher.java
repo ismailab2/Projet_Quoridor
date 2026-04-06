@@ -11,10 +11,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Launcher for contest mode, integrated with the custom AppLauncher interface.
- *
- * <p>Reads a game position from a save file (standard persistence format), computes the best move
- * for the current player using MCTS, and prints it in algebraic notation.
+ * Launcher for contest mode. Reads a save file, computes best move via MCTS, and prints it in
+ * algebraic notation.
  */
 @SuppressWarnings("PMD.SystemPrintln")
 public final class ContestLauncher implements AppLauncher {
@@ -24,8 +22,8 @@ public final class ContestLauncher implements AppLauncher {
   }
 
   @Override
-  public void launch(String[] args, ConfigManager config) {
-    String filePath = config.getContestFile();
+  public void launch(final String[] args, final ConfigManager config) {
+    final String filePath = config.getContestFile();
 
     if (filePath == null || filePath.isBlank()) {
       System.err.println("[contest] No position file specified. Use: --contest <file>");
@@ -37,14 +35,14 @@ public final class ContestLauncher implements AppLauncher {
     }
 
     try {
-      GameEngine engine = createDummyEngine(config);
-      GameState state = GameLoader.loadGame(engine, filePath);
-      Move best = computeBestMove(state, config);
+      final GameEngine engine = createDummyEngine(config);
+      final GameState state = GameLoader.loadGame(engine, filePath);
+      final Move best = computeBestMove(state, config);
       System.out.println(moveToString(best));
-    } catch (IOException e) {
+    } catch (final IOException e) {
       System.err.println("[contest] I/O error reading file: " + e.getMessage());
       System.exit(1);
-    } catch (GameLoadException e) {
+    } catch (final GameLoadException e) {
       System.err.println(
           "[contest] Invalid save file ["
               + e.getErrorType()
@@ -52,37 +50,35 @@ public final class ContestLauncher implements AppLauncher {
               + e.getLineNumber()
               + ": "
               + e.getMessage());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("[contest] Unexpected error: " + e.getMessage());
     }
   }
 
   /**
-   * Creates a minimal GameEngine with a placeholder state, used solely to satisfy
-   * GameLoader.loadGame(). The real state is rebuilt by GameLoader and returned independently —
-   * this engine's state is never used.
+   * @return placeholder engine for GameLoader.
    */
-  private static GameEngine createDummyEngine(ConfigManager config) {
-    Board dummyBoard = new Board(9);
-    List<Player> dummyPlayers =
+  private static GameEngine createDummyEngine(final ConfigManager config) {
+    final Board dummyBoard = new Board(9);
+    final List<Player> dummyPlayers =
         List.of(
             new HumanPlayer("P1", new Position(0, 4), Color.WHITE),
             new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
-    GameState dummyState = new GameState(dummyBoard, dummyPlayers, 0);
+    final GameState dummyState = new GameState(dummyBoard, dummyPlayers, 0);
 
     return new GameEngine(
         dummyState, false, false, true, false, config.getInt("initial-walls", 10));
   }
 
-  private static Move computeBestMove(GameState state, ConfigManager config) {
-    long timeBudgetMs = config.getInt("ai1.time", 3) * 1000L;
+  private static Move computeBestMove(final GameState state, final ConfigManager config) {
+    final long timeBudgetMs = config.getInt("ai1.time", 3) * 1000L;
 
     try {
       return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, false);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println(
           "[contest] MCTS failed (" + e.getMessage() + "), falling back to first legal move.");
-      List<Move> legal = state.generateLegalMoves();
+      final List<Move> legal = state.generateLegalMoves();
       if (legal.isEmpty()) {
         throw new IllegalStateException("No legal moves available.", e);
       }
@@ -90,16 +86,16 @@ public final class ContestLauncher implements AppLauncher {
     }
   }
 
-  private static String moveToString(Move move) {
+  private static String moveToString(final Move move) {
     if (move.getType() == Move.Type.PAWN) {
       return posToString(move.getFrom()) + "-" + posToString(move.getTo());
     }
-    char orientation = move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
+    final char orientation = move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
     return posToString(move.getTo()) + orientation;
   }
 
-  private static String posToString(Position p) {
-    char letter = (char) ('a' + p.getX());
+  private static String posToString(final Position p) {
+    final char letter = (char) ('a' + p.getX());
     return String.valueOf(letter) + p.getY();
   }
 }

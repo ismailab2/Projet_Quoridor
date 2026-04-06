@@ -8,24 +8,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Utility class to read a save file while handling comments.
- *
- * <p>Removes inline comments starting with '#', block comments delimited by '{' and '}', and empty
- * lines.
- */
+/** Utility to read save files while removing comments ('#', '{', '}'). */
 public final class GameLoaderComment {
   /** Private constructor to prevent instantiation. */
   private GameLoaderComment() {}
 
   /**
-   * Reads a file and returns a list of cleaned lines.
+   * Reads a file and returns cleaned lines.
    *
-   * <p>Supports inline ('#') and block ('{', '}') comments.
-   *
-   * @param filename the path to the file to read
-   * @return a list of cleaned, non-empty lines
-   * @throws IOException if an error occurs while reading the file
+   * @param filename path to the file
+   * @return cleaned, non-empty lines
+   * @throws IOException on I/O error
    */
   public static List<String> readCleanLines(final String filename) throws IOException {
     final List<String> result = new ArrayList<>();

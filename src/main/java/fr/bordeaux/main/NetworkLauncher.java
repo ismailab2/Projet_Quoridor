@@ -5,23 +5,7 @@ import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import java.util.Scanner;
 
-/**
- * This class provides a CLI interface to interact with the network features of Quoridor. Users can
- * start/stop a server, join a remote server, ping for latency testing, and discover servers on the
- * local network.
- *
- * <p>Supported commands:
- *
- * <ul>
- *   <li><b>server start [port]</b>: Start a TCP server on the specified port (default 12345).
- *   <li><b>server stop</b>: Stop the currently running server.
- *   <li><b>server list</b>: Discover servers broadcasting on the local network via UDP.
- *   <li><b>join ip[:port]</b>: Connect to a remote server at the specified IP and port (default
- *       12345).
- *   <li><b>ping</b>: Send a PING to the connected server and measure RTT.
- *   <li><b>quit</b>: Disconnect from the server and exit network mode.
- * </ul>
- */
+/** CLI interface for network features. Start/stop server, join, ping. */
 @SuppressWarnings("PMD.SystemPrintln")
 public class NetworkLauncher implements AppLauncher {
 
@@ -48,11 +32,10 @@ public class NetworkLauncher implements AppLauncher {
   }
 
   /**
-   * This method runs a command loop reading user input and executing the corresponding network
-   * commands using {@link MultiGameServer} and {@link GameClient}.
+   * Runs command loop for network interaction.
    *
-   * @param args Command-line arguments (not used here)
-   * @param config Configuration manager instance
+   * @param args CLI args (unused)
+   * @param config configuration manager
    */
   @Override
   public void launch(final String[] args, final ConfigManager config) {

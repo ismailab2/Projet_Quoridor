@@ -4,8 +4,8 @@ import fr.bordeaux.core.GameEngine;
 import java.io.IOException;
 
 /**
- * Represents a command that can be executed in the CLI for the game. Each command performs an
- * action on the game engine and can provide help information about its usage.
+ * Represents a CLI command that performs an action on the game engine. and can provide help
+ * information about its usage.
  */
 public interface Command {
   /**
@@ -17,9 +17,6 @@ public interface Command {
    */
   GameEngine execute(GameEngine engine) throws IOException;
 
-  /**
-   * Prints help information for the command to the console. This should describe usage, arguments,
-   * and examples if applicable.
-   */
+  /** Prints command help information, including usage and examples. and examples if applicable. */
   void helpText();
 }

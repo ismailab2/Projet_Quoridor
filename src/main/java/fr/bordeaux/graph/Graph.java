@@ -70,16 +70,11 @@ public class Graph {
   }
 
   /**
-   * Finds the shortest path from a starting vertex to any vertex satisfying the goal condition.
-   * This method implements the Breadth-First Search (BFS) algorithm, which guarantees finding the
-   * shortest path in an unweighted graph. It is used to verify if a player can still reach their
-   * winning side and to calculate the necessary moves.
+   * Finds the shortest path to goal using BFS.
    *
-   * @param startId The ID of the starting vertex (typically the player's current position).
-   * @param isGoal A predicate defining the victory condition (e.g., reaching the opposite
-   *     baseline).
-   * @return An ordered List of vertex IDs representing the path from start to goal (inclusive).
-   *     Returns an empty list if the destination is unreachable (e.g., player is blocked by walls).
+   * @param startId starting vertex ID
+   * @param isGoal victory condition predicate
+   * @return path from start to goal, or empty if unreachable
    */
   public List<Integer> findPathBFS(final int startId, final Predicate<Integer> isGoal) {
     final Queue<Integer> queue = new LinkedList<>();
@@ -107,13 +102,7 @@ public class Graph {
     return result;
   }
 
-  /**
-   * Reconstructs the path from the start vertex to the goal vertex using the parent map.
-   *
-   * @param parentMap map storing the parent of each visited vertex
-   * @param goalId the identifier of the goal vertex
-   * @return ordered list of vertex IDs representing the path
-   */
+  /** Reconstructs path from start to goal using parentMap. */
   private List<Integer> reconstructPath(final Map<Integer, Integer> parentMap, final int goalId) {
     final List<Integer> path = new ArrayList<>();
     Integer current = goalId;

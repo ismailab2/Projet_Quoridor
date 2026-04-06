@@ -13,12 +13,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
-/**
- * Dispatches actions from the GUI to the GameEngine or other dialogs.
- *
- * <p>This class serves as a bridge between GUI events (menu items, shortcuts) and the underlying
- * game logic or dialogs. Each action corresponds to a method in the GameEngine or a GUI dialog.
- */
+/** Bridge between GUI events and underlying game logic or dialogs. */
 public class ActionDispatcher {
 
   /** Reference to the game engine to execute game-related actions */
@@ -57,18 +52,11 @@ public class ActionDispatcher {
   }
 
   /**
-   * Dispatches a given action to the appropriate handler.
+   * Dispatches an action. May call GameEngine (new, load, save, undo, redo, pause, hint), show
+   * dialogs, or exit.
    *
-   * <p>Depending on the action type, this method may:
-   *
-   * <ul>
-   *   <li>Call GameEngine methods (newGame, loadGame, saveGame, undo, redo, pause, hint)
-   *   <li>Show GUI dialogs (configuration, info)
-   *   <li>Exit the application
-   * </ul>
-   *
-   * @param action The Action enum representing the user command.
-   * @throws IOException If an I/O error occurs during command execution.
+   * @param action The Action representing the user command.
+   * @throws IOException If an I/O error occurs.
    */
   public void dispatch(final Action action) throws IOException {
     switch (action) {
@@ -204,13 +192,13 @@ public class ActionDispatcher {
   }
 
   /**
-   * Prompts the user for a text input using a JavaFX TextInputDialog.
+   * Prompts user for text input via a dialog.
    *
-   * @param title the title of the dialog
-   * @param header the header text of the dialog
-   * @param content the content text of the dialog
-   * @param defaultValue the default value to display in the text field
-   * @return the user input as a String, or null if the user cancelled
+   * @param title dialog title
+   * @param header header text
+   * @param content content text
+   * @param defaultValue default value
+   * @return user input, or null if cancelled
    */
   protected String promptUser(
       final String title, final String header, final String content, final String defaultValue) {

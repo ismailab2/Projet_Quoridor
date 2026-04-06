@@ -15,13 +15,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * This class allows a client to connect to a Quoridor server via TCP, send simple commands (PING,
- * QUIT), and discover available servers on the local network using UDP broadcast.
- *
- * <p>Communication protocol: - Messages are ASCII strings terminated by '\n' - Commands include
- * PING, QUIT - Server responds with PONG, BYE, etc.
- */
+/** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
 @SuppressWarnings("PMD.SystemPrintln")
 public class GameClient {
 
@@ -37,32 +31,23 @@ public class GameClient {
   /** Background listener thread responsible for reading messages from the server */
   private Thread listenerThread;
 
-  /**
-   * Synchronization queue used to transfer an expected response from the listener thread to the
-   * calling method (ping, quit).
-   */
+  /** Sync queue to transfer response from listener thread to caller. */
   private final SynchronousQueue<String> syncResponse = new SynchronousQueue<>();
 
-  /**
-   * Indicates whether the next received message should be treated as a direct reply to a
-   * synchronous command instead of an asynchronous one.
-   */
+  /** Flag to treat next message as a direct reply to a sync command. */
   private final AtomicBoolean expectingDirectReply = new AtomicBoolean(false);
 
-  /**
-   * Constructs a new GameClient. This instance can be used to join a specific server or perform
-   * network discovery.
-   */
+  /** Constructs a GameClient for joining servers or discovery. */
   public GameClient() {
     // Explicit default constructor to satisfy Javadoc requirements
   }
 
   /**
-   * Attempts to establish a connection to the given host and port with a timeout of 5 seconds.
+   * Connects to host/port with a 5s timeout.
    *
-   * @param host Server hostname or IP address.
+   * @param host Server hostname or IP.
    * @param port Server TCP port.
-   * @return true if the connection succeeds, false otherwise.
+   * @return true if success.
    */
   public boolean join(final String host, final int port) {
     try {
@@ -84,11 +69,7 @@ public class GameClient {
     }
   }
 
-  /**
-   * Starts the listener thread responsible for reading every line sent by the server. Replies
-   * expected by synchronous commands are placed into the synchronization queue, while other
-   * messages are printed directly.
-   */
+  /** Starts listener thread for server messages. Handles sync/async responses. */
   private void startListener() {
     listenerThread =
         new Thread(
@@ -119,10 +100,7 @@ public class GameClient {
     listenerThread.start();
   }
 
-  /**
-   * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
-   * receiving is measured and displayed.
-   */
+  /** Sends "PING" and waits for "PONG". Measures RTT. */
   public void ping() {
     if (!checkConnection()) {
       return;
@@ -150,10 +128,7 @@ public class GameClient {
     }
   }
 
-  /**
-   * Sends a "QUIT" command to the server, waits for the "BYE" response, and then closes the socket
-   * connection.
-   */
+  /** Sends "QUIT", waits for "BYE", and closes socket. */
   public void quit() {
     if (checkConnection()) {
       try {
@@ -182,12 +157,7 @@ public class GameClient {
     System.out.println("Client exited.");
   }
 
-  /**
-   * Sends a broadcast message ("DISCOVER") to the local network and listens for responses from
-   * servers. Displays all discovered servers within a 5-second time window.
-   *
-   * <p>Runs in a separate thread to avoid blocking the main application.
-   */
+  /** Broadcasts "DISCOVER" and listens for server responses for 5s. */
   public void serverList() {
     new Thread(
             () -> {
@@ -249,7 +219,7 @@ public class GameClient {
   }
 
   /**
-   * Sends the player name to the server in order to register it in the current session.
+   * Registers player name with server.
    *
    * @param name player name
    */

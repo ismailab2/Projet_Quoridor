@@ -11,15 +11,15 @@ public enum Color {
   /** Red color (ID 4). */
   RED(4);
 
-  private final int id;
+  private final int colorId;
 
   /**
    * Constructs a color with an ID.
    *
-   * @param id the unique integer ID.
+   * @param colorId the unique integer ID.
    */
-  Color(final int id) {
-    this.id = id;
+  Color(final int colorId) {
+    this.colorId = colorId;
   }
 
   /**
@@ -28,22 +28,22 @@ public enum Color {
    * @return the integer ID of the color.
    */
   public int getId() {
-    return id;
+    return colorId;
   }
 
   /**
    * Returns the Color associated with the given ID.
    *
-   * @param id the integer ID to look up.
+   * @param colorId the integer ID to look up.
    * @return the matching Color.
    * @throws IllegalArgumentException if the ID is invalid.
    */
-  public static Color fromId(final int id) {
+  public static Color fromId(final int colorId) {
     for (Color color : values()) {
-      if (color.id == id) {
+      if (color.colorId == colorId) {
         return color;
       }
     }
-    throw new IllegalArgumentException("Unknown color ID: " + id);
+    throw new IllegalArgumentException("Unknown color ID: " + colorId);
   }
 }

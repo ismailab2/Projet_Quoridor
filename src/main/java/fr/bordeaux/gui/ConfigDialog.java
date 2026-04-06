@@ -21,24 +21,23 @@ public final class ConfigDialog {
   /** Shows the configuration dialog for keyboard shortcuts. */
   public static void show() {
 
-    Stage stage = new Stage();
+    final Stage stage = new Stage();
     stage.setTitle("Shortcut Configuration");
     stage.setResizable(true);
 
-    GridPane grid = new GridPane();
+    final GridPane grid = new GridPane();
     grid.setVgap(10);
     grid.setHgap(10);
 
     int row = 0;
 
-    for (Action action : Action.values()) {
+    for (final Action action : Action.values()) {
+      final Label actionLabel = new Label(action.name());
 
-      Label actionLabel = new Label(action.name());
+      final KeyCombination currentShortcut = ShortcutManager.getInstance().getShortcut(action);
+      final String shortcutName = currentShortcut != null ? currentShortcut.getName() : "None";
 
-      KeyCombination currentShortcut = ShortcutManager.getInstance().getShortcut(action);
-      String shortcutName = currentShortcut != null ? currentShortcut.getName() : "None";
-
-      Button keyButton = new Button(shortcutName);
+      final Button keyButton = new Button(shortcutName);
 
       keyButton.setFocusTraversable(true);
 
@@ -49,32 +48,33 @@ public final class ConfigDialog {
       row++;
     }
 
-    Button saveButton = new Button("Save");
+    final Button saveButton = new Button("Save");
     saveButton.setOnAction(e -> stage.close());
 
-    HBox saveBox = new HBox(saveButton);
+    final HBox saveBox = new HBox(saveButton);
     saveBox.setSpacing(10);
 
     grid.add(saveBox, 0, row, 2, 1);
 
-    Scene scene = new Scene(grid, 400, 50 + row * 40);
+    final Scene scene = new Scene(grid, 400, 50 + row * 40);
     stage.setScene(scene);
     stage.show();
   }
 
   /** Handles keyboard shortcut editing. */
-  private static void handleKeyPress(KeyEvent ke, Action action, Button keyButton) {
+  private static void handleKeyPress(
+      final KeyEvent ke, final Action action, final Button keyButton) {
 
-    KeyCode code = ke.getCode();
+    final KeyCode code = ke.getCode();
 
     // Ignore modifier-only keys
     if (isModifierKey(code)) {
       return;
     }
 
-    KeyCombination.Modifier[] modifiers = extractModifiers(ke);
+    final KeyCombination.Modifier[] modifiers = extractModifiers(ke);
 
-    KeyCodeCombination newShortcut = new KeyCodeCombination(code, modifiers);
+    final KeyCodeCombination newShortcut = new KeyCodeCombination(code, modifiers);
 
     ShortcutManager.getInstance().setShortcut(action, newShortcut);
 
@@ -87,8 +87,8 @@ public final class ConfigDialog {
   }
 
   /** Extracts active modifiers from the key event. */
-  private static KeyCombination.Modifier[] extractModifiers(KeyEvent ke) {
-    List<KeyCombination.Modifier> mods = new ArrayList<>();
+  private static KeyCombination.Modifier[] extractModifiers(final KeyEvent ke) {
+    final List<KeyCombination.Modifier> mods = new ArrayList<>();
 
     if (ke.isControlDown()) {
       mods.add(KeyCombination.CONTROL_DOWN);

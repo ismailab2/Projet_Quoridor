@@ -2,14 +2,7 @@ package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
 
-/**
- * Defines the contract for launching an application mode.
- *
- * <p>This interface is implemented by different launchers (e.g., CLI, GUI, Network) to start the
- * application according to the selected execution mode.
- *
- * <p>Each implementation is responsible for initializing and running its specific environment.
- */
+/** Contract for launching different application modes (CLI, GUI, Network). */
 public interface AppLauncher {
 
   /**

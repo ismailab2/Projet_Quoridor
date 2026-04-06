@@ -9,30 +9,17 @@ import fr.bordeaux.core.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Factory class responsible for player instantiation in the Quoridor game.
- *
- * <p>This class acts as a "Composition Root," bridging the gap between the game's {@code core}
- * logic, the various {@code ai} implementations, and the {@link ConfigManager} without polluting
- * the core domain with external dependencies. * @see Player
- *
- * @see HumanPlayer
- * @see MinimaxPlayer
- */
+/** Factory for player instantiation (Composition Root). */
 public final class PlayerFactory {
 
   /** Private constructor to prevent instantiation of this utility class. */
   private PlayerFactory() {}
 
   /**
-   * Creates and initializes the list of players for a game session based on the provided
-   * configuration.
+   * Creates players for a game session from config.
    *
-   * <p>Players are created without walls; the {@link fr.bordeaux.core.GameEngine} is responsible
-   * for applying the wall count from the configuration after initialization.
-   *
-   * @param config The configuration manager containing CLI arguments or persistent settings.
-   * @return A {@link List} of {@link Player} objects ready to start the game.
+   * @param config configuration manager
+   * @return list of players
    */
   public static List<Player> createPlayers(final ConfigManager config) {
     final List<Player> players = new ArrayList<>();
@@ -61,23 +48,13 @@ public final class PlayerFactory {
   }
 
   /**
-   * Configures and builds an Artificial Intelligence player instance.
+   * Builds an AI player from configuration (mode, depth, time, scoring).
    *
-   * <p>This method extracts specific AI parameters from the configuration:
-   *
-   * <ul>
-   *   <li>{@code ai.mode}: The algorithm type (minimax, iterative, mcts, neural).
-   *   <li>{@code ai.depth}: Search depth for tree-based algorithms (defaults to 2).
-   *   <li>{@code ai.time}: Reflection time limit in seconds (defaults to 5).
-   *   <li>{@code ai.scoring}: The heuristic evaluation function to use (defaults to "simple").
-   * </ul>
-   *
-   * @param name The name assigned to the AI player.
-   * @param pos The starting position on the board.
-   * @param config The configuration source for AI parameters.
-   * @param color The color of the AI player.
-   * @return A {@link Player} instance configured according to the selected mode.
-   * @throws UnsupportedOperationException if an unimplemented mode (MCTS/Neural) is requested.
+   * @param name AI name
+   * @param pos starting position
+   * @param config configuration source
+   * @param color AI color
+   * @return configured Player
    */
   private static Player buildAi(
       final String name, final Position pos, final ConfigManager config, final Color color) {

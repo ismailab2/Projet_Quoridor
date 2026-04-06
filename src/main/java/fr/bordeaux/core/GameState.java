@@ -3,7 +3,7 @@ package fr.bordeaux.core;
 import java.util.*;
 import java.util.function.Predicate;
 
-/** Manages the current state of a Quoridor game. Tracks the board, players, and turn history. */
+/** Tracks Quoridor game state: board, players, and turn history. */
 public class GameState {
 
   /** The board used for the game. */
@@ -37,7 +37,7 @@ public class GameState {
   private static final int MAX_PLAYERS = 4;
 
   /**
-   * Constructs a GameState with a board, a list of players, and an initial player index.
+   * Constructs a GameState with board, players, and initial index.
    *
    * @param board The board used for the game.
    * @param players The list of participants (must be 2 or 4).
@@ -60,7 +60,7 @@ public class GameState {
   }
 
   /**
-   * Constructs a GameState with a board and a list of players, starting with the first player.
+   * Constructs a GameState starting with the first player.
    *
    * @param board The board used for the game.
    * @param players The list of participants.
@@ -118,8 +118,7 @@ public class GameState {
   }
 
   /**
-   * Applies a move. Updates player position or board walls, manages history, and moves to next
-   * turn.
+   * Applies a move, updates state/history, and moves to next turn.
    *
    * @param move The {@link Move} to apply.
    */
@@ -139,7 +138,7 @@ public class GameState {
   }
 
   /**
-   * Applies a move without clearing the redo stack. Useful for redoing moves.
+   * Applies a move without clearing the redo stack.
    *
    * @param move The {@link Move} to apply.
    */
@@ -169,7 +168,7 @@ public class GameState {
     return moves;
   }
 
-  /** Reverts the last move. Continues reverting AI moves until a human player is reached. */
+  /** Reverts moves until a human player is reached. */
   public void undo() {
     if (paused || gameOver || undoStack.isEmpty()) {
       return;
@@ -193,7 +192,7 @@ public class GameState {
     notifyListeners();
   }
 
-  /** Re-applies the last undone move. If the next player is an AI, it continues redoing. */
+  /** Re-applies undone moves. Continues if next player is AI. */
   public void redo() {
     if (paused || gameOver || redoStack.isEmpty()) {
       return;
@@ -231,7 +230,7 @@ public class GameState {
   }
 
   /**
-   * Returns a predicate representing the win condition for a specific player.
+   * Returns the win condition predicate for a player.
    *
    * @param player The player whose win condition is needed.
    * @return A {@link Predicate} that returns true if a cell ID is a winning cell.
@@ -264,7 +263,7 @@ public class GameState {
   }
 
   /**
-   * Gets the index of the player who played the last move.
+   * /** Returns the index of the previous player.
    *
    * @return The previous player's index.
    */
@@ -327,7 +326,7 @@ public class GameState {
   }
 
   /**
-   * Copies the board, players and player index from another state, then notifies listeners.
+   * Copies state from another GameState and notifies listeners.
    *
    * @param loaded the game state to copy from
    */
@@ -379,7 +378,7 @@ public class GameState {
   }
 
   /**
-   * Generates all possible legal moves (pawn movements and wall placements) for the current player.
+   * Generates all legal moves for the current player.
    *
    * @return A list of legal {@link Move} objects.
    */
@@ -408,7 +407,7 @@ public class GameState {
   }
 
   /**
-   * Generates potential pawn move candidates for a player without rule validation.
+   * Generates pawn move candidates without rule validation.
    *
    * @param player The player to generate moves for.
    * @return A list of pseudo-legal pawn {@link Move} objects.
@@ -493,7 +492,7 @@ public class GameState {
   }
 
   /**
-   * Initializes the reflection time for all players. Sets countdown timers to the limit.
+   * Initializes reflection time for all players.
    *
    * @param timeLimit The initial time allowed for each player in milliseconds.
    */
@@ -504,7 +503,7 @@ public class GameState {
   }
 
   /**
-   * Populates the history without applying moves. Useful for loading history stack.
+   * Populates the history stack without applying moves.
    *
    * @param history The list of {@link Move} objects to load into the history stack.
    */

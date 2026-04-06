@@ -9,8 +9,8 @@ import fr.bordeaux.util.Logger;
 import java.io.IOException;
 
 /**
- * Command that suggests the best possible move for the current player. The move is computed using a
- * Minimax AI based on the current game state.
+ * Suggests the best move computed by the AI based on the current state. Minimax AI based on the
+ * current game state.
  */
 public class HintCommand implements Command {
 
@@ -21,8 +21,8 @@ public class HintCommand implements Command {
   public HintCommand() {}
 
   /**
-   * Executes the hint command. It creates a temporary AI player that evaluates the current game
-   * state and suggests the best move for the current player.
+   * Executes the hint command, suggesting the best move. state and suggests the best move for the
+   * current player.
    *
    * @param engine the current game engine
    * @return the unchanged game engine
@@ -43,34 +43,33 @@ public class HintCommand implements Command {
   /**
    * Formats a Move object into a readable string (e.g., e2-e3 or a1h).
    *
-   * @param m the move to format
+   * @param move the move to format
    * @return the string representation of the move
    */
-  private String formatMove(final Move m) {
-    if (m.getType() == Move.Type.PAWN) {
-      return posToString(m.getFrom()) + "-" + posToString(m.getTo());
+  private String formatMove(final Move move) {
+    if (move.getType() == Move.Type.PAWN) {
+      return posToString(move.getFrom()) + "-" + posToString(move.getTo());
     }
     final char orientationChar;
-    if (m.getOrientation() == Orientation.HORIZONTAL) {
+    if (move.getOrientation() == Orientation.HORIZONTAL) {
       orientationChar = 'h';
     } else {
       orientationChar = 'v';
     }
-    return posToString(m.getTo()) + orientationChar;
+    return posToString(move.getTo()) + orientationChar;
   }
 
   /**
-   * Converts a board position into a human-readable string. The format follows the CLI coordinate
-   * notation (e.g., a0, b3).
+   * Converts board position to a human-readable CLI coordinate string. notation (e.g., a0, b3).
    *
-   * @param p the position to convert
+   * @param position the position to convert
    * @return the string representation of the position
    */
-  private String posToString(final Position p) {
-    return (char) ('a' + p.getY()) + "" + (p.getX() + 1);
+  private String posToString(final Position position) {
+    return (char) ('a' + position.getY()) + "" + (position.getX() + 1);
   }
 
-  /** Displays help information about the hint command, including its usage and description. */
+  /** Displays help information for the hint command. */
   @Override
   public void helpText() {
     LOGGER.info("=== HINT Command ===\n");

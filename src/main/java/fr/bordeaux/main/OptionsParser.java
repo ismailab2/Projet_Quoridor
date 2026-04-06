@@ -3,14 +3,7 @@ package fr.bordeaux.main;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
 
-/**
- * This class interprets CLI arguments and configures the application accordingly. Supported options
- * include general settings (help, version, verbose, debug), game modes (GUI, CLI, network), and
- * blitz mode settings.
- *
- * <p>The parser also validates argument values and throws {@link IllegalArgumentException} for
- * invalid or missing parameters.
- */
+/** Interprets CLI arguments (GUI, CLI, Network) and game settings. */
 public final class OptionsParser {
 
   private static final Logger LOGGER = Logger.getInstance();
@@ -18,23 +11,10 @@ public final class OptionsParser {
   private OptionsParser() {}
 
   /**
-   * Recognized arguments:
-   *
-   * <ul>
-   *   <li><b>-h, --help</b>: Display help information.
-   *   <li><b>-V, --version</b>: Display the current version of the application.
-   *   <li><b>-v, --verbose</b>: Enable verbose logging.
-   *   <li><b>-d, --debug</b>: Enable debug mode.
-   *   <li><b>-b, --blitz</b>: Enable blitz mode.
-   *   <li><b>-t, --time N</b>: Set the timeout in minutes (default 30).
-   *   <li><b>-g, --gui</b>: Launch GUI mode.
-   *   <li><b>-c, --cli</b>: Launch CLI mode (default).
-   *   <li><b>-n, --net</b>: Launch network mode.
-   * </ul>
+   * Parses CLI arguments into configuration.
    *
    * @param args Command-line arguments.
-   * @param config Configuration manager instance to apply parsed options.
-   * @throws IllegalArgumentException if an invalid argument or missing value is provided.
+   * @param config Config manager instance.
    */
   public static void parse(final String[] args, final ConfigManager config) {
     // Reset session-specific flags to their default values
@@ -76,15 +56,13 @@ public final class OptionsParser {
         case "-b", "--blitz" -> config.setOption("blitz", "true");
 
         case "-t", "--time" -> {
-          i++;
-          handleTimeArgument(args, i, config);
+          handleTimeArgument(args, ++i, config);
         }
 
         case "-a", "--ai" -> {
           String aiOption = "";
           if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
-            i++;
-            aiOption = args[i].toLowerCase(java.util.Locale.ROOT);
+            aiOption = args[++i].toLowerCase(java.util.Locale.ROOT);
           }
 
           if ("a".equals(aiOption)) {
@@ -110,7 +88,7 @@ public final class OptionsParser {
 
         case "-s" -> {
           if (i + 1 < args.length) {
-            int argument = Integer.parseInt(args[i + 1]);
+            final int argument = Integer.parseInt(args[i + 1]);
             if (argument < 16 && argument > 2) {
               config.setOption("board-size", args[++i]);
             } else if (argument >= 1000 && argument <= 9999) {

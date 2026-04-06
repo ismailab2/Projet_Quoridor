@@ -10,10 +10,8 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 
 /**
- * Manages keyboard shortcuts for the Quoridor GUI.
- *
- * <p>This singleton loads, stores, and persists shortcuts in the configuration. It registers
- * shortcuts on a Scene and triggers actions through an ActionDispatcher.
+ * Manages keyboard shortcuts. Loads, stores, and persists in config. Triggers actions through an
+ * {@link ActionDispatcher}.
  */
 public final class ShortcutManager {
 
@@ -43,9 +41,9 @@ public final class ShortcutManager {
   }
 
   /**
-   * Sets the ActionDispatcher used to execute actions when a shortcut is pressed.
+   * Sets action dispatcher for shortcuts.
    *
-   * @param dispatcher The ActionDispatcher instance
+   * @param dispatcher ActionDispatcher instance
    */
   public void setDispatcher(final ActionDispatcher dispatcher) {
     this.dispatcher = dispatcher;
