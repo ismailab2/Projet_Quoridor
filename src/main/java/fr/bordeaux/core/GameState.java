@@ -40,14 +40,14 @@ public class GameState {
    * Constructs a GameState with board, players, and initial index.
    *
    * @param board The board used for the game.
-   * @param players The list of participants (must be 2 or 4).
+   * @param players The list of participants (must be between 2 and 4).
    * @param playerIndex The index of the player who starts.
-   * @throws IllegalArgumentException If the number of players is not 2 or 4.
+   * @throws IllegalArgumentException If the number of players is not between 2 and 4.
    */
   public GameState(final Board board, final List<Player> players, final int playerIndex) {
-    if (players.size() != MIN_PLAYERS && players.size() != MAX_PLAYERS) {
+    if (players.size() < MIN_PLAYERS || players.size() > MAX_PLAYERS) {
       throw new IllegalArgumentException(
-          "Number of players must be 2 or 4, but was: " + players.size());
+          "Number of players must be between 2 and 4, but was: " + players.size());
     }
 
     this.board = board;

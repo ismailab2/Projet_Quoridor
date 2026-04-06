@@ -37,11 +37,10 @@ public class GameStateTest {
   }
 
   @Test
-  public void testPlayersNumberInvalidThree() {
+  public void testPlayersNumberValidThree() {
     Board board = new Board(9);
     Player human2 = new HumanPlayer("Human2", new Position(4, 4), Color.BLUE);
-    assertThrows(
-        IllegalArgumentException.class,
+    assertDoesNotThrow(
         () -> {
           new GameState(board, List.of(human, human2, ia));
         });
@@ -299,6 +298,27 @@ public class GameStateTest {
     moves2.add(Move.wall(new Position(1, 0), Orientation.VERTICAL));
     moves2.add(Move.wall(new Position(1, 1), Orientation.HORIZONTAL));
 
-    assertTrue(moves2.containsAll(game.generateLegalMoves()));
+  assertTrue(moves2.containsAll(game.generateLegalMoves()));
+  }
+
+  @Test
+  public void testThreePlayerInitialization() {
+    Board board = new Board(9);
+    List<Player> players = new ArrayList<>();
+    players.add(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
+    players.add(new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
+    players.add(new HumanPlayer("P3", new Position(4, 0), Color.BLUE));
+
+    GameState state = new GameState(board, players);
+    assertEquals(3, state.getPlayers().size());
+    assertEquals(0, state.getCurrentIndexPlayer());
+
+    // Test turn cycling
+    state.nextPlayer();
+    assertEquals(1, state.getCurrentIndexPlayer());
+    state.nextPlayer();
+    assertEquals(2, state.getCurrentIndexPlayer());
+    state.nextPlayer();
+    assertEquals(0, state.getCurrentIndexPlayer());
   }
 }

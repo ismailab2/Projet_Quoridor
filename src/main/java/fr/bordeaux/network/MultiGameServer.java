@@ -382,8 +382,8 @@ public class MultiGameServer {
     String result = "";
     synchronized (lock) {
       final int playerCount = playerIds.length;
-      if (playerCount != MIN_PLAYERS && playerCount != MAX_PLAYERS) {
-        result = "ERROR need exactly 2 or 4 players";
+      if (playerCount < MIN_PLAYERS || playerCount > MAX_PLAYERS) {
+        result = "ERROR need between 2 and 4 players";
       } else {
         final java.util.Set<String> seenIds = new java.util.HashSet<>();
         final java.util.List<ClientSession> sessions = new java.util.ArrayList<>();

@@ -288,6 +288,7 @@ public final class OptionsParser {
     logInfo("  --contest, -c <file> Launch contest mode from file");
     logInfo("  -g, --gui         Launch GUI mode");
     logInfo("  -n, --net         Launch network mode");
+    logInfo("  -p, --players N   Number of players: 2, 3, or 4 (default 2)");
     logInfo("");
     logInfo("Blitz options:");
     logInfo("  -b, --blitz       Enable blitz mode");
