@@ -6,13 +6,26 @@ import java.util.List;
 /** Player in Quoridor with name, position, walls, and score. */
 public abstract class Player {
 
+  /** The color assigned to the player for visual representation. */
   private final Color color;
+
+  /** The name of the player. */
   private final String name;
+
+  /** The current position of the player's pawn on the board. */
   private Position position;
+
+  /** The number of walls the player has remaining. */
   private int remainingWalls = 10;
-  private long remainingTime = 30 * 60 * 1000; // Time in milliseconds
+
+  /** The remaining reflection time for the player in milliseconds. */
+  private long remainingTime = 30 * 60 * 1000;
+
+  /** The initial starting position of the player on the board. */
   private final Position startingPosition;
-  private boolean disabled = false;
+
+  /** Whether the player is currently disabled (e.g., in Blitz mode elimination). */
+  private boolean disabled;
 
   /**
    * Constructs a new Player with a name and starting position.
@@ -105,7 +118,7 @@ public abstract class Player {
    *
    * @return The current disable boolean.
    */
-  public Boolean isDisabled() {
+  public boolean isDisabled() {
     return disabled;
   }
 
@@ -114,7 +127,7 @@ public abstract class Player {
    *
    * @param disBoolean The new boolean to set.
    */
-  public void setDisabled(Boolean disBoolean) {
+  public void setDisabled(final boolean disBoolean) {
     this.disabled = disBoolean;
   }
 
@@ -138,7 +151,9 @@ public abstract class Player {
 
   /** Decrements the count of remaining walls if the player has any left. */
   public void useWall() {
-    if (remainingWalls > 0) remainingWalls--;
+    if (remainingWalls > 0) {
+      remainingWalls--;
+    }
   }
 
   /** Increments the count of remaining walls (for undo). */
