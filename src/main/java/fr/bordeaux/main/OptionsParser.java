@@ -67,17 +67,18 @@ public final class OptionsParser {
             aiOption = args[++i].toLowerCase(java.util.Locale.ROOT);
           }
 
-          if ("a".equals(aiOption)) {
+          if (aiOption.isEmpty()) {
+            config.setOption("ai2", "true");
+          } else if ("a".equals(aiOption)) {
             config.setOption("ai1", "true");
             config.setOption("ai2", "true");
           } else if ("blanc".equals(aiOption) || "1".equals(aiOption)) {
             config.setOption("ai1", "true");
           } else if ("noir".equals(aiOption) || "2".equals(aiOption)) {
-            // Default to Player 2
             config.setOption("ai2", "true");
           } else {
             throw new IllegalArgumentException(
-                "--ai must be equal to a value in : {blanc, noir, 1, 2, A, a}");
+                "--ai value must be: {blanc, noir, 1, 2, a} or empty (defaults to noir)");
           }
         }
 
@@ -163,6 +164,23 @@ public final class OptionsParser {
         default -> throw new IllegalArgumentException("Invalid option: " + arg);
       }
       i++;
+    }
+    validateAiPlayerCount(config);
+  }
+
+  /**
+   * Validates that AI is only enabled for 2-player games.
+   *
+   * @param config The configuration manager instance.
+   * @throws IllegalArgumentException If AI is active with more than 2 players.
+   */
+  private static void validateAiPlayerCount(final ConfigManager config) {
+    final int nbPlayers = Integer.parseInt(config.getOption("nb-players", "2"));
+    final boolean hasAi = config.getBoolean("ai1", false) || config.getBoolean("ai2", false);
+
+    if (hasAi && nbPlayers > 2) {
+      throw new IllegalArgumentException(
+          "AI mode is not supported for more than 2 players (currently: " + nbPlayers + ")");
     }
   }
 

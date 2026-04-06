@@ -298,7 +298,7 @@ public class GameStateTest {
     moves2.add(Move.wall(new Position(1, 0), Orientation.VERTICAL));
     moves2.add(Move.wall(new Position(1, 1), Orientation.HORIZONTAL));
 
-  assertTrue(moves2.containsAll(game.generateLegalMoves()));
+    assertTrue(moves2.containsAll(game.generateLegalMoves()));
   }
 
   @Test

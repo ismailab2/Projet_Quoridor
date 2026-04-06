@@ -130,6 +130,7 @@ public class OptionsParserTest {
 
   @Test
   public void testAiBothPlayers() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a"}, config);
     assertEquals("true", config.getOption("ai1", "false"));
     assertEquals("true", config.getOption("ai2", "false"));
@@ -137,12 +138,14 @@ public class OptionsParserTest {
 
   @Test
   public void testAiPlayer1ByName() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "blanc"}, config);
     assertEquals("true", config.getOption("ai1", "false"));
   }
 
   @Test
   public void testAiPlayer1ByIndex() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "1"}, config);
     assertEquals("true", config.getOption("ai1", "false"));
   }
@@ -155,19 +158,15 @@ public class OptionsParserTest {
   }
 
   @Test
-  public void testAiNoNextArg() {
-    assertThrows(
-        IllegalArgumentException.class, () -> OptionsParser.parse(new String[] {"-a"}, config));
-  }
-
-  @Test
   public void testAiModeAppliedToAi2() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "2", "--ai-mode", "minimax"}, config);
     assertEquals("minimax", config.getOption("ai2.mode", null));
   }
 
   @Test
   public void testAiModeAppliedToBothWithComma() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-mode", "minimax,mcts"}, config);
     assertEquals("minimax", config.getOption("ai1.mode", null));
     assertEquals("mcts", config.getOption("ai2.mode", null));
@@ -175,6 +174,7 @@ public class OptionsParserTest {
 
   @Test
   public void testAiMinimaxDepth() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-minimax-depth", "4"}, config);
     assertEquals("4", config.getOption("ai1.depth", null));
     assertEquals("4", config.getOption("ai2.depth", null));
@@ -182,6 +182,7 @@ public class OptionsParserTest {
 
   @Test
   public void testAiTime() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-time", "5"}, config);
     assertEquals("5", config.getOption("ai1.time", null));
     assertEquals("5", config.getOption("ai2.time", null));
@@ -189,6 +190,7 @@ public class OptionsParserTest {
 
   @Test
   public void testAiMinimaxScoring() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-minimax-scoring", "advanced"}, config);
     assertEquals("advanced", config.getOption("ai1.scoring", null));
     assertEquals("advanced", config.getOption("ai2.scoring", null));
@@ -196,6 +198,7 @@ public class OptionsParserTest {
 
   @Test
   public void testAiMctsSelectionUCT() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-mcts-selection", "UCT"}, config);
     assertEquals("UCT", config.getOption("ai1.selection", null));
     assertEquals("UCT", config.getOption("ai2.selection", null));
@@ -203,12 +206,14 @@ public class OptionsParserTest {
 
   @Test
   public void testAiMctsSelectionML() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-mcts-selection", "ML"}, config);
     assertEquals("ML", config.getOption("ai1.selection", null));
   }
 
   @Test
   public void testAiMctsSelectionWithComma() {
+    config.setOption("nb-players", "2");
     OptionsParser.parse(new String[] {"-a", "a", "--ai-mcts-selection", "UCT,ML"}, config);
     assertEquals("UCT", config.getOption("ai1.selection", null));
     assertEquals("ML", config.getOption("ai2.selection", null));
