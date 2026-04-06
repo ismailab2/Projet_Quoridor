@@ -10,12 +10,16 @@ public class ServerGameSession {
 
   /** Unique identifier for the game session. */
   private final String gameId;
+
   /** Current state of the game. */
   private final GameState gameState;
+
   /** Engine used to process moves and enforce rules. */
   private final GameEngine gameEngine;
+
   /** List of connected client sessions involved in this game. */
   private final List<ClientSession> players;
+
   /** Configuration manager used to retrieve game settings. */
   private final ConfigManager config = ConfigManager.getInstance();
 

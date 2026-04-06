@@ -194,7 +194,7 @@ public final class Logger {
    * Log une erreur avec exception associée.
    *
    * @param message message d'erreur
-   * @param e exception associée
+   * @param exception exception associée
    */
   public void error(final String message, final Exception exception) {
     if (isErrorEnabled()) {

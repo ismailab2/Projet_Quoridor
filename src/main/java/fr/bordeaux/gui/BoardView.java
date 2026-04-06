@@ -34,29 +34,40 @@ public final class BoardView extends GridPane {
 
   /** Size factor for pawns relative to cell size. */
   private static final double PAWN_SIZE_FACTOR = 0.6;
+
   /** Arc radius for rounded wall corners. */
   private static final double WALL_ARC = 4.0;
+
   /** Arc radius for rounded pawn corners. */
   private static final double PAWN_ARC = 15.0;
+
   /** Width of the pawn's border stroke. */
   private static final double PAWN_STROKE_WIDTH = 5.0;
+
   /** Radius for the pawn's drop shadow effect. */
   private static final double SHADOW_RADIUS = 5.0;
+
   /** Duration of the pulse animation in seconds. */
   private static final double PULSE_DURATION = 0.5;
+
   /** Minimum opacity during the pulse animation. */
   private static final double PULSE_MIN_OPACITY = 0.2;
+
   /** Opacity for the wall preview highlight. */
   private static final double PREVIEW_OPACITY = 0.4;
+
   /** Default size of a cell if dimensions are unknown. */
   private static final int DEFAULT_CELL_SIZE = 100;
+
   /** Minimum thickness of walls in pixels. */
   private static final double MIN_WALL_THICKNESS = 4.0;
+
   /** Ratio of cell size to wall thickness. */
   private static final double WALL_THICKNESS_RATIO = 8.0;
 
   /** Color used for placed walls. */
   private static final Color WALL_COLOR = Color.rgb(101, 67, 33);
+
   /** semi-transparent color for wall preview. */
   private static final Color PREVIEW_COLOR = Color.rgb(139, 69, 19, PREVIEW_OPACITY);
 
@@ -190,8 +201,7 @@ public final class BoardView extends GridPane {
       pawn.setArcHeight(PAWN_ARC);
       pawn.setStroke(Color.LIGHTGRAY);
       pawn.setStrokeWidth(PAWN_STROKE_WIDTH);
-      pawn.setEffect(
-          new javafx.scene.effect.DropShadow(SHADOW_RADIUS, Color.GRAY));
+      pawn.setEffect(new javafx.scene.effect.DropShadow(SHADOW_RADIUS, Color.GRAY));
 
       final fr.bordeaux.core.Color playerColor = player.getColor();
       final Color fxColor =

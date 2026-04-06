@@ -22,14 +22,19 @@ public final class GameSaver {
 
   /** Default board size. */
   private static final int DEFAULT_SIZE = 9;
+
   /** Character for vertical walls. */
   private static final char VERTICAL_WALL_CHAR = '|';
+
   /** Character for horizontal walls. */
   private static final char HORIZONTAL_WALL_CHAR = '_';
+
   /** Character for empty cells. */
   private static final char EMPTY_CELL_CHAR = '.';
+
   /** Starting character for coordinate column mapping. */
   private static final char POSITION_START_CHAR = 'a';
+
   /** Starting character for player index digits. */
   private static final char PLAYER_INDEX_START_CHAR = '1';
 

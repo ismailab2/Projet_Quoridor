@@ -269,7 +269,8 @@ public final class GameLoader {
     final Player aiPlayer;
     switch (mode) {
       case "minimax" -> aiPlayer = createMinimax(name, pos, color, settings, false);
-      case "minimax-iterative-deepening" -> aiPlayer = createMinimax(name, pos, color, settings, true);
+      case "minimax-iterative-deepening" ->
+          aiPlayer = createMinimax(name, pos, color, settings, true);
       case "mcts" -> aiPlayer = createMcts(name, pos, color, settings);
       case "random" -> aiPlayer = new RandomPlayer(name, pos, color);
       default -> throw new IllegalArgumentException("Unknown AI Type : " + mode);
@@ -334,8 +335,7 @@ public final class GameLoader {
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
    * @param index The index of a player
-   * @return {@code true} if the line has the same index player,
-   *         {@code false} otherwise.
+   * @return {@code true} if the line has the same index player, {@code false} otherwise.
    */
   private static boolean checkSameIndex(
       final List<String> lines, final int myLineRef, final int targetIndex) {
@@ -370,7 +370,10 @@ public final class GameLoader {
   }
 
   private static int handleModeSetting(
-      final GameEngine engine, final String key, final String value, final int currentPlayersCount) {
+      final GameEngine engine,
+      final String key,
+      final String value,
+      final int currentPlayersCount) {
     int playersCount = currentPlayersCount;
     switch (key) {
       case "verbose" -> engine.setVerbose(Boolean.parseBoolean(value));
