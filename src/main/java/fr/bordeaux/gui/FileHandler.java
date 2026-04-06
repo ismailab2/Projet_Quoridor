@@ -4,12 +4,7 @@ import java.io.File;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-/**
- * Handles file system interactions for saving and loading games.
- *
- * <p>This class encapsulates the JavaFX {@link FileChooser} logic to provide a consistent interface
- * for file selection dialogs.
- */
+/** Handles file select dialogs via JavaFX {@link FileChooser}. */
 public class FileHandler {
   /** Description for the text file filter. */
   private static final String FILE_DESCRIPTION = "Text files";
@@ -32,7 +27,7 @@ public class FileHandler {
   /**
    * Opens a save file dialog.
    *
-   * @return the absolute path of the selected file, or {@code null} if the user cancelled
+   * @return absolute path of save file, or null if cancelled
    */
   public String chooseSaveFile() {
     final FileChooser chooser = createBaseChooser("Save the game");
@@ -45,7 +40,7 @@ public class FileHandler {
   /**
    * Opens an open file dialog.
    *
-   * @return the absolute path of the selected file, or {@code null} if the user cancelled
+   * @return absolute path of open file, or null if cancelled
    */
   public String chooseLoadFile() {
     final FileChooser chooser = createBaseChooser("Load a game");

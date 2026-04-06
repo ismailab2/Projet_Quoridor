@@ -9,8 +9,8 @@ import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.util.Logger;
 
 /**
- * Command that interprets and executes a player move entered in the CLI. A move can either be a
- * pawn movement or a wall placement depending on the format of the input string.
+ * CLI command that interprets and executes a player move. pawn movement or a wall placement
+ * depending on the format of the input string.
  */
 public class MoveCommand implements Command {
 
@@ -23,10 +23,10 @@ public class MoveCommand implements Command {
   /**
    * Creates a MoveCommand using the provided move string.
    *
-   * @param m the move entered by the user
+   * @param moveInput the move entered by the user
    */
-  public MoveCommand(String m) {
-    move = m;
+  public MoveCommand(final String moveInput) {
+    move = moveInput;
   }
 
   /** Creates a MoveCommand with no predefined move. */
@@ -35,15 +35,14 @@ public class MoveCommand implements Command {
   }
 
   /**
-   * Executes the move command. Determines whether the input represents a pawn move or a wall
-   * placement and delegates the processing to the appropriate handler.
+   * Executes move command. Parses pawn move or wall placement. placement and delegates the
+   * processing to the appropriate handler.
    *
    * @param engine the current game engine
-   * @return the updated game engine after the move is applied, or the unchanged engine if the move
-   *     is invalid
+   * @return updated game engine or original if invalid. is invalid
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     try {
       if (move.contains("-") && (move.length() == 5 || move.length() == 7)) {
         LOGGER.debug("You played: {0}", this.move);
@@ -55,16 +54,13 @@ public class MoveCommand implements Command {
         LOGGER.debug("Please use help to see how to give a valid command");
         return engine;
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOGGER.error("Error while reading the move {0}", this.move);
       return engine;
     }
   }
 
-  /**
-   * Displays help information about the move command, explaining how to move a pawn or place a wall
-   * in the CLI.
-   */
+  /** Displays help information for the move command. in the CLI. */
   @Override
   public void helpText() {
     LOGGER.info("=== Move Commands ===\n");
@@ -83,60 +79,60 @@ public class MoveCommand implements Command {
   }
 
   /**
-   * Parses a position string and converts it into a Position object. The expected format is a
-   * letter followed by a number (e.g., "e2").
+   * Converts a position string to a Position object (e.g. "e2"). letter followed by a number (e.g.,
+   * "e2").
    *
    * @param str the string representing the board position
    * @return the corresponding Position object
    * @throws IllegalArgumentException if the format is invalid
    */
-  public Position parsePosition(String str) {
+  public Position parsePosition(final String str) {
     if (str.length() < 2) {
       LOGGER.error("Usage: c3-c4 / c3h / c3v");
       throw new IllegalArgumentException("Invalid position format");
     }
-    int row = Integer.parseInt(str.substring(1)) - 1;
-    int col = str.charAt(0) - 'a';
+    final int row = Integer.parseInt(str.substring(1)) - 1;
+    final int col = str.charAt(0) - 'a';
 
     return new Position(row, col);
   }
 
   /**
-   * Handles the execution of a pawn move. Validates the move format, converts the positions, and
-   * applies the move to the game engine.
+   * Handles execution of a pawn move, validating format and positions. applies the move to the game
+   * engine.
    *
    * @param engine the current game engine
    * @return the updated game engine after the move
    */
-  public GameEngine handleMove(GameEngine engine) {
-    String[] moves = move.split("-");
+  public GameEngine handleMove(final GameEngine engine) {
+    final String[] moves = move.split("-");
     if (moves.length != 2) {
       LOGGER.error("Usage: c3-c4 / c3h / c3v");
       throw new IllegalArgumentException("Invalid move syntax");
     }
-    Position from = parsePosition(moves[0]);
-    Position to = parsePosition(moves[1]);
+    final Position from = parsePosition(moves[0]);
+    final Position targetPosition = parsePosition(moves[1]);
 
-    Player current = engine.getState().getCurrentPlayer();
+    final Player current = engine.getState().getCurrentPlayer();
     if (!current.getPosition().equals(from)) {
       LOGGER.error("There is no pawn on the case you want to play");
       throw new IllegalArgumentException("No pawn at " + moves[0]);
     }
-    engine.play(Move.pawn(from, to));
+    engine.play(Move.pawn(from, targetPosition));
     (new ShowCommand()).execute(engine);
     return engine;
   }
 
   /**
-   * Handles the execution of a wall placement. Extracts the position and orientation from the move
-   * string and applies the wall placement to the game engine.
+   * Handles wall placement by extracting position and orientation. string and applies the wall
+   * placement to the game engine.
    *
    * @param engine the current game engine
    * @return the updated game engine after the wall is placed
    */
-  public GameEngine handleWall(GameEngine engine) {
-    Position pos = parsePosition(move.substring(0, move.length() - 1));
-    Orientation orientation =
+  public GameEngine handleWall(final GameEngine engine) {
+    final Position pos = parsePosition(move.substring(0, move.length() - 1));
+    final Orientation orientation =
         (move.charAt(move.length() - 1) == 'v') ? Orientation.VERTICAL : Orientation.HORIZONTAL;
     if (!RuleChecker.isMoveLegal(engine.getState(), Move.wall(pos, orientation))) {
       LOGGER.error("That''s an illegal move: {0}", pos);

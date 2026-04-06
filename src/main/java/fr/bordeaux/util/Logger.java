@@ -6,12 +6,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * Logger simple pour l'application Quoridor.
+ * Simple logger for the Quoridor application.
  *
- * <p>Supporte une sortie console ou fichier avec différents niveaux : INFO, DEBUG, VERBOSE et
- * ERROR.
+ * <p>Supports console or file output (INFO, DEBUG, VERBOSE, ERROR).
  *
- * <p>Implémente le pattern Singleton thread-safe.
+ * <p>Thread-safe Singleton pattern.
  */
 @SuppressWarnings({"PMD.SystemPrintln", "PMD.SingleMethodSingleton"})
 public final class Logger {
@@ -111,7 +110,7 @@ public final class Logger {
   /**
    * Log un message de niveau INFO avec des paramètres.
    *
-   * @param format le format du message (style MessageFormat, ex: "{0}")
+   * @param format message format (MessageFormat style, e.g., "{0}")
    * @param args les arguments du message
    */
   public void info(final String format, final Object... args) {

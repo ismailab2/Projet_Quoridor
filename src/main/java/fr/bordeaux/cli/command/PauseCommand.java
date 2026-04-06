@@ -3,10 +3,7 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.util.Logger;
 
-/**
- * Command that pauses the game timer when the game is in Blitz mode. If the game is not in Blitz
- * mode, the command has no effect.
- */
+/** CLI command that pauses the Blitz mode game timer. */
 public class PauseCommand implements Command {
 
   /** Logger to display informations */
@@ -22,7 +19,7 @@ public class PauseCommand implements Command {
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (engine.isBlitz()) {
       LOGGER.debug("Pausing the game.");
       engine.getState().setPaused(true);
@@ -30,7 +27,7 @@ public class PauseCommand implements Command {
     return engine;
   }
 
-  /** Displays help information about the pause command, including its usage and behavior. */
+  /** Displays help information for the pause command. */
   @Override
   public void helpText() {
     LOGGER.info("=== PAUSE Command ===\n");

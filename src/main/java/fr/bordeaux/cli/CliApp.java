@@ -14,11 +14,47 @@ import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-/**
- * Manages the Quoridor CLI, handling the terminal loop, command registration, and JLine-based
- * auto-completion.
- */
+/** Manages Quoridor CLI loop and commands. */
 public class CliApp {
+
+  /** Help command literal. */
+  private static final String CMD_HELP = "help";
+
+  /** Quit command literal. */
+  private static final String CMD_QUIT = "quit";
+
+  /** New game command literal. */
+  private static final String CMD_NEW = "new";
+
+  /** Load game command literal. */
+  private static final String CMD_LOAD = "load";
+
+  /** Save game command literal. */
+  private static final String CMD_SAVE = "save";
+
+  /** Pause command literal. */
+  private static final String CMD_PAUSE = "pause";
+
+  /** Hint command literal. */
+  private static final String CMD_HINT = "hint";
+
+  /** Undo command literal. */
+  private static final String CMD_UNDO = "undo";
+
+  /** Redo command literal. */
+  private static final String CMD_REDO = "redo";
+
+  /** Show command literal. */
+  private static final String CMD_SHOW = "show";
+
+  /** Set command literal. */
+  private static final String CMD_SET = "set";
+
+  /** Board option literal. */
+  private static final String OPT_BOARD = "board";
+
+  /** Literals to avoid duplication. */
+  private static final String STR_FALSE = "false";
 
   /** Constant representing a single unique match for command completion. */
   private static final int UNIQUE_MATCH = 1;
@@ -26,31 +62,22 @@ public class CliApp {
   /** The core engine managing the game logic, board state, and Quoridor rules. */
   private GameEngine engine;
 
-  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
+  /** System terminal. */
   private Terminal terminal;
 
-  /**
-   * The line reader responsible for text editing, history management, and tab-completion
-   * interaction.
-   */
+  /** The line reader responsible for text editing */
   private LineReader reader;
 
   /** State flag that controls the main execution loop of the CLI application. */
   private boolean running = true;
 
-  /**
-   * Internal state used to track the "Tab" key behavior, toggling between an error beep and showing
-   * suggestions.
-   */
+  /** Internal state used to track the "Tab" key behavior */
   private boolean firstTab = true;
 
   /** Logger to display informations */
   private static final Logger LOGGER = Logger.getInstance();
 
-  /**
-   * A registry mapping command names to functions that instantiate specific Command objects based
-   * on user input tokens.
-   */
+  /** A registry mapping command names */
   private Map<String, Function<String[], Command>> commandRegistry;
 
   /**
@@ -67,28 +94,31 @@ public class CliApp {
     this.reader = reader;
     commandRegistry = new HashMap<>();
 
-    // Register commands
-    commandRegistry.put("help", tokens -> new HelpCommand(tokens, commandRegistry));
+    registerAllCommands();
+  }
+
+  /** Initialises the command registry to avoid code duplication in constructors. */
+  private void registerAllCommands() {
+    commandRegistry.put(CMD_HELP, tokens -> new HelpCommand(tokens, commandRegistry));
     commandRegistry.put(
-        "quit",
+        CMD_QUIT,
         tokens -> {
           this.running = false;
           return new QuitCommand(reader);
         });
-    commandRegistry.put("new", tokens -> new NewCommand(tokens, terminal, reader));
-    commandRegistry.put("load", LoadCommand::new);
-    commandRegistry.put("save", SaveCommand::new);
-    commandRegistry.put("pause", tokens -> new PauseCommand());
-    commandRegistry.put("hint", tokens -> new HintCommand());
-    commandRegistry.put("undo", UndoCommand::new);
-    commandRegistry.put("redo", RedoCommand::new);
-    commandRegistry.put("show", ShowCommand::new);
-    commandRegistry.put("set", tokens -> new SetCommand());
+    commandRegistry.put(CMD_NEW, tokens -> new NewCommand(tokens, terminal, reader));
+    commandRegistry.put(CMD_LOAD, LoadCommand::new);
+    commandRegistry.put(CMD_SAVE, SaveCommand::new);
+    commandRegistry.put(CMD_PAUSE, tokens -> new PauseCommand());
+    commandRegistry.put(CMD_HINT, tokens -> new HintCommand());
+    commandRegistry.put(CMD_UNDO, UndoCommand::new);
+    commandRegistry.put(CMD_REDO, RedoCommand::new);
+    commandRegistry.put(CMD_SHOW, ShowCommand::new);
+    commandRegistry.put(CMD_SET, tokens -> new SetCommand());
   }
 
   /**
-   * Creates a CLI application using the provided game engine. Initializes the terminal, command
-   * auto-completion and line reader.
+   * Creates a CLI application using the provided game engine.
    *
    * @param engine the game engine used to run the game
    * @throws IOException if the terminal cannot be initialized
@@ -100,7 +130,7 @@ public class CliApp {
     this.running = true;
 
     // Create smart completer
-    Completer smartCompleter = new SmartCompleter();
+    final Completer smartCompleter = new SmartCompleter();
 
     // Create the LineReader with the smart Completer
     this.reader =
@@ -108,27 +138,11 @@ public class CliApp {
 
     // init the command register
     this.commandRegistry = new HashMap<>();
-    commandRegistry.put("help", tokens -> new HelpCommand(tokens, commandRegistry));
-    commandRegistry.put(
-        "quit",
-        tokens -> {
-          this.running = false;
-          return new QuitCommand(reader);
-        });
-    commandRegistry.put("new", tokens -> new NewCommand(tokens, terminal, reader));
-    commandRegistry.put("load", LoadCommand::new);
-    commandRegistry.put("save", SaveCommand::new);
-    commandRegistry.put("pause", tokens -> new PauseCommand());
-    commandRegistry.put("hint", tokens -> new HintCommand());
-    commandRegistry.put("undo", UndoCommand::new);
-    commandRegistry.put("redo", RedoCommand::new);
-    commandRegistry.put("show", ShowCommand::new);
-    commandRegistry.put("set", SetCommand::new);
+    registerAllCommands();
   }
 
   /**
-   * Creates a CLI application with a default game configuration. Initializes a 9x9 board with two
-   * human players.
+   * Creates a CLI application with a default game configuration.
    *
    * @throws IOException if the terminal setup fails
    */
@@ -140,10 +154,10 @@ public class CliApp {
                 List.of(
                     new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
                     new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
-            Boolean.parseBoolean(ConfigManager.getInstance().getOption("blitz", "false")),
-            Boolean.parseBoolean(ConfigManager.getInstance().getOption("verbose", "false")),
-            Boolean.parseBoolean(ConfigManager.getInstance().getOption("contest", "false")),
-            Boolean.parseBoolean(ConfigManager.getInstance().getOption("debug", "false")),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("blitz", STR_FALSE)),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("verbose", STR_FALSE)),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("contest", STR_FALSE)),
+            Boolean.parseBoolean(ConfigManager.getInstance().getOption("debug", STR_FALSE)),
             Integer.parseInt(ConfigManager.getInstance().getOption("nb-walls", "10"))));
   }
 
@@ -174,14 +188,14 @@ public class CliApp {
   }
 
   /**
-   * Starts the CLI loop. Displays the board at startup and continuously reads user commands until
-   * the application is stopped.
+   * Starts the CLI loop. Displays the board and reads commands until stopped. the application is
+   * stopped.
    *
    * @throws IOException Possible if mcts with NN selection used
    */
   public void run() throws IOException {
     if (engine != null) {
-      final ShowCommand show = new ShowCommand(new String[] {"show", "board"});
+      final ShowCommand show = new ShowCommand(new String[] {CMD_SHOW, OPT_BOARD});
       show.execute(engine);
     }
     while (running) {
@@ -197,7 +211,7 @@ public class CliApp {
           terminal.flush();
         }
         executeAiTurn();
-        new ShowCommand(new String[] {"show", "board"}).execute(engine);
+        new ShowCommand(new String[] {CMD_SHOW, OPT_BOARD}).execute(engine);
       }
       if (engine.getState().isGameOver()) {
         running = false;
@@ -221,8 +235,8 @@ public class CliApp {
   }
 
   /**
-   * Parses the user input and executes the corresponding command. If the command is not recognized,
-   * it is interpreted as a move.
+   * Parses user input and executes the command. If unrecognized, treats as a move. it is
+   * interpreted as a move.
    *
    * @param input the raw command entered by the user
    * @throws IOException Possible if mcts with NN selection used
@@ -300,32 +314,32 @@ public class CliApp {
 
       final List<String> mainCommands =
           List.of(
-              "help", "quit", "new", "save", "load", "show", "hint", "pause", "undo", "redo",
-              "set");
-      final List<String> showOptions = List.of("board", "time", "configurations", "history");
+              CMD_HELP, CMD_QUIT, CMD_NEW, CMD_SAVE, CMD_LOAD, CMD_SHOW, CMD_HINT, CMD_PAUSE,
+              CMD_UNDO, CMD_REDO, CMD_SET);
+      final List<String> showOptions = List.of(OPT_BOARD, "time", "configurations", "history");
       final List<String> helpOptions =
           List.of(
-              "help",
-              "hint",
-              "load",
-              "save",
-              "quit",
-              "pause",
-              "redo",
-              "undo",
-              "set",
-              "show board",
+              CMD_HELP,
+              CMD_HINT,
+              CMD_LOAD,
+              CMD_SAVE,
+              CMD_QUIT,
+              CMD_PAUSE,
+              CMD_REDO,
+              CMD_UNDO,
+              CMD_SET,
+              CMD_SHOW + " " + OPT_BOARD,
               "move",
-              "show time",
-              "show configurations",
-              "show history");
+              CMD_SHOW + " time",
+              CMD_SHOW + " configurations",
+              CMD_SHOW + " history");
 
       final List<String> matches;
 
-      if (tokens.length >= 1 && "show".equals(tokens[0])) {
+      if (tokens.length >= 1 && CMD_SHOW.equals(tokens[0])) {
         final String subToken = (tokens.length == 2) ? tokens[1] : "";
         matches = showOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
-      } else if (tokens.length >= 1 && "help".equals(tokens[0])) {
+      } else if (tokens.length >= 1 && CMD_HELP.equals(tokens[0])) {
         final String subToken = (tokens.length == 2) ? tokens[1] : "";
         matches = helpOptions.stream().filter(opt -> opt.startsWith(subToken)).toList();
       } else {

@@ -20,12 +20,12 @@ public class MctsPlayer extends AiPlayer {
   private static final double UCT_CONSTANT = 1.41;
 
   /**
-   * Constructor with custom reflection time.
+   * Constructs MctsPlayer.
    *
-   * @param name The name of the AI player.
-   * @param positionStart The starting position on the board.
-   * @param reflectionTime Maximum time in ms to search for a move.
-   * @param color The player's assigned color.
+   * @param name player name
+   * @param positionStart starting position
+   * @param reflectionTime search time limit
+   * @param color player color
    */
   public MctsPlayer(
       final String name,
@@ -49,14 +49,14 @@ public class MctsPlayer extends AiPlayer {
   }
 
   /**
-   * Constructor with custom reflection time and neural network evaluator.
+   * Constructor with reflection time and neural network evaluator.
    *
-   * @param name The name of the AI player.
-   * @param positionStart The starting position on the board.
-   * @param reflectionTime Maximum search time in ms.
-   * @param useNN To use or not NeuralNetworks in selection
-   * @param color The player's assigned color.
-   * @throws IOException Possible if mcts with NN selection used
+   * @param name AI name
+   * @param positionStart starting position
+   * @param reflectionTime search time
+   * @param useNN use NN evaluator
+   * @param color player color
+   * @throws IOException if NN evaluator fails to load
    */
   public MctsPlayer(
       final String name,
@@ -67,12 +67,7 @@ public class MctsPlayer extends AiPlayer {
       throws IOException {
     super(name, positionStart, color);
     this.reflectionTime = reflectionTime;
-    NeuralNetworkEvaluator evaluator1;
-    evaluator1 = null;
-    if (useNN) {
-      evaluator1 = new NeuralNetworkEvaluator();
-    }
-    this.evaluator = evaluator1;
+    this.evaluator = useNN ? new NeuralNetworkEvaluator() : null;
   }
 
   /**
@@ -134,12 +129,12 @@ public class MctsPlayer extends AiPlayer {
   /**
    * Hint for best move.
    *
-   * @param player p
-   * @param state s
-   * @param reflectionTimeMs t
-   * @param useNN nn @return best move or null.
-   * @return the best move for the player, or null.
-   * @throws IOException Possible if mcts with NN selection used
+   * @param player player to hint for
+   * @param state current game state
+   * @param reflectionTimeMs search time
+   * @param useNN use NN evaluator
+   * @return best move found
+   * @throws IOException if NN evaluator fails to load
    */
   public static Move hint(
       final Player player, final GameState state, final long reflectionTimeMs, final boolean useNN)

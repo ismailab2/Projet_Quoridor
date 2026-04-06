@@ -5,10 +5,7 @@ import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.util.Log;
 import java.io.IOException;
 
-/**
- * The core engine of the Quoridor game. This class coordinates the game logic, manages player
- * turns, and handles actions such as saving, loading, and providing hints using AI.
- */
+/** Core engine for Quoridor game logic, player turns, and AI hints. */
 public class GameEngine {
 
   /** The current state of the game. */
@@ -33,14 +30,14 @@ public class GameEngine {
   private int initialWalls;
 
   /**
-   * Constructs a GameEngine with the specified initial game state and configuration parameters.
+   * Constructs GameEngine.
    *
-   * @param state The initial {@link GameState} to be managed by the engine.
-   * @param blitz Whether Blitz mode is enabled.
-   * @param verbose Whether verbose logging is enabled.
-   * @param contest Whether contest mode is enabled.
-   * @param debug Whether debug mode is enabled.
-   * @param initialWalls The initial number of walls for each player.
+   * @param state initial game state
+   * @param blitz blitz mode flag
+   * @param verbose verbose flag
+   * @param contest contest mode flag
+   * @param debug debug flag
+   * @param initialWalls initial wall count
    */
   public GameEngine(
       final GameState state,
@@ -67,11 +64,10 @@ public class GameEngine {
   }
 
   /**
-   * Attempts to execute a move in the current game state. Validates the move according to game
-   * rules and checks if the game is paused or over.
+   * Executes a game move.
    *
-   * @param move The {@link Move} to be performed.
-   * @return {@code true} if the move was successfully applied, {@code false} otherwise.
+   * @param move move to execute
+   * @return true if success
    */
   public boolean play(final Move move) {
     final GameState currentState = this.state;
@@ -116,7 +112,7 @@ public class GameEngine {
   }
 
   /**
-   * Saves the current game state to a file.C
+   * Saves the current game state to a file.
    *
    * @param filename The path to the file where the game will be saved.
    */
@@ -162,7 +158,7 @@ public class GameEngine {
 
   /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
-    boolean newPauseState = !state.isPaused();
+    final boolean newPauseState = !state.isPaused();
     state.setPaused(newPauseState);
 
     if (blitzManager != null) {
@@ -177,7 +173,7 @@ public class GameEngine {
   }
 
   /**
-   * Provides a hint for the current player by calculating the best move using an AI.
+   * Suggests the best move using AI for the current player.
    *
    * @return The best move for the current player.
    * @throws IOException If an I/O error occurs.
@@ -202,13 +198,13 @@ public class GameEngine {
     final String result;
     if (moveType == Move.Type.PAWN) {
       final Position from = move.getFrom();
-      final Position to = move.getTo();
-      result = posToString(from) + "-" + posToString(to);
+      final Position targetPosition = move.getTo();
+      result = posToString(from) + "-" + posToString(targetPosition);
     } else {
       final Orientation orientation = move.getOrientation();
       final char orientationChar = orientation == Orientation.HORIZONTAL ? 'h' : 'v';
-      final Position to = move.getTo();
-      result = posToString(to) + orientationChar;
+      final Position targetPosition = move.getTo();
+      result = posToString(targetPosition) + orientationChar;
     }
     return result;
   }

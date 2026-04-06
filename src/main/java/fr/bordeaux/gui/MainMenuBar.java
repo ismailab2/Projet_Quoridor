@@ -16,13 +16,13 @@ public class MainMenuBar extends MenuBar {
    *
    * @param dispatcher dispatcher used to handle menu actions
    */
-  public MainMenuBar(ActionDispatcher dispatcher) {
+  public MainMenuBar(final ActionDispatcher dispatcher) {
     this.dispatcher = dispatcher;
     getMenus().addAll(createFileMenu(), createGameMenu(), createNetworkMenu());
   }
 
   private Menu createFileMenu() {
-    Menu file = new Menu("File");
+    final Menu file = new Menu("File");
     file.getItems()
         .addAll(
             menuItem("New Game", Action.NEW_GAME),
@@ -37,7 +37,7 @@ public class MainMenuBar extends MenuBar {
   }
 
   private Menu createGameMenu() {
-    Menu game = new Menu("Game");
+    final Menu game = new Menu("Game");
     game.getItems()
         .addAll(
             menuItem("Undo", Action.UNDO),
@@ -49,7 +49,7 @@ public class MainMenuBar extends MenuBar {
   }
 
   private Menu createNetworkMenu() {
-    Menu network = new Menu("Network");
+    final Menu network = new Menu("Network");
     network
         .getItems()
         .addAll(
@@ -69,13 +69,13 @@ public class MainMenuBar extends MenuBar {
     return network;
   }
 
-  private MenuItem menuItem(String text, Action action) {
-    MenuItem item = new MenuItem(text);
+  private MenuItem menuItem(final String text, final Action action) {
+    final MenuItem item = new MenuItem(text);
     item.setOnAction(
         event -> {
           try {
             dispatcher.dispatch(action);
-          } catch (IOException e) {
+          } catch (final IOException e) {
             throw new java.io.UncheckedIOException(e);
           }
         });

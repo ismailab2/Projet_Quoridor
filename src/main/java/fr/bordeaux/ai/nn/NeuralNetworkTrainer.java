@@ -210,7 +210,7 @@ public class NeuralNetworkTrainer {
    * Internal data structure representing a single training example.
    *
    * @param features The feature array corresponding to a specific game state.
-   * @param outcome The observed outcome of the simulated game (e.g. 1.0 for win, 0.0 for loss).
+   * @param outcome The observed outcome of the simulated game.
    */
   private record TrainingData(double[] features, double outcome) {
     /**

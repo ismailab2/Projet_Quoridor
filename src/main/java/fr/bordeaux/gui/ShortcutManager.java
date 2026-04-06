@@ -2,7 +2,6 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -11,26 +10,22 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 
 /**
- * Manages keyboard shortcuts for all actions in the Quoridor GUI.
- *
- * <p>This singleton class loads, stores, and updates keyboard shortcuts. It allows the user to
- * customize shortcuts and persists them in the configuration file. It also registers shortcuts on a
- * JavaFX Scene and triggers actions through an ActionDispatcher.
+ * Manages keyboard shortcuts. Loads, stores, and persists in config. Triggers actions through an
+ * {@link ActionDispatcher}.
  */
 public final class ShortcutManager {
 
+  /** Singleton instance of the manager */
   private static final ShortcutManager INSTANCE = new ShortcutManager();
 
-  /** Maps each action to its keyboard shortcut */
-  private final Map<Action, KeyCombination> shortcuts = new HashMap<>();
+  /** Maps each action to its keyboard shortcut using a thread-safe map */
+  private final Map<Action, KeyCombination> shortcuts =
+      new java.util.concurrent.ConcurrentHashMap<>();
 
   /** Dispatcher to trigger actions when shortcuts are pressed */
   private ActionDispatcher dispatcher;
 
-  /**
-   * Private constructor for singleton pattern. Loads default shortcuts and attempts to load saved
-   * shortcuts from ConfigManager.
-   */
+  /** Private constructor. Loads default and saved shortcuts. */
   private ShortcutManager() {
     loadDefaults();
     loadFromConfig();
@@ -46,9 +41,9 @@ public final class ShortcutManager {
   }
 
   /**
-   * Sets the ActionDispatcher used to execute actions when a shortcut is pressed.
+   * Sets action dispatcher for shortcuts.
    *
-   * @param dispatcher The ActionDispatcher instance
+   * @param dispatcher ActionDispatcher instance
    */
   public void setDispatcher(final ActionDispatcher dispatcher) {
     this.dispatcher = dispatcher;
@@ -65,8 +60,7 @@ public final class ShortcutManager {
   }
 
   /**
-   * Sets or updates the shortcut for an action and saves it in the configuration. Ignores shortcuts
-   * that consist only of modifier keys (Ctrl, Shift, Alt).
+   * Updates and persists the shortcut for an action.
    *
    * @param action The action to update
    * @param combination The new KeyCombination
@@ -92,10 +86,7 @@ public final class ShortcutManager {
     shortcuts.put(Action.HINT, new KeyCodeCombination(KeyCode.H, KeyCombination.CONTROL_DOWN));
   }
 
-  /**
-   * Loads previously saved shortcuts from the ConfigManager. If a saved value is invalid, the
-   * default shortcut is retained.
-   */
+  /** Loads previously saved shortcuts from the ConfigManager. */
   private void loadFromConfig() {
     final ConfigManager config = ConfigManager.getInstance();
     for (final Action action : Action.values()) {
@@ -121,54 +112,33 @@ public final class ShortcutManager {
     final KeyCode code =
         KeyCode.valueOf(parts[parts.length - 1].toUpperCase(java.util.Locale.ENGLISH));
 
-    KeyCombination.Modifier ctrl = null;
-    KeyCombination.Modifier shift = null;
-    KeyCombination.Modifier alt = null;
+    final java.util.List<KeyCombination.Modifier> modifiers = new java.util.ArrayList<>();
 
     for (int index = 0; index < parts.length - 1; index++) {
       final String part = parts[index].toUpperCase(java.util.Locale.ENGLISH);
       switch (part) {
         case "CTRL":
-          ctrl = KeyCombination.CONTROL_DOWN;
+          modifiers.add(KeyCombination.CONTROL_DOWN);
           break;
         case "SHIFT":
-          shift = KeyCombination.SHIFT_DOWN;
+          modifiers.add(KeyCombination.SHIFT_DOWN);
           break;
         case "ALT":
-          alt = KeyCombination.ALT_DOWN;
+          modifiers.add(KeyCombination.ALT_DOWN);
           break;
         default:
           break;
       }
     }
 
-    final KeyCodeCombination result;
-    if (ctrl != null && shift != null && alt != null) {
-      result = new KeyCodeCombination(code, ctrl, shift, alt);
-    } else if (ctrl != null && shift != null) {
-      result = new KeyCodeCombination(code, ctrl, shift);
-    } else if (ctrl != null && alt != null) {
-      result = new KeyCodeCombination(code, ctrl, alt);
-    } else if (shift != null && alt != null) {
-      result = new KeyCodeCombination(code, shift, alt);
-    } else if (ctrl != null) {
-      result = new KeyCodeCombination(code, ctrl);
-    } else if (shift != null) {
-      result = new KeyCodeCombination(code, shift);
-    } else if (alt != null) {
-      result = new KeyCodeCombination(code, alt);
-    } else {
-      result = new KeyCodeCombination(code);
-    }
-    return result;
+    return new KeyCodeCombination(code, modifiers.toArray(new KeyCombination.Modifier[0]));
   }
 
   /**
-   * Registers all shortcuts on a given JavaFX Scene. When a registered shortcut is pressed, the
-   * corresponding action is dispatched.
+   * Registers shortcuts on a JavaFX Scene.
    *
-   * @param scene The Scene to register the shortcuts on
-   * @throws IllegalStateException if the ActionDispatcher is not set
+   * @param scene The Scene to register on
+   * @throws IllegalStateException if ActionDispatcher is not set
    */
   public void register(final Scene scene) {
     if (dispatcher == null) {

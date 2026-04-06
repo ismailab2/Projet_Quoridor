@@ -3,10 +3,7 @@ package fr.bordeaux.ai.base;
 import fr.bordeaux.core.*;
 import java.util.Map;
 
-/**
- * Abstract base class representing an Artificial Intelligence player in the game. Extends the core
- * {@link Player} class.
- */
+/** Base class for AI players. */
 public abstract class AiPlayer extends Player {
 
   /**
@@ -21,14 +18,14 @@ public abstract class AiPlayer extends Player {
   }
 
   /**
-   * Protected constructor used primarily for cloning or restoring an AI player state.
+   * Internal constructor for state restoration.
    *
-   * @param name The name of the AI player.
-   * @param current The current position of the AI.
-   * @param start The starting position of the AI.
-   * @param walls The number of walls remaining for this AI.
-   * @param score The current score of the AI.
-   * @param color The color of the AI.
+   * @param name player name
+   * @param current current position
+   * @param start starting position
+   * @param walls remaining walls
+   * @param score current score
+   * @param color player color
    */
   protected AiPlayer(
       final String name,
@@ -62,10 +59,9 @@ public abstract class AiPlayer extends Player {
   public abstract Move getNextMove(GameState state);
 
   /**
-   * Retrieves the specific configuration settings of the AI (e.g., depth, heuristic, reflection
-   * time).
+   * Gets AI configuration settings.
    *
-   * @return A map containing the AI's settings as key-value pairs.
+   * @return Map of settings.
    */
   public abstract Map<String, Object> getSettings();
 }

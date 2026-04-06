@@ -16,12 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-/**
- * Main JavaFX application class for Quoridor.
- *
- * <p>Displays the game board in the center, player 1 panel on the left, and player 2 panel on the
- * right. Handles initializing the game state, setting up the scene, and attaching GUI components.
- */
+/** Main JavaFX app for Quoridor. Displays board and player panels. */
 public class QuoridorApp extends Application {
 
   private static final double PANEL_WIDTH = 200.0;
@@ -32,7 +27,7 @@ public class QuoridorApp extends Application {
   private static final double OVERLAY_WIDTH = 400.0;
   private static final double OVERLAY_HEIGHT = 200.0;
 
-  /** Default constructor for the Quoridor JavaFX application. */
+  /** Default constructor. */
   public QuoridorApp() {
     super();
   }
@@ -108,7 +103,7 @@ public class QuoridorApp extends Application {
   }
 
   /**
-   * Assembles the root BorderPane layout with all components.
+   * Assembles root layout components.
    *
    * @param menuBar the top menu bar
    * @param boardContainer the center board container

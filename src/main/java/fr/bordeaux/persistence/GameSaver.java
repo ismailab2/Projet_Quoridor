@@ -5,7 +5,6 @@ import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
-import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import java.io.IOException;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 /** Utility class used to save a game state to a file. */
 public final class GameSaver {
-  // Board size : always 9x9
+  /** The size of the board (usually 9x9). */
   private static int size = 9;
 
   private static final int DEFAULT_SIZE = 9;
@@ -40,7 +39,7 @@ public final class GameSaver {
    */
   public static void saveGame(final GameEngine engine, final String filename) throws IOException {
     final Path path = Path.of(filename);
-    try (final PrintWriter writer =
+    try (PrintWriter writer =
         new PrintWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8))) {
       final GameState state = engine.getState();
       final Board board = state.getBoard();
@@ -71,7 +70,7 @@ public final class GameSaver {
   }
 
   /**
-   * Writes the full board representation to the save file.
+   * Writes the board representation to the save file.
    *
    * @param writer writer used to save the data
    * @param state game state containing the board to write
@@ -108,21 +107,27 @@ public final class GameSaver {
     return line.toString();
   }
 
-  // Builds one horizontal wall line between two rows
+  /**
+   * Builds one horizontal wall line between two rows.
+   *
+   * @param row row index to build
+   * @param board board to inspect
+   * @return string representing the wall line content
+   */
   private static String buildWallLine(final int row, final Board board) {
     final StringBuilder line = new StringBuilder();
     for (int col = 0; col < size; col++) {
       if (col > 0) {
-        line.append(" ");
+        line.append(' ');
       }
       // Add '_' if there is a horizontal wall between row and row+1
-      line.append(hasHorizontalWall(board, row, col) ? '_' : ' ');
+      line.append(hasHorizontalWall(board, row, col) ? HORIZONTAL_WALL_CHAR : ' ');
     }
     return line.toString();
   }
 
   /**
-   * Returns the character used to represent the content of a board cell.
+   * Returns the character representing a board cell.
    *
    * @param row row of the cell
    * @param col column of the cell
@@ -191,7 +196,7 @@ public final class GameSaver {
   }
 
   /**
-   * Saves the specific settings of an AI player to the output file.
+   * Saves AI player settings to the output file.
    *
    * @param w The {@link PrintWriter} used to write to the file.
    * @param g The current game state.
@@ -212,12 +217,11 @@ public final class GameSaver {
   }
 
   /**
-   * Saves the global game parameters and all players' information to the output file. Writes the
-   * "[settings]" header followed by game rules and player configurations.
+   * Saves game parameters and player info. Writes the "[settings]" header and configurations.
    *
    * @param w the {@link PrintWriter} used to write to the file
    * @param engine the engine providing the configuration
-   * @param g the current game state containing player data
+   * @param state the game state containing player data
    */
   private static void saveParameters(
       final PrintWriter writer, final GameEngine engine, final GameState state) {
@@ -246,47 +250,60 @@ public final class GameSaver {
     }
   }
 
-  private static String posToCoord(final Position p) {
-    final String result;
-    if (p == null) {
-      result = "";
-    } else {
-      final char colChar = (char) (POSITION_START_CHAR + p.getY());
-      final int rowNum = p.getX() + 1;
-      result = String.valueOf(colChar) + rowNum;
-    }
-    return result;
-  }
-
+  /**
+   * Writes the complete game history to the save file.
+   *
+   * @param writer writer used to save the data
+   * @param state game state containing the history
+   */
   private static void writeHistory(final PrintWriter writer, final GameState state) {
     writer.println("[History]");
-
     final Move[] moves = state.getMovesPlayed();
     final List<Player> players = state.getPlayers();
     final int playersCount = players.size();
-    int currentPlayer = 0;
+    int currentP = 0;
 
     for (int index = moves.length - 1; index >= 0; index--) {
       final Move move = moves[index];
-      final StringBuilder strMoveBuilder = new StringBuilder();
-      strMoveBuilder.append(currentPlayer + 1).append(" ");
-      final Position to = move.getTo();
-
-      if (move.isPawn()) {
-        final Position from = move.getFrom();
-        strMoveBuilder.append(posToCoord(from)).append('-').append(posToCoord(to));
-      } else {
-        final Orientation orientation = move.getOrientation();
-        strMoveBuilder.append(posToCoord(to)).append(orientation.toString());
-      }
-      strMoveBuilder.append(';');
-      final String strMove = strMoveBuilder.toString();
-      if (currentPlayer == playersCount - 1) {
+      final String strMove = (currentP + 1) + " " + formatMove(move) + ";";
+      if (currentP == playersCount - 1) {
         writer.println(strMove);
       } else {
         writer.print(strMove + " ");
       }
-      currentPlayer = (currentPlayer + 1) % playersCount;
+      currentP = (currentP + 1) % playersCount;
     }
+  }
+
+  /**
+   * Formats a move into its save-file string representation.
+   *
+   * @param move move to format
+   * @return formatted string (e.g., "e2-e4" or "e2h")
+   */
+  private static String formatMove(final Move move) {
+    final StringBuilder builder = new StringBuilder();
+    if (move.isPawn()) {
+      builder.append(posToCoord(move.getFrom())).append('-').append(posToCoord(move.getTo()));
+    } else {
+      builder.append(posToCoord(move.getTo())).append(move.getOrientation().toString());
+    }
+    return builder.toString();
+  }
+
+  /**
+   * Converts a board position to its coordinate string (e.g., "e2").
+   *
+   * @param pos position to convert
+   * @return the coordinate string, or empty string if pos is null
+   */
+  private static String posToCoord(final Position pos) {
+    String result = "";
+    if (pos != null) {
+      final char colChar = (char) (POSITION_START_CHAR + pos.getY());
+      final int rowNum = pos.getX() + 1;
+      result = String.valueOf(colChar) + rowNum;
+    }
+    return result;
   }
 }

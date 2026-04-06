@@ -4,10 +4,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Utility class for logging application events, error messages, and debug information. Provides a
- * centralized mechanism to output runtime information to the console or log files.
- */
+/** Centralized logging for application events, errors, and debug info. */
 public final class Log {
 
   /** Centralized Logger instance for the Quoridor application. */
@@ -61,8 +58,7 @@ public final class Log {
   }
 
   /**
-   * Sets verbose mode. In verbose mode, info-level messages are logged; otherwise, only fine-level
-   * messages.
+   * Sets verbose mode for logging.
    *
    * @param verbose true to enable verbose logging, false to disable
    */
@@ -75,7 +71,7 @@ public final class Log {
   }
 
   /**
-   * Sets debug mode. In debug mode, trace-level messages are logged.
+   * Sets debug mode for logging.
    *
    * @param debug true to enable debug logging, false to leave current logging level
    */

@@ -15,29 +15,29 @@ public class SaveCommand implements Command {
   /**
    * Creates a SaveCommand using the specified file path.
    *
-   * @param p the path of the file where the game will be saved
+   * @param path the path of the file where the game will be saved
    */
-  public SaveCommand(String p) {
-    this(new String[] {"save", p});
+  public SaveCommand(final String path) {
+    this(new String[] {"save", path});
   }
 
   /**
    * Creates a SaveCommand using the provided CLI tokens.
    *
-   * @param t the tokens entered by the user
+   * @param tokens the tokens entered by the user
    */
-  public SaveCommand(String[] t) {
-    this.tokens = t;
+  public SaveCommand(final String[] tokens) {
+    this.tokens = tokens;
   }
 
   /**
-   * Executes the save command. Writes the current game state to the specified file.
+   * Executes save command. Writes the game state to the specified file.
    *
    * @param engine the current game engine
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (tokens.length < 2) {
       LOGGER.info("Usage: save FILE");
       return engine;
@@ -46,13 +46,13 @@ public class SaveCommand implements Command {
       LOGGER.info("Attempting to save game to: {0}", tokens[1]);
       engine.saveGame(tokens[1]);
       LOGGER.info("Game saved successfully.");
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOGGER.error("Failed to save game at path: {0}", tokens[1]);
     }
     return engine;
   }
 
-  /** Displays help information about the save command, including its usage and example. */
+  /** Displays help information for the save command. */
   @Override
   public void helpText() {
     LOGGER.info("=== SAVE Command ===\n");

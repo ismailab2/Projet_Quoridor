@@ -6,30 +6,27 @@ import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 
-/**
- * Basic heuristic implementation focusing on direct forward progress. It calculates the score based
- * on the distance the AI has traveled from its starting side toward the opposite goal line.
- */
+/** Heuristic focusing on direct forward progress. */
 public class SimpleHeuristic implements HeuristicEvaluator {
 
-  /** The identifier of the AI player to evaluate. */
+  /** AI player color identifier. */
   private final Color aiColor;
 
   /**
-   * Constructs a new SimpleHeuristic.
+   * Constructs SimpleHeuristic with AI color.
    *
-   * @param aiColorParameter The color used to identify the AI player in the game state.
+   * @param aiColorParameter The AI color.
    */
   public SimpleHeuristic(final Color aiColorParameter) {
     this.aiColor = aiColorParameter;
   }
 
   /**
-   * Evaluates progress by comparing the current position with the starting row or column.
+   * Evaluates progress from starting position.
    *
-   * @param gameState The current game state.
-   * @return An integer representing the steps taken toward the goal.
-   * @throws IllegalStateException if the AI player is not found in the game state.
+   * @param gameState Current state.
+   * @return Steps taken.
+   * @throws IllegalStateException If AI player not found.
    */
   @Override
   public int evaluate(final GameState gameState) {

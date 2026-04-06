@@ -3,9 +3,7 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.util.Logger;
 
-/**
- * Command that cancels previously played moves. The user can undo a single move or multiple moves.
- */
+/** CLI command that cancels previously played moves. */
 public class UndoCommand implements Command {
   /** Command tokens. */
   private String[] tokens;
@@ -23,23 +21,23 @@ public class UndoCommand implements Command {
    *
    * @param t the tokens entered by the user
    */
-  public UndoCommand(String[] t) {
+  public UndoCommand(final String[] t) {
     tokens = t;
   }
 
   /**
-   * Executes the undo command. Cancels the specified number of previously played moves.
+   * Executes undo command. Cancels the specified number of moves.
    *
    * @param engine the current game engine
    * @return the updated game engine after undoing moves
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (tokens.length >= 3) {
       LOGGER.info("Usage: undo [N]");
       return engine;
     }
-    int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
+    final int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
     LOGGER.info("Undoing {0} move(s)...", count);
 
     for (int i = 0; i < count; i++) {
@@ -48,7 +46,7 @@ public class UndoCommand implements Command {
     return engine;
   }
 
-  /** Displays help information about the undo command, including its usage and examples. */
+  /** Displays help information for the undo command. */
   @Override
   public void helpText() {
     LOGGER.info("=== UNDO Command ===\n");

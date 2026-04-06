@@ -3,7 +3,7 @@ package fr.bordeaux.core;
 import fr.bordeaux.graph.*;
 import java.util.*;
 
-/** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
+/** Represents the Quoridor board (size 3x3 to 15x15). */
 public class Board {
 
   /** The number of cells in one dimension of the board. */
@@ -13,10 +13,9 @@ public class Board {
   private final Graph graph;
 
   /**
-   * Constructs a new empty board of the given size.
+   * Constructs board.
    *
-   * @param size The width and height of the board. Must be odd and between 3 and 15.
-   * @throws IllegalArgumentException If the size is even or out of the [3, 15] range.
+   * @param size Must be odd between 3 and 15.
    */
   public Board(final int size) {
     if (size < 3 || size > 15 || size % 2 == 0) {
@@ -97,10 +96,10 @@ public class Board {
   }
 
   /**
-   * Checks if a given position is within the board's boundaries.
+   * Checks board boundaries.
    *
-   * @param position The position to check.
-   * @return {@code true} if the position is inside the board, {@code false} otherwise.
+   * @param position coordinate to check
+   * @return true if inside
    */
   public boolean isInside(final Position position) {
     final int posX = position.getX();
@@ -127,12 +126,11 @@ public class Board {
   }
 
   /**
-   * Checks if placing a wall at the specified position would cause a collision. This includes
-   * overlapping with existing walls or crossing through another wall.
+   * Checks wall collision.
    *
-   * @param targetPos The top-left position for the new wall.
-   * @param orientation The orientation of the new wall.
-   * @return {@code true} if there is a collision, {@code false} if the placement is clear.
+   * @param targetPos top-left position
+   * @param orientation horizontal/vertical
+   * @return true if collision
    */
   public boolean isWallCollision(final Position targetPos, final Orientation orientation) {
     final int posX = targetPos.getX();

@@ -2,12 +2,12 @@ package fr.bordeaux.ai.random;
 
 import fr.bordeaux.ai.base.AiPlayer;
 import fr.bordeaux.core.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
-/** Implementation of an AI player that selects moves randomly from the list of legal moves. */
+/** Implementation of an AI player that selects a random legal move */
 public class RandomPlayer extends AiPlayer {
 
   /**
@@ -29,9 +29,9 @@ public class RandomPlayer extends AiPlayer {
    */
   @Override
   public Move getNextMove(final GameState state) {
-    List<Move> l = state.generateLegalMoves();
-    Random random = new Random();
-    return l.get(random.nextInt(l.size()));
+    final List<Move> moveList = state.generateLegalMoves();
+    final Random random = new Random();
+    return moveList.get(random.nextInt(moveList.size()));
   }
 
   /**
@@ -60,15 +60,7 @@ public class RandomPlayer extends AiPlayer {
         this.getColor());
   }
 
-  /**
-   * Private constructor used for internal state management and cloning.
-   *
-   * @param name The name of the player.
-   * @param current The current position of the player.
-   * @param start The initial starting position.
-   * @param walls The number of remaining walls.
-   * @param score The current score of the player.
-   */
+  /** Internal constructor for state management and cloning. */
   private RandomPlayer(
       final String name,
       final Position current,
@@ -96,7 +88,7 @@ public class RandomPlayer extends AiPlayer {
    */
   @Override
   public Map<String, Object> getSettings() {
-    Map<String, Object> settings = new HashMap<>();
+    final Map<String, Object> settings = new ConcurrentHashMap<>();
     settings.put("mode", "random");
     return settings;
   }

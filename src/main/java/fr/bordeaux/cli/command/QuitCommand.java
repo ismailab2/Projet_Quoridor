@@ -4,10 +4,7 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.util.Logger;
 import org.jline.reader.LineReader;
 
-/**
- * Command that exits the CLI application. Before quitting, the user is prompted to optionally save
- * the current game.
- */
+/** CLI command that exits the application after a save prompt. */
 public class QuitCommand implements Command {
   /** Reader used for user interaction. */
   private final LineReader reader;
@@ -18,10 +15,10 @@ public class QuitCommand implements Command {
   /**
    * Creates a QuitCommand using the provided line reader to interact with the user.
    *
-   * @param r the LineReader used to read user input
+   * @param reader the LineReader used to read user input
    */
-  public QuitCommand(LineReader r) {
-    reader = r;
+  public QuitCommand(final LineReader reader) {
+    this.reader = reader;
   }
 
   /** Creates a QuitCommand without a predefined reader. */
@@ -30,28 +27,28 @@ public class QuitCommand implements Command {
   }
 
   /**
-   * Executes the quit command. Asks the user whether they want to save the game before exiting.
+   * Executes quit. Asks to save before exiting.
    *
    * @param engine the current game engine
    * @return the current game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     try {
-      String response = reader.readLine("Save before quitting? [y/N] >> ");
+      final String response = reader.readLine("Save before quitting? [y/N] >> ");
       if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes")) {
-        String path = reader.readLine("File path >> ");
+        final String path = reader.readLine("File path >> ");
         new SaveCommand(path).execute(engine);
       }
       LOGGER.info("Exiting Quoridor...");
       return engine;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOGGER.error("Error during quit process", e);
     }
     return engine;
   }
 
-  /** Displays help information about the quit command, including its usage and behavior. */
+  /** Displays help information for the quit command. */
   @Override
   public void helpText() {
     LOGGER.info("=== QUIT Command ===\n");

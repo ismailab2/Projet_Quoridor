@@ -2,28 +2,16 @@ package fr.bordeaux.util;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Utility class for time format conversion in the Quoridor game. Provides methods to transform
- * millisecond values into human-readable strings adapted for game timers (Blitz mode).
- */
+/** Time conversion utility for Quoridor game timers. */
 public final class TimeConvertor {
 
   /** Private constructor to prevent instantiation of this utility class. */
   private TimeConvertor() {}
 
   /**
-   * Formats a duration in milliseconds into a specific string format based on the remaining time. *
+   * Formats duration in milliseconds to "MM : SS" or "SS : ms".
    *
-   * <p>The formatting rules are as follows:
-   *
-   * <ul>
-   *   <li>If {@code timeMilli <= 0}: returns "00:00".
-   *   <li>If the duration is less than a minute: returns "Seconds : Milliseconds" (e.g., "45 :
-   *       12").
-   *   <li>If the duration is one minute or more: returns "Minutes : Seconds" (e.g., "12 : 34").
-   * </ul>
-   *
-   * @param timeMilli the duration to format in milliseconds.
+   * @param timeMilli duration to format in milliseconds.
    * @return a formatted {@link String} representing the time.
    */
   public static String formatTime(final long timeMilli) {

@@ -8,12 +8,7 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * This class sends a UDP broadcast message every 10 seconds containing the server name and its TCP
- * port. This allows clients on the local network to discover available game servers.
- *
- * <p>The broadcast is sent to the address 255.255.255.255 on port 12346.
- */
+/** Sends UDP broadcast every 10s for server discovery on port 12346. */
 public class ServerBroadcaster implements Runnable {
 
   /** Name of the server to broadcast */
@@ -54,12 +49,7 @@ public class ServerBroadcaster implements Runnable {
     this.delayMs = delayMs;
   }
 
-  /**
-   * Opens a UDP socket and continuously sends broadcast packets containing the server information
-   * every 10 seconds.
-   *
-   * <p>The loop stops when {@link #stop()} is called.
-   */
+  /** Broadcasts server info via UDP every 10s. Stops on stop(). */
   @Override
   public void run() {
     try (DatagramSocket socket = new DatagramSocket()) {
@@ -85,9 +75,7 @@ public class ServerBroadcaster implements Runnable {
     }
   }
 
-  /**
-   * Sets the running flag to false, causing the thread to exit gracefully on the next iteration.
-   */
+  /** Sets running flag to false for graceful exit. */
   public void stop() {
     running.set(false);
   }

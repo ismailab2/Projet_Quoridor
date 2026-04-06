@@ -61,12 +61,12 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   public NeuralNetworkEvaluator() throws IOException {
     initGraph();
 
-    try (InputStream is =
+    try (InputStream inputStream =
         NeuralNetworkEvaluator.class.getResourceAsStream("/nnmodels/default_quoridor_model.bin")) {
-      if (is == null) {
+      if (inputStream == null) {
         new NeuralNetworkTrainer().trainModel(this, DEFAULT_GAMES, DEFAULT_EPOCHS);
       } else {
-        NeuralNetworkTrainer.loadModel(this, is);
+        NeuralNetworkTrainer.loadModel(this, inputStream);
       }
     }
   }
@@ -91,8 +91,8 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
    */
   public NeuralNetworkEvaluator(final String path) throws IOException {
     initGraph();
-    try (InputStream is = Files.newInputStream(Paths.get(path))) {
-      NeuralNetworkTrainer.loadModel(this, is);
+    try (InputStream inputStream = Files.newInputStream(Paths.get(path))) {
+      NeuralNetworkTrainer.loadModel(this, inputStream);
     }
   }
 

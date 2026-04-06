@@ -13,24 +13,32 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
-/**
- * Dispatches actions from the GUI to the GameEngine or other dialogs.
- *
- * <p>This class serves as a bridge between GUI events (menu items, shortcuts) and the underlying
- * game logic or dialogs. Each action corresponds to a method in the GameEngine or a GUI dialog.
- */
+/** Bridge between GUI events and underlying game logic or dialogs. */
 public class ActionDispatcher {
 
   /** Reference to the game engine to execute game-related actions */
   private final GameEngine engine;
 
+  /** The file handler for loading and saving games. */
   private final FileHandler fileHandler;
 
+  /** The configuration manager for game settings. */
   private final ConfigManager configManager = ConfigManager.getInstance();
 
+  /** The server instance for multiplayer games. */
   private final MultiGameServer multiServer = new MultiGameServer();
 
+  /** The client instance for multiplayer games. */
   private final GameClient networkClient = new GameClient();
+
+  /** Default TCP port for network games. */
+  private static final int DEFAULT_PORT = 12_345;
+
+  /** Number of milliseconds in a second. */
+  private static final long MS_PER_SEC = 1000L;
+
+  /** Number of seconds in a minute. */
+  private static final int SEC_PER_MIN = 60;
 
   /**
    * Constructs an ActionDispatcher with a given GameEngine.
@@ -44,48 +52,44 @@ public class ActionDispatcher {
   }
 
   /**
-   * Dispatches a given action to the appropriate handler.
+   * Dispatches an action. May call GameEngine (new, load, save, undo, redo, pause, hint), show
+   * dialogs, or exit.
    *
-   * <p>Depending on the action type, this method may: - Call GameEngine methods (newGame, loadGame,
-   * saveGame, undo, redo, pause, hint) - Show GUI dialogs (configuration, info) - Exit the
-   * application
-   *
-   * @param action The Action enum representing the user command.
-   * @throws IOException If an I/O error occurs during command execution.
+   * @param action The Action representing the user command.
+   * @throws IOException If an I/O error occurs.
    */
   public void dispatch(final Action action) throws IOException {
     switch (action) {
-      case NEW_GAME -> {
-        final int size = configManager.getInt("board-size", 9);
-        final List<Player> players = PlayerFactory.createPlayers(configManager);
-        final boolean isBlitz = configManager.getBoolean("blitz", false);
-        final Long timeout;
-        if (isBlitz) {
-          final int timeoutMinutes = configManager.getInt("timeout", 30);
-          timeout = timeoutMinutes * 60 * 1000L;
-        } else {
-          timeout = null;
-        }
-        engine.newGame(size, players, timeout);
-      }
-      case LOAD_GAME -> {
-        final String path = fileHandler.chooseLoadFile();
-        if (path != null) {
-          engine.loadGame(path);
-        }
-      }
-      case SAVE_GAME -> {
-        final String path = fileHandler.chooseSaveFile();
-        if (path != null) {
-          engine.saveGame(path);
-        }
-      }
+      case NEW_GAME -> handleNewGame();
+      case LOAD_GAME -> handleLoadGame();
+      case SAVE_GAME -> handleSaveGame();
       case CONFIGURATION -> ConfigDialog.show();
       case INFO -> InfoDialog.show();
       case REDO -> engine.redo();
       case UNDO -> engine.undo();
       case PAUSE -> engine.pause();
       case HINT -> engine.hint();
+      case QUIT -> Platform.exit();
+      default -> handleNetworkAction(action);
+    }
+  }
+
+  private void handleLoadGame() throws IOException {
+    final String path = fileHandler.chooseLoadFile();
+    if (path != null) {
+      engine.loadGame(path);
+    }
+  }
+
+  private void handleSaveGame() throws IOException {
+    final String path = fileHandler.chooseSaveFile();
+    if (path != null) {
+      engine.saveGame(path);
+    }
+  }
+
+  private void handleNetworkAction(final Action action) {
+    switch (action) {
       case START_SERVER -> startServer();
       case STOP_SERVER -> {
         multiServer.stop();
@@ -106,24 +110,39 @@ public class ActionDispatcher {
       case SET_NETWORK_NAME -> setNetworkName();
       case PING_SERVER -> networkClient.ping();
       case QUIT_SERVER -> networkClient.quit();
-      case QUIT -> Platform.exit();
       default -> {}
     }
   }
 
+  private void handleNewGame() {
+    final int size = configManager.getInt("board-size", 9);
+    final List<Player> players = PlayerFactory.createPlayers(configManager);
+    final boolean isBlitz = configManager.getBoolean("blitz", false);
+    final Long timeout;
+    if (isBlitz) {
+      final int timeoutMinutes = configManager.getInt("timeout", 30);
+      timeout = (long) timeoutMinutes * SEC_PER_MIN * MS_PER_SEC;
+    } else {
+      timeout = null;
+    }
+    engine.newGame(size, players, timeout);
+  }
+
   private void startServer() {
-    String input = promptUser("Start Server", "Server Port", "Enter the TCP port:", "12345");
+    final String input =
+        promptUser(
+            "Start Server", "Server Port", "Enter the TCP port:", String.valueOf(DEFAULT_PORT));
     if (input == null) {
       return;
     }
 
-    int port = Integer.parseInt(input.trim());
+    final int port = Integer.parseInt(input.trim());
     multiServer.start(port);
     showMessage("Network", "Server", "Server started on port " + port + ".");
   }
 
   private void createNetworkGame() {
-    String input =
+    final String input =
         promptUser(
             "New Network Game",
             "Player IDs",
@@ -133,13 +152,14 @@ public class ActionDispatcher {
       return;
     }
 
-    String[] ids = input.trim().split("\\s+");
+    final String[] ids = input.trim().split("\\s+");
     showMessage("Network", "New Game", multiServer.createGame(ids));
   }
 
   private void joinServer() {
     final String input =
-        promptUser("Join Server", "Host and Port", "Enter host[:port]:", "localhost:12345");
+        promptUser(
+            "Join Server", "Host and Port", "Enter host[:port]:", "localhost:" + DEFAULT_PORT);
     if (input == null || input.isBlank()) {
       return;
     }
@@ -150,7 +170,7 @@ public class ActionDispatcher {
     if (hostPort.length > 1) {
       port = Integer.parseInt(hostPort[1]);
     } else {
-      port = 12345;
+      port = DEFAULT_PORT;
     }
 
     if (networkClient.join(host, port)) {
@@ -161,7 +181,8 @@ public class ActionDispatcher {
   }
 
   private void setNetworkName() {
-    String input = promptUser("Set Player Name", "Player Name", "Enter your player name:", "");
+    final String input =
+        promptUser("Set Player Name", "Player Name", "Enter your player name:", "");
     if (input == null || input.isBlank()) {
       return;
     }
@@ -171,20 +192,21 @@ public class ActionDispatcher {
   }
 
   /**
-   * Prompts the user for a text input using a JavaFX TextInputDialog.
+   * Prompts user for text input via a dialog.
    *
-   * @param title the title of the dialog
-   * @param header the header text of the dialog
-   * @param content the content text of the dialog
-   * @param defaultValue the default value to display in the text field
-   * @return the user input as a String, or null if the user cancelled
+   * @param title dialog title
+   * @param header header text
+   * @param content content text
+   * @param defaultValue default value
+   * @return user input, or null if cancelled
    */
-  protected String promptUser(String title, String header, String content, String defaultValue) {
-    TextInputDialog dialog = new TextInputDialog(defaultValue);
+  protected String promptUser(
+      final String title, final String header, final String content, final String defaultValue) {
+    final TextInputDialog dialog = new TextInputDialog(defaultValue);
     dialog.setTitle(title);
     dialog.setHeaderText(header);
     dialog.setContentText(content);
-    Optional<String> result = dialog.showAndWait();
+    final Optional<String> result = dialog.showAndWait();
     return result.orElse(null);
   }
 
@@ -195,8 +217,8 @@ public class ActionDispatcher {
    * @param header the header text of the alert
    * @param content the content text (description) of the alert
    */
-  protected void showMessage(String title, String header, String content) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+  protected void showMessage(final String title, final String header, final String content) {
+    final Alert alert = new Alert(Alert.AlertType.INFORMATION);
     alert.setTitle(title);
     alert.setHeaderText(header);
     alert.setContentText(content);

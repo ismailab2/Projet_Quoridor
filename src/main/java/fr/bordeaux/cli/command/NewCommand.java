@@ -15,21 +15,18 @@ import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 
 /**
- * Command that starts a new game from the CLI. It allows configuring the board size and the number
- * of players, and interactively asks for the type and name of each player.
+ * CLI command that starts a new game, configuring board size and players. of players, and
+ * interactively asks for the type and name of each player.
  */
 public class NewCommand implements Command {
 
   /** Command entered by the user */
   private String[] tokens;
 
-  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
+  /** JLine terminal for system-level input and output. */
   private Terminal terminal;
 
-  /**
-   * The line reader responsible for text editing, history management, and tab-completion
-   * interaction.
-   */
+  /** Line reader for text editing and tab-completion. interaction. */
   private LineReader reader;
 
   /** Logger to display informations */
@@ -38,24 +35,24 @@ public class NewCommand implements Command {
   /**
    * Creates a NewCommand with the given CLI tokens, terminal and line reader.
    *
-   * @param t the tokens entered by the user
+   * @param tokens the tokens entered by the user
    * @param term the terminal used for input/output
-   * @param r the line reader used to interact with the user
+   * @param reader the line reader used to interact with the user
    */
-  public NewCommand(final String[] t, final Terminal term, final LineReader r) {
-    this.tokens = t;
+  public NewCommand(final String[] tokens, final Terminal term, final LineReader reader) {
+    this.tokens = tokens;
     this.terminal = term;
-    this.reader = r;
+    this.reader = reader;
   }
 
   /**
    * Creates a NewCommand with default tokens and the provided terminal and reader.
    *
-   * @param t the terminal used for input/output
-   * @param r the line reader used to read user input
+   * @param terminal the terminal used for input/output
+   * @param reader the line reader used to read user input
    */
-  public NewCommand(final Terminal t, final LineReader r) {
-    this(new String[] {"9", "2"}, t, r);
+  public NewCommand(final Terminal terminal, final LineReader reader) {
+    this(new String[] {"9", "2"}, terminal, reader);
   }
 
   /** Creates an empty NewCommand. Used mainly when only help information is needed. */
@@ -64,9 +61,8 @@ public class NewCommand implements Command {
   }
 
   /**
-   * Executes the new command. Initializes a new game engine with a board and players according to
-   * the provided tokens. If necessary, the user is prompted to choose player types and names
-   * interactively.
+   * Executes new command, initializing the game engine with board and players. Prompts for player
+   * types and names if needed. interactively.
    *
    * @param engine the current game engine
    * @return a new GameEngine instance representing the new game
@@ -192,9 +188,7 @@ public class NewCommand implements Command {
     return result;
   }
 
-  /**
-   * Displays help information about the new command, including its usage, arguments and examples.
-   */
+  /** Displays help information for the new command. */
   @Override
   public void helpText() {
     LOGGER.info("=== NEW Command ===\n");

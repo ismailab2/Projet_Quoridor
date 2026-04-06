@@ -3,16 +3,10 @@ package fr.bordeaux.core;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * RuleChecker checks if moves (pawn moves or wall placements) are valid according to Quoridor
- * rules.
- */
+/** Validates Quoridor moves (pawn movements or wall placements). */
 public final class RuleChecker {
 
-  /**
-   * Private constructor to prevent instantiation of this utility class. Throws an AssertionError if
-   * called internally.
-   */
+  /** Private constructor to prevent instantiation. */
   private RuleChecker() {
     throw new AssertionError("Utility class should not be instantiated");
   }
@@ -35,9 +29,7 @@ public final class RuleChecker {
   }
 
   /**
-   * Specifically checks if a jumping move is possible. A jump occurs when an opponent's pawn is
-   * adjacent and the cell behind it is free, or diagonal cells are reachable if the back is
-   * blocked.
+   * Checks if a jumping move is possible over an opponent.
    *
    * @param state The current {@link GameState}.
    * @param move The {@link Move} containing the target jump position.
@@ -71,16 +63,7 @@ public final class RuleChecker {
     return result;
   }
 
-  /**
-   * Checks if a straight jump over an opponent is possible and matches the target position.
-   *
-   * @param board current board
-   * @param from current player position
-   * @param op opponent position
-   * @param target jump target position
-   * @param fromId board ID of current player
-   * @return true if a straight jump is possible and matches target
-   */
+  /** Checks if a straight jump over an opponent is possible. */
   private static boolean checkStraightJump(
       final Board board,
       final Position from,
@@ -104,16 +87,7 @@ public final class RuleChecker {
     return possible;
   }
 
-  /**
-   * Checks if a diagonal jump is possible given that the straight jump is blocked.
-   *
-   * @param board current board
-   * @param from current player position
-   * @param op opponent position
-   * @param target jump target position
-   * @param fromId board ID of current player
-   * @return true if a diagonal jump is possible and matches target
-   */
+  /** Checks if a diagonal jump is possible if straight is blocked. */
   private static boolean checkDiagonalJump(
       final Board board,
       final Position from,
@@ -151,8 +125,7 @@ public final class RuleChecker {
   }
 
   /**
-   * Validates a pawn movement. Checks for boundaries, collisions with other players, and
-   * connectivity through the board graph.
+   * Validates a pawn movement (boundaries, collisions, graph).
    *
    * @param state The current game state.
    * @param move The pawn move to check.
@@ -205,7 +178,7 @@ public final class RuleChecker {
   }
 
   /**
-   * Computes potential diagonal jump positions when a straight jump is blocked.
+   * Computes diagonal jump positions when a straight jump is blocked.
    *
    * @param from The current player's position.
    * @param op The opponent's position.
@@ -231,8 +204,7 @@ public final class RuleChecker {
   }
 
   /**
-   * Validates a wall placement move. Checks for remaining walls, collisions with existing walls,
-   * and path connectivity.
+   * Validates a wall placement (remaining, collisions, path).
    *
    * @param state The current game state.
    * @param move The wall placement move.
@@ -253,8 +225,7 @@ public final class RuleChecker {
   }
 
   /**
-   * Temporarily applies a wall move to verify if all players can still reach their respective goals
-   * using a BFS algorithm.
+   * Verifies if all players can still reach their goals via BFS.
    *
    * @param state The current game state.
    * @param move The wall move to test.

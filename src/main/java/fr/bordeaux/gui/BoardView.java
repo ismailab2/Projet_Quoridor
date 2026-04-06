@@ -14,9 +14,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 /**
- * Graphical representation of the Quoridor board. Responsible for drawing cells, pawns, walls and
- * handling board interactions. Extends {@link GridPane} to organize cells in a grid layout. The
- * board redraws itself automatically when the window is resized or the game state changes.
+ * Graphical Quoridor board. Draws cells, pawns, walls and handles interactions. Board redraws
+ * automatically on resize or game state change.
  */
 public final class BoardView extends GridPane {
 
@@ -42,10 +41,9 @@ public final class BoardView extends GridPane {
   private static final Color PREVIEW_COLOR = Color.rgb(139, 69, 19, PREVIEW_OPACITY);
 
   /**
-   * Creates a board view linked to the given game engine. Registers listeners on width, height and
-   * game state to trigger automatic redraws.
+   * Creates board view.
    *
-   * @param engine the game engine used to read and update the game state
+   * @param engine game engine
    */
   public BoardView(final GameEngine engine) {
     super();
@@ -70,10 +68,7 @@ public final class BoardView extends GridPane {
     drawBoard();
   }
 
-  /**
-   * Redraws the complete board from scratch. Clears all children and constraints, then rebuilds
-   * cells, wall slots, placed walls, player pawns and the current player highlight in order.
-   */
+  /** Redraws board. Clears children/constraints and rebuilds all components. */
   public void drawBoard() {
     getChildren().clear();
     getColumnConstraints().clear();
@@ -111,12 +106,7 @@ public final class BoardView extends GridPane {
     highlightCurrentPlayer();
   }
 
-  /**
-   * Draws all walls currently placed on the board by inspecting missing edges in the graph. A
-   * horizontal wall is detected when edges u1-v1 and u2-v2 are both absent. A vertical wall is
-   * detected when edges u1-u2 and v1-v2 are both absent. Walls are rendered as brown rounded
-   * rectangles.
-   */
+  /** Draws placed walls by checking missing graph edges. Rendered as brown rectangles. */
   public void drawWalls() {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
@@ -155,10 +145,7 @@ public final class BoardView extends GridPane {
     }
   }
 
-  /**
-   * Draws all player pawns at their current positions on the board. Player 0 is drawn in red, all
-   * other players in black. Each pawn listens for a left click to highlight accessible cells.
-   */
+  /** Draws player pawns. Pawns listen for left click to show highlights. */
   public void drawPlayers() {
     final int cellSize = getCellSize();
     final GameState state = engine.getState();
@@ -198,10 +185,7 @@ public final class BoardView extends GridPane {
     }
   }
 
-  /**
-   * Applies a pulsing {@link FadeTransition} animation to the pawn of the current player to
-   * visually indicate whose turn it is.
-   */
+  /** Poulse animation for the current player's pawn. */
   public void highlightCurrentPlayer() {
     final GameState state = engine.getState();
     if (state.isGameOver()) {
@@ -231,11 +215,9 @@ public final class BoardView extends GridPane {
   }
 
   /**
-   * Highlights in green all cells reachable by the given player on their current turn. Does nothing
-   * if the given player is not the current player. Resets all cells to their default beige color
-   * before applying highlights.
+   * Highlights cells reachable by player.
    *
-   * @param player the player whose legal moves should be highlighted
+   * @param player player to check
    */
   public void highlightAccessibleCells(final Player player) {
     final GameState state = engine.getState();
@@ -256,11 +238,10 @@ public final class BoardView extends GridPane {
   }
 
   /**
-   * Handles a left click on a board cell by attempting to move the current player's pawn to the
-   * clicked position. Redraws the board if the move is accepted by the engine.
+   * Moves pawn on left click.
    *
-   * @param row the row index of the clicked cell
-   * @param col the column index of the clicked cell
+   * @param row row index
+   * @param col column index
    */
   public void handleCellClick(final int row, final int col) {
     final GameState state = engine.getState();
@@ -277,13 +258,11 @@ public final class BoardView extends GridPane {
   }
 
   /**
-   * Handles a non-primary click on a board cell by attempting to place a wall. A right click places
-   * a horizontal wall; any other button places a vertical wall. The wall is only placed if it
-   * passes the rule checker validation.
+   * Places wall on right/other click.
    *
-   * @param row the row index of the clicked cell
-   * @param col the column index of the clicked cell
-   * @param button the mouse button that was clicked
+   * @param row row index
+   * @param col column index
+   * @param button clicked button
    */
   public void handleWallClick(final int row, final int col, final MouseButton button) {
     final GameState state = engine.getState();
@@ -299,11 +278,7 @@ public final class BoardView extends GridPane {
     }
   }
 
-  /**
-   * Creates and places invisible interactive rectangles (slots) between cells. Each slot detects
-   * mouse hover to show a wall preview and right clicks to place walls. Slots are placed on all
-   * inner borders of the board (size - 1 rows and columns).
-   */
+  /** Creates interactive wall slots between cells. */
   private void drawWallSlots() {
     final int cellSize = getCellSize();
     final int wallThickness = getWallThickness();
@@ -327,14 +302,12 @@ public final class BoardView extends GridPane {
   }
 
   /**
-   * Attaches mouse event handlers to a wall slot rectangle. On hover, the slot becomes
-   * semi-transparent brown as a placement preview. On right click, a wall move is submitted to the
-   * engine and the board is redrawn if accepted.
+   * Sets wall slot handlers (hover, click).
    *
-   * @param slot the rectangle acting as the interactive wall slot
-   * @param row the row index of the top-left cell of the potential wall
-   * @param col the column index of the top-left cell of the potential wall
-   * @param orientation the orientation of the wall (HORIZONTAL or VERTICAL)
+   * @param slot interactive slot
+   * @param row row index
+   * @param col column index
+   * @param orientation wall orientation
    */
   private void setupWallInteractions(
       final Rectangle slot, final int row, final int col, final Orientation orientation) {
@@ -367,11 +340,7 @@ public final class BoardView extends GridPane {
   }
 
   /**
-   * Calculates the pixel size of a single cell based on the current component dimensions. Uses the
-   * smaller of width and height to keep the board square. Returns 100 as a default value before the
-   * first render when dimensions are not yet known.
-   *
-   * @return the cell size in pixels
+   * @return cell size in pixels.
    */
   private int getCellSize() {
     final GameState state = engine.getState();
@@ -385,10 +354,7 @@ public final class BoardView extends GridPane {
   }
 
   /**
-   * Calculates the wall thickness in pixels proportional to the cell size. Enforces a minimum
-   * thickness of 4 pixels to remain visible at small sizes.
-   *
-   * @return the wall thickness in pixels
+   * @return wall thickness in pixels.
    */
   private int getWallThickness() {
     return Math.max(MIN_WALL_THICKNESS, getCellSize() / WALL_THICKNESS_RATIO);

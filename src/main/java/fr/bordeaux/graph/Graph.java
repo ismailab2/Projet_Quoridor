@@ -14,8 +14,8 @@ public class Graph {
    *
    * @param adjacencyList adjacency list representing the graph
    */
-  public Graph(Map<Integer, List<Integer>> adjacencyList) {
-    this.adjacencyList = adjacencyList;
+  public Graph(final Map<Integer, List<Integer>> adjacencyList) {
+    this.adjacencyList = new java.util.concurrent.ConcurrentHashMap<>(adjacencyList);
   }
 
   /**
@@ -24,22 +24,22 @@ public class Graph {
    * @param vertex identifier of the vertex
    * @return list of adjacent vertices
    */
-  public List<Integer> getNeighbors(int vertex) {
+  public List<Integer> getNeighbors(final int vertex) {
     return adjacencyList.get(vertex);
   }
 
   /**
    * Removes the undirected edge between two vertices.
    *
-   * @param u first vertex
-   * @param v second vertex
+   * @param vertexU first vertex
+   * @param vertexV second vertex
    */
-  public void removeEdge(int u, int v) {
-    if (adjacencyList.containsKey(u)) {
-      adjacencyList.get(u).remove(Integer.valueOf(v));
+  public void removeEdge(final int vertexU, final int vertexV) {
+    if (adjacencyList.containsKey(vertexU)) {
+      adjacencyList.get(vertexU).remove(Integer.valueOf(vertexV));
     }
-    if (adjacencyList.containsKey(v)) {
-      adjacencyList.get(v).remove(Integer.valueOf(u));
+    if (adjacencyList.containsKey(vertexV)) {
+      adjacencyList.get(vertexV).remove(Integer.valueOf(vertexU));
     }
   }
 
@@ -50,66 +50,68 @@ public class Graph {
    * @param targetId second vertex
    * @return true if an edge exists, false otherwise
    */
-  public boolean hasEdge(int currentId, int targetId) {
+  public boolean hasEdge(final int currentId, final int targetId) {
     return adjacencyList.get(currentId).contains(targetId);
   }
 
   /**
    * Adds an undirected edge between two vertices.
    *
-   * @param u first vertex
-   * @param v second vertex
+   * @param vertexU first vertex
+   * @param vertexV second vertex
    */
-  public void addEdge(int u, int v) {
-    if (!adjacencyList.get(u).contains(v)) {
-      adjacencyList.get(u).add(v);
+  public void addEdge(final int vertexU, final int vertexV) {
+    if (!adjacencyList.get(vertexU).contains(vertexV)) {
+      adjacencyList.get(vertexU).add(vertexV);
     }
-    if (!adjacencyList.get(v).contains(u)) {
-      adjacencyList.get(v).add(u);
+    if (!adjacencyList.get(vertexV).contains(vertexU)) {
+      adjacencyList.get(vertexV).add(vertexU);
     }
   }
 
   /**
-   * Finds the shortest path from a starting vertex to any vertex satisfying the goal condition.
-   * This method implements the Breadth-First Search (BFS) algorithm, which guarantees finding the
-   * shortest path in an unweighted graph. It is used to verify if a player can still reach their
-   * winning side and to calculate the necessary moves.
+   * Finds the shortest path to goal using BFS.
    *
-   * @param startId The ID of the starting vertex (typically the player's current position).
-   * @param isGoal A predicate defining the victory condition (e.g., reaching the opposite
-   *     baseline).
-   * @return An ordered List of vertex IDs representing the path from start to goal (inclusive).
-   *     Returns an empty list if the destination is unreachable (e.g., player is blocked by walls).
+   * @param startId starting vertex ID
+   * @param isGoal victory condition predicate
+   * @return path from start to goal, or empty if unreachable
    */
   public List<Integer> findPathBFS(final int startId, final Predicate<Integer> isGoal) {
-    Queue<Integer> queue = new LinkedList<>();
+    final Queue<Integer> queue = new LinkedList<>();
     queue.add(startId);
 
-    Map<Integer, Integer> parentMap = new HashMap<>();
+    final Map<Integer, Integer> parentMap = new HashMap<>();
     parentMap.put(startId, null);
 
+    List<Integer> result = new ArrayList<>();
     while (!queue.isEmpty()) {
-      int current = queue.poll();
+      final int current = queue.poll();
 
       if (isGoal.test(current)) {
-        List<Integer> path = new ArrayList<>();
-        Integer parentId = current;
-        while (parentId != null) {
-          path.add(parentId);
-          parentId = parentMap.get(parentId);
-        }
-        Collections.reverse(path);
-        return path;
+        result = reconstructPath(parentMap, current);
+        break;
       }
 
-      for (int neighbor : this.getNeighbors(current)) {
+      for (final int neighbor : this.getNeighbors(current)) {
         if (!parentMap.containsKey(neighbor)) {
           parentMap.put(neighbor, current);
           queue.add(neighbor);
         }
       }
     }
-    return new ArrayList<>();
+    return result;
+  }
+
+  /** Reconstructs path from start to goal using parentMap. */
+  private List<Integer> reconstructPath(final Map<Integer, Integer> parentMap, final int goalId) {
+    final List<Integer> path = new ArrayList<>();
+    Integer current = goalId;
+    while (current != null) {
+      path.add(current);
+      current = parentMap.get(current);
+    }
+    Collections.reverse(path);
+    return path;
   }
 
   /**
@@ -118,12 +120,11 @@ public class Graph {
    * @return a new graph containing the same vertices and edges
    */
   public Graph copy() {
-    Map<Integer, List<Integer>> newAdjacencyList = new HashMap<>();
+    final Map<Integer, List<Integer>> newAdj = new java.util.concurrent.ConcurrentHashMap<>();
 
-    for (Map.Entry<Integer, List<Integer>> entry : this.adjacencyList.entrySet()) {
-      List<Integer> newList = new ArrayList<>(entry.getValue());
-      newAdjacencyList.put(entry.getKey(), newList);
+    for (final Map.Entry<Integer, List<Integer>> entry : this.adjacencyList.entrySet()) {
+      newAdj.put(entry.getKey(), new ArrayList<>(entry.getValue()));
     }
-    return new Graph(newAdjacencyList);
+    return new Graph(newAdj);
   }
 }
