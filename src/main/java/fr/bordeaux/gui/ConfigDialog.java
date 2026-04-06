@@ -36,8 +36,9 @@ public final class ConfigDialog {
       Label actionLabel = new Label(action.name());
 
       KeyCombination currentShortcut = ShortcutManager.getInstance().getShortcut(action);
+      String shortcutName = currentShortcut != null ? currentShortcut.getName() : "None";
 
-      Button keyButton = new Button(currentShortcut.getName());
+      Button keyButton = new Button(shortcutName);
 
       keyButton.setFocusTraversable(true);
 
