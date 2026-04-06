@@ -124,7 +124,7 @@ public class OptionsParserTest {
   @Test
   public void testTimeMissingValue() {
     assertThrows(
-        IllegalArgumentException.class, () -> OptionsParser.parse(new String[] {"-t"}, config));
+        IllegalArgumentException.class, () -> OptionsParser.parse(new String[] {"-b ", "-t"}, config));
   }
 
   @Test
@@ -148,25 +148,20 @@ public class OptionsParserTest {
 
   @Test
   public void testAiDefaultPlayer2() {
-    OptionsParser.parse(new String[] {"-a", "other"}, config);
-    assertEquals("true", config.getOption("ai2", "false"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> OptionsParser.parse(new String[] {"-a", "other"}, config));
   }
 
   @Test
   public void testAiNoNextArg() {
-    OptionsParser.parse(new String[] {"-a"}, config);
-    assertEquals("true", config.getOption("ai2", "false"));
-  }
-
-  @Test
-  public void testAiNextArgIsFlag() {
-    OptionsParser.parse(new String[] {"-a", "-v"}, config);
-    assertEquals("true", config.getOption("ai2", "false"));
+    assertThrows(
+        IllegalArgumentException.class, () -> OptionsParser.parse(new String[] {"-a"}, config));
   }
 
   @Test
   public void testAiModeAppliedToAi2() {
-    OptionsParser.parse(new String[] {"-a", "other", "--ai-mode", "minimax"}, config);
+    OptionsParser.parse(new String[] {"-a", "2", "--ai-mode", "minimax"}, config);
     assertEquals("minimax", config.getOption("ai2.mode", null));
   }
 

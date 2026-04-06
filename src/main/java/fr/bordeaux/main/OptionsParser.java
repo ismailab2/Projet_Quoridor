@@ -2,6 +2,8 @@ package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class interprets CLI arguments and configures the application accordingly. Supported options
@@ -92,19 +94,36 @@ public final class OptionsParser {
             config.setOption("ai2", "true");
           } else if ("blanc".equals(aiOption) || "1".equals(aiOption)) {
             config.setOption("ai1", "true");
-          } else {
+          } else if ("noir".equals(aiOption) || "2".equals(aiOption)) {
             // Default to Player 2
             config.setOption("ai2", "true");
+          } else {
+            throw new IllegalArgumentException(
+                "--ai must be equal to a value in : {blanc, noir, 1, 2, A, a}");
           }
         }
 
-        case "--ai-mode" -> applyAiOption(args[++i], "mode", config);
+        case "--ai-mode" -> {
+          checkAiString(
+              args[++i], "mode", new ArrayList<>(List.of("minimax", "mcts", "iterative")));
+          applyAiOption(args[i], "mode", config);
+        }
 
-        case "--ai-minimax-depth" -> applyAiOption(args[++i], "depth", config);
+        case "--ai-minimax-depth" -> {
+          checkAiInt(args[++i], "minimax-depth");
+          applyAiOption(args[i], "depth", config);
+        }
 
-        case "--ai-time" -> applyAiOption(args[++i], "time", config);
+        case "--ai-time" -> {
+          checkAiInt(args[++i], "time");
+          applyAiOption(args[i], "time", config);
+        }
 
-        case "--ai-minimax-scoring" -> applyAiOption(args[++i], "scoring", config);
+        case "--ai-minimax-scoring" -> {
+          checkAiString(
+              args[++i], "scoring", new ArrayList<>(List.of("simple", "intermediate", "advanced")));
+          applyAiOption(args[i], "scoring", config);
+        }
 
         case "--ai-mcts-selection" -> applyMctsOption(args[++i], config);
 
@@ -169,6 +188,48 @@ public final class OptionsParser {
     }
   }
 
+  /**
+   * Validates that a comma-separated string contains only positive integers.
+   *
+   * @param value The raw string to validate (e.g., "3,5").
+   * @param parameter The parameter name for the error message.
+   * @throws IllegalArgumentException If value is null or not a positive integer.
+   */
+  private static void checkAiInt(final String value, final String parameter) {
+    final String[] values = value.split(",");
+    if (values == null) {
+      throw new IllegalArgumentException("AI " + parameter + " require a number");
+    }
+    for (final String val : values) {
+      if (Integer.parseInt(val) <= 0) {
+        throw new IllegalArgumentException("--ai-" + parameter + " should be higher than 0");
+      }
+    }
+  }
+
+  /**
+   * Validates that a comma-separated string contains only allowed keywords.
+   *
+   * @param value The raw string to validate (e.g., "minimax,mcts,iterative").
+   * @param parameter The parameter name for the error message.
+   * @param acceptedMode List of permitted string values.
+   * @throws IllegalArgumentException If value is null or contains an invalid mode.
+   */
+  private static void checkAiString(
+      final String value, final String parameter, final List<String> accpetedMode) {
+    final String[] values = value.split(",");
+    if (values == null) {
+      throw new IllegalArgumentException(
+          "AI " + parameter + " require an argument in " + accpetedMode);
+    }
+    for (final String val : values) {
+      if (!accpetedMode.contains(val.toLowerCase())) {
+        throw new IllegalArgumentException(
+            "The only valid AI " + parameter + " are " + accpetedMode);
+      }
+    }
+  }
+
   /** Sets AI options only for players currently flagged as AI. */
   private static void applyAiOption(
       final String value, final String suffix, final ConfigManager config) {
@@ -222,9 +283,11 @@ public final class OptionsParser {
     final boolean blitz = config.getBoolean("blitz", false);
     if (!blitz) {
       logInfo("--time nécessite d'activer le mode blitz. Il a donc été ignoré.");
-    }
-    if (index < args.length) {
+    } else if (index < args.length) {
       final String value = args[index];
+      if (Integer.parseInt(value) <= 0) {
+        throw new IllegalArgumentException("--time should be higher than 0");
+      }
       config.setOption("timeout", value);
     } else {
       throw new IllegalArgumentException("--time requires a value");
