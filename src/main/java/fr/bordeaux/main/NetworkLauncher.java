@@ -52,7 +52,7 @@ public class NetworkLauncher implements AppLauncher {
         while (true) {
           try {
             Thread.sleep(1000);
-          } catch (InterruptedException e) {
+          } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             break;
           }
@@ -75,16 +75,16 @@ public class NetworkLauncher implements AppLauncher {
     System.out.println("hello NAME");
     System.out.println("move MOVE");
 
-    try (Scanner sc = new Scanner(System.in)) {
+    try (Scanner scanner = new Scanner(System.in)) {
       boolean running = true;
-      while (running && sc.hasNextLine()) {
+      while (running && scanner.hasNextLine()) {
         System.out.print("> ");
-        final String cmd = sc.nextLine();
+        final String cmd = scanner.nextLine();
 
         try {
           if (cmd.startsWith("server start")) {
-            final String[] p = cmd.split(" ");
-            final int port = (p.length > 2) ? Integer.parseInt(p[2]) : 12345;
+            final String[] parts = cmd.split(" ");
+            final int port = (parts.length > 2) ? Integer.parseInt(parts[2]) : 12345;
             multiServer.start(port);
           } else if (cmd.equals("server stop")) {
             multiServer.stop();
@@ -114,9 +114,9 @@ public class NetworkLauncher implements AppLauncher {
               continue;
             }
             final String target = joinParts[1];
-            final String[] hp = target.split(":");
-            final String host = hp[0];
-            final int port = hp.length > 1 ? Integer.parseInt(hp[1]) : 12345;
+            final String[] hostPort = target.split(":");
+            final String host = hostPort[0];
+            final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : 12345;
             final boolean success = client.join(host, port);
             if (!success) {
               System.out.println("Failed to connect to " + host + ":" + port);
@@ -139,8 +139,8 @@ public class NetworkLauncher implements AppLauncher {
           } else {
             System.out.println("Unknown command");
           }
-        } catch (Exception e) {
-          System.out.println("Error: " + e.getMessage());
+        } catch (final Exception exception) {
+          System.out.println("Error: " + exception.getMessage());
         }
       }
     }

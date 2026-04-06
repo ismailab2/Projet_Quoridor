@@ -7,6 +7,7 @@ import fr.bordeaux.ai.random.RandomPlayer;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Utility class used to load a game state from a save file. */
 public final class GameLoader {
@@ -265,21 +266,21 @@ public final class GameLoader {
     final int nextLine = currentLine + settings.size() + 1;
 
     final String mode = settings.get("mode");
-    final Player ai;
+    final Player aiPlayer;
     switch (mode) {
-      case "minimax" -> ai = createMinimax(name, pos, color, settings, false);
-      case "minimax-iterative-deepening" -> ai = createMinimax(name, pos, color, settings, true);
-      case "mcts" -> ai = createMcts(name, pos, color, settings);
-      case "random" -> ai = new RandomPlayer(name, pos, color);
+      case "minimax" -> aiPlayer = createMinimax(name, pos, color, settings, false);
+      case "minimax-iterative-deepening" -> aiPlayer = createMinimax(name, pos, color, settings, true);
+      case "mcts" -> aiPlayer = createMcts(name, pos, color, settings);
+      case "random" -> aiPlayer = new RandomPlayer(name, pos, color);
       default -> throw new IllegalArgumentException("Unknown AI Type : " + mode);
     }
-    ai.setRemainingTime(time);
-    return new PlayerAndLine(ai, nextLine);
+    aiPlayer.setRemainingTime(time);
+    return new PlayerAndLine(aiPlayer, nextLine);
   }
 
   private static Map<String, String> parseAiSettings(
       final List<String> lines, final int startLine) {
-    final Map<String, String> settings = new java.util.concurrent.ConcurrentHashMap<>();
+    final Map<String, String> settings = new ConcurrentHashMap<>();
     int lineRef = startLine + 1;
     final int targetIndex = Integer.parseInt(lines.get(lineRef).split("-")[1]);
     while (checkSameIndex(lines, lineRef, targetIndex)) {
@@ -322,8 +323,8 @@ public final class GameLoader {
     final boolean useNN = "ML".equals(settings.get("selection"));
     try {
       return new MctsPlayer(name, pos, reflexion, useNN, color);
-    } catch (final java.io.IOException e) {
-      throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
+    } catch (final IOException exception) {
+      throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", exception);
     }
   }
 
@@ -333,7 +334,8 @@ public final class GameLoader {
    * @param lines The list of strings representing the lines of the save file.
    * @param currentLine The index of the line to check.
    * @param index The index of a player
-   * @return {@code true} if the line has the same index player, {@code false} otherwise.
+   * @return {@code true} if the line has the same index player,
+   *         {@code false} otherwise.
    */
   private static boolean checkSameIndex(
       final List<String> lines, final int myLineRef, final int targetIndex) {
@@ -368,17 +370,17 @@ public final class GameLoader {
   }
 
   private static int handleModeSetting(
-      final GameEngine engine, final String key, final String value, final int currentNb) {
-    int nb = currentNb;
+      final GameEngine engine, final String key, final String value, final int currentPlayersCount) {
+    int playersCount = currentPlayersCount;
     switch (key) {
       case "verbose" -> engine.setVerbose(Boolean.parseBoolean(value));
       case "blitz" -> engine.setBlitz(Boolean.parseBoolean(value));
       case "constest" -> engine.setContest(Boolean.parseBoolean(value));
       case "debug" -> engine.setDebug(Boolean.parseBoolean(value));
-      case "nb-players" -> nb = Integer.parseInt(value);
+      case "nb-players" -> playersCount = Integer.parseInt(value);
       default -> {}
     }
-    return nb;
+    return playersCount;
   }
 
   private static void validatePlayerCount(final int expected, final int actual) {

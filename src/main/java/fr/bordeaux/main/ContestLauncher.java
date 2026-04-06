@@ -39,19 +39,19 @@ public final class ContestLauncher implements AppLauncher {
       final GameState state = GameLoader.loadGame(engine, filePath);
       final Move best = computeBestMove(state, config);
       System.out.println(moveToString(best));
-    } catch (final IOException e) {
-      System.err.println("[contest] I/O error reading file: " + e.getMessage());
+    } catch (final IOException exception) {
+      System.err.println("[contest] I/O error reading file: " + exception.getMessage());
       System.exit(1);
-    } catch (final GameLoadException e) {
+    } catch (final GameLoadException exception) {
       System.err.println(
           "[contest] Invalid save file ["
-              + e.getErrorType()
+              + exception.getErrorType()
               + "] at line "
-              + e.getLineNumber()
+              + exception.getLineNumber()
               + ": "
-              + e.getMessage());
-    } catch (final Exception e) {
-      System.err.println("[contest] Unexpected error: " + e.getMessage());
+              + exception.getMessage());
+    } catch (final Exception exception) {
+      System.err.println("[contest] Unexpected error: " + exception.getMessage());
     }
   }
 
@@ -75,12 +75,14 @@ public final class ContestLauncher implements AppLauncher {
 
     try {
       return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, false);
-    } catch (final Exception e) {
+    } catch (final Exception exception) {
       System.err.println(
-          "[contest] MCTS failed (" + e.getMessage() + "), falling back to first legal move.");
+          "[contest] MCTS failed ("
+              + exception.getMessage()
+              + "), falling back to first legal move.");
       final List<Move> legal = state.generateLegalMoves();
       if (legal.isEmpty()) {
-        throw new IllegalStateException("No legal moves available.", e);
+        throw new IllegalStateException("No legal moves available.", exception);
       }
       return legal.get(0);
     }
@@ -94,8 +96,8 @@ public final class ContestLauncher implements AppLauncher {
     return posToString(move.getTo()) + orientation;
   }
 
-  private static String posToString(final Position p) {
-    final char letter = (char) ('a' + p.getX());
-    return String.valueOf(letter) + p.getY();
+  private static String posToString(final Position position) {
+    final char letter = (char) ('a' + position.getX());
+    return String.valueOf(letter) + position.getY();
   }
 }

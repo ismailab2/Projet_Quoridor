@@ -110,6 +110,9 @@ public final class OptionsParser {
           if (i + 1 < args.length) {
             final int argument = Integer.parseInt(args[i + 1]);
             if (argument < 16 && argument > 2) {
+              if (argument % 2 == 0) {
+                throw new IllegalArgumentException("--size must be an odd number");
+              }
               config.setOption("board-size", args[++i]);
             } else if (argument >= 1000 && argument <= 9999) {
               config.setOption("server", "true");

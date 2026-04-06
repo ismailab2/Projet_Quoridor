@@ -4,6 +4,7 @@ import fr.bordeaux.config.ConfigManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.MessageFormat;
 
 /**
  * Simple logger for the Quoridor application.
@@ -30,6 +31,7 @@ public final class Logger {
   /** Couleur ERROR */
   private static final String RED = "\u001B[31m";
 
+  /** Singleton instance of the logger. */
   private static Logger instance;
 
   /** Flux de sortie */
@@ -58,7 +60,7 @@ public final class Logger {
     try {
       final File file = new File(System.getProperty("user.home"), logFile);
       out = new PrintStream(file);
-    } catch (IOException e) {
+    } catch (final IOException exception) {
       System.out.println("Erreur création fichier log, fallback console");
       out = System.out;
     }
@@ -115,7 +117,7 @@ public final class Logger {
    */
   public void info(final String format, final Object... args) {
     if (isInfoEnabled()) {
-      log("[INFO]", java.text.MessageFormat.format(format, args), CYAN);
+      log("[INFO]", MessageFormat.format(format, args), CYAN);
     }
   }
 
@@ -138,7 +140,7 @@ public final class Logger {
    */
   public void debug(final String format, final Object... args) {
     if (isDebugEnabled()) {
-      log("[DEBUG]", java.text.MessageFormat.format(format, args), YELLOW);
+      log("[DEBUG]", MessageFormat.format(format, args), YELLOW);
     }
   }
 
@@ -161,7 +163,7 @@ public final class Logger {
    */
   public void verbose(final String format, final Object... args) {
     if (isVerboseEnabled()) {
-      log("[VERBOSE]", java.text.MessageFormat.format(format, args), GREEN);
+      log("[VERBOSE]", MessageFormat.format(format, args), GREEN);
     }
   }
 
@@ -184,7 +186,7 @@ public final class Logger {
    */
   public void error(final String format, final Object... args) {
     if (isErrorEnabled()) {
-      log("[ERROR]", java.text.MessageFormat.format(format, args), RED);
+      log("[ERROR]", MessageFormat.format(format, args), RED);
     }
   }
 
@@ -194,9 +196,9 @@ public final class Logger {
    * @param message message d'erreur
    * @param e exception associée
    */
-  public void error(final String message, final Exception e) {
+  public void error(final String message, final Exception exception) {
     if (isErrorEnabled()) {
-      log("[ERROR]", message + " | " + e.getClass().getSimpleName(), RED);
+      log("[ERROR]", message + " | " + exception.getClass().getSimpleName(), RED);
     }
   }
 

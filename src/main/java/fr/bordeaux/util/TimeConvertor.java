@@ -16,20 +16,20 @@ public final class TimeConvertor {
    */
   public static String formatTime(final long timeMilli) {
 
-    final long nbMin = TimeUnit.MILLISECONDS.toMinutes(timeMilli);
-    final long nbSeconds =
-        TimeUnit.MILLISECONDS.toSeconds(timeMilli) - TimeUnit.MINUTES.toSeconds(nbMin);
-    final long nbMillis =
-        timeMilli - TimeUnit.SECONDS.toMillis(nbSeconds) - TimeUnit.MINUTES.toMillis(nbMin);
+    final long minutes = TimeUnit.MILLISECONDS.toMinutes(timeMilli);
+    final long seconds =
+        TimeUnit.MILLISECONDS.toSeconds(timeMilli) - TimeUnit.MINUTES.toSeconds(minutes);
+    final long milliseconds =
+        timeMilli - TimeUnit.SECONDS.toMillis(seconds) - TimeUnit.MINUTES.toMillis(minutes);
 
-    String result;
+    final String result;
 
     if (timeMilli <= 0) {
       result = "00 : 00";
-    } else if (nbMin <= 0) {
-      result = String.format("%02d : %02d", nbSeconds, nbMillis / 10);
+    } else if (minutes <= 0) {
+      result = String.format("%02d : %02d", seconds, milliseconds / 10);
     } else {
-      result = String.format("%02d : %02d", nbMin, nbSeconds);
+      result = String.format("%02d : %02d", minutes, seconds);
     }
 
     return result;

@@ -1,6 +1,13 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.Board;
+import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
+import fr.bordeaux.core.Player;
+import fr.bordeaux.core.Position;
+import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
@@ -25,19 +32,32 @@ public final class BoardView extends GridPane {
   /** References to all cell containers on the board. */
   private final StackPane[][] cells;
 
+  /** Size factor for pawns relative to cell size. */
   private static final double PAWN_SIZE_FACTOR = 0.6;
+  /** Arc radius for rounded wall corners. */
   private static final double WALL_ARC = 4.0;
+  /** Arc radius for rounded pawn corners. */
   private static final double PAWN_ARC = 15.0;
+  /** Width of the pawn's border stroke. */
   private static final double PAWN_STROKE_WIDTH = 5.0;
+  /** Radius for the pawn's drop shadow effect. */
   private static final double SHADOW_RADIUS = 5.0;
+  /** Duration of the pulse animation in seconds. */
   private static final double PULSE_DURATION = 0.5;
+  /** Minimum opacity during the pulse animation. */
   private static final double PULSE_MIN_OPACITY = 0.2;
+  /** Opacity for the wall preview highlight. */
   private static final double PREVIEW_OPACITY = 0.4;
+  /** Default size of a cell if dimensions are unknown. */
   private static final int DEFAULT_CELL_SIZE = 100;
-  private static final int MIN_WALL_THICKNESS = 10;
-  private static final int WALL_THICKNESS_RATIO = 10;
+  /** Minimum thickness of walls in pixels. */
+  private static final double MIN_WALL_THICKNESS = 4.0;
+  /** Ratio of cell size to wall thickness. */
+  private static final double WALL_THICKNESS_RATIO = 8.0;
 
+  /** Color used for placed walls. */
   private static final Color WALL_COLOR = Color.rgb(101, 67, 33);
+  /** semi-transparent color for wall preview. */
   private static final Color PREVIEW_COLOR = Color.rgb(139, 69, 19, PREVIEW_OPACITY);
 
   /**
@@ -53,12 +73,12 @@ public final class BoardView extends GridPane {
     cells = new StackPane[size][size];
     this.widthProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
+            (observable, oldValue, newValue) -> {
               drawBoard();
             });
     this.heightProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
+            (observable, oldValue, newValue) -> {
               drawBoard();
             });
     state.addListener(
@@ -76,25 +96,34 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
     final int size = board.getSize();
-    final int cellSize = getCellSize();
+    final double boardSize = size * DEFAULT_CELL_SIZE;
+    final double percent = 100.0 / size;
     for (int index = 0; index < size; index++) {
-      getColumnConstraints().add(new ColumnConstraints(cellSize));
-      getRowConstraints().add(new RowConstraints(cellSize));
+      final ColumnConstraints cc = new ColumnConstraints();
+      cc.setPercentWidth(percent);
+      cc.setHalignment(HPos.CENTER);
+      getColumnConstraints().add(cc);
+
+      final RowConstraints rc = new RowConstraints();
+      rc.setPercentHeight(percent);
+      rc.setValignment(VPos.CENTER);
+      getRowConstraints().add(rc);
     }
+    final double cellSize = getCellSize();
     for (int row = 0; row < size; row++) {
       for (int col = 0; col < size; col++) {
         final StackPane cell = new StackPane();
-        cell.setPrefSize(cellSize, cellSize);
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+        cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         cells[row][col] = cell;
         final int targetRow = row;
         final int targetCol = col;
         cell.setOnMouseClicked(
-            e -> {
-              if (e.getButton() == MouseButton.PRIMARY) {
+            event -> {
+              if (event.getButton() == MouseButton.PRIMARY) {
                 handleCellClick(targetRow, targetCol);
               } else {
-                handleWallClick(targetRow, targetCol, e.getButton());
+                handleWallClick(targetRow, targetCol, event.getButton());
               }
             });
         add(cell, col, row);
@@ -111,8 +140,8 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
     final Graph graph = board.getGraph();
-    final int cellSize = getCellSize();
-    final int wallThickness = getWallThickness();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
     final int size = board.getSize();
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
@@ -122,7 +151,7 @@ public final class BoardView extends GridPane {
         final int cellV2 = board.getCellId(row + 1, col + 1);
 
         if (!graph.hasEdge(cellU1, cellV1) && !graph.hasEdge(cellU2, cellV2)) {
-          final Rectangle wall = new Rectangle(cellSize * 2, wallThickness);
+          final Rectangle wall = new Rectangle(cellSize * 2.0, wallThickness);
           wall.setFill(WALL_COLOR);
           wall.setArcWidth(WALL_ARC);
           wall.setArcHeight(WALL_ARC);
@@ -132,7 +161,7 @@ public final class BoardView extends GridPane {
           wall.setTranslateY(wallThickness / 2.0);
         }
         if (!graph.hasEdge(cellU1, cellU2) && !graph.hasEdge(cellV1, cellV2)) {
-          final Rectangle wall = new Rectangle(wallThickness, cellSize * 2);
+          final Rectangle wall = new Rectangle(wallThickness, cellSize * 2.0);
           wall.setFill(WALL_COLOR);
           wall.setArcWidth(WALL_ARC);
           wall.setArcHeight(WALL_ARC);
@@ -147,7 +176,7 @@ public final class BoardView extends GridPane {
 
   /** Draws player pawns. Pawns listen for left click to show highlights. */
   public void drawPlayers() {
-    final int cellSize = getCellSize();
+    final double cellSize = getCellSize();
     final GameState state = engine.getState();
     final List<Player> players = state.getPlayers();
     for (final Player player : players) {
@@ -162,7 +191,7 @@ public final class BoardView extends GridPane {
       pawn.setStroke(Color.LIGHTGRAY);
       pawn.setStrokeWidth(PAWN_STROKE_WIDTH);
       pawn.setEffect(
-          new javafx.scene.effect.DropShadow(SHADOW_RADIUS, javafx.scene.paint.Color.GRAY));
+          new javafx.scene.effect.DropShadow(SHADOW_RADIUS, Color.GRAY));
 
       final fr.bordeaux.core.Color playerColor = player.getColor();
       final Color fxColor =
@@ -280,18 +309,18 @@ public final class BoardView extends GridPane {
 
   /** Creates interactive wall slots between cells. */
   private void drawWallSlots() {
-    final int cellSize = getCellSize();
-    final int wallThickness = getWallThickness();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
     final int size = engine.getState().getBoard().getSize();
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
-        final Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
+        final Rectangle hSlot = new Rectangle(cellSize * 2.0, wallThickness);
         hSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
         add(hSlot, col, row, 2, 1);
         GridPane.setValignment(hSlot, VPos.BOTTOM);
         hSlot.setTranslateY(wallThickness / 2.0);
-        final Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
+        final Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2.0);
         vSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
         add(vSlot, col, row, 1, 2);
@@ -342,21 +371,21 @@ public final class BoardView extends GridPane {
   /**
    * @return cell size in pixels.
    */
-  private int getCellSize() {
+  private double getCellSize() {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
     final int size = board.getSize();
     final double available = Math.min(getWidth(), getHeight());
     if (available <= 0.0) {
-      return DEFAULT_CELL_SIZE;
+      return (double) DEFAULT_CELL_SIZE;
     }
-    return (int) (available / size);
+    return available / size;
   }
 
   /**
    * @return wall thickness in pixels.
    */
-  private int getWallThickness() {
+  private double getWallThickness() {
     return Math.max(MIN_WALL_THICKNESS, getCellSize() / WALL_THICKNESS_RATIO);
   }
 }

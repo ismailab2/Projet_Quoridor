@@ -196,7 +196,7 @@ public class QuoridorApp extends Application {
   private void resizeBoard(final BoardView boardView, final Scene scene, final double menuHeight) {
     final double availableWidth = scene.getWidth() - (PANEL_WIDTH + DEFAULT_MARGIN * 2) * 2;
     final double availableHeight = scene.getHeight() - menuHeight;
-    final double size = Math.min(availableWidth, availableHeight);
+    final double size = Math.min(availableWidth, availableHeight) - 1.0; // 1.0px safety margin
     if (size > 0.0) {
       boardView.setPrefSize(size, size);
       boardView.setMinSize(size, size);

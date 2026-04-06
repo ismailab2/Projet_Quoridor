@@ -63,8 +63,8 @@ public class GameClient {
       startListener();
       return true;
 
-    } catch (IOException e) {
-      System.out.println("Connection failed: " + e.getMessage());
+    } catch (final IOException exception) {
+      System.out.println("Connection failed: " + exception.getMessage());
       return false;
     }
   }
@@ -92,8 +92,8 @@ public class GameClient {
                     System.out.println("Server: " + line);
                   }
                 }
-              } catch (IOException e) {
-                System.out.println("Connection closed: " + e.getMessage());
+              } catch (final IOException exception) {
+                System.out.println("Connection closed: " + exception.getMessage());
               }
             });
     listenerThread.setDaemon(true);
@@ -122,7 +122,7 @@ public class GameClient {
         expectingDirectReply.set(false);
         System.out.println("Ping timeout: no response within 5 seconds.");
       }
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException exception) {
       Thread.currentThread().interrupt();
       System.out.println("Ping interrupted.");
     }
@@ -148,8 +148,8 @@ public class GameClient {
 
         socket.close();
 
-      } catch (IOException | InterruptedException e) {
-        if (e instanceof InterruptedException) {
+      } catch (final IOException | InterruptedException exception) {
+        if (exception instanceof InterruptedException) {
           Thread.currentThread().interrupt();
         }
       }
@@ -161,10 +161,10 @@ public class GameClient {
   public void serverList() {
     new Thread(
             () -> {
-              try (DatagramSocket ds = new DatagramSocket()) {
+              try (DatagramSocket udpSocket = new DatagramSocket()) {
 
-                ds.setBroadcast(true);
-                ds.setSoTimeout(5000);
+                udpSocket.setBroadcast(true);
+                udpSocket.setSoTimeout(5000);
 
                 final String msg = "DISCOVER";
 
@@ -175,7 +175,7 @@ public class GameClient {
                         InetAddress.getByName("255.255.255.255"),
                         12346);
 
-                ds.send(packet);
+                udpSocket.send(packet);
 
                 System.out.println("Broadcast sent, waiting for responses...");
 
@@ -184,23 +184,27 @@ public class GameClient {
                 while (System.currentTimeMillis() - start < 5000) {
                   try {
                     final byte[] buf = new byte[1024];
-                    final DatagramPacket rcv = new DatagramPacket(buf, buf.length);
+                    final DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
 
-                    ds.receive(rcv);
+                    udpSocket.receive(receivedPacket);
 
                     final String serverInfo =
-                        new String(rcv.getData(), 0, rcv.getLength(), StandardCharsets.UTF_8);
+                        new String(
+                            receivedPacket.getData(),
+                            0,
+                            receivedPacket.getLength(),
+                            StandardCharsets.UTF_8);
                     System.out.println("Server found: " + serverInfo);
 
-                  } catch (SocketTimeoutException ignored) {
+                  } catch (final SocketTimeoutException ignored) {
                     break;
                   }
                 }
 
                 System.out.println("Server discovery finished.");
 
-              } catch (IOException e) {
-                System.out.println("Server discovery failed: " + e.getMessage());
+              } catch (final IOException exception) {
+                System.out.println("Server discovery failed: " + exception.getMessage());
               }
             })
         .start();
