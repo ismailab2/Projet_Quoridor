@@ -45,7 +45,7 @@ public final class RuleChecker {
     boolean result = false;
 
     for (final Player otherPlayer : state.getPlayers()) {
-      if (otherPlayer == currentPlay) {
+      if (otherPlayer == currentPlay || otherPlayer.isDisabled()) {
         continue;
       }
 
@@ -145,6 +145,9 @@ public final class RuleChecker {
       boolean occupied = false;
       final List<Player> players = state.getPlayers();
       for (final Player player : players) {
+        if (player.isDisabled()) {
+          continue;
+        }
         final Position playerPos = player.getPosition();
         if (playerPos.equals(targetPos)) {
           occupied = true;
@@ -240,6 +243,9 @@ public final class RuleChecker {
     boolean canWin = true;
     final List<Player> players = state.getPlayers();
     for (final Player player : players) {
+      if (player.isDisabled()) {
+        continue;
+      }
       final Position pos = player.getPosition();
       final int startId = board.getCellId(pos.getX(), pos.getY());
       if (board.getGraph().findPathBFS(startId, state.getWinCondition(player)).isEmpty()) {

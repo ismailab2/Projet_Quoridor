@@ -82,7 +82,6 @@ public class MctsPlayer extends AiPlayer {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore(),
         this.reflectionTime,
         this.getColor());
   }
@@ -93,10 +92,9 @@ public class MctsPlayer extends AiPlayer {
       final Position current,
       final Position start,
       final int walls,
-      final int score,
       final long reflectionTime,
       final Color color) {
-    super(name, current, start, walls, score, color);
+    super(name, current, start, walls, color);
     this.reflectionTime = reflectionTime;
     this.evaluator = null;
   }

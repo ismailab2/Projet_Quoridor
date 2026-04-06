@@ -218,7 +218,8 @@ public class QuoridorApp extends Application {
         () -> {
           if (state.isGameOver()) {
             if (popupShown.compareAndSet(false, true)) {
-              findWinner(state)
+              state
+                  .getWinner()
                   .ifPresent(
                       winner ->
                           Platform.runLater(
@@ -230,16 +231,6 @@ public class QuoridorApp extends Application {
             popupShown.set(false);
           }
         });
-  }
-
-  /**
-   * Finds the winner in the current game state.
-   *
-   * @param state the current game state
-   * @return an Optional containing the winning player, or empty if none found
-   */
-  private java.util.Optional<Player> findWinner(final GameState state) {
-    return state.getPlayers().stream().filter(state::hasReachedGoal).findFirst();
   }
 
   /**

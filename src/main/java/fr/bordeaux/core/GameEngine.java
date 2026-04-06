@@ -158,6 +158,10 @@ public class GameEngine {
 
   /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
+    if (state.getCurrentPlayer().isAI()) {
+      Log.info("AI cannot pause the game.");
+      return;
+    }
     final boolean newPauseState = !state.isPaused();
     state.setPaused(newPauseState);
 

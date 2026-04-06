@@ -66,13 +66,12 @@ public final class MinimaxPlayer extends AiPlayer {
       final Position current,
       final Position start,
       final int walls,
-      final int score,
       final int depth,
       final int timeLimit,
       final boolean iterativeDeepVal,
       final String heuristicVal,
       final Color color) {
-    super(name, current, start, walls, score, color);
+    super(name, current, start, walls, color);
     this.searchDepth = depth;
     this.reflexionTime = timeLimit;
     this.useIterativeD = iterativeDeepVal;
@@ -374,7 +373,6 @@ public final class MinimaxPlayer extends AiPlayer {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore(),
         this.searchDepth,
         this.reflexionTime,
         this.useIterativeD,

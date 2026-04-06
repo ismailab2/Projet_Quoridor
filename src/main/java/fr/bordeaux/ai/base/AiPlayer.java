@@ -24,7 +24,6 @@ public abstract class AiPlayer extends Player {
    * @param current current position
    * @param start starting position
    * @param walls remaining walls
-   * @param score current score
    * @param color player color
    */
   protected AiPlayer(
@@ -32,9 +31,8 @@ public abstract class AiPlayer extends Player {
       final Position current,
       final Position start,
       final int walls,
-      final int score,
       final Color color) {
-    super(name, current, start, walls, score, color);
+    super(name, current, start, walls, color);
   }
 
   /**

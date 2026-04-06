@@ -56,7 +56,6 @@ public class RandomPlayer extends AiPlayer {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore(),
         this.getColor());
   }
 
@@ -66,9 +65,8 @@ public class RandomPlayer extends AiPlayer {
       final Position current,
       final Position start,
       final int walls,
-      final int score,
       final Color color) {
-    super(name, current, start, walls, score, color);
+    super(name, current, start, walls, color);
   }
 
   /**

@@ -73,8 +73,8 @@ public class RandomPlayerTest {
         ia1.toString(),
         "Random AI "
             + String.format(
-                "Player{name='%s', pos=%s, walls=%d, score=%d}",
-                ia1.getName(), ia1.getPosition(), ia1.getRemainingWalls(), ia1.getScore()));
+                "Player{name='%s', pos=%s, walls=%d}",
+                ia1.getName(), ia1.getPosition(), ia1.getRemainingWalls()));
     Map<String, Object> settings = new HashMap<>();
     settings.put("mode", "random");
     assertEquals(ia1.getSettings(), settings);

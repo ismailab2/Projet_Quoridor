@@ -12,7 +12,6 @@ public abstract class Player {
   private int remainingWalls = 10;
   private long remainingTime = 30 * 60 * 1000; // Time in milliseconds
   private final Position startingPosition;
-  private int score = 0;
   private boolean disabled = false;
 
   /**
@@ -36,7 +35,6 @@ public abstract class Player {
    * @param currentPos current position
    * @param startPos starting position
    * @param walls remaining walls
-   * @param score current score
    * @param color player color
    */
   protected Player(
@@ -44,13 +42,11 @@ public abstract class Player {
       final Position currentPos,
       final Position startPos,
       final int walls,
-      final int score,
       final Color color) {
     this.name = name;
     this.position = new Position(currentPos.getX(), currentPos.getY());
     this.startingPosition = startPos;
     this.remainingWalls = walls;
-    this.score = score;
     this.color = color;
   }
 
@@ -160,15 +156,6 @@ public abstract class Player {
   }
 
   /**
-   * Gets the current score of the player.
-   *
-   * @return The player's score.
-   */
-  public int getScore() {
-    return score;
-  }
-
-  /**
    * Returns the player's remaining reflection time.
    *
    * @return The remaining time in milliseconds.
@@ -184,20 +171,6 @@ public abstract class Player {
    */
   public void setRemainingTime(final long remainingTime) {
     this.remainingTime = remainingTime;
-  }
-
-  /**
-   * Adds points to the player's current score.
-   *
-   * @param points The number of points to add.
-   */
-  public void addScore(final int points) {
-    score += points;
-  }
-
-  /** Resets the player's score to zero. */
-  public void resetScore() {
-    score = 0;
   }
 
   /**
@@ -229,7 +202,6 @@ public abstract class Player {
    */
   @Override
   public String toString() {
-    return String.format(
-        "Player{name='%s', pos=%s, walls=%d, score=%d}", name, position, remainingWalls, score);
+    return String.format("Player{name='%s', pos=%s, walls=%d}", name, position, remainingWalls);
   }
 }

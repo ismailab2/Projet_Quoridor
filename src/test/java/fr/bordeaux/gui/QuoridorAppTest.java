@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -88,8 +87,7 @@ class QuoridorAppTest extends ApplicationTest {
 
     Player winner = mock(Player.class);
     when(winner.getName()).thenReturn("Winner");
-    when(state.getPlayers()).thenReturn(List.of(winner));
-    when(state.hasReachedGoal(winner)).thenReturn(true);
+    when(state.getWinner()).thenReturn(java.util.Optional.of(winner));
 
     StackPane container = new StackPane();
     QuoridorApp app = new QuoridorApp();

@@ -17,9 +17,6 @@ public final class PlayerPanel extends VBox {
   /** Label displaying the player's name. */
   private final Label nameLabel;
 
-  /** Label displaying the player's score. */
-  private final Label scoreLabel;
-
   /** Label displaying the number of walls remaining for the player. */
   private final Label wallsLabel;
 
@@ -40,7 +37,14 @@ public final class PlayerPanel extends VBox {
     super();
     this.playerIndex = playerIndex;
 
-    final String accentColor = (playerIndex == 0) ? "#e74c3c" : "#2c3e50";
+    final Player player = state.getPlayers().get(playerIndex);
+    final String accentColor =
+        switch (player.getColor()) {
+          case WHITE -> "#95a5a6";
+          case BLACK -> "#2c3e50";
+          case BLUE -> "#3498db";
+          case RED -> "#e74c3c";
+        };
 
     final Region topBar = new Region();
     topBar.setPrefHeight(6);
@@ -62,16 +66,10 @@ public final class PlayerPanel extends VBox {
 
     final Region separator2 = makeSeparator();
 
-    wallsLabel = new Label("10");
+    wallsLabel = new Label(String.valueOf(player.getRemainingWalls()));
     final VBox wallsBox = makeStatBox("Murs restants", wallsLabel, accentColor);
 
-    final Region separator3 = makeSeparator();
-
-    scoreLabel = new Label("0");
-    final VBox scoreBox = makeStatBox("Score", scoreLabel, accentColor);
-
-    final VBox content =
-        new VBox(16, nameLabel, separator, timeBox, separator2, wallsBox, separator3, scoreBox);
+    final VBox content = new VBox(16, nameLabel, separator, timeBox, separator2, wallsBox);
     content.setPadding(new Insets(15));
     content.setAlignment(Pos.TOP_CENTER);
     VBox.setVgrow(content, Priority.ALWAYS);
@@ -154,7 +152,6 @@ public final class PlayerPanel extends VBox {
       timeLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 20px;");
     } else {
       wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
-      scoreLabel.setText(String.valueOf(player.getScore()));
     }
   }
 }

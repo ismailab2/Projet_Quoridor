@@ -149,7 +149,7 @@ public class MinimaxPlayerTest {
         ia1.toString(),
         "MiniMax AI "
             + String.format(
-                "Player{name='%s', pos=%s, walls=%d, score=%d}",
-                ia1.getName(), ia1.getPosition(), ia1.getRemainingWalls(), ia1.getScore()));
+                "Player{name='%s', pos=%s, walls=%d}",
+                ia1.getName(), ia1.getPosition(), ia1.getRemainingWalls()));
   }
 }

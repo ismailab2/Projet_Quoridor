@@ -98,17 +98,18 @@ public class GameState {
     target.setRemainingTime(newTime);
 
     if (newTime <= 0) {
-      int cpt = 0;
-      List<Player> players = getPlayers();
-      for (Player player : players) {
-        if (player.getRemainingTime() <= 0) {
-          cpt++;
+      target.setDisabled(true);
+      int activePlayersCount = 0;
+      for (Player p : players) {
+        if (!p.isDisabled()) {
+          activePlayersCount++;
         }
       }
-      if (players.size() - cpt <= 1) {
+
+      if (activePlayersCount <= 1) {
         setGameOver(true);
       } else {
-        target.setDisabled(true);
+        nextPlayer();
         notifyListeners();
       }
     }
@@ -264,23 +265,52 @@ public class GameState {
     return condition;
   }
 
+  /**
+   * Finds the winner in the current game state.
+   *
+   * @return an Optional containing the winning player, or empty if none found
+   */
+  public Optional<Player> getWinner() {
+    // First check if someone actually reached their goal
+    Optional<Player> winnerInRange = players.stream().filter(this::hasReachedGoal).findFirst();
+
+    // If not, the winner is the last remaining non-disabled player (Blitz mode victory)
+    if (winnerInRange.isEmpty()) {
+      final List<Player> activePlayers = players.stream().filter(p -> !p.isDisabled()).toList();
+      if (activePlayers.size() == 1) {
+        winnerInRange = Optional.of(activePlayers.get(0));
+      }
+    }
+    return winnerInRange;
+  }
+
   /** Moves the turn to the next player. */
   public void nextPlayer() {
-    playerIndex = (playerIndex + 1) % players.size();
+    int start = playerIndex;
+    do {
+      playerIndex = (playerIndex + 1) % players.size();
+    } while (players.get(playerIndex).isDisabled() && playerIndex != start);
   }
 
   /** Moves the turn to the previous player. */
   public void previousPlayer() {
-    playerIndex = (playerIndex - 1 + players.size()) % players.size();
+    int start = playerIndex;
+    do {
+      playerIndex = (playerIndex - 1 + players.size()) % players.size();
+    } while (players.get(playerIndex).isDisabled() && playerIndex != start);
   }
 
   /**
-   * /** Returns the index of the previous player.
+   * /** Returns the index of the previous player skipping disabled ones.
    *
    * @return The previous player's index.
    */
   public int getPreviousIndexPlayer() {
-    return (playerIndex - 1 + players.size()) % players.size();
+    int prev = (playerIndex - 1 + players.size()) % players.size();
+    while (players.get(prev).isDisabled() && prev != playerIndex) {
+      prev = (prev - 1 + players.size()) % players.size();
+    }
+    return prev;
   }
 
   /**
