@@ -152,11 +152,9 @@ public final class PlayerPanel extends VBox {
       this.setOpacity(0.4);
       timeLabel.setText("ÉLIMINÉ");
       timeLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 20px;");
-    }
-    else{
+    } else {
       wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
       scoreLabel.setText(String.valueOf(player.getScore()));
     }
-
   }
 }

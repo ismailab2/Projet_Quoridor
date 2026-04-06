@@ -124,7 +124,8 @@ public class OptionsParserTest {
   @Test
   public void testTimeMissingValue() {
     assertThrows(
-        IllegalArgumentException.class, () -> OptionsParser.parse(new String[] {"-b ", "-t"}, config));
+        IllegalArgumentException.class,
+        () -> OptionsParser.parse(new String[] {"-b ", "-t"}, config));
   }
 
   @Test

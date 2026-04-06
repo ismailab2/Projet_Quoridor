@@ -104,7 +104,7 @@ public abstract class Player {
     this.position = position;
   }
 
-    /**
+  /**
    * Gets the current disable boolean of the player's pawn.
    *
    * @return The current disable boolean.

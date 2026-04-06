@@ -100,15 +100,14 @@ public class GameState {
     if (newTime <= 0) {
       int cpt = 0;
       List<Player> players = getPlayers();
-      for(Player player : players){
-        if(player.getRemainingTime()<=0){
+      for (Player player : players) {
+        if (player.getRemainingTime() <= 0) {
           cpt++;
         }
       }
-      if(players.size() - cpt <=1){
+      if (players.size() - cpt <= 1) {
         setGameOver(true);
-      }
-      else{
+      } else {
         target.setDisabled(true);
         notifyListeners();
       }

@@ -51,8 +51,8 @@ public class QuoridorApp extends Application {
     final List<Player> players = state.getPlayers();
     final PlayerPanel[] panels = new PlayerPanel[players.size()];
     for (int i = 0; i < players.size(); i++) {
-        panels[i] = new PlayerPanel(players.get(i).getName(), state, i);
-        setupPanelSize(panels[i]);
+      panels[i] = new PlayerPanel(players.get(i).getName(), state, i);
+      setupPanelSize(panels[i]);
     }
 
     final BoardView boardView = new BoardView(engine);
@@ -111,40 +111,34 @@ public class QuoridorApp extends Application {
    * @return the configured BorderPane
    */
   private BorderPane buildRootLayout(
-      final MainMenuBar menuBar,
-      final StackPane boardContainer,
-      final PlayerPanel[] panels) {
-      
+      final MainMenuBar menuBar, final StackPane boardContainer, final PlayerPanel[] panels) {
+
     final BorderPane root = new BorderPane();
     final Insets margin = new Insets(DEFAULT_MARGIN);
 
-    
     final VBox leftContainer = new VBox(DEFAULT_MARGIN);
     leftContainer.setAlignment(Pos.CENTER);
-    
+
     if (panels.length > 0) {
-        leftContainer.getChildren().add(panels[0]);
+      leftContainer.getChildren().add(panels[0]);
     }
     if (panels.length > 2) {
-        leftContainer.getChildren().add(panels[2]);
-    }
-    
-    
-    final VBox rightContainer = new VBox(DEFAULT_MARGIN);
-    rightContainer.setAlignment(Pos.CENTER);
-    
-    if (panels.length > 1) {
-        rightContainer.getChildren().add(panels[1]);
-    }
-    if (panels.length > 3) {
-        rightContainer.getChildren().add(panels[3]); 
+      leftContainer.getChildren().add(panels[2]);
     }
 
-    
+    final VBox rightContainer = new VBox(DEFAULT_MARGIN);
+    rightContainer.setAlignment(Pos.CENTER);
+
+    if (panels.length > 1) {
+      rightContainer.getChildren().add(panels[1]);
+    }
+    if (panels.length > 3) {
+      rightContainer.getChildren().add(panels[3]);
+    }
+
     BorderPane.setMargin(leftContainer, margin);
     BorderPane.setMargin(rightContainer, margin);
 
-    
     root.setTop(menuBar);
     root.setCenter(boardContainer);
     root.setLeft(leftContainer);
