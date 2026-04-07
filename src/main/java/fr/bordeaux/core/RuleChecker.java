@@ -3,6 +3,8 @@ package fr.bordeaux.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.bordeaux.i18n.I18n;
+
 /**
  * RuleChecker checks if moves (pawn moves or wall placements) are valid according to Quoridor
  * rules.
@@ -14,7 +16,7 @@ public class RuleChecker {
    * called internally.
    */
   private RuleChecker() {
-    throw new AssertionError("Utility class should not be instantiated");
+    throw new AssertionError(I18n.get("assertChecker"));
   }
 
   /**

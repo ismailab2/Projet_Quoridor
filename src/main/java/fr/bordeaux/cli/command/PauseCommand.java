@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -24,9 +25,9 @@ public class PauseCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     if (engine.isBlitz()) {
-      LOGGER.debug("Pausing the game.");
+      LOGGER.debug(I18n.get("pausing"));
       engine.getState().setPaused(true);
-    } else LOGGER.error("Not in blitz mode, pause is doing nothing.");
+    } else LOGGER.error(I18n.get("notBlitz"));
     return engine;
   }
 
@@ -37,7 +38,7 @@ public class PauseCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  pause\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Pauses the game timer if the game mode is Blitz.\n");
-    LOGGER.verbose("  If the game is not in Blitz mode, this command has no effect.\n");
+    LOGGER.info("  "+I18n.get("desc"));
+    LOGGER.verbose("  "+I18n.get("descVerb"));
   }
 }

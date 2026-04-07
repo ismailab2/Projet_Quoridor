@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
+
 import java.util.List;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -49,8 +51,8 @@ class NewCommandTest {
 
   @Test
   void executeWithTwoPlayersByDefault() {
-    when(reader.readLine("Player's type >> ")).thenReturn("h", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Alice", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("h", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Alice", "Bob");
 
     NewCommand command = new NewCommand(new String[] {"new", "9"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -61,8 +63,8 @@ class NewCommandTest {
 
   @Test
   void executeTwoHumans() {
-    when(reader.readLine("Player's type >> ")).thenReturn("h", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Alice", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("h", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Alice", "Bob");
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -75,8 +77,8 @@ class NewCommandTest {
 
   @Test
   void executeMiniPlayer() {
-    when(reader.readLine("Player's type >> ")).thenReturn("mini", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Mini", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("mini", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Mini", "Bob");
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -87,8 +89,8 @@ class NewCommandTest {
 
   @Test
   void executeMctsPlayer() {
-    when(reader.readLine("Player's type >> ")).thenReturn("mcts", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Mcts", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("mcts", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Mcts", "Bob");
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -99,8 +101,8 @@ class NewCommandTest {
 
   @Test
   void executeRandomPlayer() {
-    when(reader.readLine("Player's type >> ")).thenReturn("r", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Rand", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("r", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Rand", "Bob");
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -111,8 +113,8 @@ class NewCommandTest {
 
   @Test
   void executeWrongType() {
-    when(reader.readLine("Player's type >> ")).thenReturn("wrong", "h", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Alice", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("wrong", "h", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Alice", "Bob");
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -123,7 +125,7 @@ class NewCommandTest {
 
   @Test
   void executeNullType() throws Exception {
-    when(reader.readLine("Player's type >> ")).thenReturn((String) null);
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn((String) null);
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -134,7 +136,7 @@ class NewCommandTest {
 
   @Test
   void executeInterrupted() throws Exception {
-    when(reader.readLine("Player's type >> ")).thenThrow(new EndOfFileException());
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenThrow(new EndOfFileException());
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -145,8 +147,8 @@ class NewCommandTest {
 
   @Test
   void executeNullName() throws Exception {
-    when(reader.readLine("Player's type >> ")).thenReturn("h");
-    when(reader.readLine("Player's name >> ")).thenReturn((String) null);
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn((String) null);
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);
     GameEngine result = command.execute(engine);
@@ -157,8 +159,8 @@ class NewCommandTest {
 
   @Test
   void executeTooManyArguments() {
-    when(reader.readLine("Player's type >> ")).thenReturn("h", "h");
-    when(reader.readLine("Player's name >> ")).thenReturn("Alice", "Bob");
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenReturn("h", "h");
+    when(reader.readLine(I18n.get("playersName", " >> "))).thenReturn("Alice", "Bob");
 
     NewCommand command =
         new NewCommand(new String[] {"new", "9", "2", "a", "b", "c"}, terminal, reader);
@@ -168,7 +170,7 @@ class NewCommandTest {
 
   @Test
   void executeTerminalCloseError() throws Exception {
-    when(reader.readLine("Player's type >> ")).thenThrow(new EndOfFileException());
+    when(reader.readLine(I18n.get("playersType", " >> "))).thenThrow(new EndOfFileException());
     doThrow(new RuntimeException("close error")).when(terminal).close();
 
     NewCommand command = new NewCommand(new String[] {"new", "9", "2"}, terminal, reader);

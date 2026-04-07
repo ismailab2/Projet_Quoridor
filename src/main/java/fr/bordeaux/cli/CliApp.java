@@ -3,6 +3,7 @@ package fr.bordeaux.cli;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.HashMap;
@@ -259,7 +260,7 @@ public class CliApp {
         final String line = reader.readLine(">> ");
         fetch(line);
       } else {
-        System.out.println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+        System.out.println("\n" + engine.getState().getCurrentPlayer().getName() + I18n.get("thinking"));
         executeAiTurn();
         new ShowCommand(new String[] {"show", "board"}).execute(engine);
       }
@@ -270,7 +271,7 @@ public class CliApp {
     try {
       terminal.close();
     } catch (IOException e) {
-      LOGGER.error("Terminal has been brutally closed...");
+      LOGGER.error(I18n.get("brutalClose"));
     }
   }
 
@@ -281,7 +282,7 @@ public class CliApp {
 
     engine.play(move);
 
-    LOGGER.info("L'IA a joué : " + move.toString());
+    LOGGER.info(I18n.get("iaPlayed") + move.toString());
   }
 
   /**
@@ -316,8 +317,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        LOGGER.debug("Unknown command: '" + command + "'");
-        LOGGER.info("Did you mean: " + suggestion + " ? ");
+        LOGGER.debug(I18n.get("unknownCmd") + command);
+        LOGGER.info(I18n.get("meant", suggestion, "?"));
       }
 
       // Default behavior (interpret as move)

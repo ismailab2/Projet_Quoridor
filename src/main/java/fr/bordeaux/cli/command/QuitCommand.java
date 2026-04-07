@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import org.jline.reader.LineReader;
 
@@ -38,15 +39,15 @@ public class QuitCommand implements Command {
   @Override
   public GameEngine execute(GameEngine engine) {
     try {
-      String response = reader.readLine("Save before quitting? [y/N] >> ");
+      String response = reader.readLine(I18n.get("quitSaving", " [y/N] >> "));
       if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes")) {
-        String path = reader.readLine("File path >> ");
+        String path = reader.readLine(I18n.get("filePath", " >> "));
         new SaveCommand(path).execute(engine);
       }
-      LOGGER.info("Exiting Quoridor...");
+      LOGGER.info(I18n.get("quitting"));
       return engine;
     } catch (Exception e) {
-      LOGGER.error("Error during quit process", e);
+      LOGGER.error(I18n.get("quitError"), e);
     }
     return engine;
   }
@@ -58,8 +59,8 @@ public class QuitCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  quit\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Exits the application.\n");
+    LOGGER.info("  " + I18n.get("quitDesc"));
     LOGGER.verbose("Information:");
-    LOGGER.verbose("  This command will ask you if you want to save before quitting.\n");
+    LOGGER.verbose("  " + I18n.get("quitVerb"));
   }
 }

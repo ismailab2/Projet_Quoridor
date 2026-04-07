@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
@@ -43,11 +44,11 @@ public class SaveCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info("Attempting to save game to: " + tokens[1]);
+      LOGGER.info(I18n.get("attempt", tokens[1]));
       engine.saveGame(tokens[1]);
-      LOGGER.info("Game saved successfully.");
+      LOGGER.info(I18n.get("success"));
     } catch (Exception e) {
-      LOGGER.error("Failed to save game at path: " + tokens[1], e);
+      LOGGER.error(I18n.get("failed", tokens[1]), e);
     }
     return engine;
   }
@@ -59,10 +60,10 @@ public class SaveCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  save FILE\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Saves the current game state into the specified file FILE.\n");
+    LOGGER.info("  "+ I18n.get("saveDesc"));
     LOGGER.verbose("Arguments:");
-    LOGGER.verbose("  FILE   : Destination file path (required).\n");
-    LOGGER.verbose("Example:");
+    LOGGER.verbose("  FILE   : " + I18n.get("saveFile"));
+    LOGGER.verbose(I18n.get("loadEx"));
     LOGGER.verbose("  save mygame.txt\n");
   }
 }

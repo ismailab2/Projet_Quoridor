@@ -4,6 +4,8 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
 
+import fr.bordeaux.i18n.I18n;
+
 /**
  * Manages the application configuration using a singleton pattern. This class handles loading and
  * saving settings (like timeouts, blitz mode, or shortcuts) from a persistent file located in the
@@ -58,7 +60,7 @@ public class ConfigManager {
 
       } catch (IOException e) {
 
-        System.err.println("Warning: invalid .qoridorrc file. Using defaults.");
+        System.err.println(I18n.get("warning"));
       }
     } else {
       // Default configuration values
@@ -79,7 +81,7 @@ public class ConfigManager {
       props.store(out, "Quoridor configuration");
 
     } catch (IOException e) {
-      System.err.println("Error saving .quoridorrc");
+      System.err.println(I18n.get("configError"));
     }
   }
 

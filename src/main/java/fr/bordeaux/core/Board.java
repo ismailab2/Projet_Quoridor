@@ -1,7 +1,7 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.graph.*;
-import java.util.*;
+import fr.bordeaux.i18n.I18n;
 
 /** Represents the Quoridor board. The size of the board is odd and between 3x3 and 15x15. */
 public class Board {
@@ -18,7 +18,7 @@ public class Board {
   public Board(int size) {
     if (size < 3 || size > 15 || size % 2 == 0) {
       throw new IllegalArgumentException(
-          "Size must be odd and between 3 and 15, but was : " + size);
+          I18n.get("sizeMust") + size);
     }
     // Create the graph representing the board
     graph = GraphBuilder.buildEmptyGrid(size);

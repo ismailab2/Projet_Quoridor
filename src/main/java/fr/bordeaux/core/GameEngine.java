@@ -1,6 +1,8 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.ai.MctsPlayer;
+import fr.bordeaux.i18n.I18n;
+
 import java.io.IOException;
 
 /**
@@ -60,7 +62,7 @@ public class GameEngine {
    */
   public boolean play(Move move) {
     if (state.isGameOver() || state.isPaused()) {
-      System.out.println("GAME OVER OR PAUSED");
+      System.out.println(I18n.get("wallMove"));
       return false;
     }
 
@@ -74,7 +76,7 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      System.out.println(p.getName() + " won the game!");
+      System.out.println(p.getName() + I18n.get("won"));
     }
     return true;
   }
@@ -96,7 +98,7 @@ public class GameEngine {
     try {
       fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (IOException e) {
-      System.err.println("Saving error : " + e.getMessage());
+      System.err.println(I18n.get("engineSave") + e.getMessage());
     }
   }
 
@@ -114,7 +116,7 @@ public class GameEngine {
       state.loadState(loaded);
       initializeBlitz();
     } catch (Exception e) {
-      System.err.println("Erreur chargement : " + e.getMessage());
+      System.err.println(I18n.get("engineLoad") + e.getMessage());
     }
   }
 
@@ -136,10 +138,10 @@ public class GameEngine {
     if (blitzManager != null) {
       if (newPauseState) {
         blitzManager.pause();
-        System.out.println("Timer Paused.");
+        System.out.println(I18n.get("enginePause"));
       } else {
         blitzManager.start();
-        System.out.println("Timer Resumed.");
+        System.out.println(I18n.get("engineResume"));
       }
     }
   }
@@ -152,41 +154,9 @@ public class GameEngine {
    */
   public Move hint() throws IOException {
 
-    Player current = state.getCurrentPlayer();
-
     final Move hint = MctsPlayer.hint(getState().getCurrentPlayer(), getState(), 3000, true);
 
     return hint;
-  }
-
-  /**
-   * Converts a Move object into a human-readable string (e.g., "e2-e3" or "e2h").
-   *
-   * @param move The move to convert.
-   * @return A formatted string representation of the move.
-   */
-  private String moveToString(Move move) {
-
-    if (move.getType() == Move.Type.PAWN) {
-
-      return posToString(move.getFrom()) + "-" + posToString(move.getTo());
-    }
-
-    char orientation = move.getOrientation() == Orientation.HORIZONTAL ? 'h' : 'v';
-
-    return posToString(move.getTo()) + orientation;
-  }
-
-  /**
-   * Converts a Position object into algebraic notation (e.g., "a0", "b1").
-   *
-   * @param p The position to convert.
-   * @return A string representing the coordinates.
-   */
-  private String posToString(Position p) {
-    char letter = (char) ('a' + p.getX());
-    int number = p.getY();
-    return "" + letter + number;
   }
 
   /**

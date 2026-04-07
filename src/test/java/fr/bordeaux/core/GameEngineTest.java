@@ -137,7 +137,6 @@ public class GameEngineTest {
   public void pawn_jump_over_player_diagonal() {
     p2.setPosition(new Position(1, 2));
     board.addWall(new Position(1, 2), Orientation.HORIZONTAL);
-    Move move = Move.pawn(p1.getPosition(), new Position(2, 3));
     // assertTrue(RuleChecker.isMoveLegal(state, move));
   }
 

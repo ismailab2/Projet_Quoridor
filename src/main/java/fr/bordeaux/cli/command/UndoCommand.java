@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -40,7 +41,7 @@ public class UndoCommand implements Command {
       return engine;
     }
     int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
-    LOGGER.info("Undoing " + count + " move(s)...");
+    LOGGER.info(I18n.get("undoing") + count + I18n.get("redoMove"));
 
     for (int i = 0; i < count; i++) {
       engine.getState().undo();
@@ -56,11 +57,11 @@ public class UndoCommand implements Command {
     LOGGER.info("  undo");
     LOGGER.info("  undo [N]\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Cancels previously played moves.\n");
-    LOGGER.verbose("  - If no number is specified, one move is undone.");
-    LOGGER.verbose("  - If N is specified, N moves are undone.\n");
-    LOGGER.verbose("Examples:");
-    LOGGER.verbose("  undo      -> undo last move");
-    LOGGER.verbose("  undo 2    -> undo last two moves\n");
+    LOGGER.info("  " + I18n.get("undoDesc"));
+    LOGGER.verbose("  " + I18n.get("undoOne"));
+    LOGGER.verbose("  " + I18n.get("undoNb"));
+    LOGGER.verbose(I18n.get("loadEx"));
+    LOGGER.verbose("  undo      -> "+ I18n.get("undoExOne"));
+    LOGGER.verbose("  undo 2    -> "+ I18n.get("undoExNb"));
   }
 }
