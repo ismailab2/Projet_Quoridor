@@ -55,7 +55,7 @@ public final class OptionsParser {
 
         case "-d", "--debug" -> config.setOption("debug", "true");
 
-        case "--daemon" -> config.setOption("daemon", "true");
+        case "-D", "--daemon" -> config.setOption("daemon", "true");
 
         case "-b", "--blitz" -> config.setOption("blitz", "true");
 
@@ -116,7 +116,7 @@ public final class OptionsParser {
                 throw new IllegalArgumentException("--size must be an odd number");
               }
               config.setOption("board-size", args[++i]);
-            } else if (argument >= 1 && argument <= 9999) {
+            } else if (argument >= 10 && argument <= 9999) {
               config.setOption("server", "true");
               config.setOption("server-port", args[++i]);
             }
@@ -309,6 +309,7 @@ public final class OptionsParser {
     logInfo("  -V, --version     Display version");
     logInfo("  -v, --verbose     Enable verbose mode");
     logInfo("  -d, --debug       Enable debug mode");
+    logInfo("  -D, --daemon      Launch server in headless mode");
     logInfo("");
     logInfo("Modes:");
     logInfo("  --contest, -c <file> Launch contest mode from file");

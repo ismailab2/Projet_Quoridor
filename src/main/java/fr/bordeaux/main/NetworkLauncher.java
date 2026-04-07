@@ -10,6 +10,9 @@ import java.util.Scanner;
 @SuppressWarnings("PMD.SystemPrintln")
 public class NetworkLauncher implements AppLauncher {
 
+  private static final String DEFAULT_HOST = "localhost";
+  private static final int DEFAULT_PORT = 12345;
+
   /** Multi-game server managing multiple simultaneous games and players. */
   private final MultiGameServer multiServer;
 
@@ -66,7 +69,7 @@ public class NetworkLauncher implements AppLauncher {
     Logger.getInstance().info("server start [port]");
     Logger.getInstance().info("server stop");
     Logger.getInstance().info("server list");
-    Logger.getInstance().info("join ip[:port]");
+    Logger.getInstance().info("join [ip[:port]]");
     Logger.getInstance().info("ping");
     Logger.getInstance().info("quit");
     Logger.getInstance().info("server status");
@@ -108,16 +111,12 @@ public class NetworkLauncher implements AppLauncher {
               Logger.getInstance().info(multiServer.createGame(playerIds));
             }
 
-          } else if (cmd.startsWith("join")) {
-            final String[] joinParts = cmd.split(" ");
-            if (joinParts.length < 2) {
-              Logger.getInstance().info("Usage: join ip[:port]");
-              continue;
-            }
-            final String target = joinParts[1];
+          } else if (cmd.equals("join") || cmd.startsWith("join ")) {
+            final String[] joinParts = cmd.trim().split("\\s+");
+            final String target = joinParts.length > 1 ? joinParts[1] : DEFAULT_HOST;
             final String[] hostPort = target.split(":");
             final String host = hostPort[0];
-            final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : 12345;
+            final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_PORT;
             final boolean success = client.join(host, port);
             if (!success) {
               Logger.getInstance().info("Failed to connect to " + host + ":" + port);

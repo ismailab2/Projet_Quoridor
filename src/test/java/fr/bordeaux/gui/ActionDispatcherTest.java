@@ -357,4 +357,30 @@ class ActionDispatcherTest extends ApplicationTest {
           }
         });
   }
+
+  @Test
+  void testPingServerShowsNetworkReply() throws IOException {
+    GameEngine engine = mock(GameEngine.class);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = spy(new ActionDispatcher(engine, fileHandler));
+
+    doNothing().when(dispatcher).showMessage(anyString(), anyString(), anyString());
+
+    dispatcher.dispatch(Action.PING_SERVER);
+
+    verify(dispatcher).showMessage(eq("Network"), eq("Ping Server"), contains("Not connected"));
+  }
+
+  @Test
+  void testQuitServerShowsNetworkReply() throws IOException {
+    GameEngine engine = mock(GameEngine.class);
+    FileHandler fileHandler = mock(FileHandler.class);
+    ActionDispatcher dispatcher = spy(new ActionDispatcher(engine, fileHandler));
+
+    doNothing().when(dispatcher).showMessage(anyString(), anyString(), anyString());
+
+    dispatcher.dispatch(Action.QUIT_SERVER);
+
+    verify(dispatcher).showMessage(eq("Network"), eq("Quit Server"), contains("Client exited"));
+  }
 }

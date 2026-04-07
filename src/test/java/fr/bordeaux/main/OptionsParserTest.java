@@ -147,6 +147,12 @@ public class OptionsParserTest {
   }
 
   @Test
+  public void testDaemonShort() {
+    OptionsParser.parse(new String[] {"-D"}, config);
+    assertEquals("true", config.getOption("daemon", "false"));
+  }
+
+  @Test
   public void testBlitz() {
     OptionsParser.parse(new String[] {"-b"}, config);
     assertEquals("true", config.getOption("blitz", "false"));

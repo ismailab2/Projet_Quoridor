@@ -108,8 +108,8 @@ public class ActionDispatcher {
       case NEW_NETWORK_GAME -> createNetworkGame();
       case JOIN_SERVER -> joinServer();
       case SET_NETWORK_NAME -> setNetworkName();
-      case PING_SERVER -> networkClient.ping();
-      case QUIT_SERVER -> networkClient.quit();
+      case PING_SERVER -> showMessage("Network", "Ping Server", networkClient.ping());
+      case QUIT_SERVER -> showMessage("Network", "Quit Server", networkClient.quit());
       default -> {}
     }
   }

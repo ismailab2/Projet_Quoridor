@@ -100,10 +100,13 @@ public class GameClient {
     listenerThread.start();
   }
 
-  /** Sends "PING" and waits for "PONG". Measures RTT. */
-  public void ping() {
-    if (!checkConnection()) {
-      return;
+  /**
+   * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
+   * receiving is measured and displayed.
+   */
+  public String ping() {
+   if (!checkConnection()) {
+      return "Not connected to any server.";
     }
 
     try {
@@ -117,20 +120,31 @@ public class GameClient {
       final long rtt = System.currentTimeMillis() - start;
 
       if (res != null) {
-        Logger.getInstance().info("Server: " + res + " TIME=" + rtt + "ms");
+        final String message = "Server: " + res + " TIME=" + rtt + "ms";
+        Logger.getInstance().info(message);
+        return message;
       } else {
         expectingDirectReply.set(false);
-        Logger.getInstance().info("Ping timeout: no response within 5 seconds.");
+        final String message = "Ping timeout: no response within 5 seconds.";
+        Logger.getInstance().info(message);
+        return message;
       }
     } catch (final InterruptedException exception) {
       Thread.currentThread().interrupt();
-      Logger.getInstance().info("Ping interrupted.");
+
+      final String message = "Ping interrupted.";
+      Logger.getInstance().info(message);
+      return message;
     }
   }
 
-  /** Sends "QUIT", waits for "BYE", and closes socket. */
-  public void quit() {
-    if (checkConnection()) {
+  /**
+   * Sends a "QUIT" command to the server, waits for the "BYE" response, and then closes the socket
+   * connection.
+   */
+  public String quit() {
+    String message = "Client exited.";
+ if (checkConnection()) {
       try {
         expectingDirectReply.set(true);
         Logger.getInstance().info("Client: QUIT");
@@ -138,13 +152,16 @@ public class GameClient {
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
-          Logger.getInstance().info("Server: BYE");
+          message = "Server: BYE";
+          Logger.getInstance().info(message);
         } else if (res != null) {
-          Logger.getInstance().info("Server: " + res);
+          message = "Server: " + res;
+          Logger.getInstance().info(message);
         } else {
           expectingDirectReply.set(false);
-          Logger.getInstance().info("No BYE received, closing anyway.");
-        }
+          message = "No BYE received, closing anyway.";
+          Logger.getInstance().info(message);
+       }
 
         socket.close();
 
@@ -154,7 +171,9 @@ public class GameClient {
         }
       }
     }
+
     Logger.getInstance().info("Client exited.");
+    return message;
   }
 
   /** Broadcasts "DISCOVER" and listens for server responses for 5s. */
