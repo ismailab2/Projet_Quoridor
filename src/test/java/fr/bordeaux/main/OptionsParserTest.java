@@ -461,6 +461,18 @@ public class OptionsParserTest {
   }
 
   @Test
+  public void testPositionalArgumentAsLoadFile() {
+    OptionsParser.parse(new String[] {"save_game.txt"}, config);
+    assertEquals("save_game.txt", config.getOption("load-file", null));
+  }
+
+  @Test
+  public void testMultiplePositionalArguments() {
+    OptionsParser.parse(new String[] {"file1.txt", "file2.txt"}, config);
+    assertEquals("file2.txt", config.getOption("load-file", null));
+  }
+
+  @Test
   public void testAiMoreThanTwoPlayers() {
     config.setOption("nb-players", "4");
     config.setOption("ai1", "true");
