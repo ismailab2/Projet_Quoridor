@@ -18,7 +18,9 @@ public class HintCommand implements Command {
   private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a new HintCommand. */
-  public HintCommand() {}
+  public HintCommand() {
+    LOGGER.debug("Instantiating HintCommand");
+  }
 
   /**
    * Executes the hint command, suggesting the best move. state and suggests the best move for the

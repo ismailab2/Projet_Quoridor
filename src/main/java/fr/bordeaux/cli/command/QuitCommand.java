@@ -36,7 +36,7 @@ public class QuitCommand implements Command {
   public GameEngine execute(final GameEngine engine) {
     try {
       final String response = reader.readLine("Save before quitting? [y/N] >> ");
-      if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes")) {
+      if ("y".equalsIgnoreCase(response) || "yes".equalsIgnoreCase(response)) {
         final String path = reader.readLine("File path >> ");
         new SaveCommand(path).execute(engine);
       }

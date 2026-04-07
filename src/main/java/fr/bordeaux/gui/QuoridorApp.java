@@ -30,7 +30,7 @@ public class QuoridorApp extends Application {
 
   /** Default constructor. */
   public QuoridorApp() {
-    super();
+    Logger.getInstance().debug("Instantiating QuoridorApp");
   }
 
   /**

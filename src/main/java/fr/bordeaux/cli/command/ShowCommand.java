@@ -210,7 +210,7 @@ public class ShowCommand implements Command {
    * @return wall representation based on graph.
    */
   private String printWall(final Board board, final int row, final int col, final boolean under) {
-    String result;
+    final String result;
     if (under) {
       if (row >= board.getSize() - 1) {
         result = "  ";

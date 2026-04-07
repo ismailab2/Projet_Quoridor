@@ -11,8 +11,10 @@ public class CliLauncher implements AppLauncher {
   /** Default board size for Quoridor (9x9) */
   private static final int DEFAULT_BOARD_SIZE = 9;
 
-  /** CliLaucher */
-  public CliLauncher() {}
+  /** Default constructor. */
+  public CliLauncher() {
+    Logger.getInstance().debug("Instantiating CliLauncher");
+  }
 
   /** Starts the CLI interface. Exceptions are logged via Logger. */
   @Override

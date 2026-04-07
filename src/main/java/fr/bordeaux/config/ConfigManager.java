@@ -34,7 +34,7 @@ public final class ConfigManager {
    * @return Path to the config file
    */
   private Path getFilePath() {
-    String customPath = System.getProperty("quoridor.config.file");
+    final String customPath = System.getProperty("quoridor.config.file");
     if (customPath != null) {
       return Paths.get(customPath);
     }
@@ -47,9 +47,9 @@ public final class ConfigManager {
     final Path path = getFilePath();
     if (Files.exists(path)) {
 
-      try (final InputStream in = Files.newInputStream(path)) {
+      try (final InputStream inputStream = Files.newInputStream(path)) {
 
-        props.load(in);
+        props.load(inputStream);
 
       } catch (final IOException e) {
 

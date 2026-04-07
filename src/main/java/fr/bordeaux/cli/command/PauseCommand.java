@@ -10,7 +10,9 @@ public class PauseCommand implements Command {
   private static final Logger LOGGER = Logger.getInstance();
 
   /** Creates a PauseCommand. */
-  public PauseCommand() {}
+  public PauseCommand() {
+    LOGGER.debug("Instantiating PauseCommand");
+  }
 
   /**
    * Executes the pause command. Disables Blitz mode if it is currently active.

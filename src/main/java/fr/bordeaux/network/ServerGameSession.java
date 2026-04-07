@@ -151,7 +151,7 @@ public class ServerGameSession {
    * @return current player session, or null if invalid index
    */
   public ClientSession getCurrentPlayerSession() {
-    int currentIndex = gameState.getCurrentIndexPlayer();
+    final int currentIndex = gameState.getCurrentIndexPlayer();
     if (currentIndex < 0 || currentIndex >= players.size()) {
       return null;
     }

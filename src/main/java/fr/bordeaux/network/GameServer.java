@@ -14,7 +14,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GameServer {
 
   /** Default constructor. Initializes a new GameServer instance. */
-  public GameServer() {}
+  public GameServer() {
+    this.running = new AtomicBoolean(false);
+    this.lastPing = System.currentTimeMillis();
+  }
 
   /** TCP server socket */
   private ServerSocket serverSocket;
@@ -23,7 +26,7 @@ public class GameServer {
   private Socket clientSocket;
 
   /** Indicates whether the server is running */
-  private final AtomicBoolean running = new AtomicBoolean(false);
+  private final AtomicBoolean running;
 
   /** UDP broadcaster for server discovery */
   private ServerBroadcaster broadcaster;
@@ -32,7 +35,7 @@ public class GameServer {
   private Thread broadcastThread;
 
   /** Timestamp of the last received PING */
-  private long lastPing = System.currentTimeMillis();
+  private long lastPing;
 
   /**
    * Starts server on port. Launches broadcaster and timeout checker.
@@ -97,29 +100,29 @@ public class GameServer {
    * @param socket Client socket.
    */
   private void handleClient(final Socket socket) {
-    try (BufferedReader in =
+    try (BufferedReader reader =
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-        PrintWriter out =
+        PrintWriter writer =
             new PrintWriter(
                 new java.io.OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),
                 true)) {
 
       String line;
 
-      while ((line = in.readLine()) != null && running.get()) {
+      while ((line = reader.readLine()) != null && running.get()) {
         Logger.getInstance().info("CLIENT -> {0}", line);
 
         if (line.startsWith("PING")) {
           lastPing = System.currentTimeMillis();
-          out.println("PONG");
+          writer.println("PONG");
 
-        } else if (line.equals("QUIT")) {
-          out.println("BYE");
+        } else if ("QUIT".equals(line)) {
+          writer.println("BYE");
           break;
 
         } else {
-          out.println("OK");
+          writer.println("OK");
         }
       }
 

@@ -32,7 +32,7 @@ public final class ContestLauncher implements AppLauncher {
 
     assert filePath != null;
     if (!Files.exists(Path.of(filePath))) {
-      Logger.getInstance().error("[contest] File not found: " + filePath);
+      Logger.getInstance().error("[contest] File not found: {0}", filePath);
     }
 
     try {
@@ -41,19 +41,21 @@ public final class ContestLauncher implements AppLauncher {
       final Move best = computeBestMove(state, config);
       System.out.println(moveToString(best));
     } catch (final IOException exception) {
-      Logger.getInstance().error("[contest] I/O error reading file: " + exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("[contest] I/O error reading file: {0}", exception.getMessage());
+      }
       System.exit(1);
     } catch (final GameLoadException exception) {
-      Logger.getInstance()
-          .error(
-              "[contest] Invalid save file ["
-                  + exception.getErrorType()
-                  + "] at line "
-                  + exception.getLineNumber()
-                  + ": "
-                  + exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance()
+            .error(
+                "[contest] Invalid save file [{0}] at line {1,number,0}: {2}",
+                exception.getErrorType(), exception.getLineNumber(), exception.getMessage());
+      }
     } catch (final Exception exception) {
-      Logger.getInstance().error("[contest] Unexpected error: " + exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("[contest] Unexpected error: {0}", exception.getMessage());
+      }
     }
   }
 
@@ -78,11 +80,12 @@ public final class ContestLauncher implements AppLauncher {
     try {
       return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, false);
     } catch (final Exception exception) {
-      Logger.getInstance()
-          .error(
-              "[contest] MCTS failed ("
-                  + exception.getMessage()
-                  + "), falling back to first legal move.");
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance()
+            .error(
+                "[contest] MCTS failed ({0}), falling back to first legal move.",
+                exception.getMessage());
+      }
       final List<Move> legal = state.generateLegalMoves();
       if (legal.isEmpty()) {
         throw new IllegalStateException("No legal moves available.", exception);

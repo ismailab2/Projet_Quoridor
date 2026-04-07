@@ -1,10 +1,10 @@
 package fr.bordeaux.main;
 
 /** Factory for creating the appropriate {@link AppLauncher} based on the {@link AppMode}. */
-public class AppLauncherFactory {
+public final class AppLauncherFactory {
 
   /** Default constructor. Constructs a new AppLauncherFactory instance. */
-  public AppLauncherFactory() {}
+  private AppLauncherFactory() {}
 
   /**
    * Creates an AppLauncher corresponding to the given mode.
@@ -12,7 +12,7 @@ public class AppLauncherFactory {
    * @param mode the selected application mode
    * @return the appropriate launcher implementation
    */
-  public static AppLauncher create(AppMode mode) {
+  public static AppLauncher create(final AppMode mode) {
     if (mode == AppMode.GUI) {
       return new GuiLauncher();
     }

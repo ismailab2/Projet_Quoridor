@@ -32,7 +32,7 @@ public final class GraphBuilder {
           addUndirectedEdge(adjacencyList, currentVertex, (row + 1) * size + col);
         }
         if (col < size - 1) {
-          addUndirectedEdge(adjacencyList, currentVertex, row * size + (col + 1));
+          addUndirectedEdge(adjacencyList, currentVertex, row * size + col + 1);
         }
       }
     }

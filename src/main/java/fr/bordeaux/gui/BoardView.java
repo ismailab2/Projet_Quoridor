@@ -110,15 +110,15 @@ public final class BoardView extends GridPane {
     final double boardSize = size * DEFAULT_CELL_SIZE;
     final double percent = 100.0 / size;
     for (int index = 0; index < size; index++) {
-      final ColumnConstraints cc = new ColumnConstraints();
-      cc.setPercentWidth(percent);
-      cc.setHalignment(HPos.CENTER);
-      getColumnConstraints().add(cc);
+      final ColumnConstraints columnConstraints = new ColumnConstraints();
+      columnConstraints.setPercentWidth(percent);
+      columnConstraints.setHalignment(HPos.CENTER);
+      getColumnConstraints().add(columnConstraints);
 
-      final RowConstraints rc = new RowConstraints();
-      rc.setPercentHeight(percent);
-      rc.setValignment(VPos.CENTER);
-      getRowConstraints().add(rc);
+      final RowConstraints rowConstraints = new RowConstraints();
+      rowConstraints.setPercentHeight(percent);
+      rowConstraints.setValignment(VPos.CENTER);
+      getRowConstraints().add(rowConstraints);
     }
     final double cellSize = getCellSize();
     for (int row = 0; row < size; row++) {
@@ -168,7 +168,7 @@ public final class BoardView extends GridPane {
           wall.setArcHeight(WALL_ARC);
           wall.setMouseTransparent(true);
           add(wall, col, row, 2, 1);
-          GridPane.setValignment(wall, VPos.BOTTOM);
+          setValignment(wall, VPos.BOTTOM);
           wall.setTranslateY(wallThickness / 2.0);
         }
         if (!graph.hasEdge(cellU1, cellU2) && !graph.hasEdge(cellV1, cellV2)) {
@@ -178,7 +178,7 @@ public final class BoardView extends GridPane {
           wall.setArcHeight(WALL_ARC);
           wall.setMouseTransparent(true);
           add(wall, col, row, 1, 2);
-          GridPane.setHalignment(wall, HPos.RIGHT);
+          setHalignment(wall, HPos.RIGHT);
           wall.setTranslateX(wallThickness / 2.0);
         }
       }
@@ -324,13 +324,13 @@ public final class BoardView extends GridPane {
         hSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
         add(hSlot, col, row, 2, 1);
-        GridPane.setValignment(hSlot, VPos.BOTTOM);
+        setValignment(hSlot, VPos.BOTTOM);
         hSlot.setTranslateY(wallThickness / 2.0);
         final Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2.0);
         vSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
         add(vSlot, col, row, 1, 2);
-        GridPane.setHalignment(vSlot, HPos.RIGHT);
+        setHalignment(vSlot, HPos.RIGHT);
         vSlot.setTranslateX(wallThickness / 2.0);
       }
     }

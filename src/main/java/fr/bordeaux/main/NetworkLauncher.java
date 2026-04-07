@@ -52,7 +52,7 @@ public class NetworkLauncher implements AppLauncher {
       multiServer.start(port);
 
       if ("true".equals(daemonMode)) {
-        Logger.getInstance().info("Server started in daemon mode on port " + port);
+        Logger.getInstance().info("Server started in daemon mode on port {0,number,0}", port);
         while (true) {
           try {
             Thread.sleep(1000);
@@ -90,16 +90,22 @@ public class NetworkLauncher implements AppLauncher {
             final String[] parts = cmd.split(" ");
             final int port = (parts.length > 2) ? Integer.parseInt(parts[2]) : 12345;
             multiServer.start(port);
-          } else if (cmd.equals("server stop")) {
+          } else if ("server stop".equals(cmd)) {
             multiServer.stop();
-          } else if (cmd.equals("server status")) {
-            Logger.getInstance().info(multiServer.getServerStatus());
+          } else if ("server status".equals(cmd)) {
+            if (Logger.getInstance().isInfoEnabled()) {
+              Logger.getInstance().info("{0}", multiServer.getServerStatus());
+            }
 
-          } else if (cmd.equals("players")) {
-            Logger.getInstance().info(multiServer.listPlayers());
+          } else if ("players".equals(cmd)) {
+            if (Logger.getInstance().isInfoEnabled()) {
+              Logger.getInstance().info("{0}", multiServer.listPlayers());
+            }
 
-          } else if (cmd.equals("scoreboard")) {
-            Logger.getInstance().info(multiServer.getScoreboard());
+          } else if ("scoreboard".equals(cmd)) {
+            if (Logger.getInstance().isInfoEnabled()) {
+              Logger.getInstance().info("{0}", multiServer.getScoreboard());
+            }
 
           } else if (cmd.startsWith("new ")) {
             final String[] parts = cmd.split(" ");
@@ -108,7 +114,9 @@ public class NetworkLauncher implements AppLauncher {
             } else {
               final String[] playerIds = new String[parts.length - 1];
               System.arraycopy(parts, 1, playerIds, 0, playerIds.length);
-              Logger.getInstance().info(multiServer.createGame(playerIds));
+              if (Logger.getInstance().isInfoEnabled()) {
+                Logger.getInstance().info("{0}", multiServer.createGame(playerIds));
+              }
             }
 
           } else if (cmd.equals("join") || cmd.startsWith("join ")) {
@@ -119,20 +127,20 @@ public class NetworkLauncher implements AppLauncher {
             final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_PORT;
             final boolean success = client.join(host, port);
             if (!success) {
-              Logger.getInstance().info("Failed to connect to " + host + ":" + port);
+              Logger.getInstance().info("Failed to connect to {0}:{1,number,0}", host, port);
             }
           } else if (cmd.startsWith("hello ")) {
             final String name = cmd.substring("hello ".length()).trim();
             client.hello(name);
-          } else if (cmd.equals("ping")) {
+          } else if ("ping".equals(cmd)) {
             client.ping();
           } else if (cmd.startsWith("move ")) {
             final String move = cmd.substring("move ".length()).trim();
             client.sendMove(move);
-          } else if (cmd.equals("server list")) {
+          } else if ("server list".equals(cmd)) {
             client.serverList();
-          } else if (cmd.equals("quit") || cmd.equals("exit")) {
-            if (cmd.equals("quit")) {
+          } else if ("quit".equals(cmd) || "exit".equals(cmd)) {
+            if ("quit".equals(cmd)) {
               client.quit();
             }
             running = false;
@@ -140,7 +148,9 @@ public class NetworkLauncher implements AppLauncher {
             Logger.getInstance().info("Unknown command");
           }
         } catch (final Exception exception) {
-          Logger.getInstance().info("Error: " + exception.getMessage());
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info("Error: {0}", exception.getMessage());
+          }
         }
       }
     }

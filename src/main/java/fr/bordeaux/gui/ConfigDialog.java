@@ -82,7 +82,7 @@ public final class ConfigDialog {
   }
 
   /** Returns true if the key is only a modifier key. */
-  private static boolean isModifierKey(KeyCode code) {
+  private static boolean isModifierKey(final KeyCode code) {
     return code == KeyCode.CONTROL || code == KeyCode.SHIFT || code == KeyCode.ALT;
   }
 
