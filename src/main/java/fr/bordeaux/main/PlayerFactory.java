@@ -112,14 +112,17 @@ public final class PlayerFactory {
    */
   private static int depthBasedOnTime(final int reflexionTime) {
     final int result;
-    if (reflexionTime <= 5) {
-      result = 2;
-    } else if (reflexionTime <= 7) {
+    if (reflexionTime <= 2) {
       result = 3;
-    } else if (reflexionTime <= 10) {
+    }
+    else if (reflexionTime <= 5) {
       result = 4;
-    } else {
+    } else if (reflexionTime <= 8) {
       result = 5;
+    } else if (reflexionTime <= 12) {
+      result = 6;
+    } else {
+      result = 7;
     }
 
     return result;

@@ -188,8 +188,8 @@ public class CliApp {
   }
 
   /**
-   * Starts the CLI loop. Displays the board and reads commands until stopped. the application is
-   * stopped.
+   * <p>Starts the CLI loop</p>. 
+   * Displays the board, reads commands until the application is stopped.
    *
    * @throws IOException Possible if mcts with NN selection used
    */
@@ -200,10 +200,7 @@ public class CliApp {
     }
     while (running) {
 
-      if (!engine.getState().getCurrentPlayer().isAI()) {
-        final String line = reader.readLine(">> ");
-        fetch(line);
-      } else {
+      if (engine.getState().getCurrentPlayer().isAI()) {
         if (terminal != null && terminal.writer() != null) {
           terminal
               .writer()
@@ -212,6 +209,9 @@ public class CliApp {
         }
         executeAiTurn();
         new ShowCommand(new String[] {CMD_SHOW, OPT_BOARD}).execute(engine);
+      } else {
+        final String line = reader.readLine(">> ");
+        fetch(line);
       }
       if (engine.getState().isGameOver()) {
         running = false;
