@@ -19,6 +19,10 @@ public class CliLauncher implements AppLauncher {
   public void launch(final String[] args, final ConfigManager config) {
     try {
       final GameEngine engine = GameEngineFactory.createGameEngine(config);
+      final String loadFile = config.getOption("load-file", null);
+      if (loadFile != null) {
+        engine.loadGame(loadFile);
+      }
       new CliApp(engine).run();
     } catch (final Exception e) {
       if (Logger.getInstance().isErrorEnabled()) {

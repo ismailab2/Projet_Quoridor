@@ -181,7 +181,9 @@ public class ShowCommand implements Command {
         boolean playerFound = false;
         for (final Player player : engine.getState().getPlayers()) {
           if (player.getPosition().equals(new Position(row, col)) && !player.isDisabled()) {
-            writer.print(player.getColor().getId() + printWall(board, row, col, false));
+            writer.print(
+                player.getColor().getId()
+                    + ((col != boardSize - 1) ? printWall(board, row, col, false) : " "));
             playerFound = true;
             break;
           }
@@ -208,20 +210,24 @@ public class ShowCommand implements Command {
    * @return wall representation based on graph.
    */
   private String printWall(final Board board, final int row, final int col, final boolean under) {
-    final String result;
+    String result;
     if (under) {
-      if (row >= board.getSize() - 1
-          || !board.getGraph().hasEdge(board.getCellId(row, col), board.getCellId(row + 1, col))) {
-        result = "X ";
+      if (row >= board.getSize() - 1) {
+        result = "  ";
       } else {
-        result = ". ";
+        result =
+            board.getGraph().hasEdge(board.getCellId(row, col), board.getCellId(row + 1, col))
+                ? ". "
+                : "X ";
       }
     } else {
-      if (col >= board.getSize() - 1
-          || !board.getGraph().hasEdge(board.getCellId(row, col), board.getCellId(row, col + 1))) {
-        result = "X";
-      } else {
+      if (col >= board.getSize() - 1) {
         result = " ";
+      } else {
+        result =
+            board.getGraph().hasEdge(board.getCellId(row, col), board.getCellId(row, col + 1))
+                ? " "
+                : "X";
       }
     }
     return result;

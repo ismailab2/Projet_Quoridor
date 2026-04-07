@@ -84,7 +84,7 @@ public class QuoridorApp extends Application {
    *
    * @param panel the panel to configure
    */
-  private void setupPanelSize(final PlayerPanel panel) {
+  static void setupPanelSize(final PlayerPanel panel) {
     panel.setMinWidth(PANEL_WIDTH);
     panel.setMaxWidth(PANEL_WIDTH);
     panel.setPrefWidth(PANEL_WIDTH);
@@ -96,7 +96,7 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to wrap
    * @return a StackPane containing the board view
    */
-  private StackPane buildBoardContainer(final BoardView boardView) {
+  static StackPane buildBoardContainer(final BoardView boardView) {
     final StackPane container = new StackPane(boardView);
     container.setAlignment(Pos.CENTER);
     BorderPane.setAlignment(container, Pos.CENTER);
@@ -111,7 +111,7 @@ public class QuoridorApp extends Application {
    * @param panels array of player panels
    * @return the configured BorderPane
    */
-  private BorderPane buildRootLayout(
+  static BorderPane buildRootLayout(
       final MainMenuBar menuBar, final StackPane boardContainer, final PlayerPanel[] panels) {
 
     final BorderPane root = new BorderPane();
@@ -286,7 +286,7 @@ public class QuoridorApp extends Application {
         () -> {
           if (!state.isGameOver() && !state.isPaused()) {
             final Player currentPlayer = state.getCurrentPlayer();
-            if (currentPlayer.isAI() && aiComputing.get() != currentPlayer) {
+            if (currentPlayer.isAI() && aiComputing.compareAndSet(null, currentPlayer)) {
               final Thread aiThread =
                   new Thread(
                       () -> {

@@ -227,30 +227,28 @@ public final class BoardView extends GridPane {
   /** Poulse animation for the current player's pawn. */
   public void highlightCurrentPlayer() {
     final GameState state = engine.getState();
-    if (state.isGameOver()) {
-      return;
+    if (!state.isGameOver()) {
+      final Player current = state.getCurrentPlayer();
+      final Position pos = current.getPosition();
+      final int posX = pos.getX();
+      final int posY = pos.getY();
+      final StackPane cell = cells[posX][posY];
+      final Rectangle pawn =
+          cell.getChildren().stream()
+              .filter(n -> n instanceof Rectangle)
+              .map(n -> (Rectangle) n)
+              .findFirst()
+              .orElse(null);
+      if (pawn != null) {
+        final FadeTransition fadeTransition =
+            new FadeTransition(Duration.seconds(PULSE_DURATION), pawn);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(PULSE_MIN_OPACITY);
+        fadeTransition.setCycleCount(FadeTransition.INDEFINITE);
+        fadeTransition.setAutoReverse(true);
+        fadeTransition.play();
+      }
     }
-    final Player current = state.getCurrentPlayer();
-    final Position pos = current.getPosition();
-    final int posX = pos.getX();
-    final int posY = pos.getY();
-    final StackPane cell = cells[posX][posY];
-    final Rectangle pawn =
-        cell.getChildren().stream()
-            .filter(n -> n instanceof Rectangle)
-            .map(n -> (Rectangle) n)
-            .findFirst()
-            .orElse(null);
-    if (pawn == null) {
-      return;
-    }
-    final FadeTransition fadeTransition =
-        new FadeTransition(Duration.seconds(PULSE_DURATION), pawn);
-    fadeTransition.setFromValue(1.0);
-    fadeTransition.setToValue(PULSE_MIN_OPACITY);
-    fadeTransition.setCycleCount(FadeTransition.INDEFINITE);
-    fadeTransition.setAutoReverse(true);
-    fadeTransition.play();
   }
 
   /**
@@ -261,18 +259,17 @@ public final class BoardView extends GridPane {
   public void highlightAccessibleCells(final Player player) {
     final GameState state = engine.getState();
     final Player currentPlayer = state.getCurrentPlayer();
-    if (currentPlayer != player || player.isAI()) {
-      return;
-    }
-    for (final StackPane[] row : cells) {
-      for (final StackPane cell : row) {
-        cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+    if (currentPlayer == player && !player.isAI()) {
+      for (final StackPane[] row : cells) {
+        for (final StackPane cell : row) {
+          cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+        }
       }
-    }
-    for (final Position movePos : state.getLegalMoves(player)) {
-      final int posX = movePos.getX();
-      final int posY = movePos.getY();
-      cells[posX][posY].setStyle("-fx-border-color: black; -fx-background-color: lightgreen;");
+      for (final Position movePos : state.getLegalMoves(player)) {
+        final int posX = movePos.getX();
+        final int posY = movePos.getY();
+        cells[posX][posY].setStyle("-fx-border-color: black; -fx-background-color: lightgreen;");
+      }
     }
   }
 
@@ -285,14 +282,13 @@ public final class BoardView extends GridPane {
   public void handleCellClick(final int row, final int col) {
     final GameState state = engine.getState();
     final Player current = state.getCurrentPlayer();
-    if (current.isAI()) {
-      return;
-    }
-    final Position from = current.getPosition();
-    final Position to = new Position(row, col);
-    final Move move = Move.pawn(from, to);
-    if (engine.play(move)) {
-      drawBoard();
+    if (!current.isAI()) {
+      final Position from = current.getPosition();
+      final Position to = new Position(row, col);
+      final Move move = Move.pawn(from, to);
+      if (engine.play(move)) {
+        drawBoard();
+      }
     }
   }
 
@@ -305,15 +301,15 @@ public final class BoardView extends GridPane {
    */
   public void handleWallClick(final int row, final int col, final MouseButton button) {
     final GameState state = engine.getState();
-    if (state.getCurrentPlayer().isAI()) {
-      return;
-    }
-    final Orientation orientation =
-        (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
-    final Move wallMove = Move.wall(new Position(row, col), orientation);
-    if (RuleChecker.isMoveLegal(state, wallMove)) {
-      engine.play(wallMove);
-      drawBoard();
+    final Player current = state.getCurrentPlayer();
+    if (!current.isAI()) {
+      final Orientation orientation =
+          (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+      final Move wallMove = Move.wall(new Position(row, col), orientation);
+      if (RuleChecker.isMoveLegal(state, wallMove)) {
+        engine.play(wallMove);
+        drawBoard();
+      }
     }
   }
 
@@ -366,10 +362,7 @@ public final class BoardView extends GridPane {
         event -> {
           final GameState state = engine.getState();
           final Player current = state.getCurrentPlayer();
-          if (current.isAI()) {
-            return;
-          }
-          if (event.getButton() == MouseButton.SECONDARY) {
+          if (!current.isAI() && event.getButton() == MouseButton.SECONDARY) {
             final Move wallMove = Move.wall(new Position(row, col), orientation);
             if (engine.play(wallMove)) {
               drawBoard();
@@ -382,14 +375,14 @@ public final class BoardView extends GridPane {
    * @return cell size in pixels.
    */
   private double getCellSize() {
-    final GameState state = engine.getState();
-    final Board board = state.getBoard();
+    final Board board = engine.getState().getBoard();
     final int size = board.getSize();
     final double available = Math.min(getWidth(), getHeight());
-    if (available <= 0.0) {
-      return (double) DEFAULT_CELL_SIZE;
+    double cellSize = (double) DEFAULT_CELL_SIZE;
+    if (available > 0.0) {
+      cellSize = available / size;
     }
-    return available / size;
+    return cellSize;
   }
 
   /**

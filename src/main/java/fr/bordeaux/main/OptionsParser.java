@@ -166,7 +166,12 @@ public final class OptionsParser {
           // Handled elsewhere (AppModeResolver)
         }
 
-        default -> throw new IllegalArgumentException("Invalid option: " + arg);
+        default -> {
+          if (arg.startsWith("-")) {
+            throw new IllegalArgumentException("Invalid option: " + arg);
+          }
+          config.setOption("load-file", arg);
+        }
       }
       i++;
     }
