@@ -6,6 +6,7 @@ import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -57,7 +58,7 @@ public class CliLauncher implements AppLauncher {
     try {
       new CliApp(engine).run();
     } catch (Exception e) {
-      Logger.getInstance().error("CLI Error: " + e.getMessage());
+      Logger.getInstance().error(I18n.get("cliError") + e.getMessage());
     }
   }
 }

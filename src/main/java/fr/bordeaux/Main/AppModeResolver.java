@@ -47,7 +47,6 @@ public final class AppModeResolver {
           return AppMode.NETWORK;
 
         case "--cli":
-        case "-c":
           return AppMode.CLI;
       }
     }

@@ -1,6 +1,8 @@
 package fr.bordeaux.gui;
 
 import java.io.File;
+
+import fr.bordeaux.i18n.I18n;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -35,7 +37,7 @@ public class FileHandler {
    * @return the absolute path of the selected file, or {@code null} if the user cancelled
    */
   public String chooseSaveFile() {
-    final FileChooser chooser = createBaseChooser("Save the game");
+    final FileChooser chooser = createBaseChooser(I18n.get("saveTheGame"));
     chooser.setInitialFileName("quoridor_save.txt");
 
     final File file = chooser.showSaveDialog(this.stage);
@@ -48,7 +50,7 @@ public class FileHandler {
    * @return the absolute path of the selected file, or {@code null} if the user cancelled
    */
   public String chooseLoadFile() {
-    final FileChooser chooser = createBaseChooser("Load a game");
+    final FileChooser chooser = createBaseChooser(I18n.get("loadAGame"));
 
     final File file = chooser.showOpenDialog(this.stage);
     return file == null ? null : file.getAbsolutePath();

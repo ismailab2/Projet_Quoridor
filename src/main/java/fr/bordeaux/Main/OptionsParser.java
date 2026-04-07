@@ -1,6 +1,7 @@
 package fr.bordeaux.Main;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /**
@@ -100,7 +101,7 @@ public final class OptionsParser {
               config.setOption("server-port", args[++i]);
             }
           } else {
-            throw new IllegalArgumentException("--server requires a integer or a port");
+            throw new IllegalArgumentException("--server "+I18n.get("requiresIntPort"));
           }
         }
 
@@ -109,7 +110,7 @@ public final class OptionsParser {
             config.setOption("server", "true");
             config.setOption("server-port", args[++i]);
           } else {
-            throw new IllegalArgumentException("--server requires a port");
+            throw new IllegalArgumentException("--server "+I18n.get("requirePort"));
           }
         }
 
@@ -117,7 +118,7 @@ public final class OptionsParser {
           if (i + 1 < args.length) {
             config.setOption("nb-players", args[++i]);
           } else {
-            throw new IllegalArgumentException("--players requires an integer between 2 and 4");
+            throw new IllegalArgumentException("--players "+I18n.get("requireInter"));
           }
         }
 
@@ -129,7 +130,7 @@ public final class OptionsParser {
               config.setOption("nb-walls", args[++i]);
             }
           } else {
-            throw new IllegalArgumentException("--walls requires an integer");
+            throw new IllegalArgumentException("--walls "+I18n.get("requireInt"));
           }
         }
 
@@ -137,7 +138,7 @@ public final class OptionsParser {
           if (i + 1 < args.length) {
             config.setOption("board-size", args[++i]);
           } else {
-            throw new IllegalArgumentException("--walls requires an integer");
+            throw new IllegalArgumentException("--walls "+I18n.get("requireInt"));
           }
         }
 
@@ -145,7 +146,7 @@ public final class OptionsParser {
           // Handled elsewhere (AppModeResolver)
         }
 
-        default -> throw new IllegalArgumentException("Invalid option: " + arg);
+        default -> throw new IllegalArgumentException(I18n.get("invalidOpt", arg));
       }
     }
   }
@@ -174,7 +175,7 @@ public final class OptionsParser {
     for (final String v : values) {
       final String trimmed = v.trim();
       if (!trimmed.equals("UCT") && !trimmed.equals("ML")) {
-        throw new IllegalArgumentException("Invalid option: " + trimmed + " for MCTS selection.");
+        throw new IllegalArgumentException(I18n.get("invalidOpt", trimmed, I18n.get("mctsSelect")));
       }
     }
 
@@ -202,13 +203,13 @@ public final class OptionsParser {
 
     final boolean blitz = config.getBoolean("blitz", false);
     if (!blitz) {
-      logInfo("--time nécessite d'activer le mode blitz. Il a donc été ignoré.");
+      logInfo("--time "+I18n.get("needsBlitz"));
     }
     if (index < args.length) {
       final String value = args[index];
       config.setOption("timeout", value);
     } else {
-      throw new IllegalArgumentException("--time requires a value");
+      throw new IllegalArgumentException("--time "+I18n.get("requireVal"));
     }
   }
 
@@ -219,21 +220,21 @@ public final class OptionsParser {
     logInfo("Usage: quoridor [OPTIONS]");
     logInfo("");
 
-    logInfo("General options:");
-    logInfo("  -h, --help        Show this help message");
-    logInfo("  -V, --version     Display version");
-    logInfo("  -v, --verbose     Enable verbose mode");
-    logInfo("  -d, --debug       Enable debug mode");
+    logInfo(I18n.get("geneOpt"));
+    logInfo("  -h, --help        "+I18n.get("showThis"));
+    logInfo("  -V, --version     "+I18n.get("displayVersion"));
+    logInfo("  -v, --verbose     "+I18n.get("verboseMode"));
+    logInfo("  -d, --debug       "+I18n.get("debugMode"));
 
     logInfo("");
     logInfo("Modes:");
-    logInfo("  -g, --gui         Launch GUI mode");
-    logInfo("  -c, --cli         Launch CLI mode (default)");
-    logInfo("  -n, --net         Launch network mode");
+    logInfo("  -g, --gui         "+I18n.get("guiMode"));
+    logInfo("  -c, --cli         "+I18n.get("cliMode"));
+    logInfo("  -n, --net         "+I18n.get("networkMode"));
 
     logInfo("");
-    logInfo("Blitz options:");
-    logInfo("  -b, --blitz       Enable blitz mode");
-    logInfo("  -t, --time N      Timeout in minutes (default 30)");
+    logInfo(I18n.get("blitzOpt"));
+    logInfo("  -b, --blitz       "+I18n.get("enableBlitz"));
+    logInfo("  -t, --time N      "+I18n.get("timeout"));
   }
 }

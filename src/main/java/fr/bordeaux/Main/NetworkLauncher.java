@@ -1,6 +1,7 @@
 package fr.bordeaux.Main;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.GameServer;
 // import fr.bordeaux.network.MultiGameServer;
@@ -52,7 +53,7 @@ public class NetworkLauncher implements AppLauncher {
       // multiServer.start(port);
 
       if ("true".equals(daemonMode)) {
-        System.out.println("Server started in daemon mode on port " + port);
+        System.out.println(I18n.get("daemon") + port);
         while (true) {
           try {
             Thread.sleep(1000);
@@ -64,7 +65,7 @@ public class NetworkLauncher implements AppLauncher {
       }
     }
 
-    System.out.println("Commands:");
+    System.out.println(I18n.get("commands"));
     System.out.println("server start [port]");
     System.out.println("server stop");
     System.out.println("server list");
@@ -123,7 +124,7 @@ public class NetworkLauncher implements AppLauncher {
           int port = hp.length > 1 ? Integer.parseInt(hp[1]) : 12345;
           boolean success = client.join(host, port);
           if (!success) {
-            System.out.println("Failed to connect to " + host + ":" + port);
+            System.out.println(I18n.get("failedConnect", host, ":") + port);
           }
         } else if (cmd.startsWith("hello ")) {
           String name = cmd.substring("hello ".length()).trim();
@@ -139,14 +140,14 @@ public class NetworkLauncher implements AppLauncher {
           client.quit();
           break;
         } else {
-          System.out.println("Unknown command");
+          System.out.println(I18n.get("unknownCmd"));
         }
       } catch (Exception e) {
-        System.out.println("Error: " + e.getMessage());
+        System.out.println(I18n.get("error", ":") + e.getMessage());
       }
     }
 
     sc.close();
-    System.out.println("Network mode exited.");
+    System.out.println(I18n.get("networkExit"));
   }
 }
