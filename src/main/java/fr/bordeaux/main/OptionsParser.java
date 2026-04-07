@@ -116,7 +116,7 @@ public final class OptionsParser {
                 throw new IllegalArgumentException("--size must be an odd number");
               }
               config.setOption("board-size", args[++i]);
-            } else if (argument >= 1000 && argument <= 9999) {
+            } else if (argument >= 1 && argument <= 9999) {
               config.setOption("server", "true");
               config.setOption("server-port", args[++i]);
             }
@@ -218,7 +218,7 @@ public final class OptionsParser {
    *
    * @param value The raw string to validate (e.g., "minimax,mcts,iterative").
    * @param parameter The parameter name for the error message.
-   * @param acceptedMode List of permitted string values.
+   * @param accpetedMode List of permitted string values.
    * @throws IllegalArgumentException If value is null or contains an invalid mode.
    */
   private static void checkAiString(
