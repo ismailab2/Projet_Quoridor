@@ -31,6 +31,9 @@ public class ActionDispatcher {
   /** The client instance for multiplayer games. */
   private final GameClient networkClient = new GameClient();
 
+  /** Callback and logic for hint calculation. */
+  private Runnable hintHandler;
+
   /** Default TCP port for network games. */
   private static final int DEFAULT_PORT = 12_345;
 
@@ -52,6 +55,15 @@ public class ActionDispatcher {
   }
 
   /**
+   * Registers a handler for the HINT action.
+   *
+   * @param hintHandler The handler to execute when HINT is dispatched.
+   */
+  public void setHintHandler(final Runnable hintHandler) {
+    this.hintHandler = hintHandler;
+  }
+
+  /**
    * Dispatches an action. May call GameEngine (new, load, save, undo, redo, pause, hint), show
    * dialogs, or exit.
    *
@@ -68,7 +80,11 @@ public class ActionDispatcher {
       case REDO -> engine.redo();
       case UNDO -> engine.undo();
       case PAUSE -> engine.pause();
-      case HINT -> engine.hint();
+      case HINT -> {
+        if (hintHandler != null) {
+          hintHandler.run();
+        }
+      }
       case QUIT -> Platform.exit();
       default -> handleNetworkAction(action);
     }

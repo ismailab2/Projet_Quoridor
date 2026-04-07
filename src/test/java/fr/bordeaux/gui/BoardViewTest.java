@@ -435,4 +435,22 @@ class BoardViewTest {
     boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
     verify(engine, never()).play(any());
   }
+
+  @Test
+  void testHighlightMovePawn() {
+    Move pawnMove = Move.pawn(new Position(0, 0), new Position(0, 1));
+    assertDoesNotThrow(() -> boardView.highlightMove(pawnMove));
+  }
+
+  @Test
+  void testHighlightMoveWallHorizontal() {
+    Move wallMove = Move.wall(new Position(0, 0), Orientation.HORIZONTAL);
+    assertDoesNotThrow(() -> boardView.highlightMove(wallMove));
+  }
+
+  @Test
+  void testHighlightMoveWallVertical() {
+    Move wallMove = Move.wall(new Position(0, 0), Orientation.VERTICAL);
+    assertDoesNotThrow(() -> boardView.highlightMove(wallMove));
+  }
 }
