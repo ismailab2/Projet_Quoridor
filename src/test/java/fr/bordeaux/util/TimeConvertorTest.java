@@ -8,16 +8,16 @@ public class TimeConvertorTest {
 
   @Test
   public void checkFormatTime() {
-    assertEquals("00 : 00", TimeConvertor.formatTime(0));
-    assertEquals("01 : 52", TimeConvertor.formatTime(1528));
+    assertEquals("00 : 00 : 00", TimeConvertor.formatTime(0));
+    assertEquals("00 : 01 : 52", TimeConvertor.formatTime(1528));
     assertEquals("01 : 05", TimeConvertor.formatTime(65524));
   }
 
   @Test
   public void testNegativeAndZeroTime() {
-    assertEquals("00 : 00", TimeConvertor.formatTime(0));
-    assertEquals("00 : 00", TimeConvertor.formatTime(-1));
-    assertEquals("00 : 00", TimeConvertor.formatTime(-1000));
+    assertEquals("00 : 00 : 00", TimeConvertor.formatTime(0));
+    assertEquals("00 : 00 : 00", TimeConvertor.formatTime(-1));
+    assertEquals("00 : 00 : 00", TimeConvertor.formatTime(-1000));
   }
 
   @Test
@@ -25,9 +25,9 @@ public class TimeConvertorTest {
     // 1 minute = 60,000 ms
     assertEquals("01 : 00", TimeConvertor.formatTime(60000));
     // Just below 1 minute should show seconds : centiseconds
-    assertEquals("59 : 99", TimeConvertor.formatTime(59999));
+    assertEquals("00 : 59 : 99", TimeConvertor.formatTime(59999));
     // Half a second
-    assertEquals("00 : 50", TimeConvertor.formatTime(500));
+    assertEquals("00 : 00 : 50", TimeConvertor.formatTime(500));
   }
 
   @Test

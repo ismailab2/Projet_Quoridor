@@ -25,9 +25,9 @@ public final class TimeConvertor {
     final String result;
 
     if (timeMilli <= 0) {
-      result = "00 : 00";
+      result = "00 : 00 : 00";
     } else if (minutes <= 0) {
-      result = String.format("%02d : %02d", seconds, milliseconds / 10);
+      result = String.format("00 : %02d : %02d", seconds, milliseconds / 10);
     } else {
       result = String.format("%02d : %02d", minutes, seconds);
     }

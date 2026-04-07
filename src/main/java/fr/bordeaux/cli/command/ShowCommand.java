@@ -180,7 +180,7 @@ public class ShowCommand implements Command {
       for (int col = 0; col < boardSize; col++) {
         boolean playerFound = false;
         for (final Player player : engine.getState().getPlayers()) {
-          if (player.getPosition().equals(new Position(row, col))) {
+          if (player.getPosition().equals(new Position(row, col)) && !player.isDisabled()) {
             writer.print(player.getColor().getId() + printWall(board, row, col, false));
             playerFound = true;
             break;

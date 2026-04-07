@@ -6,6 +6,7 @@ import fr.bordeaux.main.GuiLauncher;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -278,14 +279,14 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to redraw after an AI move
    */
   void setupAITurnListener(final GameEngine engine, final BoardView boardView) {
-    final AtomicBoolean aiComputing = new AtomicBoolean(false);
+    final AtomicReference<Player> aiComputing = new AtomicReference<>();
     final GameState state = engine.getState();
 
     final Runnable aiTurnTask =
         () -> {
           if (!state.isGameOver() && !state.isPaused()) {
             final Player currentPlayer = state.getCurrentPlayer();
-            if (currentPlayer.isAI() && aiComputing.compareAndSet(false, true)) {
+            if (currentPlayer.isAI() && aiComputing.get() != currentPlayer) {
               final Thread aiThread =
                   new Thread(
                       () -> {
@@ -298,7 +299,7 @@ public class QuoridorApp extends Application {
                           final Move finalMove = move;
                           Platform.runLater(
                               () -> {
-                                aiComputing.set(false);
+                                aiComputing.compareAndSet(currentPlayer, null);
                                 if (finalMove != null
                                     && !state.isGameOver()
                                     && !state.isPaused()
