@@ -113,12 +113,11 @@ public class GameClient {
    * @return a status message indicating the result of the ping command.
    */
   public String ping() {
-    
+
     String message;
     if (!checkConnection()) {
       message = "Not connected to any server.";
-    }
-    else{
+    } else {
       try {
         final long start = System.currentTimeMillis();
 
@@ -142,7 +141,6 @@ public class GameClient {
         message = "Ping interrupted.";
         Logger.getInstance().info(message);
       }
-
     }
 
     return message;
