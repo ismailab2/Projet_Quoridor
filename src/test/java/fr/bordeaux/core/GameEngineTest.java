@@ -167,7 +167,8 @@ public class GameEngineTest {
 
   @Test
   public void testMoveToString_WallOrientation() throws Exception {
-    java.lang.reflect.Method method = GameEngine.class.getDeclaredMethod("moveToString", Move.class);
+    java.lang.reflect.Method method =
+        GameEngine.class.getDeclaredMethod("moveToString", Move.class);
     method.setAccessible(true);
 
     Move horizontal = Move.wall(new Position(1, 1), Orientation.HORIZONTAL);

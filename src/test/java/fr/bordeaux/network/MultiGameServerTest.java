@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,10 +16,7 @@ import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
-import org.mockito.ArgumentCaptor;
 
 public class MultiGameServerTest {
 
@@ -476,7 +474,8 @@ public class MultiGameServerTest {
     Thread.sleep(200);
 
     // Verify it doesn't crash the JVM and handles the error
-    java.util.concurrent.atomic.AtomicBoolean running = (java.util.concurrent.atomic.AtomicBoolean) getField(server, "running");
+    java.util.concurrent.atomic.AtomicBoolean running =
+        (java.util.concurrent.atomic.AtomicBoolean) getField(server, "running");
     assertTrue(!running.get() || mockSocket != null);
     server.stop();
   }
@@ -489,8 +488,14 @@ public class MultiGameServerTest {
     BufferedReader mockReader = mock(BufferedReader.class);
     when(mockReader.readLine()).thenThrow(new java.io.IOException("Read Error"));
 
-    TestClient client = new TestClient(
-        "C1", "Alice", new Socket(), mockReader, new PrintWriter(new StringWriter()), new StringWriter());
+    TestClient client =
+        new TestClient(
+            "C1",
+            "Alice",
+            new Socket(),
+            mockReader,
+            new PrintWriter(new StringWriter()),
+            new StringWriter());
 
     addClient(server, client);
 
@@ -522,7 +527,12 @@ public class MultiGameServerTest {
     alice.setCurrentGameId("G1");
     bob.setCurrentGameId("G1");
 
-    call(server, "processMove", new Class<?>[] {ClientSession.class, String.class}, alice, "MOVE e1-e2");
+    call(
+        server,
+        "processMove",
+        new Class<?>[] {ClientSession.class, String.class},
+        alice,
+        "MOVE e1-e2");
 
     // Verify game finished
     assertNull(alice.getCurrentGameId());
@@ -537,7 +547,7 @@ public class MultiGameServerTest {
     setRunning(server, true);
 
     // Start target thread
-    call(server, "startTimeoutChecker", new Class<?>[]{});
+    call(server, "startTimeoutChecker", new Class<?>[] {});
     Thread.sleep(100);
 
     Thread target = null;

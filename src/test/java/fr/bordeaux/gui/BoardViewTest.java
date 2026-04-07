@@ -142,10 +142,10 @@ class BoardViewTest {
     when(state.isGameOver()).thenReturn(true);
     // Create a new boardView so the constructor call also sees isGameOver = true
     BoardView bv = new BoardView(engine);
-    
+
     // Reset mock to ignore the calls from constructor if any
     clearInvocations(state);
-    
+
     bv.highlightCurrentPlayer();
     verify(state, never()).getCurrentPlayer();
   }
@@ -154,11 +154,11 @@ class BoardViewTest {
   void testHighlightCurrentPlayerNoPawn() {
     when(state.getCurrentPlayer()).thenReturn(player1);
     when(player1.getPosition()).thenReturn(new Position(0, 0));
-    
+
     // Clear the children of cell (0,0) so pawn is null
     StackPane cell = findCell(0, 0);
     cell.getChildren().removeIf(n -> n instanceof Rectangle);
-    
+
     assertDoesNotThrow(() -> boardView.highlightCurrentPlayer());
   }
 
@@ -354,13 +354,17 @@ class BoardViewTest {
     when(p4.getColor()).thenReturn(fr.bordeaux.core.Color.RED);
 
     boardView.drawPlayers();
-    
+
     StackPane cell3 = findCell(2, 2);
-    Rectangle pawn3 = (Rectangle) cell3.getChildren().stream().filter(n -> n instanceof Rectangle).findFirst().get();
+    Rectangle pawn3 =
+        (Rectangle)
+            cell3.getChildren().stream().filter(n -> n instanceof Rectangle).findFirst().get();
     assertEquals(javafx.scene.paint.Color.BLUE, pawn3.getFill());
 
     StackPane cell4 = findCell(3, 3);
-    Rectangle pawn4 = (Rectangle) cell4.getChildren().stream().filter(n -> n instanceof Rectangle).findFirst().get();
+    Rectangle pawn4 =
+        (Rectangle)
+            cell4.getChildren().stream().filter(n -> n instanceof Rectangle).findFirst().get();
     assertEquals(javafx.scene.paint.Color.RED, pawn4.getFill());
   }
 
@@ -368,22 +372,29 @@ class BoardViewTest {
   void testDrawPlayersSkipsDisabled() {
     when(player2.isDisabled()).thenReturn(true);
     when(state.getPlayers()).thenReturn(List.of(player1, player2));
-    
+
     // Create a new boardView so it uses our updated mock from the start
     BoardView bv = new BoardView(engine);
     bv.drawPlayers();
-    
-    // Since drawBoard is called in constructor, cell2 should already be empty if isDisabled was true
+
+    // Since drawBoard is called in constructor, cell2 should already be empty if isDisabled was
+    // true
     StackPane cell2 = null;
     // We need to find the cell in the NEW BoardView bv
-    cell2 = (StackPane) bv.getChildren().stream()
-        .filter(n -> n instanceof StackPane)
-        .map(n -> (StackPane) n)
-        .filter(c -> GridPane.getRowIndex(c) != null && GridPane.getRowIndex(c) == 1 
-                  && GridPane.getColumnIndex(c) != null && GridPane.getColumnIndex(c) == 1)
-        .findFirst()
-        .orElse(null);
-    
+    cell2 =
+        (StackPane)
+            bv.getChildren().stream()
+                .filter(n -> n instanceof StackPane)
+                .map(n -> (StackPane) n)
+                .filter(
+                    c ->
+                        GridPane.getRowIndex(c) != null
+                            && GridPane.getRowIndex(c) == 1
+                            && GridPane.getColumnIndex(c) != null
+                            && GridPane.getColumnIndex(c) == 1)
+                .findFirst()
+                .orElse(null);
+
     assertNotNull(cell2);
     assertTrue(cell2.getChildren().isEmpty());
   }
@@ -399,10 +410,10 @@ class BoardViewTest {
   void testHandleCellClickUnsuccessfulPlay() {
     when(player1.isAI()).thenReturn(false);
     when(engine.play(any())).thenReturn(false);
-    
+
     BoardView bvSpy = spy(boardView);
     bvSpy.handleCellClick(0, 1);
-    
+
     // Verify drawBoard should not be called if play fails
     verify(bvSpy, never()).drawBoard();
   }
@@ -412,7 +423,7 @@ class BoardViewTest {
     try (MockedStatic<RuleChecker> checker = mockStatic(RuleChecker.class)) {
       checker.when(() -> RuleChecker.isMoveLegal(any(), any())).thenReturn(false);
       when(player1.isAI()).thenReturn(false);
-      
+
       boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
       verify(engine, never()).play(any());
     }
