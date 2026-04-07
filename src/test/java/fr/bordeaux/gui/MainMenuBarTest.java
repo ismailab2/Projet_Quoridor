@@ -11,6 +11,8 @@ import javafx.scene.control.MenuItem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import fr.bordeaux.i18n.I18n;
+
 class MainMenuBarTest {
   @BeforeAll
   static void initJfx() {
@@ -24,8 +26,8 @@ class MainMenuBarTest {
     MainMenuBar menuBar = new MainMenuBar(dispatcher);
 
     assertEquals(2, menuBar.getMenus().size());
-    assertEquals("File", menuBar.getMenus().get(0).getText());
-    assertEquals("Game", menuBar.getMenus().get(1).getText());
+    assertEquals(I18n.get("file"), menuBar.getMenus().get(0).getText());
+    assertEquals(I18n.get("menuGame"), menuBar.getMenus().get(1).getText());
   }
 
   @Test
@@ -38,10 +40,10 @@ class MainMenuBarTest {
 
     assertTrue(file.getItems().stream().anyMatch(Objects::nonNull));
 
-    assertTrue(file.getItems().stream().anyMatch(item -> "New Game".equals(item.getText())));
-    assertTrue(file.getItems().stream().anyMatch(item -> "Load Game".equals(item.getText())));
-    assertTrue(file.getItems().stream().anyMatch(item -> "Save Game".equals(item.getText())));
-    assertTrue(file.getItems().stream().anyMatch(item -> "Quit".equals(item.getText())));
+    assertTrue(file.getItems().stream().anyMatch(item -> I18n.get("newGame").equals(item.getText())));
+    assertTrue(file.getItems().stream().anyMatch(item -> I18n.get("loadGame").equals(item.getText())));
+    assertTrue(file.getItems().stream().anyMatch(item -> I18n.get("saveGame").equals(item.getText())));
+    assertTrue(file.getItems().stream().anyMatch(item -> I18n.get("menuQuit").equals(item.getText())));
   }
 
   @Test
@@ -52,10 +54,10 @@ class MainMenuBarTest {
 
     Menu game = menuBar.getMenus().get(1);
 
-    assertTrue(game.getItems().stream().anyMatch(item -> "Undo".equals(item.getText())));
-    assertTrue(game.getItems().stream().anyMatch(item -> "Redo".equals(item.getText())));
+    assertTrue(game.getItems().stream().anyMatch(item -> I18n.get("menuUndo").equals(item.getText())));
+    assertTrue(game.getItems().stream().anyMatch(item -> I18n.get("menuRedo").equals(item.getText())));
     assertTrue(game.getItems().stream().anyMatch(item -> "Pause".equals(item.getText())));
-    assertTrue(game.getItems().stream().anyMatch(item -> "Hint".equals(item.getText())));
+    assertTrue(game.getItems().stream().anyMatch(item -> I18n.get("menuHint").equals(item.getText())));
   }
 
   @Test
@@ -68,7 +70,7 @@ class MainMenuBarTest {
 
     MenuItem newGameItem =
         file.getItems().stream()
-            .filter(i -> "New Game".equals(i.getText()))
+            .filter(i -> I18n.get("newGame").equals(i.getText()))
             .findFirst()
             .orElseThrow();
 
@@ -86,7 +88,7 @@ class MainMenuBarTest {
     Menu file = menuBar.getMenus().getFirst();
 
     MenuItem quit =
-        file.getItems().stream().filter(i -> "Quit".equals(i.getText())).findFirst().orElseThrow();
+        file.getItems().stream().filter(i -> I18n.get("menuQuit").equals(i.getText())).findFirst().orElseThrow();
 
     quit.getOnAction().handle(null);
 

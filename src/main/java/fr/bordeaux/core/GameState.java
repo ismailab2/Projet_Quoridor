@@ -3,6 +3,8 @@ package fr.bordeaux.core;
 import java.util.*;
 import java.util.function.Predicate;
 
+import fr.bordeaux.i18n.I18n;
+
 /**
  * Manages the current state of a Quoridor game. It tracks the board, players, current turn, and
  * maintains the history for undo/redo functionality.
@@ -30,7 +32,7 @@ public class GameState {
   public GameState(Board board, List<Player> players, int currentIndexPlayer) {
     if (players.size() != 2 && players.size() != 4)
       throw new IllegalArgumentException(
-          "Number of players must be 2 or 4, but was: " + players.size());
+          I18n.get("playersMust") + players.size());
 
     this.board = board;
     this.players = players;

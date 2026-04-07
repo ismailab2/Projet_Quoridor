@@ -1,6 +1,8 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -156,7 +158,7 @@ public class ShortcutManager {
    * @throws IllegalStateException if the ActionDispatcher is not set
    */
   public void register(Scene scene) {
-    if (dispatcher == null) throw new IllegalStateException("ActionDispatcher not set");
+    if (dispatcher == null) throw new IllegalStateException(I18n.get("actionDisp"));
 
     scene.addEventHandler(
         KeyEvent.KEY_PRESSED,

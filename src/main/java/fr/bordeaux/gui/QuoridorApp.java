@@ -3,6 +3,8 @@ package fr.bordeaux.gui;
 import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
+
 import java.io.IOException;
 import java.util.List;
 import javafx.application.Application;
@@ -150,16 +152,16 @@ public class QuoridorApp extends Application {
                                   + "-fx-border-width: 2;");
 
                           javafx.scene.control.Label titleLabel =
-                              new javafx.scene.control.Label("Game Over");
+                              new javafx.scene.control.Label(I18n.get("gameOver"));
                           titleLabel.setStyle(
                               "-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;");
 
                           javafx.scene.control.Label winLabel =
-                              new javafx.scene.control.Label(winnerName + " won the game!");
+                              new javafx.scene.control.Label(winnerName + I18n.get("won"));
                           winLabel.setStyle("-fx-text-fill: lightgreen; -fx-font-size: 20px;");
 
                           javafx.scene.control.Button closeBtn =
-                              new javafx.scene.control.Button("Close");
+                              new javafx.scene.control.Button(I18n.get("close"));
                           closeBtn.setStyle(
                               "-fx-font-size: 16px; -fx-padding: 8 20; -fx-cursor: hand;");
                           closeBtn.setOnAction(e -> container.getChildren().remove(overlay));

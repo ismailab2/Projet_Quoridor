@@ -7,6 +7,8 @@ import javafx.scene.control.Alert;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 
+import fr.bordeaux.i18n.I18n;
+
 class InfoDialogTest {
 
   @Test
@@ -25,10 +27,10 @@ class InfoDialogTest {
 
       Alert alert = mocked.constructed().get(0);
 
-      verify(alert).setTitle("Info du jeu Quoridor");
+      verify(alert).setTitle(I18n.get("info"));
       verify(alert).setHeaderText("Quoridor");
       verify(alert).setGraphic(null);
-      verify(alert).setContentText("Version 1.0\nAuthors: Isma,...Students at Bordeaux University");
+      verify(alert).setContentText("Version 1.0\n"+I18n.get("authors") + " Isma, Khadidja, Joris, Matthieu, Cengiz. "+I18n.get("students"));
       verify(alert).show();
     }
   }

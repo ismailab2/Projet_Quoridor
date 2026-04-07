@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.i18n.I18n;
 import javafx.scene.control.Alert;
 
 /** Utility class used to display the application information dialog. */
@@ -11,10 +12,10 @@ public final class InfoDialog {
   /** Displays the information dialog of the application. */
   public static void show() {
     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setTitle("Info du jeu Quoridor");
+    alert.setTitle(I18n.get("info"));
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);
-    alert.setContentText("Version 1.0\nAuthors: Isma,...Students at Bordeaux University");
+    alert.setContentText("Version 1.0\n"+I18n.get("authors") + " Isma, Khadidja, Joris, Matthieu, Cengiz. "+I18n.get("students"));
     alert.show();
   }
 }

@@ -62,7 +62,7 @@ public class GameEngine {
    */
   public boolean play(Move move) {
     if (state.isGameOver() || state.isPaused()) {
-      System.out.println(I18n.get("wallMove"));
+      System.out.println(I18n.get("overPause"));
       return false;
     }
 

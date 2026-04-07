@@ -2,6 +2,7 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.i18n.I18n;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -34,9 +35,6 @@ public class PlayerPanel extends VBox {
   /** Label displaying the remaining time for the player. */
   private final Label timeLabel;
 
-  /** Index of the player in the list of players in the GameState. */
-  private final int playerIndex;
-
   /**
    * Constructs a panel for a given player.
    *
@@ -45,7 +43,6 @@ public class PlayerPanel extends VBox {
    * @param playerIndex The index of the player in the {@link GameState}'s list of players.
    */
   public PlayerPanel(String playerName, GameState state, int playerIndex) {
-    this.playerIndex = playerIndex;
 
     String accentColor = (playerIndex == 0) ? "#e74c3c" : "#2c3e50";
 
@@ -65,12 +62,12 @@ public class PlayerPanel extends VBox {
     Region separator = makeSeparator();
 
     timeLabel = new Label("00:00");
-    VBox timeBox = makeStatBox("Temps", timeLabel, accentColor);
+    VBox timeBox = makeStatBox(I18n.get("timer"), timeLabel, accentColor);
 
     Region separator2 = makeSeparator();
 
     wallsLabel = new Label("10");
-    VBox wallsBox = makeStatBox("Murs restants", wallsLabel, accentColor);
+    VBox wallsBox = makeStatBox(I18n.get("walls"), wallsLabel, accentColor);
 
     Region separator3 = makeSeparator();
 
