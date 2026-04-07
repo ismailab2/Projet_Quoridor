@@ -108,9 +108,11 @@ public class GameClient {
   /**
    * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
    * receiving is measured and displayed.
+   *
+   * @return a status message indicating the result of the ping command.
    */
   public String ping() {
-   if (!checkConnection()) {
+    if (!checkConnection()) {
       return "Not connected to any server.";
     }
 
@@ -144,10 +146,12 @@ public class GameClient {
   /**
    * Sends a "QUIT" command to the server, waits for the "BYE" response, and then closes the socket
    * connection.
+   *
+   * @return a message indicating the final status of the connection termination.
    */
   public String quit() {
     String message = "Client exited.";
- if (checkConnection()) {
+    if (checkConnection()) {
       try {
         expectingDirectReply.set(true);
         Logger.getInstance().info("Client: QUIT");
@@ -163,7 +167,7 @@ public class GameClient {
           expectingDirectReply.set(false);
           message = "No BYE received, closing anyway.";
           Logger.getInstance().info(message);
-       }
+        }
 
         socket.close();
 
