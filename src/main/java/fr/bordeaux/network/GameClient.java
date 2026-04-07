@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -112,35 +113,39 @@ public class GameClient {
    * @return a status message indicating the result of the ping command.
    */
   public String ping() {
+    
+    String message;
     if (!checkConnection()) {
-      return "Not connected to any server.";
+      message = "Not connected to any server.";
     }
+    else{
+      try {
+        final long start = System.currentTimeMillis();
 
-    try {
-      final long start = System.currentTimeMillis();
+        expectingDirectReply.set(true);
+        Logger.getInstance().info("Client: PING");
+        writer.println("PING");
 
-      expectingDirectReply.set(true);
-      Logger.getInstance().info("Client: PING");
-      writer.println("PING");
+        final String res = syncResponse.poll(5, TimeUnit.SECONDS);
+        final long rtt = System.currentTimeMillis() - start;
 
-      final String res = syncResponse.poll(5, TimeUnit.SECONDS);
-      final long rtt = System.currentTimeMillis() - start;
-
-      if (res != null) {
-        Logger.getInstance().info("Server: {0} TIME={1,number,0}ms", res, rtt);
-      } else {
-        expectingDirectReply.set(false);
-        final String message = "Ping timeout: no response within 5 seconds.";
+        if (res != null) {
+          message = MessageFormat.format("Server: {0} TIME={1,number,0}ms", res, rtt);
+          Logger.getInstance().info(message);
+        } else {
+          expectingDirectReply.set(false);
+          message = "Ping timeout: no response within 5 seconds.";
+          Logger.getInstance().info(message);
+        }
+      } catch (final InterruptedException exception) {
+        Thread.currentThread().interrupt();
+        message = "Ping interrupted.";
         Logger.getInstance().info(message);
-        return message;
       }
-    } catch (final InterruptedException exception) {
-      Thread.currentThread().interrupt();
 
-      final String message = "Ping interrupted.";
-      Logger.getInstance().info(message);
-      return message;
     }
+
+    return message;
   }
 
   /**
