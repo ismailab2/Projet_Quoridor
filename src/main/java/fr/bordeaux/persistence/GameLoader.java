@@ -34,7 +34,7 @@ public final class GameLoader {
       throws IOException, GameLoadException {
     final List<String> lines = GameLoaderComment.readCleanLines(filename);
     validateSettingsHeader(lines);
-    PlayerLoader.PlayerResult playerResult = PlayerLoader.loadPlayers(lines);
+    final PlayerLoader.PlayerResult playerResult = PlayerLoader.loadPlayers(lines);
     final List<Player> players = playerResult.players();
     final int currentLine = playerResult.nextLineIndex();
     validateHeader(lines, currentLine);

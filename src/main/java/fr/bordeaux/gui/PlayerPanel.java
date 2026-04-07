@@ -86,7 +86,7 @@ public final class PlayerPanel extends VBox {
     final VBox content = new VBox(16, nameLabel, separator, timeBox, separator2, wallsBox);
     content.setPadding(new Insets(15));
     content.setAlignment(Pos.TOP_CENTER);
-    VBox.setVgrow(content, Priority.ALWAYS);
+    setVgrow(content, Priority.ALWAYS);
 
     getChildren().addAll(topBar, content);
 
@@ -99,8 +99,9 @@ public final class PlayerPanel extends VBox {
         () ->
             Platform.runLater(
                 () -> {
-                  final Player p = state.getPlayers().get(playerIndex);
-                  final String[] times = TimeConvertor.formatTime(p.getRemainingTime()).split(":");
+                  final Player targetPlayer = state.getPlayers().get(playerIndex);
+                  final String[] times =
+                      TimeConvertor.formatTime(targetPlayer.getRemainingTime()).split(":");
 
                   if (times.length > 2) {
 

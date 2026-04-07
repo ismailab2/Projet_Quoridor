@@ -248,7 +248,7 @@ public final class GameSaver {
     int index = 1;
     for (final Player player : players) {
       if (player.isAI()) {
-        final AiPlayer aiPlayer = ((AiPlayer) player);
+        final AiPlayer aiPlayer = (AiPlayer) player;
         saveAiSettings(writer, state, aiPlayer, index);
       } else {
         writeLine(writer, "player-" + index + "-name", player.getName());

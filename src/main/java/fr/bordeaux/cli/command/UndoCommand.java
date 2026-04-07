@@ -19,10 +19,10 @@ public class UndoCommand implements Command {
   /**
    * Creates an UndoCommand using the provided CLI tokens.
    *
-   * @param t the tokens entered by the user
+   * @param commandTokens the tokens entered by the user
    */
-  public UndoCommand(final String[] t) {
-    tokens = t;
+  public UndoCommand(final String[] commandTokens) {
+    tokens = commandTokens;
   }
 
   /**

@@ -15,13 +15,13 @@ public final class NetworkMoveParser {
    * @param str textual board coordinate
    * @return parsed position
    */
-  public static Position parsePosition(String str) {
+  public static Position parsePosition(final String str) {
     if (str == null || str.length() < 2) {
       throw new IllegalArgumentException("Invalid position: " + str);
     }
 
-    int row = Integer.parseInt(str.substring(1)) - 1;
-    int col = str.charAt(0) - 'a';
+    final int row = Integer.parseInt(str.substring(1)) - 1;
+    final int col = str.charAt(0) - 'a';
 
     return new Position(row, col);
   }

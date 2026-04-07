@@ -74,7 +74,7 @@ public class NewCommand implements Command {
       LOGGER.error("wrong amount of arguments...");
     }
 
-    final int boardSizeInput = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9);
+    final int boardSizeInput = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9;
     final int size = boardSizeInput - 1;
     final Position[] positions = {
       new Position(0, size / 2), new Position(size, size / 2),
@@ -110,11 +110,11 @@ public class NewCommand implements Command {
           if (typePlayer == null) {
             throw new EndOfFileException();
           }
-          if (!typePlayer.equals("h")
-              && !typePlayer.equals("mcts")
-              && !typePlayer.equals("mini")
-              && !typePlayer.equals("r")
-              && !typePlayer.equals("mctsnn")) {
+          if (!"h".equals(typePlayer)
+              && !"mcts".equals(typePlayer)
+              && !"mini".equals(typePlayer)
+              && !"r".equals(typePlayer)
+              && !"mctsnn".equals(typePlayer)) {
             LOGGER.error("Wrong type, please enter h / mcts / mini / mctsnn / r");
             index--;
             continue;

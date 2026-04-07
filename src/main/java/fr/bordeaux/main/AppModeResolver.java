@@ -12,8 +12,8 @@ public final class AppModeResolver {
    * @param args command-line arguments
    * @return the resolved AppMode, or CLI if none
    */
-  public static AppMode resolve(String[] args) {
-    for (String arg : args) {
+  public static AppMode resolve(final String[] args) {
+    for (final String arg : args) {
       switch (arg) {
         case "--gui":
         case "-g":

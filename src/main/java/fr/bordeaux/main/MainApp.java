@@ -31,7 +31,9 @@ public final class MainApp {
       System.exit(0);
 
     } catch (IllegalArgumentException exception) {
-      Logger.getInstance().error(exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("{0}", exception.getMessage());
+      }
       OptionsParser.printHelp();
       System.exit(1);
     }

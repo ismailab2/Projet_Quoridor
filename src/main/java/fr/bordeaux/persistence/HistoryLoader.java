@@ -18,8 +18,8 @@ public final class HistoryLoader {
    * @param lines The list of strings representing the lines of the save file.
    * @return A {@link List} of {@link Move} objects reconstructed from the history section.
    */
-  public static List<Move> parseHistory(List<String> lines) {
-    List<Move> history = new ArrayList<>();
+  public static List<Move> parseHistory(final List<String> lines) {
+    final List<Move> history = new ArrayList<>();
     readHistory(lines, history);
     return history;
   }
@@ -32,7 +32,7 @@ public final class HistoryLoader {
    * @param desc The string representation of the move.
    * @return A {@link Move} object corresponding to the description.
    */
-  public static Move parseMove(String desc) {
+  public static Move parseMove(final String desc) {
     final Move result;
     if (desc.contains("-")) {
       final String[] coords = desc.split("-");

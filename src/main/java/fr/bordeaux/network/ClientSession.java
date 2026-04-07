@@ -8,11 +8,11 @@ import java.net.Socket;
 /** Represents a connected client with socket, streams, name, and status. */
 public class ClientSession {
 
-  private final String id;
+  private final String sessionId;
   private String name;
   private final Socket socket;
-  private final BufferedReader in;
-  private final PrintWriter out;
+  private final BufferedReader reader;
+  private final PrintWriter writer;
   private PlayerStatus status;
   private String currentGameId;
   private long lastPing;
@@ -20,17 +20,21 @@ public class ClientSession {
   /**
    * Creates a new client session for one connected player.
    *
-   * @param id unique client identifier
+   * @param sessionId unique client identifier
    * @param socket client socket
-   * @param in input reader from the client
-   * @param out output writer to the client
+   * @param reader input reader from the client
+   * @param writer output writer to the client
    */
-  public ClientSession(String id, Socket socket, BufferedReader in, PrintWriter out) {
-    this.id = id;
+  public ClientSession(
+      final String sessionId,
+      final Socket socket,
+      final BufferedReader reader,
+      final PrintWriter writer) {
+    this.sessionId = sessionId;
     this.socket = socket;
-    this.in = in;
-    this.out = out;
-    this.name = id;
+    this.reader = reader;
+    this.writer = writer;
+    this.name = sessionId;
     this.status = PlayerStatus.IDLE;
     this.currentGameId = null;
     this.lastPing = System.currentTimeMillis();
@@ -41,8 +45,8 @@ public class ClientSession {
    *
    * @param message text to send
    */
-  public void send(String message) {
-    out.println(message);
+  public void send(final String message) {
+    writer.println(message);
   }
 
   /** Closes the client connection. */
@@ -59,7 +63,7 @@ public class ClientSession {
    * @return the client ID
    */
   public String getId() {
-    return id;
+    return sessionId;
   }
 
   /**
@@ -76,7 +80,7 @@ public class ClientSession {
    *
    * @param name new client name
    */
-  public void setName(String name) {
+  public void setName(final String name) {
     this.name = name;
   }
 
@@ -95,7 +99,7 @@ public class ClientSession {
    * @return the input stream reader
    */
   public BufferedReader getIn() {
-    return in;
+    return reader;
   }
 
   /**
@@ -104,7 +108,7 @@ public class ClientSession {
    * @return the output stream writer
    */
   public PrintWriter getOut() {
-    return out;
+    return writer;
   }
 
   /**
@@ -121,7 +125,7 @@ public class ClientSession {
    *
    * @param status new player status
    */
-  public void setStatus(PlayerStatus status) {
+  public void setStatus(final PlayerStatus status) {
     this.status = status;
   }
 
@@ -139,7 +143,7 @@ public class ClientSession {
    *
    * @param currentGameId new game ID
    */
-  public void setCurrentGameId(String currentGameId) {
+  public void setCurrentGameId(final String currentGameId) {
     this.currentGameId = currentGameId;
   }
 
@@ -157,7 +161,7 @@ public class ClientSession {
    *
    * @param lastPing new timestamp
    */
-  public void setLastPing(long lastPing) {
+  public void setLastPing(final long lastPing) {
     this.lastPing = lastPing;
   }
 }

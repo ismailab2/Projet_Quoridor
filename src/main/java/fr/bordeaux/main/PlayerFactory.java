@@ -71,7 +71,7 @@ public final class PlayerFactory {
         // Get reflection time and convert to milliseconds
         final long reflexionTimeMs = config.getInt(prefix + ".time", 5) * 1000L;
         final String selection = config.getOption(prefix + ".selection", "UCT");
-        final boolean useNN = selection.equalsIgnoreCase("ML");
+        final boolean useNN = "ML".equalsIgnoreCase(selection);
 
         try {
           player = new MctsPlayer(name, pos, reflexionTimeMs, useNN, color);

@@ -23,23 +23,24 @@ public class GameClient {
   private Socket socket;
 
   /** Input stream to read server responses */
-  private BufferedReader in;
+  private BufferedReader reader;
 
   /** Output stream to send commands to the server */
-  private PrintWriter out;
+  private PrintWriter writer;
 
   /** Background listener thread responsible for reading messages from the server */
   private Thread listenerThread;
 
   /** Sync queue to transfer response from listener thread to caller. */
-  private final SynchronousQueue<String> syncResponse = new SynchronousQueue<>();
+  private final SynchronousQueue<String> syncResponse;
 
   /** Flag to treat next message as a direct reply to a sync command. */
-  private final AtomicBoolean expectingDirectReply = new AtomicBoolean(false);
+  private final AtomicBoolean expectingDirectReply;
 
-  /** Constructs a GameClient for joining servers or discovery. */
+  /** Default constructor. */
   public GameClient() {
-    // Explicit default constructor to satisfy Javadoc requirements
+    this.syncResponse = new SynchronousQueue<>();
+    this.expectingDirectReply = new AtomicBoolean(false);
   }
 
   /**
@@ -54,17 +55,19 @@ public class GameClient {
       socket = new Socket();
       socket.connect(new InetSocketAddress(host, port), 5000);
 
-      in =
+      reader =
           new BufferedReader(
               new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-      out = new PrintWriter(socket.getOutputStream(), true);
-      Logger.getInstance().info("Connected to " + host + ":" + port);
+      writer = new PrintWriter(socket.getOutputStream(), true);
+      Logger.getInstance().info("Connected to {0}:{1,number,0}", host, port);
 
       startListener();
       return true;
 
     } catch (final IOException exception) {
-      Logger.getInstance().error("Connection failed: " + exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("Connection failed: {0}", exception.getMessage());
+      }
       return false;
     }
   }
@@ -76,12 +79,12 @@ public class GameClient {
             () -> {
               try {
                 String line;
-                while ((line = in.readLine()) != null) {
+                while ((line = reader.readLine()) != null) {
                   if (expectingDirectReply.get()) {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        Logger.getInstance().info("Server: " + line);
+                        Logger.getInstance().info("Server: {0}", line);
                       }
                     } catch (InterruptedException ie) {
                       Thread.currentThread().interrupt();
@@ -89,11 +92,13 @@ public class GameClient {
                       expectingDirectReply.set(false);
                     }
                   } else {
-                    Logger.getInstance().info("Server: " + line);
+                    Logger.getInstance().info("Server: {0}", line);
                   }
                 }
               } catch (final IOException exception) {
-                Logger.getInstance().info("Connection closed: " + exception.getMessage());
+                if (Logger.getInstance().isInfoEnabled()) {
+                  Logger.getInstance().info("Connection closed: {0}", exception.getMessage());
+                }
               }
             });
     listenerThread.setDaemon(true);
@@ -111,13 +116,13 @@ public class GameClient {
 
       expectingDirectReply.set(true);
       Logger.getInstance().info("Client: PING");
-      out.println("PING");
+      writer.println("PING");
 
       final String res = syncResponse.poll(5, TimeUnit.SECONDS);
       final long rtt = System.currentTimeMillis() - start;
 
       if (res != null) {
-        Logger.getInstance().info("Server: " + res + " TIME=" + rtt + "ms");
+        Logger.getInstance().info("Server: {0} TIME={1,number,0}ms", res, rtt);
       } else {
         expectingDirectReply.set(false);
         Logger.getInstance().info("Ping timeout: no response within 5 seconds.");
@@ -134,13 +139,13 @@ public class GameClient {
       try {
         expectingDirectReply.set(true);
         Logger.getInstance().info("Client: QUIT");
-        out.println("QUIT");
+        writer.println("QUIT");
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
           Logger.getInstance().info("Server: BYE");
         } else if (res != null) {
-          Logger.getInstance().info("Server: " + res);
+          Logger.getInstance().info("Server: {0}", res);
         } else {
           expectingDirectReply.set(false);
           Logger.getInstance().info("No BYE received, closing anyway.");
@@ -194,7 +199,7 @@ public class GameClient {
                             0,
                             receivedPacket.getLength(),
                             StandardCharsets.UTF_8);
-                    Logger.getInstance().info("Server found: " + serverInfo);
+                    Logger.getInstance().info("Server found: {0}", serverInfo);
 
                   } catch (final SocketTimeoutException ignored) {
                     break;
@@ -204,7 +209,10 @@ public class GameClient {
                 Logger.getInstance().info("Server discovery finished.");
 
               } catch (final IOException exception) {
-                Logger.getInstance().error("Server discovery failed: " + exception.getMessage());
+                if (Logger.getInstance().isErrorEnabled()) {
+                  Logger.getInstance()
+                      .error("Server discovery failed: {0}", exception.getMessage());
+                }
               }
             })
         .start();
@@ -231,7 +239,7 @@ public class GameClient {
     if (!checkConnection()) {
       return;
     }
-    out.println("HELLO " + name);
+    writer.println("HELLO " + name);
   }
 
   /**
@@ -243,6 +251,6 @@ public class GameClient {
     if (!checkConnection()) {
       return;
     }
-    out.println("MOVE " + move);
+    writer.println("MOVE " + move);
   }
 }

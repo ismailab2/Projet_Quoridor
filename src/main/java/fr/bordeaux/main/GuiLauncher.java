@@ -3,18 +3,21 @@ package fr.bordeaux.main;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.gui.QuoridorApp;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import javafx.application.Application;
 
 /** Starts Quoridor GUI via {@link QuoridorApp}. */
 public class GuiLauncher implements AppLauncher {
 
-  /** GuiLaucher */
-  public GuiLauncher() {}
+  /** Default constructor. */
+  public GuiLauncher() {
+    Logger.getInstance().debug("Instantiating GuiLauncher");
+  }
 
   /** Launches {@link Application#launch(Class, String...)}. */
   @Override
-  public void launch(String[] args, ConfigManager config) {
+  public void launch(final String[] args, ConfigManager config) {
     Application.launch(QuoridorApp.class, args);
   }
 

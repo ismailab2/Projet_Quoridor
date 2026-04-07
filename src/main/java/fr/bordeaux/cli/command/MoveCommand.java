@@ -123,7 +123,7 @@ public class MoveCommand implements Command {
       return engine;
     }
 
-    (new ShowCommand()).execute(engine);
+    new ShowCommand().execute(engine);
     return engine;
   }
 
@@ -143,7 +143,7 @@ public class MoveCommand implements Command {
       return engine;
     }
     engine.play(Move.wall(pos, orientation));
-    (new ShowCommand()).execute(engine);
+    new ShowCommand().execute(engine);
     return engine;
   }
 }

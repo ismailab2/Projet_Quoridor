@@ -159,7 +159,7 @@ public final class RuleChecker {
         if (board.getGraph().hasEdge(fromId, toId)) {
           legal = true;
         } else {
-          legal = RuleChecker.canJump(state, move);
+          legal = canJump(state, move);
         }
       }
     }

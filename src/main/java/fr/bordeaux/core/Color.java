@@ -39,7 +39,7 @@ public enum Color {
    * @throws IllegalArgumentException if the ID is invalid.
    */
   public static Color fromId(final int colorId) {
-    for (Color color : values()) {
+    for (final Color color : values()) {
       if (color.colorId == colorId) {
         return color;
       }
