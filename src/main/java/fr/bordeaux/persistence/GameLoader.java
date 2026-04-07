@@ -4,7 +4,6 @@ import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
 
-
 /** Utility class used to load a game state from a save file. */
 public final class GameLoader {
   /** The size of the board (9x9). */
@@ -189,5 +188,4 @@ public final class GameLoader {
               + ") are different");
     }
   }
-
 }

@@ -20,21 +20,22 @@ public class MinimaxSearch {
   private static final int WIN_THRESHOLD = 9000;
 
   /**
-  * Constructs a new Minimax search engine with a specific heuristic.
-  *
-  * @param heuristicFunction The heuristic evaluator used to score game states.
-  */
+   * Constructs a new Minimax search engine with a specific heuristic.
+   *
+   * @param heuristicFunction The heuristic evaluator used to score game states.
+   */
   public MinimaxSearch(final HeuristicEvaluator heuristicFunction) {
     this.heuristicFunction = heuristicFunction;
   }
 
   /**
- * Performs a Minimax search to find the best move within a fixed maximum depth.
- * @param state The current state of the game to analyze.
- * @param maxDepth The maximum depth of the search tree.
- * @param endTime The deadline (in milliseconds) at which the search must stop.
- * @return The best {@link Move} found, or {@code null} if no move was determined.
- */
+   * Performs a Minimax search to find the best move within a fixed maximum depth.
+   *
+   * @param state The current state of the game to analyze.
+   * @param maxDepth The maximum depth of the search tree.
+   * @param endTime The deadline (in milliseconds) at which the search must stop.
+   * @return The best {@link Move} found, or {@code null} if no move was determined.
+   */
   public Move search(final GameState state, final int maxDepth, final long endTime) {
     return miniMax(state, maxDepth, endTime);
   }

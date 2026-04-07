@@ -188,8 +188,7 @@ public class CliApp {
   }
 
   /**
-   * <p>Starts the CLI loop</p>. 
-   * Displays the board, reads commands until the application is stopped.
+   * Starts the CLI loop. Displays the board, reads commands until the application is stopped.
    *
    * @throws IOException Possible if mcts with NN selection used
    */

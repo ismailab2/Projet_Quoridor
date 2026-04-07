@@ -23,9 +23,10 @@ public final class MinimaxPlayer extends AiPlayer {
   /** The name of the heuristic algorithm to use. */
   private final String heuristicName;
 
-  /** * The core search engine instance responsible for executing 
- * the Minimax and Alpha-Beta pruning algorithms. 
- */
+  /**
+   * * The core search engine instance responsible for executing the Minimax and Alpha-Beta pruning
+   * algorithms.
+   */
   private final MinimaxSearch searchEngine;
 
   /**
@@ -119,12 +120,12 @@ public final class MinimaxPlayer extends AiPlayer {
     }
 
     if (bestMove == null) {
-      final RandomPlayer fallback = new RandomPlayer(this.getName(), this.getPosition(), this.getColor());
+      final RandomPlayer fallback =
+          new RandomPlayer(this.getName(), this.getPosition(), this.getColor());
       bestMove = fallback.getNextMove(state);
     }
     return bestMove;
   }
-
 
   /**
    * Get the search depth of the MiniMax Player.

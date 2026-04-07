@@ -114,8 +114,7 @@ public final class PlayerFactory {
     final int result;
     if (reflexionTime <= 2) {
       result = 3;
-    }
-    else if (reflexionTime <= 5) {
+    } else if (reflexionTime <= 5) {
       result = 4;
     } else if (reflexionTime <= 8) {
       result = 5;
