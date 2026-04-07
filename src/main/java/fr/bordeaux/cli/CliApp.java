@@ -13,6 +13,8 @@ import java.util.function.Function;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import fr.bordeaux.network.GameClient;
+import fr.bordeaux.network.MultiGameServer;
 
 /** Manages Quoridor CLI loop and commands. */
 public class CliApp {
@@ -50,6 +52,16 @@ public class CliApp {
   /** Set command literal. */
   private static final String CMD_SET = "set";
 
+  private static final String CMD_SERVER = "server";
+  private static final String CMD_JOIN = "join";
+  private static final String CMD_PING = "ping";
+  private static final String CMD_PLAYERS = "players";
+  private static final String CMD_SCOREBOARD = "scoreboard";
+  private static final String CMD_HELLO = "hello";
+
+  private static final String DEFAULT_NETWORK_HOST = "localhost";
+  private static final int DEFAULT_NETWORK_PORT = 12345;
+
   /** Board option literal. */
   private static final String OPT_BOARD = "board";
 
@@ -80,6 +92,9 @@ public class CliApp {
   /** A registry mapping command names */
   private Map<String, Function<String[], Command>> commandRegistry;
 
+  private final MultiGameServer networkServer;
+  private final GameClient networkClient;
+
   /**
    * Creates a CLI application with a specific game engine, terminal and reader.
    *
@@ -95,6 +110,8 @@ public class CliApp {
     commandRegistry = new HashMap<>();
 
     registerAllCommands();
+    this.networkServer = new MultiGameServer();
+    this.networkClient = new GameClient();
   }
 
   /** Initialises the command registry to avoid code duplication in constructors. */
@@ -128,6 +145,8 @@ public class CliApp {
     this.terminal = TerminalBuilder.builder().system(true).build();
     this.engine = engine;
     this.running = true;
+    this.networkServer = new MultiGameServer();
+    this.networkClient = new GameClient();
 
     // Create smart completer
     final Completer smartCompleter = new SmartCompleter();
@@ -248,6 +267,9 @@ public class CliApp {
     }
 
     final String command = tokens[0].toLowerCase(Locale.US);
+    if (handleNetworkCommand(input, tokens, command)) {
+       return;
+    }
     final Command cmd;
 
     if (commandRegistry.containsKey(command)) {
@@ -296,6 +318,127 @@ public class CliApp {
     }
     return distance[userLen][cmdLen];
   }
+
+  private boolean handleNetworkCommand(
+    final String input, final String[] tokens, final String command) {
+  try {
+    switch (command) {
+      case CMD_SERVER -> handleServerCommand(tokens);
+      case CMD_JOIN -> handleJoinCommand(tokens);
+      case CMD_PING -> networkClient.ping();
+      case CMD_PLAYERS -> LOGGER.info(networkServer.listPlayers());
+      case CMD_SCOREBOARD -> LOGGER.info(networkServer.getScoreboard());
+      case CMD_HELLO -> handleHelloCommand(input);
+      case CMD_NEW -> {
+        if (tokens.length > 1 && looksLikePlayerId(tokens[1])) {
+          handleNetworkNewCommand(tokens);
+        } else {
+          return false;
+        }
+      }
+      case "move" -> {
+        if (networkClient.isConnected() && tokens.length > 1) {
+          networkClient.sendMove(input.substring("move ".length()).trim());
+        } else {
+          return false;
+        }
+      }
+      case CMD_QUIT -> {
+        if (!networkClient.isConnected()) {
+          return false;
+        }
+        networkClient.quit();
+        LOGGER.info("Returned to local mode.");
+      }
+      default -> {
+        if (networkClient.isConnected()) {
+          networkClient.sendMove(input);
+          return true;
+        }
+        return false;
+      }
+    }
+    return true;
+  } catch (final IllegalArgumentException exception) {
+    LOGGER.info("Error: " + exception.getMessage());
+    return true;
+  }
+}
+
+/**
+ * Handles server management subcommands from the CLI.
+ * @param tokens the command tokens, starting with "server"
+ */
+  private void handleServerCommand(final String[] tokens) {
+    if (tokens.length < 2) {
+      LOGGER.info("Usage: server start [PORT] | server stop | server list | server status");
+      return;
+    }
+
+    switch (tokens[1].toLowerCase(Locale.US)) {
+      case "start" -> {
+        final int port = tokens.length > 2 ? Integer.parseInt(tokens[2]) : DEFAULT_NETWORK_PORT;
+        networkServer.start(port);
+      }
+      case "stop" -> networkServer.stop();
+      case "list" -> networkClient.serverList();
+      case "status" -> LOGGER.info(networkServer.getServerStatus());
+      default -> LOGGER.info("Unknown server command.");
+    }
+  }
+
+  /**
+ * Handles the join command and connects the client to a remote server.
+ * @param tokens the command tokens, optionally containing an IP address and port
+ */
+  private void handleJoinCommand(final String[] tokens) {
+    final String target = tokens.length > 1 ? tokens[1] : DEFAULT_NETWORK_HOST;
+    final String[] hostPort = target.split(":");
+    final String host = hostPort[0].isBlank() ? DEFAULT_NETWORK_HOST : hostPort[0];
+    final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_NETWORK_PORT;
+
+    if (!networkClient.join(host, port)) {
+      LOGGER.info("Failed to connect to " + host + ":" + port);
+    }
+  }
+
+  /**
+ * Handles the hello command and sends the local player name to the server.
+ * @param input the raw command entered by the user
+ */
+  private void handleHelloCommand(final String input) {
+    final String name = input.substring(CMD_HELLO.length()).trim();
+    if (name.isEmpty()) {
+      LOGGER.info("Usage: hello NAME");
+    } else {
+      networkClient.hello(name);
+    }
+  }
+
+  /**
+ * Handles the network new command by creating a game between connected player IDs.
+ * @param tokens the command tokens containing the player identifiers
+ */
+  private void handleNetworkNewCommand(final String[] tokens) {
+    if (tokens.length < 3 || tokens.length > 5) {
+      LOGGER.info("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+      return;
+    }
+
+    final String[] playerIds = new String[tokens.length - 1];
+    System.arraycopy(tokens, 1, playerIds, 0, playerIds.length);
+    LOGGER.info(networkServer.createGame(playerIds));
+  }
+
+  /**
+   * Checks whether a token looks like a server-side player identifier.
+   * @param value the token to check
+   * @return true if the token matches the expected player ID format, false otherwise
+  */
+  private boolean looksLikePlayerId(final String value) {
+    return value.toUpperCase(Locale.US).matches("C\\d+");
+  }
+
 
   /** Package-private inner class to handle smart tab-completion for the CLI. */
   class SmartCompleter implements Completer {

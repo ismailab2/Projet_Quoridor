@@ -164,6 +164,8 @@ public class GameClient {
        }
 
         socket.close();
+        socket = null;
+        
 
       } catch (final IOException | InterruptedException exception) {
         if (exception instanceof InterruptedException) {
@@ -187,14 +189,23 @@ public class GameClient {
 
                 final String msg = "DISCOVER";
 
-                final DatagramPacket packet =
+                 final DatagramPacket broadcastPacket =
                     new DatagramPacket(
                         msg.getBytes(StandardCharsets.UTF_8),
                         msg.length(),
                         InetAddress.getByName("255.255.255.255"),
                         12346);
 
-                udpSocket.send(packet);
+                udpSocket.send(broadcastPacket);
+
+                  final DatagramPacket localhostPacket =
+                    new DatagramPacket(
+                        msg.getBytes(StandardCharsets.UTF_8),
+                        msg.length(),
+                        InetAddress.getByName("127.0.0.1"),
+                        12346);
+
+                udpSocket.send(localhostPacket);
 
                 Logger.getInstance().info("Broadcast sent, waiting for responses...");
 
@@ -234,11 +245,19 @@ public class GameClient {
    * @return true if the socket exists and is open, false otherwise.
    */
   private boolean checkConnection() {
-    if (socket == null || socket.isClosed()) {
+    if (!isConnected()) {
       Logger.getInstance().info("Not connected to any server.");
       return false;
     }
     return true;
+  }
+
+  /**
+   * Indicates whether the TCP socket is currently connected and open.
+   * @return true if the socket exists, is connected, and is not closed; false otherwise
+  */
+  public boolean isConnected() {
+    return socket != null && socket.isConnected() && !socket.isClosed();
   }
 
   /**
