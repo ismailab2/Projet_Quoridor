@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
 
+import fr.bordeaux.i18n.I18n;
+
 /**
  * This class allows a client to connect to a Quoridor server via TCP, send simple commands (PING,
  * QUIT), and discover available servers on the local network using UDP broadcast.
@@ -47,11 +49,11 @@ public class GameClient {
       in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       out = new PrintWriter(socket.getOutputStream(), true);
 
-      System.out.println("Connected to " + host + ":" + port);
+      System.out.println(I18n.get("connected", host, ":") + port);
       return true;
 
     } catch (IOException e) {
-      System.out.println("Connection failed: " + e.getMessage());
+      System.out.println(I18n.get("failedCo", ": ") + e.getMessage());
       return false;
     }
   }
@@ -73,10 +75,10 @@ public class GameClient {
 
       long rtt = System.currentTimeMillis() - start;
 
-      System.out.println("Server: " + res + " TIME=" + rtt + "ms");
+      System.out.println(I18n.get("server", res, "TIME=") + rtt + "ms");
 
     } catch (IOException e) {
-      System.out.println("Ping error: " + e.getMessage());
+      System.out.println(I18n.get("pingError") + e.getMessage());
     }
   }
 
@@ -91,14 +93,14 @@ public class GameClient {
         out.println("QUIT");
 
         String res = in.readLine(); // read BYE
-        System.out.println("Server: " + res);
+        System.out.println(I18n.get("server", res));
 
         socket.close();
       }
     } catch (IOException ignored) {
     }
 
-    System.out.println("Client exited.");
+    System.out.println(I18n.get("clientQuit"));
   }
 
   /**
@@ -126,7 +128,7 @@ public class GameClient {
 
                 ds.send(packet);
 
-                System.out.println("Broadcast sent, waiting for responses...");
+                System.out.println(I18n.get("broadcast"));
 
                 long start = System.currentTimeMillis();
 
@@ -138,17 +140,17 @@ public class GameClient {
                     ds.receive(rcv);
 
                     String serverInfo = new String(rcv.getData(), 0, rcv.getLength());
-                    System.out.println("Server found: " + serverInfo);
+                    System.out.println(I18n.get("found", serverInfo));
 
                   } catch (SocketTimeoutException ignored) {
                     break;
                   }
                 }
 
-                System.out.println("Server discovery finished.");
+                System.out.println(I18n.get("discoOver"));
 
               } catch (IOException e) {
-                System.out.println("Server discovery failed: " + e.getMessage());
+                System.out.println(I18n.get("discoFail", ": ") + e.getMessage());
               }
             })
         .start();
@@ -160,7 +162,7 @@ public class GameClient {
    */
   private boolean checkConnection() {
     if (socket == null || socket.isClosed()) {
-      System.out.println("Not connected to any server.");
+      System.out.println(I18n.get("notConnected"));
       return false;
     }
     return true;

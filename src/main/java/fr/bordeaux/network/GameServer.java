@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import fr.bordeaux.i18n.I18n;
+
 /**
  * This class implements a simple TCP server capable of: - Accepting a single client connection -
  * Handling basic commands (PING, QUIT) - Broadcasting its presence via UDP - Detecting client
@@ -52,7 +54,7 @@ public class GameServer {
                 serverSocket = new ServerSocket(port);
                 running = true;
 
-                System.out.println("Server started on port " + port);
+                System.out.println(I18n.get("startedPort") + port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -61,13 +63,13 @@ public class GameServer {
                 startTimeoutChecker();
 
                 clientSocket = serverSocket.accept();
-                System.out.println("Client connected");
+                System.out.println(I18n.get("connectedClient"));
 
                 new Thread(() -> handleClient(clientSocket)).start();
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                System.out.println("Port already used or error: " + e.getMessage());
+                System.out.println(I18n.get("alreadyUsed") + e.getMessage());
               }
             })
         .start();
@@ -126,7 +128,7 @@ public class GameServer {
       }
 
     } catch (IOException e) {
-      System.out.println("Client disconnected");
+      System.out.println(I18n.get("disconnected"));
     }
 
     stop();
@@ -158,6 +160,6 @@ public class GameServer {
     } catch (IOException ignored) {
     }
 
-    System.out.println("Server stopped.");
+    System.out.println(I18n.get("stopped"));
   }
 }

@@ -4,6 +4,8 @@ import fr.bordeaux.ai.MctsPlayer;
 import fr.bordeaux.ai.MinimaxPlayer;
 import fr.bordeaux.ai.RandomPlayer;
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
+
 import java.io.*;
 import java.util.*;
 
@@ -52,7 +54,7 @@ public final class GameLoader {
   private static void validateHeader(List<String> lines, int currentLine) throws GameLoadException {
     if (!lines.get(currentLine).equals("[game]"))
       throw new GameLoadException(
-          "ERREUR_ENTETE", 1, "Expected [game] but found : " + lines.get(currentLine));
+          "ERREUR_ENTETE", 1, I18n.get("expectGame") + lines.get(currentLine));
   }
 
   /**
@@ -64,7 +66,7 @@ public final class GameLoader {
   private static void validateSettingsHeader(final List<String> lines) throws GameLoadException {
     if (!"[settings]".equals(lines.get(0))) {
       throw new GameLoadException(
-          "ERREUR_ENTETE", 1, "Expected [settings] but found : " + lines.get(0));
+          "ERREUR_ENTETE", 1, I18n.get("expectSett") + lines.get(0));
     }
   }
 
@@ -271,7 +273,7 @@ public final class GameLoader {
           return new PlayerAndLine(
               new MctsPlayer(pName, pPostion, reflexionTimeMcts, useNN, pColor), myCurrentLine);
         } catch (java.io.IOException e) {
-          throw new IllegalArgumentException("Impossible de charger le modèle pour MCTS", e);
+          throw new IllegalArgumentException(I18n.get("mctsImpossible"), e);
         }
 
       case "random":
@@ -290,7 +292,7 @@ public final class GameLoader {
               myCurrentLine);
         }
       default:
-        throw new IllegalArgumentException("Unknow Ai Type : " + aiSettings.get("mode"));
+        throw new IllegalArgumentException(I18n.get("unknownAi") + aiSettings.get("mode"));
     }
   }
 
@@ -355,11 +357,11 @@ public final class GameLoader {
 
     if (nbPlayers > 0 && gameState.getPlayers().size() != nbPlayers) {
       throw new IllegalArgumentException(
-          "The number of players read from the file ("
+          I18n.get("nbPlayer")
               + nbPlayers
-              + ") and the actual players in the game ("
+              + I18n.get("actualPlayer")
               + gameState.getPlayers().size()
-              + ") are different");
+              + I18n.get("diff"));
     }
   }
 
