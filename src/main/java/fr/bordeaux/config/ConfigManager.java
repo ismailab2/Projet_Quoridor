@@ -1,6 +1,6 @@
 package fr.bordeaux.config;
 
-import fr.bordeaux.util.Log;
+import fr.bordeaux.util.Logger;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
@@ -34,11 +34,16 @@ public final class ConfigManager {
    * @return Path to the config file
    */
   private Path getFilePath() {
+    String customPath = System.getProperty("quoridor.config.file");
+    if (customPath != null) {
+      return Paths.get(customPath);
+    }
     return Paths.get(System.getProperty("user.home"), ".quoridorrc");
   }
 
   /** Loads config if it exists. Otherwise saves defaults. */
   public void load() {
+    props.clear();
     final Path path = getFilePath();
     if (Files.exists(path)) {
 
@@ -48,7 +53,7 @@ public final class ConfigManager {
 
       } catch (final IOException e) {
 
-        Log.error("Warning: invalid .quoridorrc file. Using defaults.", e);
+        Logger.getInstance().error("Warning: invalid .quoridorrc file. Using defaults.", e);
       }
     } else {
       props.setProperty("verbose", "true");
@@ -71,7 +76,7 @@ public final class ConfigManager {
       props.store(out, "Quoridor configuration");
 
     } catch (final IOException e) {
-      Log.error("Error saving .quoridorrc", e);
+      Logger.getInstance().error("Error saving .quoridorrc", e);
     }
   }
 

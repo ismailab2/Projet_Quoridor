@@ -19,12 +19,6 @@ public final class OptionsParser {
    * @param config Config manager instance.
    */
   public static void parse(final String[] args, final ConfigManager config) {
-    // Reset session-specific flags to their default values
-    config.setOption("blitz", "false");
-    config.setOption("contest", "false");
-    config.setOption("ai1", "false");
-    config.setOption("ai2", "false");
-
     int i = 0;
     while (i < args.length) {
       final String arg = args[i];
@@ -32,10 +26,18 @@ public final class OptionsParser {
       switch (arg) {
         case "-h", "--help" -> {
           printHelp();
+          // Exit if not in test mode
+          if (System.getProperty("quoridor.test") == null) {
+            System.exit(0);
+          }
         }
 
         case "-V", "--version" -> {
           logInfo("Quoridor version 1.0.0");
+          // Exit if not in test mode
+          if (System.getProperty("quoridor.test") == null) {
+            System.exit(0);
+          }
         }
 
         case "--contest", "-c" -> {
@@ -195,10 +197,10 @@ public final class OptionsParser {
    * @throws IllegalArgumentException If value is null or not a positive integer.
    */
   private static void checkAiInt(final String value, final String parameter) {
-    final String[] values = value.split(",");
-    if (values == null) {
+    if (value == null) {
       throw new IllegalArgumentException("AI " + parameter + " require a number");
     }
+    final String[] values = value.split(",");
     for (final String val : values) {
       if (Integer.parseInt(val) <= 0) {
         throw new IllegalArgumentException("--ai-" + parameter + " should be higher than 0");
@@ -216,11 +218,11 @@ public final class OptionsParser {
    */
   private static void checkAiString(
       final String value, final String parameter, final List<String> accpetedMode) {
-    final String[] values = value.split(",");
-    if (values == null) {
+    if (value == null) {
       throw new IllegalArgumentException(
           "AI " + parameter + " require an argument in " + accpetedMode);
     }
+    final String[] values = value.split(",");
     for (final String val : values) {
       if (!accpetedMode.contains(val.toLowerCase())) {
         throw new IllegalArgumentException(
@@ -293,10 +295,8 @@ public final class OptionsParser {
     }
   }
 
-  /**
-   * @brief Prints usage and help information to the console.
-   */
-  private static void printHelp() {
+  /** Prints usage and help information to the console. */
+  public static void printHelp() {
     logInfo("Usage: quoridor [OPTIONS]");
     logInfo("");
     logInfo("General options:");
@@ -314,6 +314,5 @@ public final class OptionsParser {
     logInfo("Blitz options:");
     logInfo("  -b, --blitz       Enable blitz mode");
     logInfo("  -t, --time N      Timeout in minutes (default 30)");
-    System.exit(0);
   }
 }

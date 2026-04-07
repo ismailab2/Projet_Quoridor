@@ -1,6 +1,6 @@
 package fr.bordeaux.network;
 
-import fr.bordeaux.util.Log;
+import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,7 +46,7 @@ public class GameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Log.info("Server started on port {0}", port);
+                Logger.getInstance().info("Server started on port {0}", port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -55,14 +55,14 @@ public class GameServer {
                 startTimeoutChecker();
 
                 clientSocket = serverSocket.accept();
-                Log.info("Client connected");
+                Logger.getInstance().info("Client connected");
 
                 new Thread(() -> handleClient(clientSocket)).start();
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                if (Log.isErrorEnabled()) {
-                  Log.error("Port already used or error: {0}", e.getMessage());
+                if (Logger.getInstance().isErrorEnabled()) {
+                  Logger.getInstance().error("Port already used or error: {0}", e.getMessage());
                 }
               }
             })
@@ -76,7 +76,7 @@ public class GameServer {
               while (running.get()) {
 
                 if (System.currentTimeMillis() - lastPing > 60000) {
-                  Log.info("Client timeout");
+                  Logger.getInstance().info("Client timeout");
                   stop();
                   break;
                 }
@@ -108,7 +108,7 @@ public class GameServer {
       String line;
 
       while ((line = in.readLine()) != null && running.get()) {
-        Log.info("CLIENT -> {0}", line);
+        Logger.getInstance().info("CLIENT -> {0}", line);
 
         if (line.startsWith("PING")) {
           lastPing = System.currentTimeMillis();
@@ -124,7 +124,7 @@ public class GameServer {
       }
 
     } catch (IOException e) {
-      Log.info("Client disconnected");
+      Logger.getInstance().info("Client disconnected");
     }
 
     stop();
@@ -154,6 +154,6 @@ public class GameServer {
     } catch (IOException ignored) {
     }
 
-    Log.info("Server stopped.");
+    Logger.getInstance().info("Server stopped.");
   }
 }

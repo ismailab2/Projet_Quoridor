@@ -1,7 +1,7 @@
 package fr.bordeaux.network;
 
 import fr.bordeaux.core.Move;
-import fr.bordeaux.util.Log;
+import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -79,7 +79,7 @@ public class MultiGameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Log.info("Server started on port {0}", port);
+                Logger.getInstance().info("Server started on port {0}", port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -108,8 +108,8 @@ public class MultiGameServer {
                     scoreboard.put(cid, new ScoreEntry(cid, client.getName()));
                   }
 
-                  if (Log.isInfoEnabled()) {
-                    Log.info("Client connected: {0}", clientId);
+                  if (Logger.getInstance().isInfoEnabled()) {
+                    Logger.getInstance().info("Client connected: {0}", clientId);
                   }
 
                   final Thread clientThread =
@@ -122,8 +122,8 @@ public class MultiGameServer {
 
               } catch (final IOException e) {
                 if (running.get()) {
-                  if (Log.isErrorEnabled()) {
-                    Log.error("Server error: {0}", e.getMessage());
+                  if (Logger.getInstance().isErrorEnabled()) {
+                    Logger.getInstance().error("Server error: {0}", e.getMessage());
                   }
                 }
               }
@@ -145,8 +145,8 @@ public class MultiGameServer {
           break;
         }
         client.setLastPing(System.currentTimeMillis());
-        if (Log.isInfoEnabled()) {
-          Log.info("{0} -> {1}", client.getId(), line);
+        if (Logger.getInstance().isInfoEnabled()) {
+          Logger.getInstance().info("{0} -> {1}", client.getId(), line);
         }
 
         if (line.startsWith("HELLO ")) {
@@ -163,8 +163,8 @@ public class MultiGameServer {
         }
       }
     } catch (final IOException e) {
-      if (Log.isInfoEnabled()) {
-        Log.info("Client disconnected: {0}", e.getMessage());
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info("Client disconnected: {0}", e.getMessage());
       }
     } finally {
       unregisterClient(client);
@@ -200,8 +200,8 @@ public class MultiGameServer {
     }
 
     client.close();
-    if (Log.isInfoEnabled()) {
-      Log.info("Client disconnected: {0}", clientId);
+    if (Logger.getInstance().isInfoEnabled()) {
+      Logger.getInstance().info("Client disconnected: {0}", clientId);
     }
   }
 
@@ -461,7 +461,7 @@ public class MultiGameServer {
     } catch (IOException ignored) {
     }
 
-    Log.info("Server stopped.");
+    Logger.getInstance().info("Server stopped.");
   }
 
   /** Disconnects every client that has been inactive for more than one minute. */

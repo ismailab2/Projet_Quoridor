@@ -1,5 +1,6 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
-@SuppressWarnings("PMD.SystemPrintln")
 public class GameClient {
 
   /** TCP socket used for the connection */
@@ -58,13 +58,13 @@ public class GameClient {
           new BufferedReader(
               new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       out = new PrintWriter(socket.getOutputStream(), true);
-      System.out.println("Connected to " + host + ":" + port);
+      Logger.getInstance().info("Connected to " + host + ":" + port);
 
       startListener();
       return true;
 
     } catch (final IOException exception) {
-      System.out.println("Connection failed: " + exception.getMessage());
+      Logger.getInstance().error("Connection failed: " + exception.getMessage());
       return false;
     }
   }
@@ -81,7 +81,7 @@ public class GameClient {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        System.out.println("Server: " + line);
+                        Logger.getInstance().info("Server: " + line);
                       }
                     } catch (InterruptedException ie) {
                       Thread.currentThread().interrupt();
@@ -89,11 +89,11 @@ public class GameClient {
                       expectingDirectReply.set(false);
                     }
                   } else {
-                    System.out.println("Server: " + line);
+                    Logger.getInstance().info("Server: " + line);
                   }
                 }
               } catch (final IOException exception) {
-                System.out.println("Connection closed: " + exception.getMessage());
+                Logger.getInstance().info("Connection closed: " + exception.getMessage());
               }
             });
     listenerThread.setDaemon(true);
@@ -110,21 +110,21 @@ public class GameClient {
       final long start = System.currentTimeMillis();
 
       expectingDirectReply.set(true);
-      System.out.println("Client: PING");
+      Logger.getInstance().info("Client: PING");
       out.println("PING");
 
       final String res = syncResponse.poll(5, TimeUnit.SECONDS);
       final long rtt = System.currentTimeMillis() - start;
 
       if (res != null) {
-        System.out.println("Server: " + res + " TIME=" + rtt + "ms");
+        Logger.getInstance().info("Server: " + res + " TIME=" + rtt + "ms");
       } else {
         expectingDirectReply.set(false);
-        System.out.println("Ping timeout: no response within 5 seconds.");
+        Logger.getInstance().info("Ping timeout: no response within 5 seconds.");
       }
     } catch (final InterruptedException exception) {
       Thread.currentThread().interrupt();
-      System.out.println("Ping interrupted.");
+      Logger.getInstance().info("Ping interrupted.");
     }
   }
 
@@ -133,17 +133,17 @@ public class GameClient {
     if (checkConnection()) {
       try {
         expectingDirectReply.set(true);
-        System.out.println("Client: QUIT");
+        Logger.getInstance().info("Client: QUIT");
         out.println("QUIT");
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
-          System.out.println("Server: BYE");
+          Logger.getInstance().info("Server: BYE");
         } else if (res != null) {
-          System.out.println("Server: " + res);
+          Logger.getInstance().info("Server: " + res);
         } else {
           expectingDirectReply.set(false);
-          System.out.println("No BYE received, closing anyway.");
+          Logger.getInstance().info("No BYE received, closing anyway.");
         }
 
         socket.close();
@@ -154,7 +154,7 @@ public class GameClient {
         }
       }
     }
-    System.out.println("Client exited.");
+    Logger.getInstance().info("Client exited.");
   }
 
   /** Broadcasts "DISCOVER" and listens for server responses for 5s. */
@@ -177,7 +177,7 @@ public class GameClient {
 
                 udpSocket.send(packet);
 
-                System.out.println("Broadcast sent, waiting for responses...");
+                Logger.getInstance().info("Broadcast sent, waiting for responses...");
 
                 final long start = System.currentTimeMillis();
 
@@ -194,17 +194,17 @@ public class GameClient {
                             0,
                             receivedPacket.getLength(),
                             StandardCharsets.UTF_8);
-                    System.out.println("Server found: " + serverInfo);
+                    Logger.getInstance().info("Server found: " + serverInfo);
 
                   } catch (final SocketTimeoutException ignored) {
                     break;
                   }
                 }
 
-                System.out.println("Server discovery finished.");
+                Logger.getInstance().info("Server discovery finished.");
 
               } catch (final IOException exception) {
-                System.out.println("Server discovery failed: " + exception.getMessage());
+                Logger.getInstance().error("Server discovery failed: " + exception.getMessage());
               }
             })
         .start();
@@ -216,7 +216,7 @@ public class GameClient {
    */
   private boolean checkConnection() {
     if (socket == null || socket.isClosed()) {
-      System.out.println("Not connected to any server.");
+      Logger.getInstance().info("Not connected to any server.");
       return false;
     }
     return true;
