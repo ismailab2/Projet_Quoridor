@@ -494,7 +494,8 @@ public class MultiGameServer {
                   return;
                 }
               }
-            });
+            },
+            "TimeoutChecker");
     timeoutThread.setDaemon(true);
     timeoutThread.start();
   }

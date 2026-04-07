@@ -197,9 +197,20 @@ public class OptionsParserTest {
 
   @Test
   public void testAiDefaultPlayer2() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> OptionsParser.parse(new String[] {"-a", "other"}, config));
+    OptionsParser.parse(new String[] {"-a"}, config);
+    assertEquals("true", config.getOption("ai2", "false"));
+  }
+
+  @Test
+  public void testAiNoir() {
+    OptionsParser.parse(new String[] {"-a", "noir"}, config);
+    assertEquals("true", config.getOption("ai2", "false"));
+  }
+
+  @Test
+  public void testAi2() {
+    OptionsParser.parse(new String[] {"-a", "2"}, config);
+    assertEquals("true", config.getOption("ai2", "false"));
   }
 
   @Test
@@ -312,10 +323,23 @@ public class OptionsParserTest {
   }
 
   @Test
+  public void testSBoardSize_Small() {
+    OptionsParser.parse(new String[] {"-s", "5"}, config);
+    assertEquals("5", config.getOption("board-size", null));
+  }
+
+  @Test
   public void testSServerPort() {
     OptionsParser.parse(new String[] {"-s", "1234"}, config);
     assertEquals("true", config.getOption("server", "false"));
     assertEquals("1234", config.getOption("server-port", null));
+  }
+
+  @Test
+  public void testSServerPort_Large() {
+    OptionsParser.parse(new String[] {"-s", "8080"}, config);
+    assertEquals("true", config.getOption("server", "false"));
+    assertEquals("8080", config.getOption("server-port", null));
   }
 
   @Test

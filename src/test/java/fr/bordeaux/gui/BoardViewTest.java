@@ -138,6 +138,31 @@ class BoardViewTest {
   }
 
   @Test
+  void testHighlightCurrentPlayerGameOver() {
+    when(state.isGameOver()).thenReturn(true);
+    // Create a new boardView so the constructor call also sees isGameOver = true
+    BoardView bv = new BoardView(engine);
+    
+    // Reset mock to ignore the calls from constructor if any
+    clearInvocations(state);
+    
+    bv.highlightCurrentPlayer();
+    verify(state, never()).getCurrentPlayer();
+  }
+
+  @Test
+  void testHighlightCurrentPlayerNoPawn() {
+    when(state.getCurrentPlayer()).thenReturn(player1);
+    when(player1.getPosition()).thenReturn(new Position(0, 0));
+    
+    // Clear the children of cell (0,0) so pawn is null
+    StackPane cell = findCell(0, 0);
+    cell.getChildren().removeIf(n -> n instanceof Rectangle);
+    
+    assertDoesNotThrow(() -> boardView.highlightCurrentPlayer());
+  }
+
+  @Test
   void testHighlightAccessibleCells() {
     Position legal1 = new Position(0, 1);
     Position legal2 = new Position(1, 0);
@@ -157,6 +182,20 @@ class BoardViewTest {
     StackPane defaultCell = findCell(0, 0);
     assertNotNull(defaultCell);
     assertTrue(defaultCell.getStyle().contains("beige"));
+  }
+
+  @Test
+  void testHighlightAccessibleCellsNotCurrent() {
+    when(state.getCurrentPlayer()).thenReturn(player2);
+    boardView.highlightAccessibleCells(player1);
+    verify(state, never()).getLegalMoves(any());
+  }
+
+  @Test
+  void testHighlightAccessibleCellsAI() {
+    when(player1.isAI()).thenReturn(true);
+    boardView.highlightAccessibleCells(player1);
+    verify(state, never()).getLegalMoves(any());
   }
 
   private StackPane findCell(int row, int col) {
@@ -299,6 +338,90 @@ class BoardViewTest {
 
     slot.getOnMouseClicked().handle(event);
 
+    verify(engine, never()).play(any());
+  }
+
+  @Test
+  void testDrawPlayersColors() {
+    Player p3 = mock(Player.class);
+    Player p4 = mock(Player.class);
+    when(state.getPlayers()).thenReturn(List.of(p3, p4));
+    when(p3.isDisabled()).thenReturn(false);
+    when(p3.getPosition()).thenReturn(new Position(2, 2));
+    when(p3.getColor()).thenReturn(fr.bordeaux.core.Color.BLUE);
+    when(p4.isDisabled()).thenReturn(false);
+    when(p4.getPosition()).thenReturn(new Position(3, 3));
+    when(p4.getColor()).thenReturn(fr.bordeaux.core.Color.RED);
+
+    boardView.drawPlayers();
+    
+    StackPane cell3 = findCell(2, 2);
+    Rectangle pawn3 = (Rectangle) cell3.getChildren().stream().filter(n -> n instanceof Rectangle).findFirst().get();
+    assertEquals(javafx.scene.paint.Color.BLUE, pawn3.getFill());
+
+    StackPane cell4 = findCell(3, 3);
+    Rectangle pawn4 = (Rectangle) cell4.getChildren().stream().filter(n -> n instanceof Rectangle).findFirst().get();
+    assertEquals(javafx.scene.paint.Color.RED, pawn4.getFill());
+  }
+
+  @Test
+  void testDrawPlayersSkipsDisabled() {
+    when(player2.isDisabled()).thenReturn(true);
+    when(state.getPlayers()).thenReturn(List.of(player1, player2));
+    
+    // Create a new boardView so it uses our updated mock from the start
+    BoardView bv = new BoardView(engine);
+    bv.drawPlayers();
+    
+    // Since drawBoard is called in constructor, cell2 should already be empty if isDisabled was true
+    StackPane cell2 = null;
+    // We need to find the cell in the NEW BoardView bv
+    cell2 = (StackPane) bv.getChildren().stream()
+        .filter(n -> n instanceof StackPane)
+        .map(n -> (StackPane) n)
+        .filter(c -> GridPane.getRowIndex(c) != null && GridPane.getRowIndex(c) == 1 
+                  && GridPane.getColumnIndex(c) != null && GridPane.getColumnIndex(c) == 1)
+        .findFirst()
+        .orElse(null);
+    
+    assertNotNull(cell2);
+    assertTrue(cell2.getChildren().isEmpty());
+  }
+
+  @Test
+  void testHandleCellClickAI() {
+    when(player1.isAI()).thenReturn(true);
+    boardView.handleCellClick(0, 1);
+    verify(engine, never()).play(any());
+  }
+
+  @Test
+  void testHandleCellClickUnsuccessfulPlay() {
+    when(player1.isAI()).thenReturn(false);
+    when(engine.play(any())).thenReturn(false);
+    
+    BoardView bvSpy = spy(boardView);
+    bvSpy.handleCellClick(0, 1);
+    
+    // Verify drawBoard should not be called if play fails
+    verify(bvSpy, never()).drawBoard();
+  }
+
+  @Test
+  void testHandleWallClickIllegal() {
+    try (MockedStatic<RuleChecker> checker = mockStatic(RuleChecker.class)) {
+      checker.when(() -> RuleChecker.isMoveLegal(any(), any())).thenReturn(false);
+      when(player1.isAI()).thenReturn(false);
+      
+      boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
+      verify(engine, never()).play(any());
+    }
+  }
+
+  @Test
+  void testHandleWallClickAI() {
+    when(player1.isAI()).thenReturn(true);
+    boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
     verify(engine, never()).play(any());
   }
 }

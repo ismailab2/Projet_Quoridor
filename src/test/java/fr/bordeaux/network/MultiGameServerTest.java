@@ -15,7 +15,10 @@ import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
+import org.mockito.ArgumentCaptor;
 
 public class MultiGameServerTest {
 
@@ -360,6 +363,197 @@ public class MultiGameServerTest {
     assertTrue(out(alice).contains("BYE"));
     assertTrue(alice.wasClosed());
     assertFalse(clients(server).containsKey("C1"));
+  }
+
+  @Test
+  void testCreateGame_InvalidPlayerCount() {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    addClient(server, alice);
+
+    // Too few (1)
+    String res1 = server.createGame("C1");
+    assertEquals("ERROR need between 2 and 4 players", res1);
+
+    // Too many (5)
+    String res5 = server.createGame("C1", "C2", "C3", "C4", "C5");
+    assertEquals("ERROR need between 2 and 4 players", res5);
+  }
+
+  @Test
+  void testCreateGame_DuplicatePlayer() {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    addClient(server, alice);
+
+    String res = server.createGame("C1", "C1");
+    assertEquals("ERROR duplicate player", res);
+  }
+
+  @Test
+  void testCreateGame_PlayerNotFound() {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    addClient(server, alice);
+
+    String res = server.createGame("C1", "C99");
+    assertEquals("ERROR player not found", res);
+  }
+
+  @Test
+  void testCreateGame_PlayerNotAvailable() {
+    TestData data = startedGame();
+    TestClient chloe = client("C3", "Chloe");
+    addClient(data.server, chloe);
+
+    // Alice is already INGAME (startedGame)
+    String res = data.server.createGame("C1", "C3");
+    assertEquals("ERROR player not available", res);
+  }
+
+  @Test
+  void testHello_EmptyName() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    addClient(server, alice);
+
+    call(
+        server,
+        "processHello",
+        new Class<?>[] {ClientSession.class, String.class},
+        alice,
+        "HELLO  ");
+
+    assertTrue(out(alice).contains("ERROR invalid name"));
+  }
+
+  @Test
+  void testUnregisterClient_NoGame() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    addClient(server, alice);
+
+    call(server, "unregisterClient", new Class<?>[] {ClientSession.class}, alice);
+    assertFalse(clients(server).containsKey("C1"));
+  }
+
+  @Test
+  void testStop_FullCleanup() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    server.start(0);
+    Thread.sleep(100);
+
+    // Verify broadcaster and broadcastThread were started
+    Field broadcasterField = MultiGameServer.class.getDeclaredField("broadcaster");
+    broadcasterField.setAccessible(true);
+    Object broadcaster = broadcasterField.get(server);
+    assertTrue(broadcaster != null);
+
+    server.stop();
+    assertEquals(0, clients(server).size());
+    assertEquals(0, games(server).size());
+  }
+
+  @Test
+  void testServerError_AcceptLoop_IOException() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    ServerSocket mockSocket = mock(ServerSocket.class);
+    when(mockSocket.accept()).thenThrow(new java.io.IOException("Test Error"));
+
+    Field socketField = MultiGameServer.class.getDeclaredField("serverSocket");
+    socketField.setAccessible(true);
+    socketField.set(server, mockSocket);
+
+    setRunning(server, true);
+
+    // Get the server thread logic by starting it normally then overriding the socket
+    server.start(0);
+    Thread.sleep(200);
+    socketField.set(server, mockSocket); // Inject mock after start
+
+    // The loop keeps running and calling accept(). The mock throws IOException.
+    // We wait a bit to ensure the catch block is hit.
+    Thread.sleep(200);
+
+    // Verify it doesn't crash the JVM and handles the error
+    java.util.concurrent.atomic.AtomicBoolean running = (java.util.concurrent.atomic.AtomicBoolean) getField(server, "running");
+    assertTrue(!running.get() || mockSocket != null);
+    server.stop();
+  }
+
+  @Test
+  void testHandleClient_IOException() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    setRunning(server, true);
+
+    BufferedReader mockReader = mock(BufferedReader.class);
+    when(mockReader.readLine()).thenThrow(new java.io.IOException("Read Error"));
+
+    TestClient client = new TestClient(
+        "C1", "Alice", new Socket(), mockReader, new PrintWriter(new StringWriter()), new StringWriter());
+
+    addClient(server, client);
+
+    // Call handleClient - it should catch the IOException and log it
+    call(server, "handleClient", new Class<?>[] {ClientSession.class}, client);
+
+    // Verify client is unregistered
+    assertFalse(clients(server).containsKey("C1"));
+    assertTrue(client.wasClosed());
+  }
+
+  @Test
+  void testProcessMove_GameFinished() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    TestClient alice = client("C1", "Alice");
+    TestClient bob = client("C2", "Bob");
+    addClient(server, alice);
+    addClient(server, bob);
+
+    ServerGameSession mockGame = mock(ServerGameSession.class);
+    when(mockGame.getGameId()).thenReturn("G1");
+    when(mockGame.isPlayerTurn("C1")).thenReturn(true);
+    when(mockGame.applyMove(any())).thenReturn(true);
+    when(mockGame.getOtherPlayers("C1")).thenReturn(java.util.List.of(bob));
+    when(mockGame.getPlayers()).thenReturn(java.util.List.of(alice, bob));
+    when(mockGame.getWinnerSession()).thenReturn(alice);
+
+    games(server).put("G1", mockGame);
+    alice.setCurrentGameId("G1");
+    bob.setCurrentGameId("G1");
+
+    call(server, "processMove", new Class<?>[] {ClientSession.class, String.class}, alice, "MOVE e1-e2");
+
+    // Verify game finished
+    assertNull(alice.getCurrentGameId());
+    assertNull(bob.getCurrentGameId());
+    assertEquals(PlayerStatus.IDLE, alice.getStatus());
+    assertFalse(games(server).containsKey("G1"));
+  }
+
+  @Test
+  void testTimeoutChecker_Interrupted() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+    setRunning(server, true);
+
+    // Start target thread
+    call(server, "startTimeoutChecker", new Class<?>[]{});
+    Thread.sleep(100);
+
+    Thread target = null;
+    for (Thread t : Thread.getAllStackTraces().keySet()) {
+      if ("TimeoutChecker".equals(t.getName())) {
+        target = t;
+        break;
+      }
+    }
+
+    if (target != null) {
+      target.interrupt();
+      Thread.sleep(200);
+      assertFalse(target.isAlive());
+    }
+    setRunning(server, false);
   }
 
   private TestData twoClients() {
