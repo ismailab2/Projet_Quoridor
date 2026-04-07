@@ -1,8 +1,8 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.main.GuiLauncher;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -294,7 +294,7 @@ public class QuoridorApp extends Application {
                         try {
                           move = currentPlayer.getNextMove(state);
                         } catch (final Exception e) {
-                          e.printStackTrace();
+                          Logger.getInstance().error("AI move computation failed", e);
                         } finally {
                           final Move finalMove = move;
                           Platform.runLater(
@@ -320,11 +320,7 @@ public class QuoridorApp extends Application {
     Platform.runLater(aiTurnTask);
   }
 
-  /**
-   * Called when the JavaFX application is stopped. Saves configuration or performs cleanup tasks.
-   */
+  /** Called when the JavaFX application is stopped. */
   @Override
-  public void stop() {
-    ConfigManager.getInstance().save();
-  }
+  public void stop() {}
 }

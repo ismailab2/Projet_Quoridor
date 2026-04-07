@@ -7,6 +7,8 @@ import fr.bordeaux.config.ConfigManager;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -25,6 +27,21 @@ class ShortcutManagerTest {
       Platform.startup(() -> {});
     } catch (IllegalStateException ignored) {
     }
+  }
+
+  private Path tempConfigFile;
+
+  @BeforeEach
+  void setUp() throws IOException {
+    Path tempDir = Files.createTempDirectory("shortcut-test-config");
+    tempConfigFile = tempDir.resolve(".quoridorrc");
+    System.setProperty("quoridor.config.file", tempConfigFile.toString());
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    System.clearProperty("quoridor.config.file");
+    Files.deleteIfExists(tempConfigFile);
   }
 
   @Test

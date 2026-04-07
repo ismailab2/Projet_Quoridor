@@ -47,6 +47,19 @@ public class GameStateTest {
   }
 
   @Test
+  public void testConstructorInvalidPlayerCount() {
+    Board board = new Board(9);
+    // 1 player
+    assertThrows(IllegalArgumentException.class, () -> new GameState(board, List.of(human)));
+    // 5 players
+    Player p3 = new HumanPlayer("P3", new Position(0, 0), Color.BLUE);
+    Player p4 = new HumanPlayer("P4", new Position(0, 0), Color.RED);
+    Player p5 = new HumanPlayer("P5", new Position(0, 0), Color.WHITE);
+    assertThrows(
+        IllegalArgumentException.class, () -> new GameState(board, List.of(human, ia, p3, p4, p5)));
+  }
+
+  @Test
   public void listenerIsCalledOnApplyMove() {
     final boolean[] called = {false};
 
@@ -117,6 +130,52 @@ public class GameStateTest {
   public void redoDoesNothingIfStackEmpty() {
     game.redo();
     assertEquals(human, game.getCurrentPlayer());
+  }
+
+  @Test
+  public void undoRedoBlockedWhenPausedOrGameOver() {
+    game.applyMove(Move.pawn(human.getPosition(), new Position(1, 4)));
+
+    // Paused
+    game.setPaused(true);
+    game.undo();
+    assertEquals(ia, game.getCurrentPlayer()); // No undo
+    game.redo(); // No redo
+
+    // Game Over
+    game.setPaused(false);
+    game.setGameOver(true);
+    game.undo();
+    assertEquals(ia, game.getCurrentPlayer()); // No undo
+  }
+
+  @Test
+  public void testUndoWithAI() {
+    // Current: Human
+    game.applyMove(Move.pawn(human.getPosition(), new Position(1, 4)));
+    // Current: AI
+    game.applyMove(Move.pawn(ia.getPosition(), new Position(7, 4)));
+    // Current: Human
+
+    // Undo should revert BOTH (AI then Human)
+    game.undo();
+
+    assertEquals(new Position(0, 4), human.getPosition());
+    assertEquals(new Position(8, 4), ia.getPosition());
+    assertEquals(human, game.getCurrentPlayer());
+  }
+
+  @Test
+  public void testRedoWithAI() {
+    game.applyMove(Move.pawn(human.getPosition(), new Position(1, 4)));
+    game.applyMove(Move.pawn(ia.getPosition(), new Position(7, 4)));
+    game.undo(); // Both reverted
+
+    game.redo(); // Both reapplied
+
+    assertEquals(new Position(1, 4), human.getPosition());
+    assertEquals(new Position(7, 4), ia.getPosition());
+    assertEquals(human, game.getCurrentPlayer()); // It switch twice
   }
 
   @Test
@@ -320,5 +379,48 @@ public class GameStateTest {
     assertEquals(2, state.getCurrentIndexPlayer());
     state.nextPlayer();
     assertEquals(0, state.getCurrentIndexPlayer());
+  }
+
+  @Test
+  public void testGetWinnerScenarios() {
+    // 1. Standard Win
+    human.setPosition(new Position(8, 4));
+    assertTrue(game.getWinner().isPresent());
+    assertEquals(human, game.getWinner().get());
+
+    // 2. Blitz Victory (all but one disabled)
+    human.setPosition(new Position(0, 4)); // Reset position
+    ia.setDisabled(true);
+    assertTrue(game.getWinner().isPresent());
+    assertEquals(human, game.getWinner().get());
+
+    // 3. No winner
+    ia.setDisabled(false);
+    assertFalse(game.getWinner().isPresent());
+  }
+
+  @Test
+  public void testPlayerCyclingWithDisabled() {
+    // 3 players: human1(0), human2(1), ia(2)
+    Player human2 = new HumanPlayer("H2", new Position(4, 0), Color.BLUE);
+    GameState state = new GameState(board, List.of(human, human2, ia));
+
+    // Disable middle player
+    human2.setDisabled(true);
+
+    // nextPlayer from 0 should skip 1 and go to 2
+    state.nextPlayer();
+    assertEquals(2, state.getCurrentIndexPlayer());
+
+    // nextPlayer from 2 should skip to 0 (skipping 1 again)
+    state.nextPlayer();
+    assertEquals(0, state.getCurrentIndexPlayer());
+
+    // previousPlayer from 0 should skip 1 and go to 2
+    state.previousPlayer();
+    assertEquals(2, state.getCurrentIndexPlayer());
+
+    // getPreviousIndexPlayer from 2 should skip 1 and return 0
+    assertEquals(0, state.getPreviousIndexPlayer());
   }
 }

@@ -1,9 +1,9 @@
 package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.util.Logger;
 
 /** Main entry point. Loads config, parses options, and resolves launch mode. */
-@SuppressWarnings("PMD.SystemPrintln")
 public final class MainApp {
 
   /** Default constructor. Constructs a new MainApp instance. */
@@ -28,9 +28,11 @@ public final class MainApp {
 
       final AppLauncher launcher = AppLauncherFactory.create(mode);
       launcher.launch(args, config);
+      System.exit(0);
 
-    } catch (IllegalArgumentException e) {
-      System.err.println(e.getMessage());
+    } catch (IllegalArgumentException exception) {
+      Logger.getInstance().error(exception.getMessage());
+      OptionsParser.printHelp();
       System.exit(1);
     }
   }

@@ -3,6 +3,7 @@ package fr.bordeaux.main;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
+import fr.bordeaux.util.Logger;
 import java.util.Scanner;
 
 /** CLI interface for network features. Start/stop server, join, ping. */
@@ -48,7 +49,7 @@ public class NetworkLauncher implements AppLauncher {
       multiServer.start(port);
 
       if ("true".equals(daemonMode)) {
-        System.out.println("Server started in daemon mode on port " + port);
+        Logger.getInstance().info("Server started in daemon mode on port " + port);
         while (true) {
           try {
             Thread.sleep(1000);
@@ -61,19 +62,19 @@ public class NetworkLauncher implements AppLauncher {
       }
     }
 
-    System.out.println("Commands:");
-    System.out.println("server start [port]");
-    System.out.println("server stop");
-    System.out.println("server list");
-    System.out.println("join ip[:port]");
-    System.out.println("ping");
-    System.out.println("quit");
-    System.out.println("server status");
-    System.out.println("players");
-    System.out.println("scoreboard");
-    System.out.println("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
-    System.out.println("hello NAME");
-    System.out.println("move MOVE");
+    Logger.getInstance().info("Commands:");
+    Logger.getInstance().info("server start [port]");
+    Logger.getInstance().info("server stop");
+    Logger.getInstance().info("server list");
+    Logger.getInstance().info("join ip[:port]");
+    Logger.getInstance().info("ping");
+    Logger.getInstance().info("quit");
+    Logger.getInstance().info("server status");
+    Logger.getInstance().info("players");
+    Logger.getInstance().info("scoreboard");
+    Logger.getInstance().info("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+    Logger.getInstance().info("hello NAME");
+    Logger.getInstance().info("move MOVE");
 
     try (Scanner scanner = new Scanner(System.in)) {
       boolean running = true;
@@ -89,28 +90,28 @@ public class NetworkLauncher implements AppLauncher {
           } else if (cmd.equals("server stop")) {
             multiServer.stop();
           } else if (cmd.equals("server status")) {
-            System.out.println(multiServer.getServerStatus());
+            Logger.getInstance().info(multiServer.getServerStatus());
 
           } else if (cmd.equals("players")) {
-            System.out.println(multiServer.listPlayers());
+            Logger.getInstance().info(multiServer.listPlayers());
 
           } else if (cmd.equals("scoreboard")) {
-            System.out.println(multiServer.getScoreboard());
+            Logger.getInstance().info(multiServer.getScoreboard());
 
           } else if (cmd.startsWith("new ")) {
             final String[] parts = cmd.split(" ");
             if (parts.length != 3 && parts.length != 5) {
-              System.out.println("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+              Logger.getInstance().info("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
             } else {
               final String[] playerIds = new String[parts.length - 1];
               System.arraycopy(parts, 1, playerIds, 0, playerIds.length);
-              System.out.println(multiServer.createGame(playerIds));
+              Logger.getInstance().info(multiServer.createGame(playerIds));
             }
 
           } else if (cmd.startsWith("join")) {
             final String[] joinParts = cmd.split(" ");
             if (joinParts.length < 2) {
-              System.out.println("Usage: join ip[:port]");
+              Logger.getInstance().info("Usage: join ip[:port]");
               continue;
             }
             final String target = joinParts[1];
@@ -119,7 +120,7 @@ public class NetworkLauncher implements AppLauncher {
             final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : 12345;
             final boolean success = client.join(host, port);
             if (!success) {
-              System.out.println("Failed to connect to " + host + ":" + port);
+              Logger.getInstance().info("Failed to connect to " + host + ":" + port);
             }
           } else if (cmd.startsWith("hello ")) {
             final String name = cmd.substring("hello ".length()).trim();
@@ -137,13 +138,13 @@ public class NetworkLauncher implements AppLauncher {
             }
             running = false;
           } else {
-            System.out.println("Unknown command");
+            Logger.getInstance().info("Unknown command");
           }
         } catch (final Exception exception) {
-          System.out.println("Error: " + exception.getMessage());
+          Logger.getInstance().info("Error: " + exception.getMessage());
         }
       }
     }
-    System.out.println("Network mode exited.");
+    Logger.getInstance().info("Network mode exited.");
   }
 }
