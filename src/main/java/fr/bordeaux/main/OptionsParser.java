@@ -94,6 +94,7 @@ public final class OptionsParser {
 
         logInfo("Usage: quoridor [OPTIONS] [LOAD_FILE]");
         logInfo("");
+
         logInfo("General options:");
         logInfo("  -h, --help             Show this help message");
         logInfo("  -V, --version          Display version");
@@ -101,12 +102,14 @@ public final class OptionsParser {
         logInfo("  -d, --debug            Enable debug logging (default: " + config.getBoolean("debug", true) + ")");
         logInfo("  -D, --daemon           Launch server in headless mode (default: " + config.getBoolean("daemon", false) + ")");
         logInfo("");
+
         logInfo("Modes:");
         logInfo("  -g, --gui              Launch GUI mode");
         logInfo("  -c, --cli              Launch CLI mode");
         logInfo("  -n, --net, --server, -s Launch network mode");
         logInfo("  --contest, -C <file>   Launch contest mode from file");
         logInfo("");
+
         logInfo("Game options:");
         logInfo("  -p, --players N        Number of players (2-4) (default: " + config.getInt("nb-players", 2) + ")");
         logInfo("  -b, --blitz            Enable blitz mode (default: " + config.getBoolean("blitz", false) + ")");
@@ -114,16 +117,36 @@ public final class OptionsParser {
         logInfo("  -w, --walls N          Number of walls per player (default: " + config.getInt("nb-walls", 20) + ")");
         logInfo("  --size N               Board size, e.g., 9 for 9x9 (default: " + config.getInt("board-size", 9) + ")");
         logInfo("");
+
+        logInfo("AI options:");
+        logInfo("  -a, --ai [MODE]        Enable AI player(s):");
+        logInfo("                         blanc | 1   -> AI for player 1");
+        logInfo("                         noir  | 2   -> AI for player 2 (default)");
+        logInfo("                         a            -> AI for both players");
+        logInfo("                         (no value)   -> AI for player 2");
+        logInfo("");
+        logInfo("  --ai-mode MODE         AI algorithm: minimax, mcts, iterative");
+        logInfo("  --ai-minimax-depth N   Depth for minimax algorithm (>0)");
+        logInfo("  --ai-time N            Time limit for AI in seconds (>0)");
+        logInfo("  --ai-minimax-scoring S Scoring method: simple, intermediate, advanced");
+        logInfo("  --ai-mcts-selection S  MCTS selection: UCT, ML");
+        logInfo("");
+
         logInfo("Load/Save:");
         logInfo("  [LOAD_FILE]            Optional path to a saved game to load at startup");
         logInfo("");
+
         logInfo("Shortcut and configuration options:");
         logInfo("  --shortcut-config      Open GUI to configure keyboard shortcuts");
         logInfo("  --config <file>        Load custom configuration file");
         logInfo("");
+
         logInfo("Examples:");
-        logInfo("  java -jar quoridor.jar -g -p 4 -w 20 --size 9");
-        logInfo("  java -jar quoridor.jar -n --daemon -p 2");
-        logInfo("  java -jar quoridor.jar --contest contest_file.txt");
+        logInfo("  ./quoridor -g -p 4 -w 20 --size 9");
+        logInfo("  ./quoridor -a a");
+        logInfo("  ./quoridor -g -a blanc");
+        logInfo("  ./quoridor -a a --ai-mode minimax --ai-minimax-depth 3");
+        logInfo("  ./quoridor -n --daemon -p 2");
+        logInfo("  ./quoridor --contest contest_file.txt");
     }
 }
