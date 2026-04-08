@@ -29,6 +29,9 @@ public final class BoardView extends GridPane {
   /** Game engine used to retrieve the game state. */
   private final GameEngine engine;
 
+  /** Dispatcher used to forward GUI moves in local or network mode. */
+  private final ActionDispatcher dispatcher;
+
   /** References to all cell containers on the board. */
   private final StackPane[][] cells;
 
@@ -90,10 +93,12 @@ public final class BoardView extends GridPane {
    * Creates board view.
    *
    * @param engine game engine
+   * @param dispatcher dispatcher used for local and network moves
    */
-  public BoardView(final GameEngine engine) {
+  public BoardView(final GameEngine engine, final ActionDispatcher dispatcher) {
     super();
     this.engine = engine;
+    this.dispatcher = dispatcher;
     final GameState state = engine.getState();
     final int size = state.getBoard().getSize();
     cells = new StackPane[size][size];
@@ -224,11 +229,15 @@ public final class BoardView extends GridPane {
       wall.setOnMouseExited(e -> wall.setFill(HINT_WALL_COLOR));
       wall.setOnMouseClicked(
           event -> {
+            final GameState state = engine.getState();
             final Player current = engine.getState().getCurrentPlayer();
             if (!current.isAI()) {
+              if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
+                return;
+              }
               final Move wallMove = Move.wall(target, orientation);
-              if (engine.play(wallMove)) {
-                drawBoard();
+              if (RuleChecker.isMoveLegal(state, wallMove)) {
+                dispatcher.playBoardMove(wallMove);
               }
             }
           });
@@ -382,14 +391,15 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Player current = state.getCurrentPlayer();
     if (!current.isAI()) {
-      final Position from = current.getPosition();
-      final Position to = new Position(row, col);
-      final Move move = Move.pawn(from, to);
-      if (engine.play(move)) {
-        drawBoard();
-      }
-    }
-  }
+      if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
+        return;
+       }
+        final Position from = current.getPosition();
+        final Position to = new Position(row, col);
+        final Move move = Move.pawn(from, to);
+        dispatcher.playBoardMove(move);
+   }
+}
 
   /**
    * Places wall on right/other click.
@@ -402,12 +412,14 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Player current = state.getCurrentPlayer();
     if (!current.isAI()) {
+       if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
+        return;
+      }
       final Orientation orientation =
           (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
       final Move wallMove = Move.wall(new Position(row, col), orientation);
       if (RuleChecker.isMoveLegal(state, wallMove)) {
-        engine.play(wallMove);
-        drawBoard();
+        dispatcher.playBoardMove(wallMove);
       }
     }
   }
@@ -462,9 +474,12 @@ public final class BoardView extends GridPane {
           final GameState state = engine.getState();
           final Player current = state.getCurrentPlayer();
           if (!current.isAI() && event.getButton() == MouseButton.SECONDARY) {
+            if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
+              return;
+            }
             final Move wallMove = Move.wall(new Position(row, col), orientation);
-            if (engine.play(wallMove)) {
-              drawBoard();
+            if (RuleChecker.isMoveLegal(state, wallMove)) {
+              dispatcher.playBoardMove(wallMove);
             }
           }
         });

@@ -99,7 +99,8 @@ public class QuoridorApp extends Application {
       setupPanelSize(panels[i]);
     }
 
-    final BoardView boardView = new BoardView(engine);
+    final BoardView boardView = new BoardView(engine, dispatcher);
+    dispatcher.setBoardView(boardView);
     final StackPane boardContainer = buildBoardContainer(boardView);
 
     final javafx.scene.Node hintArea = createHintArea(engine, boardView);
@@ -115,7 +116,7 @@ public class QuoridorApp extends Application {
     final MainMenuBar menuBar = new MainMenuBar(dispatcher);
     final BorderPane root = buildRootLayout(menuBar, centerBox, panels);
 
-    DragAndDrop.install(engine, boardView);
+    DragAndDrop.install(engine, boardView, dispatcher);
 
     final Scene scene = new Scene(root);
     setupShortcuts(scene, dispatcher);

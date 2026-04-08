@@ -3,6 +3,11 @@ package fr.bordeaux.gui;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.core.Color;
+import fr.bordeaux.core.HumanPlayer;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Position;
+import fr.bordeaux.network.NetworkMoveParser;
 import fr.bordeaux.main.PlayerFactory;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
@@ -31,6 +36,21 @@ public class ActionDispatcher {
   /** The client instance for multiplayer games. */
   private final GameClient networkClient = new GameClient();
 
+    /** Board view used to refresh the GUI after network messages. */
+  private BoardView boardView;
+
+  /** Last move sent to the server and still waiting for validation. */
+  private String pendingMove;
+
+  /** True when the GUI is currently playing a network game. */
+  private boolean networkGame;
+
+  /** True when the local player can play now. */
+  private boolean myTurn;
+
+  /** Local player name sent to the server. */
+  private String localPlayerName = "Player";
+
   /** Callback and logic for hint calculation. */
   private Runnable hintHandler;
 
@@ -52,6 +72,8 @@ public class ActionDispatcher {
   public ActionDispatcher(final GameEngine engine, final FileHandler fileHandler) {
     this.engine = engine;
     this.fileHandler = fileHandler;
+    this.networkClient.setServerMessageHandler(this::handleServerMessage);
+
   }
 
   /**
@@ -141,7 +163,11 @@ public class ActionDispatcher {
     } else {
       timeout = null;
     }
+    networkGame = false;
+    myTurn = false;
+    pendingMove = null;
     engine.newGame(size, players, timeout);
+
   }
 
   private void startServer() {
@@ -206,8 +232,172 @@ public class ActionDispatcher {
       return;
     }
 
-    networkClient.hello(input.trim());
+    localPlayerName = input.trim();
+    networkClient.hello(localPlayerName);
     showMessage("Network", "Player Name", "Name sent to server.");
+  }
+
+    /**
+   * Registers the board view so the dispatcher can refresh it after network updates.
+   *
+   * @param boardView the board view used by the GUI
+   */
+  public void setBoardView(final BoardView boardView) {
+    this.boardView = boardView;
+  }
+
+  /**
+   * Indicates whether a network game is currently active.
+   *
+   * @return true if the current game is a network game
+   */
+  public boolean isNetworkGame() {
+    return networkGame;
+  }
+
+  /**
+   * Indicates whether the local player can play now.
+   *
+   * @return true if it is the local player's turn
+   */
+  public boolean isMyTurn() {
+    return myTurn;
+  }
+
+  /**
+   * Plays a move from the GUI board.
+   * In local mode the move is applied directly.
+   * In network mode the move is sent to the server.
+   *
+   * @param move move chosen on the board
+   */
+  public void playBoardMove(final Move move) {
+    if (!networkGame) {
+      if (engine.play(move) && boardView != null) {
+        boardView.drawBoard();
+      }
+      return;
+    }
+
+    if (!myTurn) {
+      showMessage("Network", "Turn", "It is not your turn.");
+      return;
+    }
+
+    if (pendingMove != null) {
+      showMessage("Network", "Move", "A move is already waiting for validation.");
+      return;
+    }
+
+    pendingMove = moveToText(move);
+    networkClient.sendMove(pendingMove);
+  }
+
+  /**
+   * Handles messages received from the network server.
+   *
+   * @param message server message
+   */
+  private void handleServerMessage(final String message) {
+    Platform.runLater(
+        () -> {
+          if (message.startsWith("GAME_START ")) {
+            final boolean startsNow = message.contains("YOUR_TURN");
+            networkGame = true;
+            myTurn = startsNow;
+            pendingMove = null;
+            setupNetworkBoard(startsNow);
+            showMessage("Network", "Game Start", startsNow ? "Your turn." : "Opponent's turn.");
+          } else if ("OK".equals(message) && pendingMove != null) {
+            applyNetworkMove(pendingMove);
+            pendingMove = null;
+            myTurn = false;
+          } else if (message.startsWith("OPPONENT_MOVE ")) {
+            final String moveText = message.substring("OPPONENT_MOVE ".length()).trim();
+            applyNetworkMove(moveText);
+            myTurn = true;
+          } else if (message.startsWith("ERROR ")) {
+            pendingMove = null;
+            showMessage("Network", "Server Error", message);
+          } else if (message.startsWith("GAME_OVER ")) {
+            pendingMove = null;
+            myTurn = false;
+            networkGame = false;
+          } else if ("SERVER_STOPPED".equals(message)) {
+            pendingMove = null;
+            myTurn = false;
+            networkGame = false;
+            showMessage("Network", "Server", "Server stopped.");
+          }
+        });
+  }
+
+  /**
+   * Creates a fresh local board that matches the network game start.
+   * This minimal version is designed for a two-player network game.
+   *
+   * @param startsNow true if the local player starts first
+   */
+  private void setupNetworkBoard(final boolean startsNow) {
+    final int size = engine.getState().getBoard().getSize();
+
+    final List<Player> players;
+    if (startsNow) {
+      players =
+          List.of(
+              new HumanPlayer(localPlayerName, new Position(0, 4), Color.WHITE),
+              new HumanPlayer("Opponent", new Position(8, 4), Color.BLACK));
+    } else {
+      players =
+          List.of(
+              new HumanPlayer("Opponent", new Position(0, 4), Color.WHITE),
+              new HumanPlayer(localPlayerName, new Position(8, 4), Color.BLACK));
+    }
+
+    engine.newGame(size, players, null);
+
+    if (boardView != null) {
+      boardView.drawBoard();
+    }
+  }
+
+  /**
+   * Applies a validated network move to the local engine.
+   *
+   * @param moveText move text received from the server
+   */
+  private void applyNetworkMove(final String moveText) {
+    final Move move = NetworkMoveParser.parseMove(moveText);
+    if (engine.play(move) && boardView != null) {
+      boardView.drawBoard();
+    }
+  }
+
+  /**
+   * Converts a move into the text format used by the network protocol.
+   *
+   * @param move move to convert
+   * @return network text for the move
+   */
+  private String moveToText(final Move move) {
+    if (move.isPawn()) {
+      return positionToText(move.getFrom()) + "-" + positionToText(move.getTo());
+    }
+
+    final char orientationLetter = move.getOrientation().name().charAt(0);
+    return positionToText(move.getTo()) + Character.toLowerCase(orientationLetter);
+  }
+
+  /**
+   * Converts a board position into network text.
+   *
+   * @param position board position
+   * @return text representation of the position
+   */
+  private String positionToText(final Position position) {
+    final char column = (char) ('a' + position.getY());
+    final int row = position.getX() + 1;
+    return String.valueOf(column) + row;
   }
 
   /**

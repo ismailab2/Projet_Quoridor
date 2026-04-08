@@ -100,6 +100,7 @@ public class GameClient {
                     }
                   } else {
                     Logger.getInstance().info(I18n.get("server", line));
+                    notifyServerMessage(line);
                   }
                 }
               } catch (final IOException exception) {

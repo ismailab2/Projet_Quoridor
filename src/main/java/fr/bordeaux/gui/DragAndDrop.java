@@ -43,9 +43,10 @@ public final class DragAndDrop {
    *
    * @param engine game engine used to validate and play moves
    * @param boardView board view on which handlers are installed
+   * @param dispatcher dispatcher used to route moves in local or network mode
    */
-  public static void install(final GameEngine engine, final BoardView boardView) {
-    final Runnable attachHandlers = () -> attachHandlers(engine, boardView);
+  public static void install(final GameEngine engine, final BoardView boardView, final ActionDispatcher dispatcher) {
+    final Runnable attachHandlers = () -> attachHandlers(engine, boardView, dispatcher);
     Platform.runLater(attachHandlers);
     engine.getState().addListener(() -> Platform.runLater(attachHandlers));
   }
@@ -56,15 +57,14 @@ public final class DragAndDrop {
    * @param engine game engine used to validate moves
    * @param boardView board view containing the cells
    */
-  private static void attachHandlers(final GameEngine engine, final BoardView boardView) {
+  private static void attachHandlers(final GameEngine engine, final BoardView boardView, final ActionDispatcher dispatcher) {
     for (final Node node : boardView.getChildren()) {
       if (!(node instanceof StackPane cell)) {
         continue;
       }
       final int row = getIndex(cell, true);
       final int col = getIndex(cell, false);
-      installDropOnCell(engine, boardView, cell, row, col);
-
+      installDropOnCell(engine, boardView, dispatcher, cell, row, col);
       for (final Node child : cell.getChildren()) {
         if (child instanceof Rectangle pawn) {
           installDragOnPawn(engine, pawn, row, col);
@@ -111,6 +111,7 @@ public final class DragAndDrop {
   private static void installDropOnCell(
       final GameEngine engine,
       final BoardView boardView,
+      final ActionDispatcher dispatcher,
       final StackPane cell,
       final int toRow,
       final int toCol) {
@@ -143,9 +144,15 @@ public final class DragAndDrop {
           boolean success = false;
           if (event.getDragboard().hasContent(PAWN_FORMAT)
               && isMoveLegal(engine, event.getDragboard(), toRow, toCol)) {
-            success = engine.play(buildMove(event.getDragboard(), toRow, toCol));
-            if (success) {
-              boardView.drawBoard();
+            final Move move = buildMove(event.getDragboard(), toRow, toCol);
+            if (dispatcher.isNetworkGame()) {
+              if (dispatcher.isMyTurn()) {
+                dispatcher.playBoardMove(move);
+                success = true;
+              }
+            } else {
+              dispatcher.playBoardMove(move);
+              success = true;
             }
           }
           event.setDropCompleted(success);

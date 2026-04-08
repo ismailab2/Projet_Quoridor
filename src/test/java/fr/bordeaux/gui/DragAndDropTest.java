@@ -22,6 +22,8 @@ class DragAndDropTest {
   private GameEngine engine;
   private GameState state;
   private BoardView boardView;
+  private ActionDispatcher dispatcher;
+
 
   @BeforeAll
   static void initJavaFx() {
@@ -34,8 +36,11 @@ class DragAndDropTest {
     Board board = new Board(9);
     state = new GameState(board, Player.createDefaultPlayers());
     engine = new GameEngine(state, false, false, false, false, 10);
-    runAndWait(() -> boardView = new BoardView(engine));
-    runAndWait(() -> DragAndDrop.install(engine, boardView));
+
+     dispatcher = new ActionDispatcher(engine, null);
+
+    runAndWait(() -> boardView = new BoardView(engine, dispatcher));
+    runAndWait(() -> DragAndDrop.install(engine, boardView, dispatcher));
     waitForFxEvents();
   }
 
