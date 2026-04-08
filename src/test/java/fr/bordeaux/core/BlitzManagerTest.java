@@ -109,7 +109,9 @@ public class BlitzManagerTest {
 
     Player player = mock(Player.class);
     when(player.getRemainingTime()).thenReturn(70000L);
-    when(mockedState.getCurrentPlayer()).thenReturn(player).thenThrow(new RuntimeException("Injected task error"));
+    when(mockedState.getCurrentPlayer())
+        .thenReturn(player)
+        .thenThrow(new RuntimeException("Injected task error"));
 
     BlitzManager faultyBlitz = new BlitzManager(mockedEngine);
 

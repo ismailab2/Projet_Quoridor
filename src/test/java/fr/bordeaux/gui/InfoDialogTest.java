@@ -28,9 +28,11 @@ class InfoDialogTest {
       verify(alert).setTitle("Info du jeu Quoridor");
       verify(alert).setHeaderText("Quoridor");
       verify(alert).setGraphic(null);
-      verify(alert).setContentText("Version : 1.0.0\nAuthors: Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \nStudents at Bordeaux University");
+      verify(alert)
+          .setContentText(
+              "Version : 1.0.0\nAuthors: Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \nStudents at Bordeaux University");
 
-        verify(alert).show();
+      verify(alert).show();
     }
   }
 }

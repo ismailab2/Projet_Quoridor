@@ -3,7 +3,6 @@ package fr.bordeaux.core;
 import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.util.Logger;
-
 import java.io.IOException;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
@@ -78,7 +77,7 @@ public class GameEngine {
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
-        Logger.getInstance().info("Invalid move! Please try again.");
+      Logger.getInstance().info("Invalid move! Please try again.");
       return false;
     }
 

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import org.mockito.MockedStatic;
 import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -568,7 +567,6 @@ public class MultiGameServerTest {
     setRunning(server, false);
   }
 
-  
   @Test
   void testServerError_LoggedWhenRunning() throws Exception {
     MultiGameServer server = new MultiGameServer();

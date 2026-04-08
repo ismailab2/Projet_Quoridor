@@ -1,6 +1,5 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.config.ConfigManager;
 import javafx.scene.control.Alert;
 
 /** Utility class used to display the application information dialog. */
@@ -15,7 +14,8 @@ public final class InfoDialog {
     alert.setTitle("Info du jeu Quoridor");
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);
-    alert.setContentText("Version : 1.0.0\nAuthors: Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \nStudents at Bordeaux University");
+    alert.setContentText(
+        "Version : 1.0.0\nAuthors: Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \nStudents at Bordeaux University");
     alert.show();
   }
 }
