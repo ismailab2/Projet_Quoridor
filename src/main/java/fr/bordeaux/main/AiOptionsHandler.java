@@ -13,13 +13,14 @@ public final class AiOptionsHandler {
   /**
    * Processes AI-related arguments.
    *
-   * @param arg    The current argument.
-   * @param args   The full array of arguments.
-   * @param index  The current index in the array.
+   * @param arg The current argument.
+   * @param args The full array of arguments.
+   * @param index The current index in the array.
    * @param config The configuration manager.
    * @return The new index after consuming arguments, or -1 if the argument is not handled here.
    */
-  public static int handle(final String arg, final String[] args, final int index, final ConfigManager config) {
+  public static int handle(
+      final String arg, final String[] args, final int index, final ConfigManager config) {
     int i = index;
     switch (arg) {
       case "-a", "--ai" -> {
@@ -54,7 +55,8 @@ public final class AiOptionsHandler {
         applyAiOption(args[i], "time", config);
       }
       case "--ai-minimax-scoring" -> {
-        checkAiString(args[++i], "scoring", new ArrayList<>(List.of("simple", "intermediate", "advanced")));
+        checkAiString(
+            args[++i], "scoring", new ArrayList<>(List.of("simple", "intermediate", "advanced")));
         applyAiOption(args[i], "scoring", config);
       }
       case "--ai-mcts-selection" -> applyMctsOption(args[++i], config);
@@ -64,7 +66,6 @@ public final class AiOptionsHandler {
     }
     return i;
   }
-
 
   /**
    * Validates that AI is only enabled for 2-player games.

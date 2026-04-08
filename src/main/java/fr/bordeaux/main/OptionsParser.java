@@ -2,8 +2,6 @@ package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
-import java.util.ArrayList;
-import java.util.List;
 
 /** Interprets CLI arguments (GUI, CLI, Network) and game settings. */
 public final class OptionsParser {
@@ -37,12 +35,12 @@ public final class OptionsParser {
 
       i = handleSystemOption(arg, args, i, config);
       i++;
-
     }
     AiOptionsHandler.validateAiPlayerCount(config);
   }
 
-  private static int handleSystemOption(final String arg, final String[] args, final int index, final ConfigManager config) {
+  private static int handleSystemOption(
+      final String arg, final String[] args, final int index, final ConfigManager config) {
     int i = index;
     switch (arg) {
       case "-h", "--help" -> {
@@ -89,7 +87,6 @@ public final class OptionsParser {
       LOGGER.info(message);
     }
   }
-
 
   /** Prints usage and help information to the console. */
   public static void printHelp() {

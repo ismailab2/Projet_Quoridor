@@ -13,13 +13,14 @@ public final class GameOptionsHandler {
   /**
    * Processes game-related arguments.
    *
-   * @param arg    The current argument.
-   * @param args   The full array of arguments.
-   * @param index  The current index in the array.
+   * @param arg The current argument.
+   * @param args The full array of arguments.
+   * @param index The current index in the array.
    * @param config The configuration manager.
    * @return The new index after consuming arguments, or -1 if not handled.
    */
-  public static int handle(final String arg, final String[] args, final int index, final ConfigManager config) {
+  public static int handle(
+      final String arg, final String[] args, final int index, final ConfigManager config) {
     int i = index;
     switch (arg) {
       case "-b", "--blitz" -> config.setOption("blitz", "true");
