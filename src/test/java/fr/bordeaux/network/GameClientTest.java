@@ -14,10 +14,9 @@ import static org.mockito.Mockito.when;
 
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
-
 import java.io.*;
-import java.net.*;
 import java.lang.reflect.Field;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
