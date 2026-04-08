@@ -77,6 +77,7 @@ public class GameEngine {
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
+        Log.info("Invalid move! Please try again.");
       return false;
     }
 

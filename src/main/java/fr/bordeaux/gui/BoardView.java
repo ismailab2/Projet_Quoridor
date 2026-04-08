@@ -4,6 +4,7 @@ import fr.bordeaux.core.*;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -12,6 +13,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import javafx.scene.control.Label;
 
 /**
  * Graphical Quoridor board. Draws cells, pawns, walls and handles interactions. Board redraws
@@ -24,6 +26,8 @@ public final class BoardView extends GridPane {
 
   /** References to all cell containers on the board. */
   private final StackPane[][] cells;
+
+  private final Label errorLabel = new Label();
 
   private static final double PAWN_SIZE_FACTOR = 0.6;
   private static final double WALL_ARC = 4.0;
@@ -48,6 +52,12 @@ public final class BoardView extends GridPane {
   public BoardView(final GameEngine engine) {
     super();
     this.engine = engine;
+
+      // Style du label d'erreur
+      errorLabel.setTextFill(Color.RED);
+      errorLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+    //dans le GridPane en première ligne sur toute la largeur
+      add(errorLabel, 0, 0, engine.getState().getBoard().getSize(), 1);
     final GameState state = engine.getState();
     final int size = state.getBoard().getSize();
     cells = new StackPane[size][size];
@@ -247,6 +257,7 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Player current = state.getCurrentPlayer();
     if (current.isAI()) {
+        showError("AI cannot use.");
       return;
     }
     final Position from = current.getPosition();
@@ -254,6 +265,9 @@ public final class BoardView extends GridPane {
     final Move move = Move.pawn(from, to);
     if (engine.play(move)) {
       drawBoard();
+    }
+    else {
+        showError("Invalide Move ! Try again please.");
     }
   }
 
@@ -267,6 +281,7 @@ public final class BoardView extends GridPane {
   public void handleWallClick(final int row, final int col, final MouseButton button) {
     final GameState state = engine.getState();
     if (state.getCurrentPlayer().isAI()) {
+        showError("AI cannot place a wall.");
       return;
     }
     final Orientation orientation =
@@ -275,6 +290,9 @@ public final class BoardView extends GridPane {
     if (RuleChecker.isMoveLegal(state, wallMove)) {
       engine.play(wallMove);
       drawBoard();
+    }
+    else{
+        showError("Invalid wall placement!");
     }
   }
 
@@ -328,12 +346,16 @@ public final class BoardView extends GridPane {
           final GameState state = engine.getState();
           final Player current = state.getCurrentPlayer();
           if (current.isAI()) {
+              showError("L'IA ne peut pas placer de mur.");
             return;
           }
           if (event.getButton() == MouseButton.SECONDARY) {
             final Move wallMove = Move.wall(new Position(row, col), orientation);
             if (engine.play(wallMove)) {
               drawBoard();
+            }
+            else{
+                showError("Placement de mur invalide !");
             }
           }
         });
@@ -359,4 +381,11 @@ public final class BoardView extends GridPane {
   private int getWallThickness() {
     return Math.max(MIN_WALL_THICKNESS, getCellSize() / WALL_THICKNESS_RATIO);
   }
+
+    private void showError(String message) {
+        errorLabel.setText("⚠ " + message);
+        PauseTransition pause = new PauseTransition(Duration.seconds(10));
+        pause.setOnFinished(event -> errorLabel.setText(""));
+        pause.play();
+    }
 }
