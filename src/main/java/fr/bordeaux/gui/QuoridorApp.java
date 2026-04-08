@@ -60,7 +60,7 @@ public class QuoridorApp extends Application {
   /** Message displayed when AI is idle. */
   private static final String HINT_IDLE_TEXT = "";
 
-  /**Tracks the current hint task to allow cancellation. */
+  /** Tracks the current hint task to allow cancellation. */
   private final AtomicReference<CompletableFuture<Move>> currentHintTask = new AtomicReference<>();
 
   /** Default constructor. */
@@ -139,7 +139,8 @@ public class QuoridorApp extends Application {
    * @param boardView the board view for highlighting the move
    * @return a Node containing the Hint button and status label
    */
-  /* default */ javafx.scene.Node createHintArea(final GameEngine engine, final BoardView boardView) {
+  /* default */ javafx.scene.Node createHintArea(
+      final GameEngine engine, final BoardView boardView) {
     final Button hintButton = new Button("Hint");
     hintButton.setStyle(HINT_BUTTON_STYLE);
 
