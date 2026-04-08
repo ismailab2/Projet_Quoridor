@@ -3,6 +3,7 @@ package fr.bordeaux.gui;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.Optional;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
@@ -123,7 +124,7 @@ class ConfigDialogTest extends ApplicationTest {
     Optional<Window> stageOpt =
         Window.getWindows().stream()
             .filter(window -> window instanceof Stage)
-            .filter(window -> "Shortcut Configuration".equals(((Stage) window).getTitle()))
+            .filter(window -> I18n.get("shortcut").equals(((Stage) window).getTitle()))
             .findFirst();
 
     assertTrue(stageOpt.isPresent(), "ConfigDialog stage should be opened");

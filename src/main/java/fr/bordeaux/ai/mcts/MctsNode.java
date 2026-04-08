@@ -98,7 +98,7 @@ public class MctsNode {
   public Move getBestMoveAfterSearch(
       final long limit, final int myIdx, final NeuralNetworkEvaluator evaluator) {
     final long start = System.currentTimeMillis();
-    while (System.currentTimeMillis() - start < limit) {
+    while (System.currentTimeMillis() - start < limit && !Thread.currentThread().isInterrupted()) {
       MctsNode current = this;
       // Selection
       while (!current.state.isGameOver() && !current.hasUntriedLegalMoves()) {

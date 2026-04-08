@@ -6,6 +6,7 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import fr.bordeaux.util.TimeConvertor;
 import java.io.PrintStream;
@@ -76,13 +77,14 @@ public class ShowCommand implements Command {
           for (final Player player : players) {
             if (player.equals(currentPlayer)) {
               writer.println(
-                  "Your time left : " + TimeConvertor.formatTime(player.getRemainingTime()));
+                  I18n.get("timeLeft") + TimeConvertor.formatTime(player.getRemainingTime()));
             } else {
               writer.println(
-                  "Time left for "
-                      + player.getName()
-                      + " ---> "
-                      + TimeConvertor.formatTime(player.getRemainingTime()));
+                  I18n.get(
+                      "timeFor",
+                      player.getName(),
+                      " ---> ",
+                      TimeConvertor.formatTime(player.getRemainingTime())));
             }
           }
 
@@ -94,7 +96,7 @@ public class ShowCommand implements Command {
           break;
         }
       default:
-        LOGGER.error("The command \"show{0}\" doesn't exist...", option);
+        LOGGER.error(I18n.get("showNot", tokens[1], I18n.get("notExist")));
         break;
     }
     return engine;
@@ -110,14 +112,14 @@ public class ShowCommand implements Command {
     LOGGER.info("  show configuration");
     LOGGER.info("  show time\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Displays information about the current game.\n");
-    LOGGER.verbose("  If any option is given, displays the board by default");
+    LOGGER.info("  " + I18n.get("showDesc"));
+    LOGGER.verbose("  " + I18n.get("showVerb"));
     LOGGER.verbose("Options:");
-    LOGGER.verbose("  board         : Displays the current board state.");
-    LOGGER.verbose("  history       : Displays the list of moves played so far.");
-    LOGGER.verbose("  configuration : Displays all the configuations set for the game.");
-    LOGGER.verbose("  time          : Displays the remaining time for each player.\n");
-    LOGGER.verbose("If you want the help with an option, you can enter \"help show [option]\".\n");
+    LOGGER.verbose("  board         : " + I18n.get("showVBoard"));
+    LOGGER.verbose("  history       : " + I18n.get("showVHisto"));
+    LOGGER.verbose("  configuration : " + I18n.get("showVConfig"));
+    LOGGER.verbose("  time          : " + I18n.get("showVTime"));
+    LOGGER.verbose(I18n.get("showVMore"));
   }
 
   /** Displays help information for the "show board" option. */
@@ -126,7 +128,7 @@ public class ShowCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  show board\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Displays the current state of the board.\n");
+    LOGGER.info("  " + I18n.get("showDescBoard"));
   }
 
   /** Displays help information for the "show history" option. */
@@ -135,7 +137,7 @@ public class ShowCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  show history\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Displays the chronological list of all moves played.\n");
+    LOGGER.info("  " + I18n.get("showDescHisto"));
   }
 
   /** Displays help information for the "show time" option. */
@@ -144,8 +146,7 @@ public class ShowCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  show time\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Displays the remaining time for each player.\n");
-    LOGGER.info("  Only relevant if a timed mode is active.\n");
+    LOGGER.info("  " + I18n.get("showDescTime"));
   }
 
   /** Displays help information for the "show configuration" option. */
@@ -154,14 +155,10 @@ public class ShowCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  show configuration\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Displays the current game configuration.\n");
-    LOGGER.verbose("  This includes all active settings such as:");
-    LOGGER.verbose("    - Board size");
-    LOGGER.verbose("    - Number of players");
-    LOGGER.verbose("    - Game mode (e.g., Blitz)");
-    LOGGER.verbose("    - Debug mode");
-    LOGGER.verbose("    - Any other configurable parameters\n");
-    LOGGER.verbose("This command does not modify the game state.\n");
+    LOGGER.info("  " + I18n.get("showDescConfig"));
+    LOGGER.verbose("  " + I18n.get("showDescVConfig"));
+    LOGGER.verbose("    " + I18n.get("showCfgs"));
+    LOGGER.verbose(I18n.get("showCfgsMore"));
   }
 
   /**
@@ -251,7 +248,7 @@ public class ShowCommand implements Command {
    * @param engine the current game engine
    */
   public void showHistory(final GameEngine engine) {
-    writer.println("Oldest move");
+    writer.println(I18n.get("oldest"));
     final List<Player> players = engine.getState().getPlayers();
     final int nbPlayers = players.size();
     int count = 0;
@@ -270,6 +267,6 @@ public class ShowCommand implements Command {
       strMove.append(';');
       writer.println(strMove.toString());
     }
-    writer.println("Newest move");
+    writer.println(I18n.get("newest"));
   }
 }

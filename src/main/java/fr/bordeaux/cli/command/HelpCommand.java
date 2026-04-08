@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.util.Map;
 import java.util.function.Function;
@@ -44,12 +45,12 @@ public class HelpCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens == null) {
-      LOGGER.debug("Any command has been given.");
+      LOGGER.debug(I18n.get("noCommand"));
     } else if (tokens.length == 1) {
-      LOGGER.debug("Showing all commands help.");
+      LOGGER.debug(I18n.get("allCommandHelp"));
       helpCli();
     } else {
-      LOGGER.debug("Displaying help for the command {0}", tokens[1]);
+      LOGGER.debug(I18n.get("helpFor"), tokens[1]);
       helpFetch();
     }
     return engine;
@@ -65,26 +66,22 @@ public class HelpCommand implements Command {
   public void helpCli() {
     LOGGER.info("/=== Quoridor Command Line Help ===/\n");
     LOGGER.info("Commands :\n");
-    LOGGER.info("new [ARGS] :          Start a new game with the given args");
-    LOGGER.info("help [CMD] :          If no command is given, displays this message.");
-    LOGGER.info(
-        "                      Otherwise, displays a more detailed help for a specific command.");
-    LOGGER.info("help move :           Shows you how to play a move.");
-    LOGGER.info(
-        "quit :                Quit the current game. It'll ask you if you want to save it before quitting.");
-    LOGGER.info("load [filename] :     Load a game from the given file \"filename\".");
-    LOGGER.info("save [filename] :     Save the current game to a file \"filename\".");
-    LOGGER.info(
-        "pause :               Pause the timer if you're in a blitz game, else it does nothing.");
-    LOGGER.info("hint :                Suggest you a move if you don't know what to play.");
-    LOGGER.info("undo [N] :            Unplays the N last move played. Just once if no N given.");
-    LOGGER.info("redo [N] :            Replays the N undone move played. Just once if no N given.");
-    LOGGER.info("show board :          Displays the board of the current game.");
-    LOGGER.info(
-        "show history :        Displays all the moves that were played during the game. From older to the more recent.");
-    LOGGER.info("show time :           Displays the time you and your opponent(s) each remain.");
-    LOGGER.info("show configurations : Displays the configurations set on your game.");
-    LOGGER.info("set PARAM=VALUE :     Changing the value of a given parameters PARAM to VALUE");
+    LOGGER.info("new [ARGS] :          " + I18n.get("newArgs"));
+    LOGGER.info("help [CMD] :          " + I18n.get("helpCmd"));
+    LOGGER.info("                      " + I18n.get("helpCmd2"));
+    LOGGER.info("help move :           " + I18n.get("helpMove"));
+    LOGGER.info("quit :                " + I18n.get("helpQuit"));
+    LOGGER.info("load [filename] :     " + I18n.get("helpLoad"));
+    LOGGER.info("save [filename] :     " + I18n.get("helpSave"));
+    LOGGER.info("pause :               " + I18n.get("helpPause"));
+    LOGGER.info("hint :                " + I18n.get("helpHint"));
+    LOGGER.info("undo [N] :            " + I18n.get("helpUndo"));
+    LOGGER.info("redo [N] :            " + I18n.get("helpRedo"));
+    LOGGER.info("show board :          " + I18n.get("helpBoard"));
+    LOGGER.info("show history :        " + I18n.get("helpHistory"));
+    LOGGER.info("show time :           " + I18n.get("helpTime"));
+    LOGGER.info("show configurations : " + I18n.get("helpConfigs"));
+    LOGGER.info("set PARAM=VALUE :     " + I18n.get("helpSet"));
   }
 
   /**
@@ -101,7 +98,7 @@ public class HelpCommand implements Command {
         final Command cmd = registry.get(commandName).apply(new String[] {commandName});
         cmd.helpText();
       } else {
-        LOGGER.debug("Unknown command : {0}", commandName);
+        LOGGER.debug(I18n.get("unknownCmd") + "{0}", commandName);
         LOGGER.info("Usage : help [CMD]");
       }
     }

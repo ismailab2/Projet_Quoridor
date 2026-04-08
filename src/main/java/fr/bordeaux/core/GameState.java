@@ -1,5 +1,6 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -46,8 +47,7 @@ public class GameState {
    */
   public GameState(final Board board, final List<Player> players, final int playerIndex) {
     if (players.size() < MIN_PLAYERS || players.size() > MAX_PLAYERS) {
-      throw new IllegalArgumentException(
-          "Number of players must be between 2 and 4, but was: " + players.size());
+      throw new IllegalArgumentException(I18n.get("playersMust") + players.size());
     }
 
     this.board = board;
@@ -92,7 +92,10 @@ public class GameState {
    *
    * @param amountInMillis amount to subtract in milliseconds.
    */
-  public void decrementCurrentPlayerTime(final long amountInMillis) {
+  public synchronized void decrementCurrentPlayerTime(final long amountInMillis) {
+    if (playerIndex >= players.size()) {
+      return;
+    }
     final Player target = getCurrentPlayer();
     final long newTime = target.getRemainingTime() - amountInMillis;
     target.setRemainingTime(newTime);
@@ -135,7 +138,7 @@ public class GameState {
    *
    * @param move The {@link Move} to apply.
    */
-  public void applyMove(final Move move) {
+  public synchronized void applyMove(final Move move) {
     final Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -155,7 +158,7 @@ public class GameState {
    *
    * @param move The {@link Move} to apply.
    */
-  public void applyMoveWithoutClearingRedo(final Move move) {
+  public synchronized void applyMoveWithoutClearingRedo(final Move move) {
     final Player player = getCurrentPlayer();
     if (move.isPawn()) {
       player.setPosition(move.getTo());
@@ -182,7 +185,7 @@ public class GameState {
   }
 
   /** Reverts moves until a human player is reached. */
-  public void undo() {
+  public synchronized void undo() {
     if (paused || gameOver || undoStack.isEmpty()) {
       return;
     }
@@ -206,7 +209,7 @@ public class GameState {
   }
 
   /** Re-applies undone moves. Continues if next player is AI. */
-  public void redo() {
+  public synchronized void redo() {
     if (paused || gameOver || redoStack.isEmpty()) {
       return;
     }
@@ -318,7 +321,10 @@ public class GameState {
    *
    * @return The current {@link Player}.
    */
-  public Player getCurrentPlayer() {
+  public synchronized Player getCurrentPlayer() {
+    if (playerIndex >= players.size()) {
+      playerIndex = 0;
+    }
     return players.get(playerIndex);
   }
 
@@ -372,7 +378,7 @@ public class GameState {
    *
    * @param loaded the game state to copy from
    */
-  public void loadState(final GameState loaded) {
+  public synchronized void loadState(final GameState loaded) {
     this.board = loaded.board;
     this.players = loaded.players;
     this.playerIndex = loaded.playerIndex;
@@ -386,7 +392,8 @@ public class GameState {
    * @param newPlayers the list of players
    * @param blitzTimeoutMs the blitz timeout in milliseconds, or null if not blitz
    */
-  public void reset(final int size, final List<Player> newPlayers, final Long blitzTimeoutMs) {
+  public synchronized void reset(
+      final int size, final List<Player> newPlayers, final Long blitzTimeoutMs) {
     this.board = new Board(size);
     this.players = newPlayers;
     this.playerIndex = 0;

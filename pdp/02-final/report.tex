@@ -1,3 +1,4 @@
+\PassOptionsToPackage{svgnames}{xcolor}
 \documentclass[a4paper]{article}
 
 \usepackage{pdp}
@@ -24,6 +25,12 @@
 %------------------------------------------------------------------------------
 %	MAIN MATTER
 %------------------------------------------------------------------------------
+\section{Le jeu Quoridor}
+\subsection{Histoire du jeu}
+\subsection{Les règles du jeu}
+\subsubsection{Règles de base}
+\subsubsection{Règls spéciales}
+
 \section{Les Fonctionnalités étendues}
 
 \subsection{Fonctionnalité 1 : Réseau client/serveur et gestion multi-clients}
@@ -42,7 +49,7 @@ L’implémentation repose sur deux niveaux principaux. La classe \texttt{GameSe
 
 Le protocole choisi est volontairement simple : les messages échangés sont des chaînes ASCII terminées par un retour à la ligne. Les commandes principales sont \texttt{HELLO}, \texttt{PING}, \texttt{QUIT} et \texttt{MOVE}, avec des réponses comme \texttt{WELCOME}, \texttt{PONG}, \texttt{BYE}, \texttt{OK}, \texttt{ERROR}, \texttt{GAME\_START}, \texttt{OPPONENT\_MOVE} et \texttt{GAME\_OVER}.
 
-Pour l’annonce de présence du serveur, le projet utilise une classe \texttt{ServerBroadcaster}. Côté client, la méthode \texttt{serverList()} de \texttt{GameClient} écoute les messages UDP afin de détecter les serveurs disponibles.
+Pour l’annonce de présence du serveur, le projet utilise une classe \texttt{ServerBroadcaster}. Côté client, la méthode \texttt{serverList} de \texttt{GameClient} écoute les messages UDP afin de détecter les serveurs disponibles.
 
 Enfin, la validation des coups ne repose pas sur le client. Lorsqu’un joueur envoie un coup sous forme textuelle, celui-ci est converti en objet métier \texttt{Move} par \texttt{NetworkMoveParser}, puis transmis au moteur de jeu côté serveur.
 
@@ -408,7 +415,7 @@ jamais l'inverse. Cette contrainte est visible dans le diagramme.
 schema en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{architecture_quoridor.jpg}}
+    \frame{\includegraphics[width=.85\textwidth]{layered_architectures.png}}
     \caption{Une architecture en couches}\label{fig:example1}
 \end{figure}
 
@@ -442,7 +449,7 @@ voici un diagramme indique comment son lié les differents classes du package ma
 schema du couche main de notre architecture (Fig.~\ref{fig:example2}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{main}}
+    \frame{\includegraphics[width=.65\textwidth]{main.jpg}}
     \caption{Une architecture en couches}\label{fig:example2}
 \end{figure}
 
@@ -460,7 +467,7 @@ voici un diagramme indique comment son lié les differents classes du package cl
 schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{cli}}
+    \frame{\includegraphics[width=.65\textwidth]{cli.jpg}}
     \caption{Une architecture en couches}\label{fig:example3}
 \end{figure}
 
@@ -486,7 +493,7 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 
 \nocite{*}
 \bibliographystyle{plain}
-\bibliography{bibliography}
+\bibliography{bibliography.bib}
 
 %------------------------------------------------------------------------------
 % BACK MATTER

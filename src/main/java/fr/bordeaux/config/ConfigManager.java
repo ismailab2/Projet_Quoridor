@@ -1,5 +1,6 @@
 package fr.bordeaux.config;
 
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.*;
 import java.nio.file.*;
@@ -53,7 +54,7 @@ public final class ConfigManager {
 
       } catch (final IOException e) {
 
-        Logger.getInstance().error("Warning: invalid .quoridorrc file. Using defaults.", e);
+        System.err.println(I18n.get("warning"));
       }
     } else {
       props.setProperty("verbose", "true");
@@ -76,7 +77,7 @@ public final class ConfigManager {
       props.store(out, "Quoridor configuration");
 
     } catch (final IOException e) {
-      Logger.getInstance().error("Error saving .quoridorrc", e);
+      Logger.getInstance().error(I18n.get("configError") + e);
     }
   }
 

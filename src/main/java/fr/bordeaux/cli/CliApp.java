@@ -3,6 +3,7 @@ package fr.bordeaux.cli;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import fr.bordeaux.util.Logger;
@@ -238,7 +239,11 @@ public class CliApp {
         if (terminal != null && terminal.writer() != null) {
           terminal
               .writer()
-              .println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+              .println(
+                  "\n"
+                      + engine.getState().getCurrentPlayer().getName()
+                      + " "
+                      + I18n.get("thinking"));
           terminal.flush();
         }
         executeAiTurn();
@@ -254,7 +259,7 @@ public class CliApp {
     try {
       terminal.close();
     } catch (IOException e) {
-      LOGGER.error("Terminal has been brutally closed...");
+      LOGGER.error(I18n.get("brutalClose"));
     }
   }
 
@@ -264,7 +269,7 @@ public class CliApp {
     engine.play(move);
 
     if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("L''IA a joué : {0}", move);
+      LOGGER.info(I18n.get("iaPlayed") + "{0}", move);
     }
   }
 
@@ -303,8 +308,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        LOGGER.debug("Unknown command: ''{0}''", command);
-        LOGGER.info("Did you mean: {0} ? ", suggestion);
+        LOGGER.debug(I18n.get("unknownCmd") + "'{0}'", command);
+        LOGGER.info(I18n.get("meant") + "{0} ? ", suggestion);
       }
 
       // Default behavior (interpret as move)
@@ -418,7 +423,7 @@ public class CliApp {
     final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_NETWORK_PORT;
 
     if (!networkClient.join(host, port)) {
-      LOGGER.info("Failed to connect to " + host + ":" + port);
+      LOGGER.info(I18n.get("failedConnect", host, ":") + port);
     }
   }
 

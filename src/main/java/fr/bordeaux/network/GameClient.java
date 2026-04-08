@@ -1,5 +1,6 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,14 +65,14 @@ public class GameClient {
           new BufferedReader(
               new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       writer = new PrintWriter(socket.getOutputStream(), true);
-      Logger.getInstance().info("Connected to {0}:{1,number,0}", host, port);
+      Logger.getInstance().info(I18n.get("connected") + " {0}:{1,number,0}", host, port);
 
       startListener();
       return true;
 
     } catch (final IOException exception) {
       if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("Connection failed: {0}", exception.getMessage());
+        Logger.getInstance().error(I18n.get("failedCo", ": ") + exception.getMessage());
       }
       return false;
     }
@@ -89,7 +90,7 @@ public class GameClient {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        Logger.getInstance().info("Server: " + line);
+                        Logger.getInstance().info(I18n.get("server", line));
                       }
                       notifyServerMessage(line);
                     } catch (InterruptedException ie) {
@@ -98,13 +99,12 @@ public class GameClient {
                       expectingDirectReply.set(false);
                     }
                   } else {
-                    Logger.getInstance().info("Server: " + line);
-                    notifyServerMessage(line);
+                    Logger.getInstance().info(I18n.get("server", line));
                   }
                 }
               } catch (final IOException exception) {
                 if (Logger.getInstance().isInfoEnabled()) {
-                  Logger.getInstance().info("Connection closed: {0}", exception.getMessage());
+                  Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
                 }
               }
             });
@@ -142,7 +142,7 @@ public class GameClient {
 
     String message;
     if (!checkConnection()) {
-      message = "Not connected to any server.";
+      message = I18n.get("notConnected");
     } else {
       try {
         final long start = System.currentTimeMillis();
@@ -155,16 +155,16 @@ public class GameClient {
         final long rtt = System.currentTimeMillis() - start;
 
         if (res != null) {
-          message = MessageFormat.format("Server: {0} TIME={1,number,0}ms", res, rtt);
+          message = MessageFormat.format(I18n.get("server") + " {0} TIME={1,number,0}ms", res, rtt);
           Logger.getInstance().info(message);
         } else {
           expectingDirectReply.set(false);
-          message = "Ping timeout: no response within 5 seconds.";
+          message = I18n.get("pingTimeout");
           Logger.getInstance().info(message);
         }
       } catch (final InterruptedException exception) {
         Thread.currentThread().interrupt();
-        message = "Ping interrupted.";
+        message = I18n.get("pingInterrupt");
         Logger.getInstance().info(message);
       }
     }
@@ -188,13 +188,13 @@ public class GameClient {
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
-          message = "Server: BYE";
+          message = I18n.get("server", " BYE");
           Logger.getInstance().info(message);
         } else if (res != null) {
-          Logger.getInstance().info("Server: {0}", res);
+          Logger.getInstance().info(I18n.get("server", res));
         } else {
           expectingDirectReply.set(false);
-          message = "No BYE received, closing anyway.";
+          message = I18n.get("noBye");
           Logger.getInstance().info(message);
         }
 
@@ -208,7 +208,7 @@ public class GameClient {
       }
     }
 
-    Logger.getInstance().info("Client exited.");
+    Logger.getInstance().info(I18n.get("clientQuit"));
     return message;
   }
 
@@ -241,7 +241,7 @@ public class GameClient {
 
                 udpSocket.send(localhostPacket);
 
-                Logger.getInstance().info("Broadcast sent, waiting for responses...");
+                Logger.getInstance().info(I18n.get("broadcast"));
 
                 final long start = System.currentTimeMillis();
 
@@ -258,19 +258,18 @@ public class GameClient {
                             0,
                             receivedPacket.getLength(),
                             StandardCharsets.UTF_8);
-                    Logger.getInstance().info("Server found: {0}", serverInfo);
+                    Logger.getInstance().info(I18n.get("found", serverInfo));
 
                   } catch (final SocketTimeoutException ignored) {
                     break;
                   }
                 }
 
-                Logger.getInstance().info("Server discovery finished.");
+                Logger.getInstance().info(I18n.get("discoOver"));
 
               } catch (final IOException exception) {
                 if (Logger.getInstance().isErrorEnabled()) {
-                  Logger.getInstance()
-                      .error("Server discovery failed: {0}", exception.getMessage());
+                  Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
                 }
               }
             })
@@ -283,7 +282,7 @@ public class GameClient {
    */
   private boolean checkConnection() {
     if (!isConnected()) {
-      Logger.getInstance().info("Not connected to any server.");
+      Logger.getInstance().info(I18n.get("notConnected"));
       return false;
     }
     return true;

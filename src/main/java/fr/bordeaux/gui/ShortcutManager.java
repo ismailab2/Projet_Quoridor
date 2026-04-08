@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import java.io.IOException;
 import java.util.Map;
 import javafx.scene.Scene;
@@ -142,7 +143,7 @@ public final class ShortcutManager {
    */
   public void register(final Scene scene) {
     if (dispatcher == null) {
-      throw new IllegalStateException("ActionDispatcher not set");
+      throw new IllegalStateException(I18n.get("actionDisp"));
     }
 
     scene.addEventHandler(

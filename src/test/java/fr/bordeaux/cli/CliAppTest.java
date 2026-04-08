@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
@@ -80,13 +81,13 @@ class CliAppTest {
   @Test
   void runQuit() throws Exception {
     when(reader.readLine(">> ")).thenReturn("quit");
-    when(reader.readLine("Save before quitting? [y/N] >> ")).thenReturn("n");
+    when(reader.readLine(I18n.get("quitSaving", " [y/N] >> "))).thenReturn("n");
 
     assertDoesNotThrow(() -> app.run());
 
     assertFalse(app.isRunning());
     verify(reader).readLine(">> ");
-    verify(reader).readLine("Save before quitting? [y/N] >> ");
+    verify(reader).readLine(I18n.get("quitSaving", " [y/N] >> "));
     verify(terminal).close();
   }
 
@@ -108,7 +109,7 @@ class CliAppTest {
     app.fetch("quit");
 
     assertFalse(app.isRunning());
-    verify(reader).readLine("Save before quitting? [y/N] >> ");
+    verify(reader).readLine(I18n.get("quitSaving", " [y/N] >> "));
   }
 
   @Test

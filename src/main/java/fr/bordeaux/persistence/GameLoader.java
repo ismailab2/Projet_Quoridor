@@ -1,6 +1,7 @@
 package fr.bordeaux.persistence;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import java.io.*;
 import java.util.*;
 
@@ -11,12 +12,6 @@ public final class GameLoader {
 
   /** The line index where the board section starts in the save file. */
   private static final int BOARD_START = 3;
-
-  /** Default board size. */
-  private static final int BOARD_SIZE_DEFAULT = 9;
-
-  /** Default timeout in minutes. */
-  private static final int TIMEOUT_DEFAULT = 30;
 
   /** Private constructor to prevent instantiation. */
   private GameLoader() {}
@@ -57,7 +52,7 @@ public final class GameLoader {
       throws GameLoadException {
     if (!"[game]".equals(lines.get(currentLine))) {
       throw new GameLoadException(
-          "ERREUR_ENTETE", 1, "Expected [game] but found : " + lines.get(currentLine));
+          "ERREUR_ENTETE", 1, I18n.get("expectGame") + lines.get(currentLine));
     }
   }
 
@@ -69,8 +64,7 @@ public final class GameLoader {
    */
   private static void validateSettingsHeader(final List<String> lines) throws GameLoadException {
     if (!"[settings]".equals(lines.get(0))) {
-      throw new GameLoadException(
-          "ERREUR_ENTETE", 1, "Expected [settings] but found : " + lines.get(0));
+      throw new GameLoadException("ERREUR_ENTETE", 1, I18n.get("expectSett") + lines.get(0));
     }
   }
 
@@ -181,11 +175,7 @@ public final class GameLoader {
   private static void validatePlayerCount(final int expected, final int actual) {
     if (expected > 0 && actual != expected) {
       throw new IllegalArgumentException(
-          "The number of players read from the file ("
-              + expected
-              + ") and the actual players in the game ("
-              + actual
-              + ") are different");
+          I18n.get("nbPlayer") + expected + I18n.get("actualPlayer") + actual + I18n.get("diff"));
     }
   }
 }

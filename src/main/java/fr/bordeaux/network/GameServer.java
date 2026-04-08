@@ -1,5 +1,6 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class GameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Logger.getInstance().info("Server started on port " + port);
+                Logger.getInstance().info(I18n.get("startedPort") + port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -58,14 +59,14 @@ public class GameServer {
                 startTimeoutChecker();
 
                 clientSocket = serverSocket.accept();
-                Logger.getInstance().info("Client connected");
+                Logger.getInstance().info(I18n.get("connectedClient"));
 
                 new Thread(() -> handleClient(clientSocket)).start();
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
                 if (Logger.getInstance().isErrorEnabled()) {
-                  Logger.getInstance().error("Port already used or error: {0}", e.getMessage());
+                  Logger.getInstance().error(I18n.get("alreadyUsed") + e.getMessage());
                 }
               }
             })
@@ -79,7 +80,7 @@ public class GameServer {
               while (running.get()) {
 
                 if (System.currentTimeMillis() - lastPing > 60000) {
-                  Logger.getInstance().info("Client timeout");
+                  Logger.getInstance().info(I18n.get("clientTimeout"));
                   stop();
                   break;
                 }
@@ -127,7 +128,7 @@ public class GameServer {
       }
 
     } catch (IOException e) {
-      Logger.getInstance().info("Client disconnected");
+      Logger.getInstance().error(I18n.get("disconnected"));
     }
 
     stop();
@@ -157,6 +158,6 @@ public class GameServer {
     } catch (IOException ignored) {
     }
 
-    Logger.getInstance().info("Server stopped.");
+    Logger.getInstance().info(I18n.get("stopped"));
   }
 }

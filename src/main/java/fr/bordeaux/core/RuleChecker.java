@@ -1,14 +1,18 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Validates Quoridor moves (pawn movements or wall placements). */
-public final class RuleChecker {
+/**
+ * RuleChecker checks if moves (pawn moves or wall placements) are valid according to Quoridor
+ * rules.
+ */
+public class RuleChecker {
 
   /** Private constructor to prevent instantiation. */
   private RuleChecker() {
-    throw new AssertionError("Utility class should not be instantiated");
+    throw new AssertionError(I18n.get("assertChecker"));
   }
 
   /**
