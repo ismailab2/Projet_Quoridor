@@ -5,18 +5,18 @@ import java.util.Objects;
 /** Represents a position on the Quoridor board. */
 public class Position {
 
-  int x;
-  int y;
+  private final int posX;
+  private final int posY;
 
   /**
    * Constructs a new Position with specified coordinates.
    *
-   * @param x The x-coordinate.
-   * @param y The y-coordinate.
+   * @param posX The x-coordinate.
+   * @param posY The y-coordinate.
    */
-  public Position(int x, int y) {
-    this.x = x;
-    this.y = y;
+  public Position(final int posX, final int posY) {
+    this.posX = posX;
+    this.posY = posY;
   }
 
   /**
@@ -25,7 +25,7 @@ public class Position {
    * @return The x value.
    */
   public int getX() {
-    return x;
+    return posX;
   }
 
   /**
@@ -34,7 +34,7 @@ public class Position {
    * @return The y value.
    */
   public int getY() {
-    return y;
+    return posY;
   }
 
   /**
@@ -44,7 +44,7 @@ public class Position {
    */
   @Override
   public String toString() {
-    return "Position: " + this.x + ", " + this.y;
+    return "Position: " + this.posX + ", " + this.posY;
   }
 
   /**
@@ -54,11 +54,15 @@ public class Position {
    * @return {@code true} if the coordinates are identical, {@code false} otherwise.
    */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    Position position = (Position) obj;
-    return this.x == position.x && this.y == position.y;
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    final Position position = (Position) obj;
+    return this.posX == position.posX && this.posY == position.posY;
   }
 
   /**
@@ -68,6 +72,6 @@ public class Position {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(x, y);
+    return Objects.hash(posX, posY);
   }
 }

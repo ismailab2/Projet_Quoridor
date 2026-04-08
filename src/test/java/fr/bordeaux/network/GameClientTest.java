@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,21 +14,37 @@ import org.junit.jupiter.api.Test;
 public class GameClientTest {
 
   static class MockServer extends Thread {
-    private int port;
+    private final int port;
+    private final List<String> receivedMessages = new ArrayList<>();
 
-    public MockServer(int port) {
-      this.port = port;
+    public MockServer() {
+      this.port = 0;
+    }
+
+    private int actualPort;
+
+    public int getPort() {
+      return actualPort;
     }
 
     public void run() {
-      try (ServerSocket serverSocket = new ServerSocket(port)) {
+      try (ServerSocket serverSocket = new ServerSocket(0)) {
+        actualPort = serverSocket.getLocalPort();
+        synchronized (this) {
+          this.notifyAll();
+        }
         Socket client = serverSocket.accept();
         BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
         String line = null;
         while ((line = in.readLine()) != null) {
+          receivedMessages.add(line);
           if (line.startsWith("PING")) {
             out.println("PONG");
+          } else if (line.startsWith("HELLO ")) {
+            out.println("WELCOME");
+          } else if (line.startsWith("MOVE ")) {
+            out.println("OK");
           } else if (line.equals("QUIT")) {
             out.println("BYE");
             break;
@@ -36,6 +53,10 @@ public class GameClientTest {
         client.close();
       } catch (IOException ignored) {
       }
+    }
+
+    public List<String> getReceivedMessages() {
+      return receivedMessages;
     }
   }
 
@@ -54,12 +75,16 @@ public class GameClientTest {
 
   @Test
   void testJoinSuccess() throws Exception {
-    int port = 12000;
-    MockServer server = new MockServer(port);
+    MockServer server = new MockServer();
     server.start();
-    Thread.sleep(200);
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+    int port = server.getPort();
     GameClient client = new GameClient();
-    assertTrue(client.join("localhost", port));
+    assertTrue(client.join("localhost", port), "Join should succeed");
   }
 
   @Test
@@ -83,15 +108,20 @@ public class GameClientTest {
 
   @Test
   void testPingSuccess() throws Exception {
-    int port = 12001;
-    MockServer server = new MockServer(port);
+    MockServer server = new MockServer();
     server.start();
-    Thread.sleep(200);
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+    int port = server.getPort();
 
     GameClient client = new GameClient();
-    client.join("localhost", port);
+    assertTrue(client.join("localhost", port), "Join should succeed");
     client.ping();
-    assertTrue(outContent.toString().contains("PONG"));
+    String output = outContent.toString();
+    assertTrue(output.contains("PONG"), "Output should contain PONG, but was: " + output);
   }
 
   @Test
@@ -103,13 +133,17 @@ public class GameClientTest {
 
   @Test
   void testQuitSuccess() throws Exception {
-    int port = 12002;
-    MockServer server = new MockServer(port);
+    MockServer server = new MockServer();
     server.start();
-    Thread.sleep(200);
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+    int port = server.getPort();
 
     GameClient client = new GameClient();
-    client.join("localhost", port);
+    assertTrue(client.join("localhost", port), "Join should succeed");
     client.quit();
     String output = outContent.toString();
     assertTrue(output.contains("BYE"));
@@ -118,18 +152,108 @@ public class GameClientTest {
 
   @Test
   void testPingAfterClose() throws Exception {
-    int port = 12003;
-
-    new MockServer(port).start();
-    Thread.sleep(200);
+    MockServer server = new MockServer();
+    server.start();
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+    int port = server.getPort();
 
     GameClient client = new GameClient();
-    client.join("localhost", port);
+    assertTrue(client.join("localhost", port), "Join should succeed");
 
     client.quit();
 
     client.ping();
 
     assertTrue(outContent.toString().contains("Not connected"));
+  }
+
+  @Test
+  void hello_sendsPlayerName() throws Exception {
+    MockServer server = new MockServer();
+    server.start();
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+    int port = server.getPort();
+
+    GameClient client = new GameClient();
+    assertTrue(client.join("localhost", port), "Join should succeed");
+
+    // Send player name to server
+    client.hello("Alice");
+    client.quit();
+    server.join(1000);
+
+    assertTrue(server.getReceivedMessages().contains("HELLO Alice"));
+  }
+
+  @Test
+  void sendMove_sendsMoveText() throws Exception {
+    MockServer server = new MockServer();
+    server.start();
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+    int port = server.getPort();
+
+    GameClient client = new GameClient();
+    assertTrue(client.join("localhost", port), "Join should succeed");
+
+    // Send one move to server
+    client.sendMove("e2-e3");
+    client.quit();
+    server.join(1000);
+
+    assertTrue(server.getReceivedMessages().contains("MOVE e2-e3"));
+  }
+
+  @Test
+  void serverList_findsOneServer() throws Exception {
+    Thread fakeServer =
+        new Thread(
+            () -> {
+              try (DatagramSocket socket =
+                  new DatagramSocket(12346, InetAddress.getByName("0.0.0.0"))) {
+
+                // Wait for DISCOVER message
+                byte[] buffer = new byte[1024];
+                DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+                socket.receive(request);
+
+                String message = new String(request.getData(), 0, request.getLength());
+
+                // Send back one fake server
+                if ("DISCOVER".equals(message)) {
+                  byte[] response = "testServer:9000".getBytes();
+                  DatagramPacket reply =
+                      new DatagramPacket(
+                          response, response.length, request.getAddress(), request.getPort());
+                  socket.send(reply);
+                }
+
+              } catch (IOException ignored) {
+              }
+            });
+
+    fakeServer.start();
+
+    GameClient client = new GameClient();
+    client.serverList();
+
+    Thread.sleep(1000);
+    fakeServer.join(1000);
+
+    String output = outContent.toString();
+
+    assertTrue(output.contains("Broadcast sent, waiting for responses..."));
+    assertTrue(output.contains("Server found: testServer:9000"));
   }
 }

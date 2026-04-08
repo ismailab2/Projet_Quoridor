@@ -6,10 +6,7 @@ import fr.bordeaux.i18n.I18n;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * Command that displays help information for the CLI. It can show a global help message or detailed
- * help for a specific command.
- */
+/** CLI command that displays global or detailed help information. help for a specific command. */
 public class HelpCommand implements Command {
 
   /** Command entered by the user */
@@ -21,7 +18,7 @@ public class HelpCommand implements Command {
   /** Reference from the CliApp command registry */
   private final Map<String, Function<String[], Command>> registry;
 
-  /** Creates a HelpCommand without specific tokens. Used when no command arguments are provided. */
+  /** Creates a HelpCommand without specific tokens. */
   public HelpCommand() {
     this(null, null);
   }
@@ -29,30 +26,31 @@ public class HelpCommand implements Command {
   /**
    * Creates a HelpCommand with the given command tokens and the command registry.
    *
-   * @param userTokens the tokens entered by the user in the CLI
-   * @param registryCli the mapping of command names to their respective factory functions
+   * @param userTokens tokens entered by the user in the CLI
+   * @param registryCli mapping of command names to factory functions
    */
-  public HelpCommand(String[] userTokens, Map<String, Function<String[], Command>> registryCli) {
+  public HelpCommand(
+      final String[] userTokens, final Map<String, Function<String[], Command>> registryCli) {
     this.tokens = userTokens;
     this.registry = registryCli;
   }
 
   /**
-   * Executes the help command. Displays the general help message or the help for a specific command
-   * depending on the provided tokens.
+   * Executes help command. Displays general or specific help message. depending on the provided
+   * tokens.
    *
    * @param engine the current game engine
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (tokens == null) {
       LOGGER.debug(I18n.get("noCommand"));
     } else if (tokens.length == 1) {
       LOGGER.debug(I18n.get("allCommandHelp"));
       helpCli();
     } else {
-      LOGGER.debug("Displaying help for the command " + tokens[1]);
+      LOGGER.debug("Displaying help for the command {0}", tokens[1]);
       helpFetch();
     }
     return engine;
@@ -91,20 +89,20 @@ public class HelpCommand implements Command {
   }
 
   /**
-   * Displays detailed help for a specific command based on the user input. The command is
-   * determined from the provided tokens.
+   * Displays detailed help for a specific command based on user input. determined from the provided
+   * tokens.
    */
   public void helpFetch() {
     if (this.tokens.length <= 1) {
       LOGGER.info("Usage: help [CMD]");
-      return;
     } else {
-      if (registry.containsKey(tokens[1])) {
+      final String commandName = tokens[1];
+      if (registry.containsKey(commandName)) {
         // Temporary instance of the command to use helpText()
-        Command cmd = registry.get(tokens[1]).apply(new String[] {tokens[1]});
+        final Command cmd = registry.get(commandName).apply(new String[] {commandName});
         cmd.helpText();
       } else {
-        LOGGER.debug(I18n.get("unknownCmd", tokens[1]));
+        LOGGER.debug(I18n.get("unknownCmd") + " {0}", commandName);
         LOGGER.info("Usage : help [CMD]");
       }
     }

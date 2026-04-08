@@ -1,9 +1,17 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.Board;
+import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
+import fr.bordeaux.core.Player;
+import fr.bordeaux.core.Position;
+import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.input.MouseButton;
@@ -13,59 +21,121 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 /**
- * Graphical representation of the Quoridor board. Responsible for drawing cells, pawns, walls and
- * handling board interactions. Extends {@link GridPane} to organize cells in a grid layout. The
- * board redraws itself automatically when the window is resized or the game state changes.
+ * Graphical Quoridor board. Draws cells, pawns, walls and handles interactions. Board redraws
+ * automatically on resize or game state change.
  */
-public class BoardView extends GridPane {
+public final class BoardView extends GridPane {
 
+  /** Game engine used to retrieve the game state. */
   private final GameEngine engine;
-  private StackPane[][] cells;
-  private Rectangle[][] pawns;
+
+  /** References to all cell containers on the board. */
+  private final StackPane[][] cells;
+
+  /** Size factor for pawns relative to cell size. */
+  private static final double PAWN_SIZE_FACTOR = 0.6;
+
+  /** Arc radius for rounded wall corners. */
+  private static final double WALL_ARC = 4.0;
+
+  /** Arc radius for rounded pawn corners. */
+  private static final double PAWN_ARC = 15.0;
+
+  /** Width of the pawn's border stroke. */
+  private static final double PAWN_STROKE_WIDTH = 5.0;
+
+  /** Radius for the pawn's drop shadow effect. */
+  private static final double SHADOW_RADIUS = 5.0;
+
+  /** Duration of the pulse animation in seconds. */
+  private static final double PULSE_DURATION = 0.5;
+
+  /** Minimum opacity during the pulse animation. */
+  private static final double PULSE_MIN_OPACITY = 0.2;
+
+  /** Opacity for the wall preview highlight. */
+  private static final double PREVIEW_OPACITY = 0.4;
+
+  /** Default size of a cell if dimensions are unknown. */
+  private static final int DEFAULT_CELL_SIZE = 100;
+
+  /** Minimum thickness of walls in pixels. */
+  private static final double MIN_WALL_THICKNESS = 4.0;
+
+  /** Ratio of cell size to wall thickness. */
+  private static final double WALL_THICKNESS_RATIO = 8.0;
+
+  /** Color used for placed walls. */
+  private static final Color WALL_COLOR = Color.rgb(101, 67, 33);
+
+  /** semi-transparent color for wall preview. */
+  private static final Color PREVIEW_COLOR = Color.rgb(139, 69, 19, PREVIEW_OPACITY);
 
   /**
-   * Creates a board view linked to the given game engine. Registers listeners on width, height and
-   * game state to trigger automatic redraws.
+   * Creates board view.
    *
-   * @param engine the game engine used to read and update the game state
+   * @param engine game engine
    */
-  public BoardView(GameEngine engine) {
+  public BoardView(final GameEngine engine) {
+    super();
     this.engine = engine;
-    int size = engine.getState().getBoard().getSize();
+    final GameState state = engine.getState();
+    final int size = state.getBoard().getSize();
     cells = new StackPane[size][size];
-    pawns = new Rectangle[engine.getState().getPlayers().size()][size];
-    this.widthProperty().addListener((obs, oldVal, newVal) -> drawBoard());
-    this.heightProperty().addListener((obs, oldVal, newVal) -> drawBoard());
-    engine.getState().addListener(this::drawBoard);
+    this.widthProperty()
+        .addListener(
+            (observable, oldValue, newValue) -> {
+              drawBoard();
+            });
+    this.heightProperty()
+        .addListener(
+            (observable, oldValue, newValue) -> {
+              drawBoard();
+            });
+    state.addListener(
+        () -> {
+          Platform.runLater(this::drawBoard);
+        });
     drawBoard();
   }
 
-  /**
-   * Redraws the complete board from scratch. Clears all children and constraints, then rebuilds
-   * cells, wall slots, placed walls, player pawns and the current player highlight in order.
-   */
+  /** Redraws board. Clears children/constraints and rebuilds all components. */
   public void drawBoard() {
     getChildren().clear();
     getColumnConstraints().clear();
     getRowConstraints().clear();
-    Board board = engine.getState().getBoard();
-    int size = board.getSize();
-    int cellSize = getCellSize();
-    for (int i = 0; i < size; i++) {
-      getColumnConstraints().add(new ColumnConstraints(cellSize));
-      getRowConstraints().add(new RowConstraints(cellSize));
+    final GameState state = engine.getState();
+    final Board board = state.getBoard();
+    final int size = board.getSize();
+    final double boardSize = size * DEFAULT_CELL_SIZE;
+    final double percent = 100.0 / size;
+    for (int index = 0; index < size; index++) {
+      final ColumnConstraints columnConstraints = new ColumnConstraints();
+      columnConstraints.setPercentWidth(percent);
+      columnConstraints.setHalignment(HPos.CENTER);
+      getColumnConstraints().add(columnConstraints);
+
+      final RowConstraints rowConstraints = new RowConstraints();
+      rowConstraints.setPercentHeight(percent);
+      rowConstraints.setValignment(VPos.CENTER);
+      getRowConstraints().add(rowConstraints);
     }
+    final double cellSize = getCellSize();
     for (int row = 0; row < size; row++) {
       for (int col = 0; col < size; col++) {
-        StackPane cell = new StackPane();
-        cell.setPrefSize(cellSize, cellSize);
+        final StackPane cell = new StackPane();
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+        cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         cells[row][col] = cell;
-        int r = row, c = col;
+        final int targetRow = row;
+        final int targetCol = col;
         cell.setOnMouseClicked(
-            e -> {
-              if (e.getButton() == MouseButton.PRIMARY) handleCellClick(r, c);
-              else handleWallClick(r, c, e.getButton());
+            event -> {
+              if (event.getButton() == MouseButton.PRIMARY) {
+                handleCellClick(targetRow, targetCol);
+              } else {
+                handleWallClick(targetRow, targetCol, event.getButton());
+              }
             });
         add(cell, col, row);
       }
@@ -76,223 +146,249 @@ public class BoardView extends GridPane {
     highlightCurrentPlayer();
   }
 
-  /**
-   * Draws all walls currently placed on the board by inspecting missing edges in the graph. A
-   * horizontal wall is detected when edges u1-v1 and u2-v2 are both absent. A vertical wall is
-   * detected when edges u1-u2 and v1-v2 are both absent. Walls are rendered as brown rounded
-   * rectangles and are mouse-transparent.
-   */
+  /** Draws placed walls by checking missing graph edges. Rendered as brown rectangles. */
   public void drawWalls() {
-    Board board = engine.getState().getBoard();
-    Graph graph = board.getGraph();
-    int cellSize = getCellSize();
-    int wallThickness = getWallThickness();
-    int size = board.getSize();
+    final GameState state = engine.getState();
+    final Board board = state.getBoard();
+    final Graph graph = board.getGraph();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
+    final int size = board.getSize();
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
-        int u1 = board.id(row, col);
-        int u2 = board.id(row, col + 1);
-        int v1 = board.id(row + 1, col);
-        int v2 = board.id(row + 1, col + 1);
+        final int cellU1 = board.getCellId(row, col);
+        final int cellU2 = board.getCellId(row, col + 1);
+        final int cellV1 = board.getCellId(row + 1, col);
+        final int cellV2 = board.getCellId(row + 1, col + 1);
 
-        if (!graph.hasEdge(u1, v1) && !graph.hasEdge(u2, v2)) {
-          Rectangle wall = new Rectangle(cellSize * 2, wallThickness);
-          wall.setFill(Color.rgb(101, 67, 33));
-          wall.setArcWidth(4);
-          wall.setArcHeight(4);
+        if (!graph.hasEdge(cellU1, cellV1) && !graph.hasEdge(cellU2, cellV2)) {
+          final Rectangle wall = new Rectangle(cellSize * 2.0, wallThickness);
+          wall.setFill(WALL_COLOR);
+          wall.setArcWidth(WALL_ARC);
+          wall.setArcHeight(WALL_ARC);
           wall.setMouseTransparent(true);
           add(wall, col, row, 2, 1);
-          GridPane.setValignment(wall, VPos.BOTTOM);
+          setValignment(wall, VPos.BOTTOM);
           wall.setTranslateY(wallThickness / 2.0);
         }
-        if (!graph.hasEdge(u1, u2) && !graph.hasEdge(v1, v2)) {
-          Rectangle wall = new Rectangle(wallThickness, cellSize * 2);
-          wall.setFill(Color.rgb(101, 67, 33));
-          wall.setArcWidth(4);
-          wall.setArcHeight(4);
+        if (!graph.hasEdge(cellU1, cellU2) && !graph.hasEdge(cellV1, cellV2)) {
+          final Rectangle wall = new Rectangle(wallThickness, cellSize * 2.0);
+          wall.setFill(WALL_COLOR);
+          wall.setArcWidth(WALL_ARC);
+          wall.setArcHeight(WALL_ARC);
           wall.setMouseTransparent(true);
           add(wall, col, row, 1, 2);
-          GridPane.setHalignment(wall, HPos.RIGHT);
+          setHalignment(wall, HPos.RIGHT);
           wall.setTranslateX(wallThickness / 2.0);
         }
       }
     }
   }
 
-  /**
-   * Draws all player pawns at their current positions on the board. Player 0 is drawn in red, all
-   * other players in black. Each pawn listens for a left click to highlight accessible cells.
-   */
+  /** Draws player pawns. Pawns listen for left click to show highlights. */
   public void drawPlayers() {
-    int cellSize = getCellSize();
-    List<Player> players = engine.getState().getPlayers();
-    for (int i = 0; i < players.size(); i++) {
-      Player player = players.get(i);
-      Position pos = player.getPosition();
-      Rectangle pawn = new Rectangle(cellSize * 0.6, cellSize * 0.6);
-      pawn.setArcWidth(15);
-      pawn.setArcHeight(15);
-      pawn.setFill(i == 0 ? Color.RED : Color.BLACK);
-      pawns[i][0] = pawn;
-      cells[pos.getX()][pos.getY()].getChildren().add(pawn);
+    final double cellSize = getCellSize();
+    final GameState state = engine.getState();
+    final List<Player> players = state.getPlayers();
+    for (final Player player : players) {
+      if (player.isDisabled()) {
+        continue;
+      }
+      final Position pos = player.getPosition();
+      final Rectangle pawn =
+          new Rectangle(cellSize * PAWN_SIZE_FACTOR, cellSize * PAWN_SIZE_FACTOR);
+      pawn.setArcWidth(PAWN_ARC);
+      pawn.setArcHeight(PAWN_ARC);
+      pawn.setStroke(Color.LIGHTGRAY);
+      pawn.setStrokeWidth(PAWN_STROKE_WIDTH);
+      pawn.setEffect(new javafx.scene.effect.DropShadow(SHADOW_RADIUS, Color.GRAY));
+
+      final fr.bordeaux.core.Color playerColor = player.getColor();
+      final Color fxColor =
+          switch (playerColor) {
+            case WHITE -> Color.WHITE;
+            case BLACK -> Color.BLACK;
+            case BLUE -> Color.BLUE;
+            case RED -> Color.RED;
+          };
+      pawn.setFill(fxColor);
+      final int posX = pos.getX();
+      final int posY = pos.getY();
+      cells[posX][posY].getChildren().add(pawn);
       pawn.setOnMouseClicked(
-          e -> {
-            if (e.getButton() == MouseButton.PRIMARY) highlightAccessibleCells(player);
+          event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+              highlightAccessibleCells(player);
+            }
           });
     }
   }
 
-  /**
-   * Applies a pulsing {@link FadeTransition} animation to the pawn of the current player to
-   * visually indicate whose turn it is.
-   */
+  /** Poulse animation for the current player's pawn. */
   public void highlightCurrentPlayer() {
-    if (engine.getState().isGameOver()) return;
-    Player current = engine.getState().getCurrentPlayer();
-    Position pos = current.getPosition();
-    StackPane cell = cells[pos.getX()][pos.getY()];
-    Rectangle pawn =
-        cell.getChildren().stream()
-            .filter(n -> n instanceof Rectangle)
-            .map(n -> (Rectangle) n)
-            .findFirst()
-            .orElse(null);
-    if (pawn == null) return;
-    FadeTransition ft = new FadeTransition(Duration.seconds(0.5), pawn);
-    ft.setFromValue(1.0);
-    ft.setToValue(0.2);
-    ft.setCycleCount(FadeTransition.INDEFINITE);
-    ft.setAutoReverse(true);
-    ft.play();
-  }
-
-  /**
-   * Highlights in green all cells reachable by the given player on their current turn. Does nothing
-   * if the given player is not the current player. Resets all cells to their default beige color
-   * before applying highlights.
-   *
-   * @param player the player whose legal moves should be highlighted
-   */
-  public void highlightAccessibleCells(Player player) {
-    if (engine.getState().getCurrentPlayer() != player || player.isAI()) return;
-    for (StackPane[] row : cells)
-      for (StackPane cell : row)
-        cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
-    for (Position pos : engine.getState().getLegalMoves(player))
-      cells[pos.getX()][pos.getY()].setStyle(
-          "-fx-border-color: black; -fx-background-color: lightgreen;");
-  }
-
-  /**
-   * Handles a left click on a board cell by attempting to move the current player's pawn to the
-   * clicked position. Redraws the board if the move is accepted by the engine.
-   *
-   * @param row the row index of the clicked cell
-   * @param col the column index of the clicked cell
-   */
-  public void handleCellClick(int row, int col) {
-    Player current = engine.getState().getCurrentPlayer();
-    if (current.isAI()) return;
-    Move move = Move.pawn(current.getPosition(), new Position(row, col));
-    if (engine.play(move)) drawBoard();
-  }
-
-  /**
-   * Handles a non-primary click on a board cell by attempting to place a wall. A right click places
-   * a horizontal wall; any other button places a vertical wall. The wall is only placed if it
-   * passes the rule checker validation.
-   *
-   * @param row the row index of the clicked cell
-   * @param col the column index of the clicked cell
-   * @param button the mouse button that was clicked
-   */
-  public void handleWallClick(int row, int col, MouseButton button) {
-    if (engine.getState().getCurrentPlayer().isAI()) return;
-    Orientation orientation =
-        (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
-    Move wallMove = Move.wall(new Position(row, col), orientation);
-    if (RuleChecker.isMoveLegal(engine.getState(), wallMove)) {
-      engine.play(wallMove);
-      drawBoard();
+    final GameState state = engine.getState();
+    if (!state.isGameOver()) {
+      final Player current = state.getCurrentPlayer();
+      final Position pos = current.getPosition();
+      final int posX = pos.getX();
+      final int posY = pos.getY();
+      final StackPane cell = cells[posX][posY];
+      final Rectangle pawn =
+          cell.getChildren().stream()
+              .filter(n -> n instanceof Rectangle)
+              .map(n -> (Rectangle) n)
+              .findFirst()
+              .orElse(null);
+      if (pawn != null) {
+        final FadeTransition fadeTransition =
+            new FadeTransition(Duration.seconds(PULSE_DURATION), pawn);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(PULSE_MIN_OPACITY);
+        fadeTransition.setCycleCount(FadeTransition.INDEFINITE);
+        fadeTransition.setAutoReverse(true);
+        fadeTransition.play();
+      }
     }
   }
 
   /**
-   * Creates and places invisible interactive rectangles (slots) between cells. Each slot detects
-   * mouse hover to show a wall preview and right clicks to place walls. Slots are placed on all
-   * inner borders of the board (size - 1 rows and columns).
+   * Highlights cells reachable by player.
+   *
+   * @param player player to check
    */
+  public void highlightAccessibleCells(final Player player) {
+    final GameState state = engine.getState();
+    final Player currentPlayer = state.getCurrentPlayer();
+    if (currentPlayer == player && !player.isAI()) {
+      for (final StackPane[] row : cells) {
+        for (final StackPane cell : row) {
+          cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+        }
+      }
+      for (final Position movePos : state.getLegalMoves(player)) {
+        final int posX = movePos.getX();
+        final int posY = movePos.getY();
+        cells[posX][posY].setStyle("-fx-border-color: black; -fx-background-color: lightgreen;");
+      }
+    }
+  }
+
+  /**
+   * Moves pawn on left click.
+   *
+   * @param row row index
+   * @param col column index
+   */
+  public void handleCellClick(final int row, final int col) {
+    final GameState state = engine.getState();
+    final Player current = state.getCurrentPlayer();
+    if (!current.isAI()) {
+      final Position from = current.getPosition();
+      final Position to = new Position(row, col);
+      final Move move = Move.pawn(from, to);
+      if (engine.play(move)) {
+        drawBoard();
+      }
+    }
+  }
+
+  /**
+   * Places wall on right/other click.
+   *
+   * @param row row index
+   * @param col column index
+   * @param button clicked button
+   */
+  public void handleWallClick(final int row, final int col, final MouseButton button) {
+    final GameState state = engine.getState();
+    final Player current = state.getCurrentPlayer();
+    if (!current.isAI()) {
+      final Orientation orientation =
+          (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+      final Move wallMove = Move.wall(new Position(row, col), orientation);
+      if (RuleChecker.isMoveLegal(state, wallMove)) {
+        engine.play(wallMove);
+        drawBoard();
+      }
+    }
+  }
+
+  /** Creates interactive wall slots between cells. */
   private void drawWallSlots() {
-    int cellSize = getCellSize();
-    int wallThickness = getWallThickness();
-    int size = engine.getState().getBoard().getSize();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
+    final int size = engine.getState().getBoard().getSize();
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
-        Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
+        final Rectangle hSlot = new Rectangle(cellSize * 2.0, wallThickness);
         hSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
         add(hSlot, col, row, 2, 1);
-        GridPane.setValignment(hSlot, VPos.BOTTOM);
+        setValignment(hSlot, VPos.BOTTOM);
         hSlot.setTranslateY(wallThickness / 2.0);
-        Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
+        final Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2.0);
         vSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
         add(vSlot, col, row, 1, 2);
-        GridPane.setHalignment(vSlot, HPos.RIGHT);
+        setHalignment(vSlot, HPos.RIGHT);
         vSlot.setTranslateX(wallThickness / 2.0);
       }
     }
   }
 
   /**
-   * Attaches mouse event handlers to a wall slot rectangle. On hover, the slot becomes
-   * semi-transparent brown as a placement preview. On right click, a wall move is submitted to the
-   * engine and the board is redrawn if accepted.
+   * Sets wall slot handlers (hover, click).
    *
-   * @param slot the rectangle acting as the interactive wall slot
-   * @param row the row index of the top-left cell of the potential wall
-   * @param col the column index of the top-left cell of the potential wall
-   * @param orientation the orientation of the wall (HORIZONTAL or VERTICAL)
+   * @param slot interactive slot
+   * @param row row index
+   * @param col column index
+   * @param orientation wall orientation
    */
-  private void setupWallInteractions(Rectangle slot, int row, int col, Orientation orientation) {
+  private void setupWallInteractions(
+      final Rectangle slot, final int row, final int col, final Orientation orientation) {
     slot.setOnMouseEntered(
-        e -> {
-          if (!engine.getState().getCurrentPlayer().isAI()) {
-            slot.setFill(Color.rgb(139, 69, 19, 0.4));
+        event -> {
+          final GameState state = engine.getState();
+          final Player current = state.getCurrentPlayer();
+          if (!current.isAI()) {
+            slot.setFill(PREVIEW_COLOR);
           }
         });
-    slot.setOnMouseExited(e -> slot.setFill(Color.TRANSPARENT));
+    slot.setOnMouseExited(
+        event -> {
+          slot.setFill(Color.TRANSPARENT);
+        });
     slot.setOnMouseClicked(
-        e -> {
-          if (engine.getState().getCurrentPlayer().isAI()) return;
-          if (e.getButton() == MouseButton.SECONDARY) {
-            Move wallMove = Move.wall(new Position(row, col), orientation);
-            if (engine.play(wallMove)) drawBoard();
+        event -> {
+          final GameState state = engine.getState();
+          final Player current = state.getCurrentPlayer();
+          if (!current.isAI() && event.getButton() == MouseButton.SECONDARY) {
+            final Move wallMove = Move.wall(new Position(row, col), orientation);
+            if (engine.play(wallMove)) {
+              drawBoard();
+            }
           }
         });
   }
 
   /**
-   * Calculates the pixel size of a single cell based on the current component dimensions. Uses the
-   * smaller of width and height to keep the board square. Returns 100 as a default value before the
-   * first render when dimensions are not yet known.
-   *
-   * @return the cell size in pixels
+   * @return cell size in pixels.
    */
-  private int getCellSize() {
-    int size = engine.getState().getBoard().getSize();
-    double available = Math.min(getWidth(), getHeight());
-    if (available <= 0) return 100;
-    return (int) (available / size);
+  private double getCellSize() {
+    final Board board = engine.getState().getBoard();
+    final int size = board.getSize();
+    final double available = Math.min(getWidth(), getHeight());
+    double cellSize = (double) DEFAULT_CELL_SIZE;
+    if (available > 0.0) {
+      cellSize = available / size;
+    }
+    return cellSize;
   }
 
   /**
-   * Calculates the wall thickness in pixels proportional to the cell size. Enforces a minimum
-   * thickness of 4 pixels to remain visible at small sizes.
-   *
-   * @return the wall thickness in pixels
+   * @return wall thickness in pixels.
    */
-  private int getWallThickness() {
-    return Math.max(10, getCellSize() / 10);
+  private double getWallThickness() {
+    return Math.max(MIN_WALL_THICKNESS, getCellSize() / WALL_THICKNESS_RATIO);
   }
 }

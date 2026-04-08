@@ -5,10 +5,7 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
-/**
- * Command that modifies a configuration parameter of the game. The command expects an assignment in
- * the form PARAM=VALUE.
- */
+/** CLI command that modifies a game configuration parameter. */
 public class SetCommand implements Command {
 
   /** Command entered by the user */
@@ -25,44 +22,44 @@ public class SetCommand implements Command {
   /**
    * Creates a SetCommand. Currently not implemented.
    *
-   * @param s name of the command
+   * @param setting name of the command
    */
-  public SetCommand(String s) {
-    this(new String[] {"set", s});
+  public SetCommand(final String setting) {
+    this(new String[] {"set", setting});
   }
 
   /**
    * Creates a SetCommand with the provided CLI tokens.
    *
-   * @param t the command tokens (e.g., ["set", "debug=true"])
+   * @param tokens the command tokens (e.g., ["set", "debug=true"])
    */
-  public SetCommand(String[] t) {
-    this.tokens = t;
+  public SetCommand(final String[] tokens) {
+    this.tokens = tokens;
   }
 
   /**
-   * Executes the set command. Intended to update a configuration option in the game engine.
+   * Executes set command. Updates a configuration option in the engine.
    *
    * @param engine the current game engine
    * @return the unchanged game engine
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (tokens == null || tokens.length < 2) {
       LOGGER.info("Usage: set PARAM=VALUE");
       return engine;
     }
 
-    String argument = tokens[1];
+    final String argument = tokens[1];
     if (!argument.contains("=")) {
       LOGGER.error(I18n.get("usage", " PARAM=VALUE (set debug=true)"));
       return engine;
     }
 
     // Splitting the argument into key and value
-    String[] parts = argument.split("=", 2);
-    String key = parts[0].trim();
-    String value = parts[1].trim();
+    final String[] parts = argument.split("=", 2);
+    final String key = parts[0].trim();
+    final String value = parts[1].trim();
 
     if (key.isEmpty() || value.isEmpty()) {
       LOGGER.error(I18n.get("setEmpty"));
@@ -70,7 +67,7 @@ public class SetCommand implements Command {
     }
 
     try {
-      ConfigManager config = ConfigManager.getInstance();
+      final ConfigManager config = ConfigManager.getInstance();
 
       // Update the option in memory
       config.setOption(key, value);
@@ -98,18 +95,15 @@ public class SetCommand implements Command {
           break;
       }
 
-      // Persist the change to the file (.quoridorrc)
-      config.save();
-
       LOGGER.debug(I18n.get("setUpdate", key, I18n.get("setTo"), value));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOGGER.error(I18n.get("setFailed", key), e);
     }
 
     return engine;
   }
 
-  /** Displays help information about the set command, including its usage and an example. */
+  /** Displays help information for the set command. */
   @Override
   public void helpText() {
     LOGGER.info("=== SET Command ===\n");

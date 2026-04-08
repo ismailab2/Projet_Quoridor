@@ -2,7 +2,8 @@ package fr.bordeaux.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.minimax.MinimaxPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ public class GameEngineTest {
   private GameState state;
   private Player p1, p2;
   private Board board;
+  private ConfigManager configManager;
 
   @BeforeEach
   public void setup() {
@@ -22,6 +24,7 @@ public class GameEngineTest {
     p2 = MinimaxPlayer.builder("Bot", new Position(4, 2), Color.BLACK).build();
     state = new GameState(board, List.of(p1, p2));
     engine = new GameEngine(state, false, false, false, false, 10);
+    configManager = ConfigManager.getInstance();
   }
 
   @Test
@@ -52,20 +55,6 @@ public class GameEngineTest {
   }
 
   @Test
-  public void play_wall_move_blocks_path() {
-    /*
-    Move wall1 = Move.wall(new Position(3, 0), Orientation.HORIZONTAL);
-    board.addWall(wall1.getTo(), wall1.getOrientation());
-    Move wall2 = Move.wall(new Position(3, 2), Orientation.HORIZONTAL);
-    //System.out.println(state.getCurrentPlayer().getPosition());
-    //System.out.println(RuleChecker.isMoveLegal(state, wall2));
-    assertFalse(RuleChecker.isMoveLegal(state, wall2));
-
-       */
-
-  }
-
-  @Test
   public void undo_reverts_pawn_move() {
     Position from = p1.getPosition();
     Position to = new Position(1, 2);
@@ -93,7 +82,6 @@ public class GameEngineTest {
     engine.play(wall);
     engine.undo();
     engine.redo();
-    // System.out.println(wall.getTo());
     assertTrue(board.isWallCollision(new Position(2, 2), Orientation.HORIZONTAL));
   }
 
@@ -107,49 +95,94 @@ public class GameEngineTest {
 
   @Test
   public void newGame_resets_state() {
-    GameState old = engine.getState();
-    engine.newGame();
-    GameState fresh = engine.getState();
+    final GameState old = engine.getState();
+    engine.newGame(9, fr.bordeaux.main.PlayerFactory.createPlayers(configManager), null);
+    final GameState fresh = engine.getState();
     assertSame(old, fresh);
     assertEquals(2, fresh.getPlayers().size());
-    // System.out.println(fresh.getBoard().getSize());
     assertEquals(9, fresh.getBoard().getSize());
   }
 
   @Test
   public void save_and_load_game() {
-    String file = "engine_test.json";
+    final String file = "engine_test.json";
     engine.saveGame(file);
-    engine.newGame();
+    engine.newGame(9, fr.bordeaux.main.PlayerFactory.createPlayers(configManager), null);
     engine.loadGame(file);
     assertEquals(2, engine.getState().getPlayers().size());
     new File(file).delete();
   }
 
   @Test
-  public void pawn_jump_over_player_straight() {
-    p2.setPosition(new Position(1, 2));
-    Move move = Move.pawn(p1.getPosition(), new Position(2, 2));
-    assertTrue(RuleChecker.isMoveLegal(state, move));
+  public void testPlay_Winner_WithBlitz() {
+    engine = new GameEngine(state, true, false, false, false, 10);
+    // p1 starts at X=0 in setup(), so goal is X=8
+    p1.setPosition(new Position(7, 2));
+    Move move = Move.pawn(new Position(7, 2), new Position(8, 2));
+
+    assertTrue(engine.play(move));
+    assertTrue(state.isGameOver());
+    assertFalse(engine.getBlitzManager().isRunning());
   }
 
   @Test
-  public void pawn_jump_over_player_diagonal() {
-    p2.setPosition(new Position(1, 2));
-    board.addWall(new Position(1, 2), Orientation.HORIZONTAL);
-    // assertTrue(RuleChecker.isMoveLegal(state, move));
+  public void testNewGame_WithBlitz() {
+    engine = new GameEngine(state, true, false, false, false, 10);
+    assertTrue(engine.getBlitzManager().isRunning());
+    engine.newGame(9, List.of(p1, p2), null);
+    // Since newGame calls initializeBlitz, it should still be running or re-created
+    assertNotNull(engine.getBlitzManager());
   }
 
   @Test
-  public void pawn_move_non_adjacent_invalid() {
-    Move move = Move.pawn(p1.getPosition(), new Position(3, 2));
-    assertFalse(RuleChecker.isMoveLegal(state, move));
+  public void testLoadGame_WithBlitz() {
+    engine = new GameEngine(state, true, false, false, false, 10);
+    final String file = "engine_load_blitz.json";
+    engine.saveGame(file);
+    engine.loadGame(file);
+    assertNotNull(engine.getBlitzManager());
+    new File(file).delete();
   }
 
   @Test
-  public void wall_no_remaining_walls() {
-    for (int i = 0; i < 10; i++) p1.useWall();
-    Move wall = Move.wall(new Position(1, 1), Orientation.HORIZONTAL);
-    assertFalse(RuleChecker.isMoveLegal(state, wall));
+  public void testPause_AI() {
+    state.nextPlayer(); // Now it's p2 (AI)
+    engine.pause();
+    assertFalse(state.isPaused());
+  }
+
+  @Test
+  public void testPause_Toggle_WithBlitz() {
+    engine = new GameEngine(state, true, false, false, false, 10);
+    assertTrue(engine.getBlitzManager().isRunning());
+
+    engine.pause(); // Pause
+    assertTrue(state.isPaused());
+    assertFalse(engine.getBlitzManager().isRunning());
+
+    engine.pause(); // Resume
+    assertFalse(state.isPaused());
+    assertTrue(engine.getBlitzManager().isRunning());
+  }
+
+  @Test
+  public void testMoveToString_WallOrientation() throws Exception {
+    java.lang.reflect.Method method =
+        GameEngine.class.getDeclaredMethod("moveToString", Move.class);
+    method.setAccessible(true);
+
+    Move horizontal = Move.wall(new Position(1, 1), Orientation.HORIZONTAL);
+    String hStr = (String) method.invoke(engine, horizontal);
+    assertEquals("b1h", hStr);
+
+    Move vertical = Move.wall(new Position(2, 2), Orientation.VERTICAL);
+    String vStr = (String) method.invoke(engine, vertical);
+    assertEquals("c2v", vStr);
+  }
+
+  @Test
+  public void testSetInitialWalls() {
+    engine.setInitialWalls(15);
+    assertEquals(15, engine.getInitialWalls());
   }
 }

@@ -10,11 +10,11 @@ public final class GameLoadException extends Exception {
   private final int lineNumber;
 
   /**
-   * Creates a load exception with the error type, the line number, and the associated message.
+   * Creates a load exception.
    *
-   * @param errorTypeValue type of detected error
-   * @param lineNumberValue line number where the error was found
-   * @param message detailed error message
+   * @param errorTypeValue error type string
+   * @param lineNumberValue line number of error
+   * @param message error message
    */
   public GameLoadException(
       final String errorTypeValue, final int lineNumberValue, final String message) {

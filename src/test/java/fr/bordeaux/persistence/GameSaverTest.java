@@ -2,7 +2,10 @@ package fr.bordeaux.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.*;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.*;
+import fr.bordeaux.ai.minimax.*;
+import fr.bordeaux.ai.random.*;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -138,5 +141,8 @@ public class GameSaverTest {
         settingsLines.contains("player-1-name=Player1"), "Incorrect name for the first Player");
     assertTrue(settingsLines.contains("ai-2-name=Ai1"), "Incorrect name for the second Player");
     assertTrue(settingsLines.contains("ai-2-depth=3"), "Incorrect depth for the second Player");
+    assertTrue(settingsLines.contains("ai-2-mode=minimax"), "Incorrect mode for Minimax");
+    assertTrue(settingsLines.contains("ai-2-reflexion=5"), "Incorrect reflexion time for Minimax");
+    assertTrue(settingsLines.contains("ai-2-heuristic=simple"), "Incorrect heuristic for Minimax");
   }
 }

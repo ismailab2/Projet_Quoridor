@@ -45,7 +45,7 @@ public final class DragAndDrop {
    * @param boardView board view on which handlers are installed
    */
   public static void install(final GameEngine engine, final BoardView boardView) {
-    Runnable attachHandlers = () -> attachHandlers(engine, boardView);
+    final Runnable attachHandlers = () -> attachHandlers(engine, boardView);
     Platform.runLater(attachHandlers);
     engine.getState().addListener(() -> Platform.runLater(attachHandlers));
   }
@@ -57,15 +57,15 @@ public final class DragAndDrop {
    * @param boardView board view containing the cells
    */
   private static void attachHandlers(final GameEngine engine, final BoardView boardView) {
-    for (Node node : boardView.getChildren()) {
+    for (final Node node : boardView.getChildren()) {
       if (!(node instanceof StackPane cell)) {
         continue;
       }
-      int row = getIndex(cell, true);
-      int col = getIndex(cell, false);
+      final int row = getIndex(cell, true);
+      final int col = getIndex(cell, false);
       installDropOnCell(engine, boardView, cell, row, col);
 
-      for (Node child : cell.getChildren()) {
+      for (final Node child : cell.getChildren()) {
         if (child instanceof Rectangle pawn) {
           installDragOnPawn(engine, pawn, row, col);
         }
@@ -85,37 +85,29 @@ public final class DragAndDrop {
       final GameEngine engine, final Rectangle pawn, final int row, final int col) {
     pawn.setOnDragDetected(
         event -> {
-          Player currentPlayer = engine.getState().getCurrentPlayer();
+          final Player currentPlayer = engine.getState().getCurrentPlayer();
 
           if (currentPlayer.isAI()) {
             event.consume();
             return;
           }
 
-          Position currentPosition = currentPlayer.getPosition();
+          final Position currentPosition = currentPlayer.getPosition();
 
           if (currentPosition.getX() != row || currentPosition.getY() != col) {
             event.consume();
             return;
           }
 
-          Dragboard dragboard = pawn.startDragAndDrop(TransferMode.MOVE);
-          ClipboardContent content = new ClipboardContent();
+          final Dragboard dragboard = pawn.startDragAndDrop(TransferMode.MOVE);
+          final ClipboardContent content = new ClipboardContent();
           content.put(PAWN_FORMAT, row + "," + col);
           dragboard.setContent(content);
           event.consume();
         });
   }
 
-  /**
-   * Installs drop handlers on a target cell.
-   *
-   * @param engine game engine used to validate and play moves
-   * @param boardView board view to redraw after a successful move
-   * @param cell target cell
-   * @param toRow target row
-   * @param toCol target column
-   */
+  /** Installs drop handlers on a target cell. */
   private static void installDropOnCell(
       final GameEngine engine,
       final BoardView boardView,
@@ -125,7 +117,7 @@ public final class DragAndDrop {
     cell.setOnDragEntered(
         event -> {
           if (event.getDragboard().hasContent(PAWN_FORMAT)) {
-            boolean isLegal = isMoveLegal(engine, event.getDragboard(), toRow, toCol);
+            final boolean isLegal = isMoveLegal(engine, event.getDragboard(), toRow, toCol);
             cell.setStyle(STYLE_BASE + (isLegal ? COLOR_LEGAL : COLOR_ILLEGAL));
           }
           event.consume();
@@ -168,13 +160,7 @@ public final class DragAndDrop {
   }
 
   /**
-   * Checks whether a move to the target cell is legal.
-   *
-   * @param engine game engine used to access the game state
-   * @param dragboard dragboard containing the origin position
-   * @param toRow target row
-   * @param toCol target column
-   * @return true if the move is legal, false otherwise
+   * @return true if move to target cell is legal.
    */
   private static boolean isMoveLegal(
       final GameEngine engine, final Dragboard dragboard, final int toRow, final int toCol) {
@@ -190,9 +176,9 @@ public final class DragAndDrop {
    * @return the constructed pawn move
    */
   private static Move buildMove(final Dragboard dragboard, final int toRow, final int toCol) {
-    int[] from = parsePosition((String) dragboard.getContent(PAWN_FORMAT));
-    Position origin = new Position(from[0], from[1]);
-    Position destination = new Position(toRow, toCol);
+    final int[] from = parsePosition((String) dragboard.getContent(PAWN_FORMAT));
+    final Position origin = new Position(from[0], from[1]);
+    final Position destination = new Position(toRow, toCol);
     return Move.pawn(origin, destination);
   }
 
@@ -203,7 +189,7 @@ public final class DragAndDrop {
    * @return an array containing row and column
    */
   private static int[] parsePosition(final String text) {
-    String[] parts = text.split(",");
+    final String[] parts = text.split(",");
     return new int[] {Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
   }
 
@@ -215,7 +201,7 @@ public final class DragAndDrop {
    * @return the requested index, or 0 if it is null
    */
   private static int getIndex(final Node node, final boolean isRow) {
-    Integer index = isRow ? GridPane.getRowIndex(node) : GridPane.getColumnIndex(node);
+    final Integer index = isRow ? GridPane.getRowIndex(node) : GridPane.getColumnIndex(node);
     return index == null ? 0 : index;
   }
 }

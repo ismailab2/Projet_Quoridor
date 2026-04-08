@@ -2,7 +2,8 @@ package fr.bordeaux.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.MinimaxPlayer;
+import fr.bordeaux.ai.minimax.MinimaxPlayer;
+import fr.bordeaux.config.ConfigManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -36,14 +37,26 @@ public class GameStateTest {
   }
 
   @Test
-  public void testPlayersNumberInvalidThree() {
+  public void testPlayersNumberValidThree() {
     Board board = new Board(9);
     Player human2 = new HumanPlayer("Human2", new Position(4, 4), Color.BLUE);
-    assertThrows(
-        IllegalArgumentException.class,
+    assertDoesNotThrow(
         () -> {
           new GameState(board, List.of(human, human2, ia));
         });
+  }
+
+  @Test
+  public void testConstructorInvalidPlayerCount() {
+    Board board = new Board(9);
+    // 1 player
+    assertThrows(IllegalArgumentException.class, () -> new GameState(board, List.of(human)));
+    // 5 players
+    Player p3 = new HumanPlayer("P3", new Position(0, 0), Color.BLUE);
+    Player p4 = new HumanPlayer("P4", new Position(0, 0), Color.RED);
+    Player p5 = new HumanPlayer("P5", new Position(0, 0), Color.WHITE);
+    assertThrows(
+        IllegalArgumentException.class, () -> new GameState(board, List.of(human, ia, p3, p4, p5)));
   }
 
   @Test
@@ -99,13 +112,9 @@ public class GameStateTest {
 
     Move move = Move.pawn(pos, p1);
 
-    // System.out.println("1 " + human.getPosition());
     game.applyMove(move);
-    // System.out.println("2 " + human.getPosition());
     game.undo();
-    // System.out.println("3 " + human.getPosition());
     game.redo();
-    // System.out.println("4 " + human.getPosition());
 
     assertEquals(p1, human.getPosition());
     assertEquals(ia, game.getCurrentPlayer());
@@ -124,12 +133,56 @@ public class GameStateTest {
   }
 
   @Test
+  public void undoRedoBlockedWhenPausedOrGameOver() {
+    game.applyMove(Move.pawn(human.getPosition(), new Position(1, 4)));
+
+    // Paused
+    game.setPaused(true);
+    game.undo();
+    assertEquals(ia, game.getCurrentPlayer()); // No undo
+    game.redo(); // No redo
+
+    // Game Over
+    game.setPaused(false);
+    game.setGameOver(true);
+    game.undo();
+    assertEquals(ia, game.getCurrentPlayer()); // No undo
+  }
+
+  @Test
+  public void testUndoWithAI() {
+    // Current: Human
+    game.applyMove(Move.pawn(human.getPosition(), new Position(1, 4)));
+    // Current: AI
+    game.applyMove(Move.pawn(ia.getPosition(), new Position(7, 4)));
+    // Current: Human
+
+    // Undo should revert BOTH (AI then Human)
+    game.undo();
+
+    assertEquals(new Position(0, 4), human.getPosition());
+    assertEquals(new Position(8, 4), ia.getPosition());
+    assertEquals(human, game.getCurrentPlayer());
+  }
+
+  @Test
+  public void testRedoWithAI() {
+    game.applyMove(Move.pawn(human.getPosition(), new Position(1, 4)));
+    game.applyMove(Move.pawn(ia.getPosition(), new Position(7, 4)));
+    game.undo(); // Both reverted
+
+    game.redo(); // Both reapplied
+
+    assertEquals(new Position(1, 4), human.getPosition());
+    assertEquals(new Position(7, 4), ia.getPosition());
+    assertEquals(human, game.getCurrentPlayer()); // It switch twice
+  }
+
+  @Test
   public void victoryIsDetected() {
     human.setPosition(new Position(8, 4));
     Position pos = game.getCurrentPlayer().getPosition();
-    // System.out.println("1 " + human.getPosition());
     game.applyMove(Move.pawn(pos, new Position(8, 4)));
-    // System.out.println("2 " + human.getPosition());
 
     assertFalse(game.isGameOver());
   }
@@ -137,8 +190,8 @@ public class GameStateTest {
   @Test
   public void winConditionFromTopRow() {
     Predicate<Integer> predicate = game.getWinCondition(human);
-    int id = board.id(8, 4);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(8, 4);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
@@ -146,8 +199,8 @@ public class GameStateTest {
     Player p = new HumanPlayer("P", new Position(8, 4), Color.BLACK);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
-    int id = board.id(0, 4);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(0, 4);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
@@ -155,8 +208,8 @@ public class GameStateTest {
     Player p = new HumanPlayer("P", new Position(4, 0), Color.BLUE);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
-    int id = board.id(4, 8);
-    assertTrue(predicate.test(id));
+    int getCellId = board.getCellId(4, 8);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
@@ -164,32 +217,63 @@ public class GameStateTest {
     Player p = new HumanPlayer("P", new Position(4, 8), Color.RED);
     GameState g = new GameState(board, List.of(p, ia));
     Predicate<Integer> predicate = g.getWinCondition(p);
-    int id = board.id(4, 0);
-    assertTrue(predicate.test(id));
-  }
-
-  @Test
-  public void saveAndLoadJsonWorks() {
-    /*
-    String filename = "test_save.json";
-    game.saveGameJSON(filename);
-
-    GameState loaded = game.loadGameJSON(filename);
-
-    assertNotNull(loaded);
-    assertEquals(game.getPlayers().size(), loaded.getPlayers().size());
-
-    new File(filename).delete();
-
-       */
+    int getCellId = board.getCellId(4, 0);
+    assertTrue(predicate.test(getCellId));
   }
 
   @Test
   public void resetCreatesNewGame() {
-
-    game.reset();
+    final ConfigManager config = ConfigManager.getInstance();
+    game.reset(9, fr.bordeaux.main.PlayerFactory.createPlayers(config), null);
     assertEquals(2, game.getPlayers().size());
     assertEquals(9, game.getBoard().getSize());
+  }
+
+  @Test
+  public void testResetWithBlitz() {
+    final ConfigManager config = ConfigManager.getInstance();
+    final String oldBlitz = config.getOption("blitz", "false");
+    final String oldTimeout = config.getOption("timeout", "30");
+
+    try {
+      config.setOption("blitz", "true");
+      config.setOption("timeout", "10"); // 10 minutes
+
+      // 10 minutes = 10 * 60 * 1000 = 600,000 ms
+      game.reset(9, fr.bordeaux.main.PlayerFactory.createPlayers(config), 600000L);
+
+      for (final Player p : game.getPlayers()) {
+        assertEquals(600000L, p.getRemainingTime());
+      }
+    } finally {
+      // Restore config to avoid side effects on other tests
+      config.setOption("blitz", oldBlitz);
+      config.setOption("timeout", oldTimeout);
+    }
+  }
+
+  @Test
+  public void testGetLegalMoves() {
+    // Starting position (0,4) for WHITE player
+    List<Position> legalPositions = game.getLegalMoves(human);
+
+    // Possible moves from (0,4) on a standard board are (1,4), (0,3), (0,5)
+    assertTrue(legalPositions.contains(new Position(1, 4)));
+    assertTrue(legalPositions.contains(new Position(0, 3)));
+    assertTrue(legalPositions.contains(new Position(0, 5)));
+    assertEquals(3, legalPositions.size());
+  }
+
+  @Test
+  public void testGenerateLegalPawnMoves() {
+    List<Move> legalPawnMoves = game.generateLegalPawnMoves(human);
+
+    // Should contain moves to the same positions as getLegalMoves
+    assertTrue(legalPawnMoves.stream().anyMatch(m -> m.getTo().equals(new Position(1, 4))));
+    assertTrue(legalPawnMoves.stream().anyMatch(m -> m.getTo().equals(new Position(0, 3))));
+    assertTrue(legalPawnMoves.stream().anyMatch(m -> m.getTo().equals(new Position(0, 5))));
+    assertEquals(3, legalPawnMoves.size());
+    assertTrue(legalPawnMoves.stream().allMatch(Move::isPawn));
   }
 
   @Test
@@ -274,5 +358,69 @@ public class GameStateTest {
     moves2.add(Move.wall(new Position(1, 1), Orientation.HORIZONTAL));
 
     assertTrue(moves2.containsAll(game.generateLegalMoves()));
+  }
+
+  @Test
+  public void testThreePlayerInitialization() {
+    Board board = new Board(9);
+    List<Player> players = new ArrayList<>();
+    players.add(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
+    players.add(new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
+    players.add(new HumanPlayer("P3", new Position(4, 0), Color.BLUE));
+
+    GameState state = new GameState(board, players);
+    assertEquals(3, state.getPlayers().size());
+    assertEquals(0, state.getCurrentIndexPlayer());
+
+    // Test turn cycling
+    state.nextPlayer();
+    assertEquals(1, state.getCurrentIndexPlayer());
+    state.nextPlayer();
+    assertEquals(2, state.getCurrentIndexPlayer());
+    state.nextPlayer();
+    assertEquals(0, state.getCurrentIndexPlayer());
+  }
+
+  @Test
+  public void testGetWinnerScenarios() {
+    // 1. Standard Win
+    human.setPosition(new Position(8, 4));
+    assertTrue(game.getWinner().isPresent());
+    assertEquals(human, game.getWinner().get());
+
+    // 2. Blitz Victory (all but one disabled)
+    human.setPosition(new Position(0, 4)); // Reset position
+    ia.setDisabled(true);
+    assertTrue(game.getWinner().isPresent());
+    assertEquals(human, game.getWinner().get());
+
+    // 3. No winner
+    ia.setDisabled(false);
+    assertFalse(game.getWinner().isPresent());
+  }
+
+  @Test
+  public void testPlayerCyclingWithDisabled() {
+    // 3 players: human1(0), human2(1), ia(2)
+    Player human2 = new HumanPlayer("H2", new Position(4, 0), Color.BLUE);
+    GameState state = new GameState(board, List.of(human, human2, ia));
+
+    // Disable middle player
+    human2.setDisabled(true);
+
+    // nextPlayer from 0 should skip 1 and go to 2
+    state.nextPlayer();
+    assertEquals(2, state.getCurrentIndexPlayer());
+
+    // nextPlayer from 2 should skip to 0 (skipping 1 again)
+    state.nextPlayer();
+    assertEquals(0, state.getCurrentIndexPlayer());
+
+    // previousPlayer from 0 should skip 1 and go to 2
+    state.previousPlayer();
+    assertEquals(2, state.getCurrentIndexPlayer());
+
+    // getPreviousIndexPlayer from 2 should skip 1 and return 0
+    assertEquals(0, state.getPreviousIndexPlayer());
   }
 }

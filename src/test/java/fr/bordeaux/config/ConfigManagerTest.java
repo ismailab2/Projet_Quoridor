@@ -13,15 +13,15 @@ public class ConfigManagerTest {
   @BeforeEach
   void setup() throws IOException {
     Path tempDir = Files.createTempDirectory("test-config");
-    System.setProperty("user.home", tempDir.toString());
     configFile = tempDir.resolve(".quoridorrc");
+    System.setProperty("quoridor.config.file", configFile.toString());
     resetSingleton();
     deleteConfigFile();
   }
 
   private void resetSingleton() {
     try {
-      var field = ConfigManager.class.getDeclaredField("INSTANCE");
+      var field = ConfigManager.class.getDeclaredField("instance");
       field.setAccessible(true);
       field.set(null, null);
     } catch (Exception e) {

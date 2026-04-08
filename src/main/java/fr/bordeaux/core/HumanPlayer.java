@@ -10,7 +10,7 @@ public class HumanPlayer extends Player {
    * @param positionStart The initial starting position on the board.
    * @param color The color of the player.
    */
-  public HumanPlayer(String name, Position positionStart, Color color) {
+  public HumanPlayer(final String name, final Position positionStart, final Color color) {
     super(name, positionStart, color);
   }
 
@@ -21,32 +21,24 @@ public class HumanPlayer extends Player {
         this.getPosition(),
         this.getStartingPosition(),
         this.getRemainingWalls(),
-        this.getScore(),
         this.getColor());
   }
 
-  /**
-   * Private constructor used for internal state management and cloning.
-   *
-   * @param name The name of the player.
-   * @param current The current position of the player on the board.
-   * @param start The initial starting position.
-   * @param walls The number of remaining walls.
-   * @param score The current score of the player.
-   */
+  /** Private constructor for state restoration. */
   private HumanPlayer(
-      String name, Position current, Position start, int walls, int score, Color color) {
-    super(name, current, start, walls, score, color);
+      final String name,
+      final Position current,
+      final Position start,
+      final int walls,
+      final Color color) {
+    super(name, current, start, walls, color);
   }
 
   /**
-   * Human players do not automate moves. Moves are expected to be handled via the user interface.
-   *
-   * @param state The current game state.
-   * @return Always {@code null} as humans decide moves externally.
+   * @return null as humans decide moves externally.
    */
   @Override
-  public Move getNextMove(GameState state) {
+  public Move getNextMove(final GameState state) {
     return null;
   }
 

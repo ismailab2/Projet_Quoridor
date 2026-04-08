@@ -11,10 +11,7 @@ import fr.bordeaux.i18n.I18n;
  */
 public class RuleChecker {
 
-  /**
-   * Private constructor to prevent instantiation of this utility class. Throws an AssertionError if
-   * called internally.
-   */
+  /** Private constructor to prevent instantiation. */
   private RuleChecker() {
     throw new AssertionError(I18n.get("assertChecker"));
   }
@@ -26,103 +23,153 @@ public class RuleChecker {
    * @param move The {@link Move} to validate.
    * @return {@code true} if the move is legal, {@code false} otherwise.
    */
-  public static boolean isMoveLegal(GameState state, Move move) {
+  public static boolean isMoveLegal(final GameState state, final Move move) {
+    final boolean legal;
     if (move.isPawn()) {
-      return pawnMoveLegal(state, move);
+      legal = pawnMoveLegal(state, move);
     } else {
-      return wallMoveLegal(state, move);
+      legal = wallMoveLegal(state, move);
     }
+    return legal;
   }
 
   /**
-   * Specifically checks if a jumping move is possible. A jump occurs when an opponent's pawn is
-   * adjacent and the cell behind it is free, or diagonal cells are reachable if the back is
-   * blocked.
+   * Checks if a jumping move is possible over an opponent.
    *
    * @param state The current {@link GameState}.
    * @param move The {@link Move} containing the target jump position.
    * @return {@code true} if the jump is valid, {@code false} otherwise.
    */
-  public static boolean canJump(GameState state, Move move) {
-    // Jump gestion
-    Player CurrentPlay = state.getCurrentPlayer();
-    Board b = state.getBoard();
-    Position from = CurrentPlay.getPosition();
-    Position to = move.getTo();
+  public static boolean canJump(final GameState state, final Move move) {
+    final Player currentPlay = state.getCurrentPlayer();
+    final Board board = state.getBoard();
+    final Position from = currentPlay.getPosition();
+    final Position targetPos = move.getTo();
 
-    int fromId = b.id(from.getX(), from.getY());
+    final int fromId = board.getCellId(from.getX(), from.getY());
+    boolean result = false;
 
-    for (Player otherPlayer : state.getPlayers()) {
-      if (otherPlayer == CurrentPlay) {
+    for (final Player otherPlayer : state.getPlayers()) {
+      if (otherPlayer == currentPlay || otherPlayer.isDisabled()) {
         continue;
       }
 
-      Position posOtherPlayer = otherPlayer.getPosition();
-
+      final Position posOtherPlayer = otherPlayer.getPosition();
       if (!isAdjacent(from, posOtherPlayer)) {
         continue;
       }
 
-      int dx = posOtherPlayer.getX() - from.getX();
-      int dy = posOtherPlayer.getY() - from.getY();
-
-      int opId = b.id(posOtherPlayer.getX(), posOtherPlayer.getY());
-      // System.out.println(dx + " " + dy);
-
-      Position jump = new Position(posOtherPlayer.getX() + dx, posOtherPlayer.getY() + dy);
-      boolean jumpPossible = false;
-
-      if (b.isInside(jump)) {
-        int jumpId = b.id(jump.getX(), jump.getY());
-        if (b.getGraph().hasEdge(opId, jumpId) && b.getGraph().hasEdge(fromId, opId)) {
-          if (to.equals(jump)) return true;
-          jumpPossible = true;
-        }
+      if (checkStraightJump(board, from, posOtherPlayer, targetPos, fromId)
+          || checkDiagonalJump(board, from, posOtherPlayer, targetPos, fromId)) {
+        result = true;
+        break;
       }
-      if (!jumpPossible) {
-        for (Position diag : getDiagonalJumps(from, posOtherPlayer)) {
-          if (!b.isInside(diag)) continue;
+    }
+    return result;
+  }
 
-          int diagId = b.id(diag.getX(), diag.getY());
+  /** Checks if a straight jump over an opponent is possible. */
+  private static boolean checkStraightJump(
+      final Board board,
+      final Position from,
+      final Position opponentPlayer,
+      final Position target,
+      final int fromId) {
+    final int oppX = opponentPlayer.getX();
+    final int oppY = opponentPlayer.getY();
+    final int deltaX = oppX - from.getX();
+    final int deltaY = oppY - from.getY();
+    final Position jump = new Position(oppX + deltaX, oppY + deltaY);
 
-          boolean canSideStep =
-              b.getGraph().hasEdge(fromId, opId) && b.getGraph().hasEdge(opId, diagId);
+    boolean possible = false;
+    if (board.isInside(jump)) {
+      final int opId = board.getCellId(oppX, oppY);
+      final int jumpId = board.getCellId(jump.getX(), jump.getY());
+      if (board.getGraph().hasEdge(opId, jumpId) && board.getGraph().hasEdge(fromId, opId)) {
+        possible = target.equals(jump);
+      }
+    }
+    return possible;
+  }
 
-          if (canSideStep && to.equals(diag)) return true;
+  /** Checks if a diagonal jump is possible if straight is blocked. */
+  private static boolean checkDiagonalJump(
+      final Board board,
+      final Position from,
+      final Position opponentPlayer,
+      final Position target,
+      final int fromId) {
+    final int oppX = opponentPlayer.getX();
+    final int oppY = opponentPlayer.getY();
+    final int deltaX = oppX - from.getX();
+    final int deltaY = oppY - from.getY();
+    final Position jump = new Position(oppX + deltaX, oppY + deltaY);
+
+    boolean possible = false;
+    final int opId = board.getCellId(oppX, oppY);
+    final boolean straightBlocked =
+        !board.isInside(jump)
+            || !board.getGraph().hasEdge(opId, board.getCellId(jump.getX(), jump.getY()));
+
+    if (straightBlocked) {
+      final List<Position> diagonalCandidates = getDiagonalJumps(from, opponentPlayer);
+      for (final Position diag : diagonalCandidates) {
+        if (board.isInside(diag)) {
+          final int diagId = board.getCellId(diag.getX(), diag.getY());
+          final boolean canSideStep =
+              board.getGraph().hasEdge(fromId, opId) && board.getGraph().hasEdge(opId, diagId);
+
+          if (canSideStep && target.equals(diag)) {
+            possible = true;
+            break;
+          }
         }
       }
     }
-    return false;
+    return possible;
   }
 
   /**
-   * Validates a pawn movement. Checks for boundaries, collisions with other players, and
-   * connectivity through the board graph.
+   * Validates a pawn movement (boundaries, collisions, graph).
    *
    * @param state The current game state.
    * @param move The pawn move to check.
    * @return {@code true} if the pawn can move to the target position.
    */
-  private static boolean pawnMoveLegal(GameState state, Move move) {
-    Player CurrentPlay = state.getCurrentPlayer();
-    Board b = state.getBoard();
-    Position from = CurrentPlay.getPosition();
-    Position to = move.getTo();
-    // System.out.println("c'est from"+from);
-    // System.out.println(to.getX() + " " + to.getY());
+  private static boolean pawnMoveLegal(final GameState state, final Move move) {
+    final Player currentPlay = state.getCurrentPlayer();
+    final Board board = state.getBoard();
+    final Position from = currentPlay.getPosition();
+    final Position targetPos = move.getTo();
 
-    if (!b.isInside(to)) return false;
+    boolean legal = false;
+    if (board.isInside(targetPos)) {
+      final int fromId = board.getCellId(from.getX(), from.getY());
+      final int toId = board.getCellId(targetPos.getX(), targetPos.getY());
 
-    int fromId = b.id(from.getX(), from.getY());
-    int toId = b.id(to.getX(), to.getY());
+      boolean occupied = false;
+      final List<Player> players = state.getPlayers();
+      for (final Player player : players) {
+        if (player.isDisabled()) {
+          continue;
+        }
+        final Position playerPos = player.getPosition();
+        if (playerPos.equals(targetPos)) {
+          occupied = true;
+          break;
+        }
+      }
 
-    for (Player p : state.getPlayers()) {
-      if (p.getPosition().equals(to)) return false;
+      if (!occupied) {
+        if (board.getGraph().hasEdge(fromId, toId)) {
+          legal = true;
+        } else {
+          legal = canJump(state, move);
+        }
+      }
     }
 
-    if (b.getGraph().hasEdge(fromId, toId)) return true;
-
-    return RuleChecker.canJump(state, move);
+    return legal;
   }
 
   /**
@@ -132,86 +179,86 @@ public class RuleChecker {
    * @param b The second position.
    * @return {@code true} if the positions are neighbors.
    */
-  private static boolean isAdjacent(Position a, Position b) {
-    int dx = Math.abs(a.getX() - b.getX());
-    int dy = Math.abs(a.getY() - b.getY());
-    // System.out.println("c'est adjacent "+ (dx+dy == 1));
-    return dx + dy == 1;
+  private static boolean isAdjacent(final Position pos1, final Position pos2) {
+    final int deltaX = Math.abs(pos1.getX() - pos2.getX());
+    final int deltaY = Math.abs(pos1.getY() - pos2.getY());
+    return deltaX + deltaY == 1;
   }
 
   /**
-   * Computes potential diagonal jump positions when a straight jump is blocked.
+   * Computes diagonal jump positions when a straight jump is blocked.
    *
    * @param from The current player's position.
    * @param op The opponent's position.
    * @return A list of candidate {@link Position}s for a diagonal jump.
    */
-  private static List<Position> getDiagonalJumps(Position from, Position op) {
-    List<Position> diags = new ArrayList<>();
+  private static List<Position> getDiagonalJumps(
+      final Position from, final Position opponentPlayer) {
+    final List<Position> diags = new ArrayList<>();
+    final int oppX = opponentPlayer.getX();
+    final int oppY = opponentPlayer.getY();
+    final int deltaX = oppX - from.getX();
+    final int deltaY = oppY - from.getY();
 
-    int dx = op.getX() - from.getX();
-    int dy = op.getY() - from.getY();
-
-    if (dx == 1) {
-      diags.add(new Position(op.getX(), op.getY() + 1));
-      diags.add(new Position(op.getX(), op.getY() - 1));
-    } else if (dx == -1) { // adversaire en haut
-      diags.add(new Position(op.getX(), op.getY() + 1));
-      diags.add(new Position(op.getX(), op.getY() - 1));
-    } else if (dy == 1) { // adversaire à droite
-      diags.add(new Position(op.getX() + 1, op.getY()));
-      diags.add(new Position(op.getX() - 1, op.getY()));
-    } else if (dy == -1) {
-      diags.add(new Position(op.getX() + 1, op.getY()));
-      diags.add(new Position(op.getX() - 1, op.getY()));
+    if (deltaX == 1 || deltaX == -1) {
+      diags.add(new Position(oppX, oppY + 1));
+      diags.add(new Position(oppX, oppY - 1));
+    } else if (deltaY == 1 || deltaY == -1) {
+      diags.add(new Position(oppX + 1, oppY));
+      diags.add(new Position(oppX - 1, oppY));
     }
 
     return diags;
   }
 
   /**
-   * Validates a wall placement move. Checks for remaining walls, collisions with existing walls,
-   * and path connectivity.
+   * Validates a wall placement (remaining, collisions, path).
    *
    * @param state The current game state.
    * @param move The wall placement move.
    * @return {@code true} if the wall placement is legal.
    */
-  private static boolean wallMoveLegal(GameState state, Move move) {
-    Player p = state.getCurrentPlayer();
-    Board b = state.getBoard();
+  private static boolean wallMoveLegal(final GameState state, final Move move) {
+    final Player player = state.getCurrentPlayer();
+    final Board board = state.getBoard();
 
-    // Has the player enough walls
-    if (p.getRemainingWalls() <= 0) return false;
+    boolean legal = false;
+    if (player.getRemainingWalls() > 0) {
+      if (!board.isWallCollision(move.getTo(), move.getOrientation())) {
+        legal = doesPathExist(state, move);
+      }
+    }
 
-    // Is there a collision between two walls
-    if (b.isWallCollision(move.getTo(), move.getOrientation())) return false;
-
-    // Do all players still have a path to victory
-    return doesPathExist(state, move);
+    return legal;
   }
 
   /**
-   * Temporarily applies a wall move to verify if all players can still reach their respective goals
-   * using a BFS algorithm.
+   * Verifies if all players can still reach their goals via BFS.
    *
    * @param state The current game state.
    * @param move The wall move to test.
    * @return {@code true} if a path still exists for every player.
    */
-  private static boolean doesPathExist(GameState state, Move move) {
-    Board b = state.getBoard();
-    b.addWall(move.getTo(), move.getOrientation());
+  private static boolean doesPathExist(final GameState state, final Move move) {
+    final Board board = state.getBoard();
+    final Position wallPos = move.getTo();
+    final Orientation wallOrient = move.getOrientation();
+    board.addWall(wallPos, wallOrient);
 
     boolean canWin = true;
-    for (Player p : state.getPlayers()) {
-      int startId = b.id(p.getPosition().getX(), p.getPosition().getY());
-      if (b.getGraph().findPathBFS(startId, state.getWinCondition(p)).isEmpty()) {
+    final List<Player> players = state.getPlayers();
+    for (final Player player : players) {
+      if (player.isDisabled()) {
+        continue;
+      }
+      final Position pos = player.getPosition();
+      final int startId = board.getCellId(pos.getX(), pos.getY());
+      if (board.getGraph().findPathBFS(startId, state.getWinCondition(player)).isEmpty()) {
         canWin = false;
         break;
       }
     }
-    b.removeWall(move.getTo(), move.getOrientation());
+    board.removeWall(wallPos, wallOrient);
     return canWin;
   }
 }

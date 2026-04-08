@@ -1,6 +1,9 @@
 package fr.bordeaux.cli.command;
 
-import fr.bordeaux.ai.*;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.*;
+import fr.bordeaux.ai.minimax.*;
+import fr.bordeaux.ai.random.*;
 import fr.bordeaux.core.*;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
@@ -13,21 +16,18 @@ import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 
 /**
- * Command that starts a new game from the CLI. It allows configuring the board size and the number
- * of players, and interactively asks for the type and name of each player.
+ * CLI command that starts a new game, configuring board size and players. of players, and
+ * interactively asks for the type and name of each player.
  */
 public class NewCommand implements Command {
 
   /** Command entered by the user */
   private String[] tokens;
 
-  /** The JLine terminal abstraction used to handle system-level input, output, and signals. */
+  /** JLine terminal for system-level input and output. */
   private Terminal terminal;
 
-  /**
-   * The line reader responsible for text editing, history management, and tab-completion
-   * interaction.
-   */
+  /** Line reader for text editing and tab-completion. interaction. */
   private LineReader reader;
 
   /** Logger to display informations */
@@ -36,24 +36,24 @@ public class NewCommand implements Command {
   /**
    * Creates a NewCommand with the given CLI tokens, terminal and line reader.
    *
-   * @param t the tokens entered by the user
+   * @param tokens the tokens entered by the user
    * @param term the terminal used for input/output
-   * @param r the line reader used to interact with the user
+   * @param reader the line reader used to interact with the user
    */
-  public NewCommand(String[] t, Terminal term, LineReader r) {
-    this.tokens = t;
+  public NewCommand(final String[] tokens, final Terminal term, final LineReader reader) {
+    this.tokens = tokens;
     this.terminal = term;
-    this.reader = r;
+    this.reader = reader;
   }
 
   /**
    * Creates a NewCommand with default tokens and the provided terminal and reader.
    *
-   * @param t the terminal used for input/output
-   * @param r the line reader used to read user input
+   * @param terminal the terminal used for input/output
+   * @param reader the line reader used to read user input
    */
-  public NewCommand(Terminal t, LineReader r) {
-    this(new String[] {"9", "2"}, t, r);
+  public NewCommand(final Terminal terminal, final LineReader reader) {
+    this(new String[] {"9", "2"}, terminal, reader);
   }
 
   /** Creates an empty NewCommand. Used mainly when only help information is needed. */
@@ -62,56 +62,65 @@ public class NewCommand implements Command {
   }
 
   /**
-   * Executes the new command. Initializes a new game engine with a board and players according to
-   * the provided tokens. If necessary, the user is prompted to choose player types and names
-   * interactively.
+   * Executes new command, initializing the game engine with board and players. Prompts for player
+   * types and names if needed. interactively.
    *
    * @param engine the current game engine
    * @return a new GameEngine instance representing the new game
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
-    if (tokens.length > 5) LOGGER.error(I18n.get("newNbArgs"));
+  public GameEngine execute(final GameEngine engine) {
+    GameEngine result = engine;
+    if (tokens.length > 5) {
+      LOGGER.error(I18n.get("newNbArgs"));
+    }
 
-    int size = (tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9) - 1;
-    Position[] positions = {
+    final int boardSizeInput = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9;
+    final int size = boardSizeInput - 1;
+    final Position[] positions = {
       new Position(0, size / 2), new Position(size, size / 2),
       new Position(size / 2, 0), new Position(size / 2, size)
     };
-    if (tokens.length == 1)
-      return new GameEngine(
-          new GameState(
-              new Board(size + 1),
-              List.of(
-                  new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
-                  new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
-          engine.isBlitz(),
-          engine.isVerbose(),
-          engine.isContest(),
-          engine.isDebug(),
-          engine.getInitialWalls());
-    else {
-      int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
-      Board board = new Board(size + 1);
-      Player[] players = new Player[nbPlayer];
 
-      for (int i = 0; i < nbPlayer; i++) {
+    if (tokens.length == 1) {
+      result =
+          new GameEngine(
+              new GameState(
+                  new Board(size + 1),
+                  List.of(
+                      new HumanPlayer("Human", new Position(0, 4), Color.WHITE),
+                      new HumanPlayer("Bob", new Position(8, 4), Color.BLACK))),
+              engine.isBlitz(),
+              engine.isVerbose(),
+              engine.isContest(),
+              engine.isDebug(),
+              engine.getInitialWalls());
+    } else {
+      final int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
+      final Board board = new Board(size + 1);
+      final Player[] players = new Player[nbPlayer];
+
+      boolean interrupted = false;
+      for (int index = 0; index < nbPlayer; index++) {
         try {
           LOGGER.info(I18n.get("playersType", I18n.get("availType")));
           LOGGER.info(
-              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia  - [mctsnn] Monte Carlo ia "+I18n.get("nnSelect", " - [r]andom ia"));
-          String typePlayer = reader.readLine(I18n.get("playersType", " >> "));
-          if (typePlayer == null) throw new EndOfFileException();
-          if (!typePlayer.equals("h")
-              && !typePlayer.equals("mcts")
-              && !typePlayer.equals("mini")
-              && !typePlayer.equals("r")
-              && !typePlayer.equals("mctsnn")) {
+              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia"
+                  + "  - [mctsnn] Monte Carlo ia with NeuralNetwork selector  - [r]andom ia");
+          final String typePlayer = reader.readLine(I18n.get("playersType", " >> "));
+          if (typePlayer == null) {
+            throw new EndOfFileException();
+          }
+          if (!"h".equals(typePlayer)
+              && !"mcts".equals(typePlayer)
+              && !"mini".equals(typePlayer)
+              && !"r".equals(typePlayer)
+              && !"mctsnn".equals(typePlayer)) {
             LOGGER.error(I18n.get("wrongType"));
-            i--;
+            index--;
             continue;
           }
-          String inputName = reader.readLine(I18n.get("playersName", " >> "));
+          final String inputName = reader.readLine(I18n.get("playersName", " >> "));
           if (inputName == null) {
             LOGGER.error(I18n.get("shouldName"));
             throw new EndOfFileException();
@@ -119,28 +128,34 @@ public class NewCommand implements Command {
           switch (typePlayer) {
             case "h":
               {
-                players[i] = new HumanPlayer(inputName, positions[i], Color.fromId(i + 1));
+                players[index] =
+                    new HumanPlayer(inputName, positions[index], Color.fromId(index + 1));
                 break;
               }
             case "mcts":
               {
-                players[i] = new MctsPlayer(inputName, positions[i], Color.fromId(i + 1));
+                players[index] =
+                    new MctsPlayer(inputName, positions[index], Color.fromId(index + 1));
                 break;
               }
             case "mini":
               {
-                players[i] =
-                    MinimaxPlayer.builder(inputName, positions[i], Color.fromId(i + 1)).build();
+                players[index] =
+                    MinimaxPlayer.builder(inputName, positions[index], Color.fromId(index + 1))
+                        .build();
                 break;
               }
             case "mctsnn":
               {
-                players[i] =
-                    new MctsPlayer(inputName, positions[i], 2000, true, Color.fromId(i + 1));
+                players[index] =
+                    new MctsPlayer(
+                        inputName, positions[index], 2000, true, Color.fromId(index + 1));
+                break;
               }
             default:
               {
-                players[i] = new RandomPlayer(inputName, positions[i], Color.fromId(i + 1));
+                players[index] =
+                    new RandomPlayer(inputName, positions[index], Color.fromId(index + 1));
                 break;
               }
           }
@@ -151,27 +166,30 @@ public class NewCommand implements Command {
           } catch (Exception exc) {
             LOGGER.error(I18n.get("termClose"));
           }
-          return engine;
-        } catch (
-            IOException e) { // IOException can be caused by loading default NN for mctsnn option
-          throw new RuntimeException(e);
+          interrupted = true;
+          break;
+        } catch (final IOException e) {
+          throw new java.io.UncheckedIOException(e);
         }
       }
-      String setNbPlayers = "nb-players=" + nbPlayer;
-      new SetCommand(setNbPlayers).execute(engine);
-      return new GameEngine(
-          new GameState(board, Arrays.stream(players).toList()),
-          engine.isBlitz(),
-          engine.isVerbose(),
-          engine.isContest(),
-          engine.isDebug(),
-          engine.getInitialWalls());
+
+      if (!interrupted) {
+        final String setNbPlayers = "nb-players=" + nbPlayer;
+        new SetCommand(setNbPlayers).execute(engine);
+        result =
+            new GameEngine(
+                new GameState(board, Arrays.stream(players).toList()),
+                engine.isBlitz(),
+                engine.isVerbose(),
+                engine.isContest(),
+                engine.isDebug(),
+                engine.getInitialWalls());
+      }
     }
+    return result;
   }
 
-  /**
-   * Displays help information about the new command, including its usage, arguments and examples.
-   */
+  /** Displays help information for the new command. */
   @Override
   public void helpText() {
     LOGGER.info("=== NEW Command ===\n");

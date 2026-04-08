@@ -69,9 +69,9 @@ public class BoardTest {
 
   @Test
   public void testIdConversion() {
-    assertEquals(0, board.id(0, 0));
-    assertEquals(SIZE + 1, board.id(1, 1));
-    assertEquals((SIZE * SIZE) - 1, board.id(8, 8)); // 63
+    assertEquals(0, board.getCellId(0, 0));
+    assertEquals(SIZE + 1, board.getCellId(1, 1));
+    assertEquals((SIZE * SIZE) - 1, board.getCellId(8, 8)); // 63
   }
 
   @Test
@@ -81,9 +81,9 @@ public class BoardTest {
 
     Graph g = board.getGraph();
 
-    assertFalse(g.getNeighbors(board.id(2, 2)).contains(board.id(3, 2)));
-    assertFalse(g.getNeighbors(board.id(2, 3)).contains(board.id(3, 3)));
-    assertTrue(g.getNeighbors(board.id(2, 2)).contains(board.id(2, 3)));
+    assertFalse(g.getNeighbors(board.getCellId(2, 2)).contains(board.getCellId(3, 2)));
+    assertFalse(g.getNeighbors(board.getCellId(2, 3)).contains(board.getCellId(3, 3)));
+    assertTrue(g.getNeighbors(board.getCellId(2, 2)).contains(board.getCellId(2, 3)));
   }
 
   @Test
@@ -93,9 +93,9 @@ public class BoardTest {
 
     Graph g = board.getGraph();
 
-    assertFalse(g.getNeighbors(board.id(4, 1)).contains(board.id(4, 2)));
-    assertFalse(g.getNeighbors(board.id(5, 1)).contains(board.id(5, 2)));
-    assertTrue(g.getNeighbors(board.id(4, 1)).contains(board.id(5, 1)));
+    assertFalse(g.getNeighbors(board.getCellId(4, 1)).contains(board.getCellId(4, 2)));
+    assertFalse(g.getNeighbors(board.getCellId(5, 1)).contains(board.getCellId(5, 2)));
+    assertTrue(g.getNeighbors(board.getCellId(4, 1)).contains(board.getCellId(5, 1)));
   }
 
   @Test
@@ -153,13 +153,13 @@ public class BoardTest {
     Position pos = new Position(2, 2);
     board.addWall(pos, Orientation.HORIZONTAL);
 
-    assertFalse(board.getGraph().hasEdge(board.id(2, 2), board.id(3, 2)));
-    assertFalse(board.getGraph().hasEdge(board.id(2, 3), board.id(3, 3)));
+    assertFalse(board.getGraph().hasEdge(board.getCellId(2, 2), board.getCellId(3, 2)));
+    assertFalse(board.getGraph().hasEdge(board.getCellId(2, 3), board.getCellId(3, 3)));
 
     board.removeWall(pos, Orientation.HORIZONTAL);
 
-    assertTrue(board.getGraph().hasEdge(board.id(2, 2), board.id(3, 2)));
-    assertTrue(board.getGraph().hasEdge(board.id(2, 3), board.id(3, 3)));
+    assertTrue(board.getGraph().hasEdge(board.getCellId(2, 2), board.getCellId(3, 2)));
+    assertTrue(board.getGraph().hasEdge(board.getCellId(2, 3), board.getCellId(3, 3)));
   }
 
   @Test
@@ -167,12 +167,12 @@ public class BoardTest {
     Position pos = new Position(4, 1);
     board.addWall(pos, Orientation.VERTICAL);
 
-    assertFalse(board.getGraph().hasEdge(board.id(4, 1), board.id(4, 2)));
-    assertFalse(board.getGraph().hasEdge(board.id(5, 1), board.id(5, 2)));
+    assertFalse(board.getGraph().hasEdge(board.getCellId(4, 1), board.getCellId(4, 2)));
+    assertFalse(board.getGraph().hasEdge(board.getCellId(5, 1), board.getCellId(5, 2)));
 
     board.removeWall(pos, Orientation.VERTICAL);
 
-    assertTrue(board.getGraph().hasEdge(board.id(4, 1), board.id(4, 2)));
-    assertTrue(board.getGraph().hasEdge(board.id(5, 1), board.id(5, 2)));
+    assertTrue(board.getGraph().hasEdge(board.getCellId(4, 1), board.getCellId(4, 2)));
+    assertTrue(board.getGraph().hasEdge(board.getCellId(5, 1), board.getCellId(5, 2)));
   }
 }

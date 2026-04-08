@@ -11,7 +11,7 @@ public final class InfoDialog {
 
   /** Displays the information dialog of the application. */
   public static void show() {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    final Alert alert = new Alert(Alert.AlertType.INFORMATION);
     alert.setTitle(I18n.get("info"));
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);

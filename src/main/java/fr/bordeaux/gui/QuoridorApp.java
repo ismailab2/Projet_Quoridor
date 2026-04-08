@@ -1,31 +1,37 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.ai.MctsPlayer;
-import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.main.GuiLauncher;
+import fr.bordeaux.util.Logger;
 import fr.bordeaux.i18n.I18n;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-/**
- * Main JavaFX application class for Quoridor.
- *
- * <p>Displays the game board in the center, player 1 walls on the right, and player 2 walls on the
- * left. Handles initializing the game state, setting up the scene, and attaching GUI components.
- */
+/** Main JavaFX app for Quoridor. Displays board and player panels. */
 public class QuoridorApp extends Application {
 
-  /** Default constructor for the Quoridor JavaFX application. */
+  private static final double PANEL_WIDTH = 200.0;
+  private static final double MIN_WIDTH = 800.0;
+  private static final double MIN_HEIGHT = 600.0;
+  private static final double DEFAULT_MARGIN = 20.0;
+  private static final int OVERLAY_SPACING = 20;
+  private static final double OVERLAY_WIDTH = 400.0;
+  private static final double OVERLAY_HEIGHT = 200.0;
+
+  /** Default constructor. */
   public QuoridorApp() {
-    super();
+    Logger.getInstance().debug(I18n.get("instantiate"));
   }
 
   /**
@@ -33,212 +39,167 @@ public class QuoridorApp extends Application {
    * GUI event handling.
    *
    * @param stage the primary stage for this application
+   * @throws IOException if the game engine cannot be built
    */
   @Override
-  public void start(Stage stage) throws IOException {
-    int BOARD_SIZE = 9;
-    Player player1 = new HumanPlayer("Human Player", new Position(0, 4), Color.WHITE);
-    Player player2 = new MctsPlayer("MCTS Player", new Position(8, 4), 3000, true, Color.BLACK);
-    GameState state = new GameState(new Board(BOARD_SIZE), List.of(player1, player2));
-    GameEngine engine =
-        new GameEngine(
-            state,
-            Boolean.parseBoolean(ConfigManager.getInstance().getOption("blitz", "false")),
-            false,
-            false,
-            false,
-            Integer.parseInt(ConfigManager.getInstance().getOption("nb-walls", "10")));
-    FileHandler fileHandler = new FileHandler(stage);
-    ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
+  public void start(final Stage stage) throws IOException {
+    final GuiLauncher guiLauncher = new GuiLauncher();
+    final GameEngine engine = guiLauncher.buildEngine();
+    final GameState state = engine.getState();
 
-    PlayerPanel player1Panel = new PlayerPanel(state.getPlayers().get(0).getName(), state, 0);
-    PlayerPanel player2Panel = new PlayerPanel(state.getPlayers().get(1).getName(), state, 1);
+    final FileHandler fileHandler = new FileHandler(stage);
+    final ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
 
-    double panelWidth = 200;
-    for (PlayerPanel p : new PlayerPanel[] {player1Panel, player2Panel}) {
-      p.setMinWidth(panelWidth);
-      p.setMaxWidth(panelWidth);
-      p.setPrefWidth(panelWidth);
+    final List<Player> players = state.getPlayers();
+    final PlayerPanel[] panels = new PlayerPanel[players.size()];
+    for (int i = 0; i < players.size(); i++) {
+      panels[i] = new PlayerPanel(players.get(i).getName(), state, i);
+      setupPanelSize(panels[i]);
     }
 
-    BorderPane.setAlignment(player1Panel, Pos.CENTER);
-    BorderPane.setAlignment(player2Panel, Pos.CENTER);
-    BorderPane.setMargin(player1Panel, new Insets(20));
-    BorderPane.setMargin(player2Panel, new Insets(20));
+    final BoardView boardView = new BoardView(engine);
+    final StackPane boardContainer = buildBoardContainer(boardView);
 
-    BoardView boardView = new BoardView(engine);
-
-    StackPane boardContainer = new StackPane(boardView);
-    boardContainer.setAlignment(Pos.CENTER);
-    BorderPane.setAlignment(boardContainer, Pos.CENTER);
-
-    BorderPane root = new BorderPane();
-    MainMenuBar menuBar = new MainMenuBar(dispatcher);
-    root.setTop(menuBar);
-    root.setCenter(boardContainer);
-    root.setLeft(player1Panel);
-    root.setRight(player2Panel);
+    final MainMenuBar menuBar = new MainMenuBar(dispatcher);
+    final BorderPane root = buildRootLayout(menuBar, boardContainer, panels);
 
     DragAndDrop.install(engine, boardView);
 
-    Scene scene = new Scene(root);
-
-    ShortcutManager manager = ShortcutManager.getInstance();
-    manager.setDispatcher(dispatcher);
-    manager.register(scene);
+    final Scene scene = new Scene(root);
+    setupShortcuts(scene, dispatcher);
 
     stage.setTitle("Quoridor");
     stage.setScene(scene);
-    stage.setMinWidth(800);
-    stage.setMinHeight(600);
+    stage.setMinWidth(MIN_WIDTH);
+    stage.setMinHeight(MIN_HEIGHT);
     stage.setMaximized(true);
     stage.show();
 
-    scene
-        .widthProperty()
-        .addListener(
-            (obs, oldVal, newVal) ->
-                resizeBoard(boardView, scene, panelWidth, menuBar.getHeight()));
-
-    scene
-        .heightProperty()
-        .addListener(
-            (obs, oldVal, newVal) ->
-                resizeBoard(boardView, scene, panelWidth, menuBar.getHeight()));
-
-    Platform.runLater(() -> resizeBoard(boardView, scene, panelWidth, menuBar.getHeight()));
-
+    setupResizeListeners(scene, boardView, menuBar);
     setupAITurnListener(engine, boardView);
     setupGameOverListener(engine, boardContainer);
   }
 
   /**
-   * Sets up a listener to show a popup when the game is over.
+   * Fixes the width of a player panel to {@link #PANEL_WIDTH}.
    *
-   * @param engine The game engine to interact with.
-   * @param container The container where the overlay will be displayed.
+   * @param panel the panel to configure
    */
-  private void setupGameOverListener(GameEngine engine, StackPane container) {
-    java.util.concurrent.atomic.AtomicBoolean popupShown =
-        new java.util.concurrent.atomic.AtomicBoolean(false);
+  static void setupPanelSize(final PlayerPanel panel) {
+    panel.setMinWidth(PANEL_WIDTH);
+    panel.setMaxWidth(PANEL_WIDTH);
+    panel.setPrefWidth(PANEL_WIDTH);
+  }
 
-    engine
-        .getState()
+  /**
+   * Builds the centered board container with alignment and margin.
+   *
+   * @param boardView the board view to wrap
+   * @return a StackPane containing the board view
+   */
+  static StackPane buildBoardContainer(final BoardView boardView) {
+    final StackPane container = new StackPane(boardView);
+    container.setAlignment(Pos.CENTER);
+    BorderPane.setAlignment(container, Pos.CENTER);
+    return container;
+  }
+
+  /**
+   * Assembles root layout components.
+   *
+   * @param menuBar the top menu bar
+   * @param boardContainer the center board container
+   * @param panels array of player panels
+   * @return the configured BorderPane
+   */
+  static BorderPane buildRootLayout(
+      final MainMenuBar menuBar, final StackPane boardContainer, final PlayerPanel[] panels) {
+
+    final BorderPane root = new BorderPane();
+    final Insets margin = new Insets(DEFAULT_MARGIN);
+
+    final VBox leftContainer = new VBox(DEFAULT_MARGIN);
+    leftContainer.setAlignment(Pos.CENTER);
+
+    if (panels.length > 0) {
+      leftContainer.getChildren().add(panels[0]);
+    }
+    if (panels.length > 2) {
+      leftContainer.getChildren().add(panels[2]);
+    }
+
+    final VBox rightContainer = new VBox(DEFAULT_MARGIN);
+    rightContainer.setAlignment(Pos.CENTER);
+
+    if (panels.length > 1) {
+      rightContainer.getChildren().add(panels[1]);
+    }
+    if (panels.length > 3) {
+      rightContainer.getChildren().add(panels[3]);
+    }
+
+    BorderPane.setMargin(leftContainer, margin);
+    BorderPane.setMargin(rightContainer, margin);
+
+    root.setTop(menuBar);
+    root.setCenter(boardContainer);
+    root.setLeft(leftContainer);
+    root.setRight(rightContainer);
+
+    return root;
+  }
+
+  /**
+   * Registers the shortcut manager on the scene and sets its dispatcher.
+   *
+   * @param scene the JavaFX scene
+   * @param dispatcher the action dispatcher
+   */
+  private void setupShortcuts(final Scene scene, final ActionDispatcher dispatcher) {
+    final ShortcutManager manager = ShortcutManager.getInstance();
+    manager.setDispatcher(dispatcher);
+    manager.register(scene);
+  }
+
+  /**
+   * Attaches resize listeners to the scene to keep the board square.
+   *
+   * @param scene the JavaFX scene
+   * @param boardView the board view to resize
+   * @param menuBar the menu bar (its height is excluded from available space)
+   */
+  private void setupResizeListeners(
+      final Scene scene, final BoardView boardView, final MainMenuBar menuBar) {
+    scene
+        .widthProperty()
         .addListener(
-            () -> {
-              GameState state = engine.getState();
-              if (state.isGameOver()) {
-                if (popupShown.compareAndSet(false, true)) {
-                  Player winner = null;
-                  for (Player p : state.getPlayers()) {
-                    if (state.hasReachedGoal(p)) {
-                      winner = p;
-                      break;
-                    }
-                  }
-                  if (winner != null) {
-                    final String winnerName = winner.getName();
-                    Platform.runLater(
-                        () -> {
-                          VBox overlay = new VBox(20);
-                          overlay.setAlignment(Pos.CENTER);
-                          overlay.setMaxSize(400, 200);
-                          overlay.setStyle(
-                              "-fx-background-color: rgba(0, 0, 0, 0.85);"
-                                  + "-fx-padding: 30;"
-                                  + "-fx-background-radius: 15;"
-                                  + "-fx-border-color: rgba(255, 255, 255, 0.2);"
-                                  + "-fx-border-radius: 15;"
-                                  + "-fx-border-width: 2;");
-
-                          javafx.scene.control.Label titleLabel =
-                              new javafx.scene.control.Label(I18n.get("gameOver"));
-                          titleLabel.setStyle(
-                              "-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;");
-
-                          javafx.scene.control.Label winLabel =
-                              new javafx.scene.control.Label(winnerName + I18n.get("won"));
-                          winLabel.setStyle("-fx-text-fill: lightgreen; -fx-font-size: 20px;");
-
-                          javafx.scene.control.Button closeBtn =
-                              new javafx.scene.control.Button(I18n.get("close"));
-                          closeBtn.setStyle(
-                              "-fx-font-size: 16px; -fx-padding: 8 20; -fx-cursor: hand;");
-                          closeBtn.setOnAction(e -> container.getChildren().remove(overlay));
-
-                          overlay.getChildren().addAll(titleLabel, winLabel, closeBtn);
-                          container.getChildren().add(overlay);
-                        });
-                  }
-                }
-              } else {
-                popupShown.set(false);
-              }
+            (obs, oldVal, newVal) -> {
+              resizeBoard(boardView, scene, menuBar.getHeight());
             });
-  }
-
-  /**
-   * Sets up a listener to trigger AI turns automatically without freezing the JavaFX thread.
-   *
-   * @param engine The game engine to interact with.
-   * @param boardView The board view to redraw after an AI move.
-   */
-  private void setupAITurnListener(GameEngine engine, BoardView boardView) {
-    java.util.concurrent.atomic.AtomicBoolean aiComputing =
-        new java.util.concurrent.atomic.AtomicBoolean(false);
-
-    Runnable aiTurnTask =
+    scene
+        .heightProperty()
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              resizeBoard(boardView, scene, menuBar.getHeight());
+            });
+    Platform.runLater(
         () -> {
-          GameState state = engine.getState();
-          if (!state.isGameOver() && !state.isPaused()) {
-            Player currentPlayer = state.getCurrentPlayer();
-            if (currentPlayer.isAI() && aiComputing.compareAndSet(false, true)) {
-              new Thread(
-                      () -> {
-                        Move move = null;
-                        try {
-                          move = currentPlayer.getNextMove(state);
-                        } catch (Exception e) {
-                          e.printStackTrace();
-                        } finally {
-                          Move finalMove = move;
-                          Platform.runLater(
-                              () -> {
-                                aiComputing.set(false);
-                                if (finalMove != null
-                                    && !state.isGameOver()
-                                    && !state.isPaused()
-                                    && state.getCurrentPlayer() == currentPlayer) {
-                                  boolean success = engine.play(finalMove);
-                                  if (success) {
-                                    boardView.drawBoard();
-                                  }
-                                }
-                              });
-                        }
-                      })
-                  .start();
-            }
-          }
-        };
-
-    engine.getState().addListener(aiTurnTask);
-    Platform.runLater(aiTurnTask);
+          resizeBoard(boardView, scene, menuBar.getHeight());
+        });
   }
 
   /**
-   * @param boardView boardView
-   * @param scene scene
-   * @param panelWidth panelWidth
-   * @param menuHeight menuHeight
+   * Resizes the board view to fill the available square area in the scene.
+   *
+   * @param boardView the board view to resize
+   * @param scene the current scene
+   * @param menuHeight the height of the menu bar to subtract
    */
-  private void resizeBoard(BoardView boardView, Scene scene, double panelWidth, double menuHeight) {
-    double availableWidth = scene.getWidth() - (panelWidth + 40) * 2;
-    double availableHeight = scene.getHeight() - menuHeight;
-
-    double size = Math.min(availableWidth, availableHeight);
-
-    if (size > 0) {
+  private void resizeBoard(final BoardView boardView, final Scene scene, final double menuHeight) {
+    final double availableWidth = scene.getWidth() - (PANEL_WIDTH + DEFAULT_MARGIN * 2) * 2;
+    final double availableHeight = scene.getHeight() - menuHeight;
+    final double size = Math.min(availableWidth, availableHeight) - 1.0; // 1.0px safety margin
+    if (size > 0.0) {
       boardView.setPrefSize(size, size);
       boardView.setMinSize(size, size);
       boardView.setMaxSize(size, size);
@@ -246,19 +207,121 @@ public class QuoridorApp extends Application {
   }
 
   /**
-   * Called when the JavaFX application is stopped. Saves configuration or performs cleanup tasks.
+   * Sets up a listener to show a game-over overlay when the game ends.
+   *
+   * @param engine the game engine to observe
+   * @param container the container where the overlay will be displayed
    */
-  @Override
-  public void stop() {
-    ConfigManager.getInstance().save();
+  void setupGameOverListener(final GameEngine engine, final StackPane container) {
+    final AtomicBoolean popupShown = new AtomicBoolean(false);
+    final GameState state = engine.getState();
+
+    state.addListener(
+        () -> {
+          if (state.isGameOver()) {
+            if (popupShown.compareAndSet(false, true)) {
+              state
+                  .getWinner()
+                  .ifPresent(
+                      winner ->
+                          Platform.runLater(
+                              () -> {
+                                showGameOverOverlay(container, winner.getName(), popupShown);
+                              }));
+            }
+          } else {
+            popupShown.set(false);
+          }
+        });
   }
 
   /**
-   * Main entry point for launching the JavaFX application.
+   * Displays the game-over overlay on the board container.
    *
-   * @param args command-line arguments
+   * @param container the container to add the overlay to
+   * @param winnerName the name of the winning player
+   * @param popupShown the flag to reset when the overlay is closed
    */
-  public static void main(String[] args) {
-    launch(args);
+  void showGameOverOverlay(
+      final StackPane container, final String winnerName, final AtomicBoolean popupShown) {
+    final VBox overlay = new VBox(OVERLAY_SPACING);
+    overlay.setAlignment(Pos.CENTER);
+    overlay.setMaxSize(OVERLAY_WIDTH, OVERLAY_HEIGHT);
+    overlay.setStyle(
+        "-fx-background-color: rgba(0, 0, 0, 0.85);"
+            + "-fx-padding: 30;"
+            + "-fx-background-radius: 15;"
+            + "-fx-border-color: rgba(255, 255, 255, 0.2);"
+            + "-fx-border-radius: 15;"
+            + "-fx-border-width: 2;");
+
+    final Label titleLabel = new Label("Game Over");
+    titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;");
+
+    final Label winLabel = new Label(winnerName + " won the game!");
+    winLabel.setStyle("-fx-text-fill: lightgreen; -fx-font-size: 20px;");
+
+    final Button closeBtn = new Button("Close");
+    closeBtn.setStyle("-fx-font-size: 16px; -fx-padding: 8 20; -fx-cursor: hand;");
+    closeBtn.setOnAction(
+        e -> {
+          container.getChildren().remove(overlay);
+          popupShown.set(false);
+        });
+
+    overlay.getChildren().addAll(titleLabel, winLabel, closeBtn);
+    container.getChildren().add(overlay);
   }
+
+  /**
+   * Sets up a listener to trigger AI turns automatically without freezing the JavaFX thread.
+   *
+   * @param engine the game engine to interact with
+   * @param boardView the board view to redraw after an AI move
+   */
+  void setupAITurnListener(final GameEngine engine, final BoardView boardView) {
+    final AtomicReference<Player> aiComputing = new AtomicReference<>();
+    final GameState state = engine.getState();
+
+    final Runnable aiTurnTask =
+        () -> {
+          if (!state.isGameOver() && !state.isPaused()) {
+            final Player currentPlayer = state.getCurrentPlayer();
+            if (currentPlayer.isAI() && aiComputing.compareAndSet(null, currentPlayer)) {
+              final Thread aiThread =
+                  new Thread(
+                      () -> {
+                        Move move = null;
+                        try {
+                          move = currentPlayer.getNextMove(state);
+                        } catch (final Exception e) {
+                          Logger.getInstance().error(I18n.get("computeAi"), e);
+                        } finally {
+                          final Move finalMove = move;
+                          Platform.runLater(
+                              () -> {
+                                aiComputing.compareAndSet(currentPlayer, null);
+                                if (finalMove != null
+                                    && !state.isGameOver()
+                                    && !state.isPaused()
+                                    && state.getCurrentPlayer() == currentPlayer) {
+                                  if (engine.play(finalMove)) {
+                                    boardView.drawBoard();
+                                  }
+                                }
+                              });
+                        }
+                      });
+              aiThread.start();
+            }
+          }
+        };
+
+    state.addListener(aiTurnTask);
+    Platform.runLater(aiTurnTask);
+  }
+
+  /** Called when the JavaFX application is stopped. */
+  @Override
+  public void stop() {}
 }

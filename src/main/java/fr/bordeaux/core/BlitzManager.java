@@ -1,14 +1,16 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.util.Logger;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Manager for the Blitz mode in Quoridor. This class uses a background thread to decrement the
- * reflection time of the current player at regular intervals.
- */
+/** Manager for the Blitz mode in Quoridor. */
 public class BlitzManager {
+
+  private static final long THRESHOLD_MS = 60_000;
+  private static final int TICK_SLOW_MS = 1000;
+  private static final int TICK_FAST_MS = 10;
 
   private GameEngine gameEngine;
   private ScheduledExecutorService scheduler;
@@ -19,24 +21,32 @@ public class BlitzManager {
    *
    * @param gameEngine The game engine to monitor.
    */
-  public BlitzManager(GameEngine gameEngine) {
+  public BlitzManager(final GameEngine gameEngine) {
     this.gameEngine = gameEngine;
   }
 
-  /** Starts or resumes the countdown. Creates a new scheduled thread that executes every second. */
+  /** Starts or resumes the countdown. */
   public void start() {
     if (isRunning) {
       return;
     }
     isRunning = true;
-    scheduler = Executors.newSingleThreadScheduledExecutor();
-    scheduler.scheduleAtFixedRate(this::task, 1, 1, TimeUnit.SECONDS);
+    final long remaining = gameEngine.getState().getCurrentPlayer().getRemainingTime();
+    final int tick = remaining > THRESHOLD_MS ? TICK_SLOW_MS : TICK_FAST_MS;
+    startWithTick(tick);
   }
 
   /**
-   * Temporarily stops the countdown (Pause). Shuts down the current thread to stop all
-   * decrementation.
+   * Creates a new scheduler and starts it with the given tick interval.
+   *
+   * @param tickMs the interval in milliseconds between each timer tick
    */
+  private void startWithTick(final int tickMs) {
+    scheduler = Executors.newSingleThreadScheduledExecutor();
+    scheduler.scheduleAtFixedRate(() -> task(tickMs), tickMs, tickMs, TimeUnit.MILLISECONDS);
+  }
+
+  /** Temporarily stops the countdown (Pause). decrementation. */
   public void pause() {
     if (!isRunning) {
       return;
@@ -48,22 +58,32 @@ public class BlitzManager {
   }
 
   /**
-   * Internal task executed at each timer tick (every second). Identifies the active player,
-   * decrements their time, and checks for loss conditions.
+   * Internal task executed at each timer tick. decrements their time, and checks for loss
+   * conditions.
    */
-  private void task() {
+  private void task(final int tickMs) {
+    try {
+      final GameState state = gameEngine.getState();
+      if (state.isPaused() || state.isGameOver()) return;
 
-    GameState gameState = gameEngine.getState();
-    if (gameState.isPaused() || gameState.isGameOver()) {
-      return;
-    }
-    Player target = gameState.getCurrentPlayer();
-    Long playerTime = target.getRemainingTime() - 1000;
-    target.setRemainingTime(playerTime);
+      state.decrementCurrentPlayerTime(tickMs);
+      if (state.isGameOver()) {
+        pause();
+        return;
+      }
 
-    if (playerTime <= 0) {
-      gameState.setGameOver(true);
-      pause();
+      if (tickMs == TICK_SLOW_MS && state.getCurrentPlayer().getRemainingTime() <= THRESHOLD_MS) {
+        final ScheduledExecutorService old = scheduler;
+        new Thread(
+                () -> {
+                  old.shutdownNow();
+                  startWithTick(TICK_FAST_MS);
+                })
+            .start();
+      }
+
+    } catch (Exception e) {
+      Logger.getInstance().error("Blitz task failed", e);
     }
   }
 

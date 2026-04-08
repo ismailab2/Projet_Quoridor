@@ -6,15 +6,16 @@ import fr.bordeaux.i18n.I18n;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.MessageFormat;
 
 /**
- * Logger for Quoridor application.
+ * Simple logger for the Quoridor application.
  *
- * <p>Displays messages depending on different levels : INFO, DEBUG, VERBOSE and
- * ERROR.
+ * <p>Supports console or file output (INFO, WARNING, DEBUG, VERBOSE, ERROR).
  *
- * <p>Implement the Singleton pattern.
+ * <p>Thread-safe Singleton pattern.
  */
+@SuppressWarnings({"PMD.SystemPrintln", "PMD.SingleMethodSingleton"})
 public final class Logger {
   /** ANSI escape code to reset text formatting to default. */
   private static final String RESET = "\u001B[0m";
@@ -25,16 +26,19 @@ public final class Logger {
   /** Coulor for DEBUG message */
   private static final String YELLOW = "\u001B[33m";
 
-  /** Coulor for VERBOSE message */
+  /** Couleur WARNING */
+  private static final String YELLOW_BOLD = "\u001B[33;1m";
+
+  /** Couleur VERBOSE / TRACE */
   private static final String GREEN = "\u001B[32m";
 
   /** Coulor for ERROR message */
   private static final String RED = "\u001B[31m";
 
-  /** Singleton Logger */
-  private static volatile Logger instance;
+  /** Singleton instance of the logger. */
+  private static Logger instance;
 
-  /** Output stream */
+  /** Flux de sortie (file or System.out) */
   private final PrintStream writer;
 
   /** Boolean in case debug is enabled */
@@ -48,8 +52,7 @@ public final class Logger {
    * and sets output to System.out.
    */
   private Logger() {
-    this.writer = System.out;
-    refreshConfig();
+    this.writer = null;
   }
 
   /**
@@ -63,14 +66,12 @@ public final class Logger {
     try {
       final File file = new File(System.getProperty("user.home"), logFile);
       out = new PrintStream(file);
-      out.close();
-    } catch (IOException e) {
-      System.out.println(I18n.get("error")+I18n.get("creatingLogFile"));
-      out = System.out;
+    } catch (final IOException exception) {
+      System.err.println(I18n.get("error", I18n.get("creatingLogFile")));
+      out = null;
     }
 
     this.writer = out;
-    refreshConfig();
   }
 
   /**
@@ -78,13 +79,10 @@ public final class Logger {
    *
    * @return logger's unique instance
    */
-  public static Logger getInstance() {
+  public static synchronized Logger getInstance() {
     if (instance == null) {
-      synchronized (Logger.class) {
-        if (instance == null) {
-          instance = new Logger();
-        }
-      }
+      instance = new Logger();
+      instance.refreshConfig();
     }
     return instance;
   }
@@ -95,13 +93,10 @@ public final class Logger {
    * @param logFile file where to print the logs
    * @return logger's unique instance
    */
-  public static Logger getInstance(final String logFile) {
+  public static synchronized Logger getInstance(final String logFile) {
     if (instance == null) {
-      synchronized (Logger.class) {
-        if (instance == null) {
-          instance = new Logger(logFile);
-        }
-      }
+      instance = new Logger(logFile);
+      instance.refreshConfig();
     }
     return instance;
   }
@@ -122,7 +117,42 @@ public final class Logger {
   }
 
   /**
-   * DEBUG level message to display.
+   * Log un message de niveau INFO avec des paramètres.
+   *
+   * @param format message format (MessageFormat style, e.g., "{0}")
+   * @param args les arguments du message
+   */
+  public void info(final String format, final Object... args) {
+    if (isInfoEnabled()) {
+      log("[INFO]", MessageFormat.format(format, args), CYAN);
+    }
+  }
+
+  /**
+   * Log un message de niveau WARNING.
+   *
+   * @param message message à afficher
+   */
+  public void warning(final String message) {
+    if (isWarningEnabled()) {
+      log("[WARNING]", message, YELLOW_BOLD);
+    }
+  }
+
+  /**
+   * Log un message de niveau WARNING avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void warning(final String format, final Object... args) {
+    if (isWarningEnabled()) {
+      log("[WARNING]", MessageFormat.format(format, args), YELLOW_BOLD);
+    }
+  }
+
+  /**
+   * Log un message de niveau DEBUG.
    *
    * @param message message to display
    */
@@ -133,7 +163,19 @@ public final class Logger {
   }
 
   /**
-   * VERBOSE level message to display.
+   * Log un message de niveau DEBUG avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void debug(final String format, final Object... args) {
+    if (isDebugEnabled()) {
+      log("[DEBUG]", MessageFormat.format(format, args), YELLOW);
+    }
+  }
+
+  /**
+   * Log un message de niveau VERBOSE.
    *
    * @param message message to display
    */
@@ -144,7 +186,30 @@ public final class Logger {
   }
 
   /**
-   * ERROR level message to display.
+   * Log un message de niveau VERBOSE avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void verbose(final String format, final Object... args) {
+    if (isVerboseEnabled()) {
+      log("[VERBOSE]", MessageFormat.format(format, args), GREEN);
+    }
+  }
+
+  /**
+   * Log un message de niveau TRACE.
+   *
+   * @param message message très détaillé
+   */
+  public void trace(final String message) {
+    if (isVerboseEnabled()) {
+      log("[TRACE]", message, GREEN);
+    }
+  }
+
+  /**
+   * Log un message d'erreur.
    *
    * @param message message to display
    */
@@ -155,14 +220,29 @@ public final class Logger {
   }
 
   /**
-   * ERROR level message to display.
+   * Log un message de niveau ERROR avec des paramètres.
    *
-   * @param message message to display
-   * @param e exception associée
+   * @param format le format du message
+   * @param args les arguments du message
    */
-  public void error(final String message, final Exception e) {
+  public void error(final String format, final Object... args) {
     if (isErrorEnabled()) {
-      log("[ERROR]", message + " | " + e.getClass().getSimpleName(), RED);
+      log("[ERROR]", MessageFormat.format(format, args), RED);
+    }
+  }
+
+  /**
+   * Log une erreur avec exception associée.
+   *
+   * @param message message d'erreur
+   * @param exception exception associée
+   */
+  public void error(final String message, final Throwable exception) {
+    if (isErrorEnabled()) {
+      log(
+          "[ERROR]",
+          message + " | " + exception.getClass().getSimpleName() + ": " + exception.getMessage(),
+          RED);
     }
   }
 
@@ -190,7 +270,14 @@ public final class Logger {
    * @param color color to display the level
    */
   private void log(final String level, final String message, final String color) {
-    writer.println(color + level + RESET + " " + message);
+    PrintStream stream = (writer != null) ? writer : System.out;
+    // Si on écrit sur la sortie standard (console), on bascule ERROR/WARNING sur stderr
+    if (writer == null && (level.contains("ERROR") || level.contains("WARNING"))) {
+      stream = System.err;
+    }
+    if (stream != null) {
+      stream.println(color + level + RESET + " " + message);
+    }
   }
 
   // =========================================================
@@ -216,7 +303,16 @@ public final class Logger {
   }
 
   /**
-   * Check if ERROR level is activated.
+   * Indique si le niveau WARNING est activé.
+   *
+   * @return true (toujours actif)
+   */
+  public boolean isWarningEnabled() {
+    return true;
+  }
+
+  /**
+   * Indique si le niveau ERROR est activé.
    *
    * @return true (always active)
    */

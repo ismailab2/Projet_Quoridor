@@ -49,5 +49,5 @@ public class I18n {
   }
 
   /** Constructs a new I18n manager. */
-  public I18n() {}
+  private I18n() {}
 }

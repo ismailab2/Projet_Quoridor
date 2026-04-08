@@ -1,41 +1,52 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.ai.MctsPlayer;
+import fr.bordeaux.ai.mcts.MctsPlayer;
+import fr.bordeaux.persistence.GameLoadException;
+import fr.bordeaux.util.Logger;
 import fr.bordeaux.i18n.I18n;
-
 import java.io.IOException;
 
-/**
- * The core engine of the Quoridor game. This class coordinates the game logic, manages player
- * turns, and handles actions such as saving, loading, and providing hints using AI.
- */
+/** Core engine for Quoridor game logic, player turns, and AI hints. */
 public class GameEngine {
 
+  /** The current state of the game. */
   private GameState state;
+
+  /** The manager for blitz mode (timed games). */
   private BlitzManager blitzManager;
+
+  /** Whether Blitz mode is enabled. */
   private boolean blitz;
+
+  /** Whether verbose logging is enabled. */
   private boolean verbose;
+
+  /** Whether contest mode is enabled. */
   private boolean contest;
+
+  /** Whether debug mode is enabled. */
   private boolean debug;
+
+  /** The initial number of walls for each player. */
   private int initialWalls;
 
   /**
-   * Constructs a GameEngine with the specified initial game state and configuration parameters.
+   * Constructs GameEngine.
    *
-   * @param state The initial {@link GameState} to be managed by the engine.
-   * @param blitz Whether Blitz mode is enabled.
-   * @param verbose Whether verbose logging is enabled.
-   * @param contest Whether contest mode is enabled.
-   * @param debug Whether debug mode is enabled.
-   * @param initialWalls The initial number of walls for each player.
+   * @param state initial game state
+   * @param blitz blitz mode flag
+   * @param verbose verbose flag
+   * @param contest contest mode flag
+   * @param debug debug flag
+   * @param initialWalls initial wall count
    */
   public GameEngine(
-      GameState state,
-      boolean blitz,
-      boolean verbose,
-      boolean contest,
-      boolean debug,
-      int initialWalls) {
+      final GameState state,
+      final boolean blitz,
+      final boolean verbose,
+      final boolean contest,
+      final boolean debug,
+      final int initialWalls) {
     this.state = state;
     this.blitz = blitz;
     this.verbose = verbose;
@@ -54,39 +65,51 @@ public class GameEngine {
   }
 
   /**
-   * Attempts to execute a move in the current game state. Validates the move according to game
-   * rules and checks if the game is paused or over.
+   * Executes a game move.
    *
-   * @param move The {@link Move} to be performed.
-   * @return {@code true} if the move was successfully applied, {@code false} otherwise.
+   * @param move move to execute
+   * @return true if success
    */
-  public boolean play(Move move) {
-    if (state.isGameOver() || state.isPaused()) {
-      System.out.println(I18n.get("overPause"));
+  public boolean play(final Move move) {
+    final GameState currentState = this.state;
+    if (currentState.isGameOver() || currentState.isPaused()) {
+      Logger.getInstance().info(I18n.get("overPause"));
       return false;
     }
 
-    if (!RuleChecker.isMoveLegal(state, move)) return false;
+    if (!RuleChecker.isMoveLegal(currentState, move)) {
+      return false;
+    }
 
-    Player p = state.getCurrentPlayer();
-    state.applyMove(move);
+    final Player currentPlayer = currentState.getCurrentPlayer();
+    currentState.applyMove(move);
 
-    if (state.hasReachedGoal(p)) {
-      state.setGameOver(true);
+    if (currentState.hasReachedGoal(currentPlayer)) {
+      currentState.setGameOver(true);
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      System.out.println(p.getName() + I18n.get("won"));
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info("{0} "+ I18n.get("won"), currentPlayer.getName());
+      }
     }
     return true;
   }
 
-  /** Resets the current game to its initial state and clears listeners. */
-  public void newGame() {
+  /**
+   * Resets the current game to a specified initial state.
+   *
+   * @param boardSize the board size
+   * @param players the list of players
+   * @param blitzTimeoutMs the blitz timeout in milliseconds, or null if not blitz
+   */
+  public void newGame(
+      final int boardSize, final java.util.List<Player> players, final Long blitzTimeoutMs) {
     if (blitzManager != null) {
       blitzManager.pause();
     }
-    state.reset();
+    state.reset(boardSize, players, blitzTimeoutMs);
+    initializeBlitz();
   }
 
   /**
@@ -94,11 +117,13 @@ public class GameEngine {
    *
    * @param filename The path to the file where the game will be saved.
    */
-  public void saveGame(String filename) {
+  public void saveGame(final String filename) {
     try {
       fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
-    } catch (IOException e) {
-      System.err.println(I18n.get("engineSave") + e.getMessage());
+    } catch (final IOException exception) {
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error(I18n.get("engineSave") + exception.getMessage());
+      }
     }
   }
 
@@ -107,16 +132,18 @@ public class GameEngine {
    *
    * @param filename The path to the file to load.
    */
-  public void loadGame(String filename) {
+  public void loadGame(final String filename) {
     try {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      GameState loaded = fr.bordeaux.persistence.GameLoader.loadGame(this, filename);
-      state.loadState(loaded);
+      final GameState loadedState = fr.bordeaux.persistence.GameLoader.loadGame(this, filename);
+      state.loadState(loadedState);
       initializeBlitz();
-    } catch (Exception e) {
-      System.err.println(I18n.get("engineLoad") + e.getMessage());
+    } catch (final IOException | GameLoadException exception) {
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error(I18n.get("engineLoad") + exception.getMessage());
+      }
     }
   }
 
@@ -132,31 +159,72 @@ public class GameEngine {
 
   /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
-    boolean newPauseState = !state.isPaused();
+    if (state.getCurrentPlayer().isAI()) {
+      Logger.getInstance().info("AI cannot pause the game.");
+      return;
+    }
+    final boolean newPauseState = !state.isPaused();
     state.setPaused(newPauseState);
 
     if (blitzManager != null) {
       if (newPauseState) {
         blitzManager.pause();
-        System.out.println(I18n.get("enginePause"));
+        Logger.getInstance().info(I18n.get("enginePause"));
       } else {
         blitzManager.start();
-        System.out.println(I18n.get("engineResume"));
+        Logger.getInstance().info(I18n.get("engineResume"));
       }
     }
   }
 
   /**
-   * Provides a hint for the current player by calculating the best move using an AI.
+   * Suggests the best move using AI for the current player.
    *
    * @return The best move for the current player.
    * @throws IOException If an I/O error occurs.
    */
   public Move hint() throws IOException {
+    final Player currentPlayer = state.getCurrentPlayer();
+    final Move bestMove = MctsPlayer.hint(currentPlayer, state, 3000, true);
+    if (bestMove != null) {
+      moveToString(bestMove);
+    }
+    return bestMove;
+  }
 
-    final Move hint = MctsPlayer.hint(getState().getCurrentPlayer(), getState(), 3000, true);
+  /**
+   * Converts a Move object into a human-readable string (e.g., "e2-e3" or "e2h").
+   *
+   * @param move The move to convert.
+   * @return A formatted string representation of the move.
+   */
+  private String moveToString(final Move move) {
+    final Move.Type moveType = move.getType();
+    final String result;
+    if (moveType == Move.Type.PAWN) {
+      final Position from = move.getFrom();
+      final Position targetPosition = move.getTo();
+      result = posToString(from) + "-" + posToString(targetPosition);
+    } else {
+      final Orientation orientation = move.getOrientation();
+      final char orientationChar = orientation == Orientation.HORIZONTAL ? 'h' : 'v';
+      final Position targetPosition = move.getTo();
+      result = posToString(targetPosition) + orientationChar;
+    }
+    return result;
+  }
 
-    return hint;
+  /**
+   * Converts a Position object into algebraic notation (e.g., "a0", "b1").
+   *
+   * @param p The position to convert.
+   * @return A string representing the coordinates.
+   */
+  private String posToString(final Position pos) {
+    final int posX = pos.getX();
+    final int posY = pos.getY();
+    final char letter = (char) ('a' + posX);
+    return String.valueOf(letter) + posY;
   }
 
   /**
@@ -191,7 +259,7 @@ public class GameEngine {
    *
    * @param blitz {@code true} to enable blitz, {@code false} to disable.
    */
-  public void setBlitz(boolean blitz) {
+  public void setBlitz(final boolean blitz) {
     this.blitz = blitz;
   }
 
@@ -209,7 +277,7 @@ public class GameEngine {
    *
    * @param verbose {@code true} to enable verbose, {@code false} to disable.
    */
-  public void setVerbose(boolean verbose) {
+  public void setVerbose(final boolean verbose) {
     this.verbose = verbose;
   }
 
@@ -227,7 +295,7 @@ public class GameEngine {
    *
    * @param contest {@code true} to enable contest, {@code false} to disable.
    */
-  public void setContest(boolean contest) {
+  public void setContest(final boolean contest) {
     this.contest = contest;
   }
 
@@ -245,7 +313,7 @@ public class GameEngine {
    *
    * @param debug {@code true} to enable debug, {@code false} to disable.
    */
-  public void setDebug(boolean debug) {
+  public void setDebug(final boolean debug) {
     this.debug = debug;
   }
 
@@ -263,7 +331,7 @@ public class GameEngine {
    *
    * @param initialWalls The new initial wall count.
    */
-  public void setInitialWalls(int initialWalls) {
+  public void setInitialWalls(final int initialWalls) {
     this.initialWalls = initialWalls;
   }
 }

@@ -1,11 +1,14 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import fr.bordeaux.i18n.I18n;
 
@@ -21,7 +24,10 @@ import fr.bordeaux.i18n.I18n;
 public class GameServer {
 
   /** Default constructor. Initializes a new GameServer instance. */
-  public GameServer() {}
+  public GameServer() {
+    this.running = new AtomicBoolean(false);
+    this.lastPing = System.currentTimeMillis();
+  }
 
   /** TCP server socket */
   private ServerSocket serverSocket;
@@ -30,7 +36,7 @@ public class GameServer {
   private Socket clientSocket;
 
   /** Indicates whether the server is running */
-  private volatile boolean running = false;
+  private final AtomicBoolean running;
 
   /** UDP broadcaster for server discovery */
   private ServerBroadcaster broadcaster;
@@ -39,20 +45,19 @@ public class GameServer {
   private Thread broadcastThread;
 
   /** Timestamp of the last received PING */
-  private long lastPing = System.currentTimeMillis();
+  private long lastPing;
 
   /**
-   * Creates a TCP server socket, starts the UDP broadcaster, launches the timeout checker, and
-   * waits for a client connection.
+   * Starts server on port. Launches broadcaster and timeout checker.
    *
    * @param port TCP port to listen on.
    */
-  public void start(int port) {
+  public void start(final int port) {
     new Thread(
             () -> {
               try {
                 serverSocket = new ServerSocket(port);
-                running = true;
+                running.set(true);
 
                 System.out.println(I18n.get("startedPort") + port);
 
@@ -75,17 +80,14 @@ public class GameServer {
         .start();
   }
 
-  /**
-   * Periodically checks if the client has sent a PING within the last 60 seconds. If not, the
-   * client is disconnected and the server stops.
-   */
+  /** Disconnects client if no PING within 60s. */
   private void startTimeoutChecker() {
     new Thread(
             () -> {
-              while (running) {
+              while (running.get()) {
 
                 if (System.currentTimeMillis() - lastPing > 60000) {
-                  System.out.println("Client timeout");
+                  Logger.getInstance().info(I18n.get("clientTimeout"));
                   stop();
                   break;
                 }
@@ -93,6 +95,7 @@ public class GameServer {
                 try {
                   Thread.sleep(5000);
                 } catch (InterruptedException ignored) {
+                  Thread.currentThread().interrupt();
                 }
               }
             })
@@ -100,30 +103,34 @@ public class GameServer {
   }
 
   /**
-   * Reads incoming messages and responds according to the protocol: - PING → updates lastPing and
-   * sends PONG - QUIT → sends BYE and disconnects client - Other → sends OK
+   * Reads and handles messages (PING, QUIT, MOVE).
    *
    * @param socket Client socket.
    */
-  private void handleClient(Socket socket) {
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+  private void handleClient(final Socket socket) {
+    try (BufferedReader reader =
+            new BufferedReader(
+                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        PrintWriter writer =
+            new PrintWriter(
+                new java.io.OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),
+                true)) {
 
       String line;
 
-      while ((line = in.readLine()) != null && running) {
-        System.out.println("CLIENT -> " + line);
+      while ((line = reader.readLine()) != null && running.get()) {
+        Logger.getInstance().info("CLIENT -> {0}", line);
 
         if (line.startsWith("PING")) {
           lastPing = System.currentTimeMillis();
-          out.println("PONG");
+          writer.println("PONG");
 
-        } else if (line.equals("QUIT")) {
-          out.println("BYE");
+        } else if ("QUIT".equals(line)) {
+          writer.println("BYE");
           break;
 
         } else {
-          out.println("OK");
+          writer.println("OK");
         }
       }
 
@@ -134,11 +141,9 @@ public class GameServer {
     stop();
   }
 
-  /**
-   * Stops the UDP broadcaster, interrupts its thread, closes all sockets, and releases resources.
-   */
+  /** Stops broadcaster, closes sockets, and releases resources. */
   public void stop() {
-    running = false;
+    running.set(false);
 
     try {
       if (broadcaster != null) {

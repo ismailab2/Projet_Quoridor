@@ -2,7 +2,10 @@ package fr.bordeaux.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.bordeaux.ai.*;
+import fr.bordeaux.ai.base.*;
+import fr.bordeaux.ai.mcts.*;
+import fr.bordeaux.ai.minimax.*;
+import fr.bordeaux.ai.random.*;
 import fr.bordeaux.core.*;
 import java.io.*;
 import java.util.*;
@@ -65,7 +68,7 @@ public class GameLoaderTest {
         loaded
             .getBoard()
             .getGraph()
-            .hasEdge(loaded.getBoard().id(2, 2), loaded.getBoard().id(3, 2)));
+            .hasEdge(loaded.getBoard().getCellId(2, 2), loaded.getBoard().getCellId(3, 2)));
   }
 
   @Test
@@ -116,7 +119,7 @@ public class GameLoaderTest {
     Board board = loaded.getBoard();
 
     assertFalse(
-        board.getGraph().hasEdge(board.id(1, 2), board.id(1, 3)),
+        board.getGraph().hasEdge(board.getCellId(1, 2), board.getCellId(1, 3)),
         "Le mur vertical doit supprimer l'arête entre les deux cases");
   }
 
@@ -194,6 +197,8 @@ public class GameLoaderTest {
     assertTrue(aiPlayer.getName().equals("Player2"));
     assertTrue(aiPlayer.getStartingPosition().equals(new Position(8, 4)));
     assertTrue(aiPlayer.isUseIterativeDeepening());
+    assertEquals(aiPlayer.getSearchDepth(), 2);
+    assertEquals(aiPlayer.getLimitTime(), 5);
     assertTrue(aiPlayer.getHeuristicName().equals("advanced"));
   }
 }

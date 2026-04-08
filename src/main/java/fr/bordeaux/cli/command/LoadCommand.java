@@ -4,10 +4,7 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
-/**
- * Command that loads a saved game from a file. The loaded game replaces the current game engine
- * state.
- */
+/** CLI command that loads a saved game from a file. state. */
 public class LoadCommand implements Command {
 
   /** Command entered by the user */
@@ -19,39 +16,35 @@ public class LoadCommand implements Command {
   /**
    * Creates a LoadCommand with the provided command tokens.
    *
-   * @param t the tokens entered by the user in the CLI
+   * @param tokens the tokens entered by the user in the CLI
    */
-  public LoadCommand(String[] t) {
-    this.tokens = t;
+  public LoadCommand(final String[] tokens) {
+    this.tokens = tokens;
   }
 
   /**
-   * Executes the load command. Attempts to load a saved game from the file specified in the tokens.
-   * If loading succeeds, a new GameEngine is created with the loaded state.
+   * Executes load command and loads game from file. If loading succeeds, a new GameEngine is
+   * created with the loaded state.
    *
    * @param engine the current game engine
-   * @return a new GameEngine containing the loaded game state, or the current engine if loading
-   *     fails
+   * @return Loaded GameEngine or the current one if failed. fails
    */
   @Override
-  public GameEngine execute(GameEngine engine) {
+  public GameEngine execute(final GameEngine engine) {
     if (tokens.length < 2) {
       LOGGER.info("Usage: load FILE");
       return engine;
     }
     try {
-      LOGGER.info(I18n.get("loading", tokens[1]));
+      LOGGER.info(I18n.get("loading")+" {0}", tokens[1]);
       engine.loadGame(tokens[1]);
-    } catch (Exception e) {
-      LOGGER.error(I18n.get("loadError", tokens[1]), e);
+    } catch (final Exception e) {
+      LOGGER.error(I18n.get("loadError")+" {0}", tokens[1]);
     }
     return engine;
   }
 
-  /**
-   * Displays help information about the load command, including its usage, arguments, and an
-   * example.
-   */
+  /** Displays help information for the load command. example. */
   @Override
   public void helpText() {
     LOGGER.info("=== LOAD Command ===\n");
