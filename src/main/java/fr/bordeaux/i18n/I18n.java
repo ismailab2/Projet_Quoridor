@@ -28,7 +28,12 @@ public class I18n {
     bundle = ResourceBundle.getBundle(BUNDLE_NAME, currentLocale);
   }
 
-  /** Get a simple message */
+  /**
+   * Get a simple message
+   *
+   * @param key the text to display from properties
+   * @return text depending on the language choosen
+   */
   public static String get(String key) {
     return bundle.getString(key);
   }

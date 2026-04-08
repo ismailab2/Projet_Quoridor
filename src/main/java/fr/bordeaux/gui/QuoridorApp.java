@@ -5,6 +5,7 @@ import fr.bordeaux.main.GuiLauncher;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
@@ -59,6 +60,9 @@ public class QuoridorApp extends Application {
   /** Message displayed when AI is idle. */
   private static final String HINT_IDLE_TEXT = "";
 
+  /** Tracks the current hint task to allow cancellation. */
+  private final AtomicReference<CompletableFuture<Move>> currentHintTask = new AtomicReference<>();
+
   /** Default constructor. */
   public QuoridorApp() {
     Logger.getInstance().debug("Instantiating QuoridorApp");
@@ -76,6 +80,14 @@ public class QuoridorApp extends Application {
     final GuiLauncher guiLauncher = new GuiLauncher();
     final GameEngine engine = guiLauncher.buildEngine();
     final GameState state = engine.getState();
+
+    state.addListener(
+        () -> {
+          final CompletableFuture<Move> task = currentHintTask.getAndSet(null);
+          if (task != null) {
+            task.cancel(true);
+          }
+        });
 
     final FileHandler fileHandler = new FileHandler(stage);
     final ActionDispatcher dispatcher = new ActionDispatcher(engine, fileHandler);
@@ -127,7 +139,7 @@ public class QuoridorApp extends Application {
    * @param boardView the board view for highlighting the move
    * @return a Node containing the Hint button and status label
    */
-  /* default */ static javafx.scene.Node createHintArea(
+  /* default */ javafx.scene.Node createHintArea(
       final GameEngine engine, final BoardView boardView) {
     final Button hintButton = new Button("Hint");
     hintButton.setStyle(HINT_BUTTON_STYLE);
@@ -142,7 +154,9 @@ public class QuoridorApp extends Application {
         event -> {
           hintButton.setDisable(true);
           statusLabel.setText(HINT_BUSY_TEXT);
-          java.util.concurrent.CompletableFuture.supplyAsync(
+
+          final CompletableFuture<Move> future =
+              CompletableFuture.supplyAsync(
                   () -> {
                     try {
                       return engine.hint();
@@ -152,17 +166,21 @@ public class QuoridorApp extends Application {
                       }
                       return null;
                     }
-                  })
-              .thenAccept(
-                  move ->
-                      Platform.runLater(
-                          () -> {
-                            hintButton.setDisable(false);
-                            statusLabel.setText(HINT_IDLE_TEXT);
-                            if (move != null) {
-                              boardView.highlightMove(move);
-                            }
-                          }));
+                  });
+
+          currentHintTask.set(future);
+
+          future.whenComplete(
+              (move, throwable) ->
+                  Platform.runLater(
+                      () -> {
+                        hintButton.setDisable(false);
+                        statusLabel.setText(HINT_IDLE_TEXT);
+                        currentHintTask.compareAndSet(future, null);
+                        if (move != null && !future.isCancelled()) {
+                          boardView.highlightMove(move);
+                        }
+                      }));
         });
     return container;
   }
