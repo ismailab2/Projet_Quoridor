@@ -48,7 +48,7 @@ public final class OptionsParser {
             config.enableContest(file);
 
           } else {
-            throw new IllegalArgumentException("--contest "+I18n.get("needsFile"));
+            throw new IllegalArgumentException("--contest " + I18n.get("needsFile"));
           }
         }
 
@@ -122,7 +122,7 @@ public final class OptionsParser {
               config.setOption("server-port", args[++i]);
             }
           } else {
-            throw new IllegalArgumentException("--server "+I18n.get("requiresIntPort"));
+            throw new IllegalArgumentException("--server " + I18n.get("requiresIntPort"));
           }
         }
 
@@ -131,7 +131,7 @@ public final class OptionsParser {
             config.setOption("server", "true");
             config.setOption("server-port", args[++i]);
           } else {
-            throw new IllegalArgumentException("--server "+I18n.get("requirePort"));
+            throw new IllegalArgumentException("--server " + I18n.get("requirePort"));
           }
         }
 
@@ -139,7 +139,7 @@ public final class OptionsParser {
           if (i + 1 < args.length) {
             config.setOption("nb-players", args[++i]);
           } else {
-            throw new IllegalArgumentException("--players "+I18n.get("requireInter"));
+            throw new IllegalArgumentException("--players " + I18n.get("requireInter"));
           }
         }
 
@@ -151,7 +151,7 @@ public final class OptionsParser {
               config.setOption("nb-walls", args[++i]);
             }
           } else {
-            throw new IllegalArgumentException("--walls "+I18n.get("requireInt"));
+            throw new IllegalArgumentException("--walls " + I18n.get("requireInt"));
           }
         }
 
@@ -159,7 +159,7 @@ public final class OptionsParser {
           if (i + 1 < args.length) {
             config.setOption("board-size", args[++i]);
           } else {
-            throw new IllegalArgumentException("--walls "+I18n.get("requireInt"));
+            throw new IllegalArgumentException("--walls " + I18n.get("requireInt"));
           }
         }
 
@@ -190,8 +190,7 @@ public final class OptionsParser {
     final boolean hasAi = config.getBoolean("ai1", false) || config.getBoolean("ai2", false);
 
     if (hasAi && nbPlayers > 2) {
-      throw new IllegalArgumentException(
-          I18n.get("notSupported") + nbPlayers + ")");
+      throw new IllegalArgumentException(I18n.get("notSupported") + nbPlayers + ")");
     }
   }
 
@@ -204,7 +203,7 @@ public final class OptionsParser {
    */
   private static void checkAiInt(final String value, final String parameter) {
     if (value == null) {
-      throw new IllegalArgumentException(I18n.get("ai", parameter) + I18n.get("requireInt"));
+      throw new IllegalArgumentException("AI " + parameter + " " + I18n.get("requireInt"));
     }
     final String[] values = value.split(",");
     for (final String val : values) {
@@ -289,15 +288,15 @@ public final class OptionsParser {
 
     final boolean blitz = config.getBoolean("blitz", false);
     if (!blitz) {
-      logInfo("--time "+I18n.get("needsBlitz"));
+      logInfo("--time " + I18n.get("needsBlitz"));
     } else if (index < args.length) {
       final String value = args[index];
       if (Integer.parseInt(value) <= 0) {
-        throw new IllegalArgumentException("--time "+I18n.get("higher"));
+        throw new IllegalArgumentException("--time " + I18n.get("higher"));
       }
       config.setOption("timeout", value);
     } else {
-      throw new IllegalArgumentException("--time "+I18n.get("requireVal"));
+      throw new IllegalArgumentException("--time " + I18n.get("requireVal"));
     }
   }
 
@@ -306,20 +305,20 @@ public final class OptionsParser {
     logInfo("Usage: quoridor [OPTIONS]");
     logInfo("");
     logInfo(I18n.get("geneOpt"));
-    logInfo("  -h, --help        "+I18n.get("showThis"));
-    logInfo("  -V, --version     "+I18n.get("displayVersion"));
-    logInfo("  -v, --verbose     "+I18n.get("verboseMode"));
-    logInfo("  -d, --debug       "+I18n.get("debugMode"));
-    logInfo("  -D, --daemon      "+I18n.get("headless"));
+    logInfo("  -h, --help        " + I18n.get("showThis"));
+    logInfo("  -V, --version     " + I18n.get("displayVersion"));
+    logInfo("  -v, --verbose     " + I18n.get("verboseMode"));
+    logInfo("  -d, --debug       " + I18n.get("debugMode"));
+    logInfo("  -D, --daemon      " + I18n.get("headless"));
     logInfo("");
     logInfo("Modes:");
-    logInfo("  --contest, -c <file> "+I18n.get("contest"));
-    logInfo("  -g, --gui         "+I18n.get("guiMode"));
-    logInfo("  -n, --net         "+I18n.get("networkMode"));
-    logInfo("  -p, --players N   "+I18n.get("numberPlayers"));
+    logInfo("  --contest, -c <file> " + I18n.get("contest"));
+    logInfo("  -g, --gui         " + I18n.get("guiMode"));
+    logInfo("  -n, --net         " + I18n.get("networkMode"));
+    logInfo("  -p, --players N   " + I18n.get("numberPlayers"));
     logInfo("");
     logInfo(I18n.get("blitzOpt"));
-    logInfo("  -b, --blitz       "+I18n.get("enableBlitz"));
-    logInfo("  -t, --time N      "+I18n.get("timeout"));
+    logInfo("  -b, --blitz       " + I18n.get("enableBlitz"));
+    logInfo("  -t, --time N      " + I18n.get("timeout"));
   }
 }

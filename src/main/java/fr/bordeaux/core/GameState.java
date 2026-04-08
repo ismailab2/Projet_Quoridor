@@ -1,9 +1,8 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.*;
 import java.util.function.Predicate;
-
-import fr.bordeaux.i18n.I18n;
 
 /** Tracks Quoridor game state: board, players, and turn history. */
 public class GameState {
@@ -48,8 +47,7 @@ public class GameState {
    */
   public GameState(final Board board, final List<Player> players, final int playerIndex) {
     if (players.size() < MIN_PLAYERS || players.size() > MAX_PLAYERS) {
-      throw new IllegalArgumentException(
-          I18n.get("playersMust") + players.size());
+      throw new IllegalArgumentException(I18n.get("playersMust") + players.size());
     }
 
     this.board = board;

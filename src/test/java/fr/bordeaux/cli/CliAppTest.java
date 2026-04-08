@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
 import fr.bordeaux.i18n.I18n;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;

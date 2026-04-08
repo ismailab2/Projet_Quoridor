@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
 import fr.bordeaux.i18n.I18n;
-
 import java.util.List;
 import org.jline.reader.LineReader;
 import org.junit.jupiter.api.BeforeEach;

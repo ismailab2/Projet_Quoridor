@@ -1,9 +1,8 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
-
-import fr.bordeaux.i18n.I18n;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

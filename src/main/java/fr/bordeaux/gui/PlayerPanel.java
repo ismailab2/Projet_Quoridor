@@ -2,9 +2,9 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.TimeConvertor;
 import javafx.application.Platform;
-import fr.bordeaux.i18n.I18n;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;

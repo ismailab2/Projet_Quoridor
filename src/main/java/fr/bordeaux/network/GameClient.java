@@ -1,5 +1,6 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import fr.bordeaux.i18n.I18n;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
 public class GameClient {
@@ -60,7 +60,7 @@ public class GameClient {
           new BufferedReader(
               new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       writer = new PrintWriter(socket.getOutputStream(), true);
-      Logger.getInstance().info(I18n.get("connected")+" {0}:{1,number,0}", host, port);
+      Logger.getInstance().info(I18n.get("connected") + " {0}:{1,number,0}", host, port);
 
       startListener();
       return true;
@@ -116,6 +116,7 @@ public class GameClient {
     if (!checkConnection()) {
       return I18n.get("notConnected");
     }
+    String res;
 
     try {
       final long start = System.currentTimeMillis();
@@ -124,7 +125,7 @@ public class GameClient {
       Logger.getInstance().info("Client: PING");
       writer.println("PING");
 
-      final String res = syncResponse.poll(5, TimeUnit.SECONDS);
+      res = syncResponse.poll(5, TimeUnit.SECONDS);
       final long rtt = System.currentTimeMillis() - start;
 
       if (res != null) {
@@ -142,6 +143,7 @@ public class GameClient {
       Logger.getInstance().info(message);
       return message;
     }
+    return res;
   }
 
   /**
@@ -160,7 +162,7 @@ public class GameClient {
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
-          message = I18n.get("server"," BYE");
+          message = I18n.get("server", " BYE");
           Logger.getInstance().info(message);
         } else if (res != null) {
           Logger.getInstance().info(I18n.get("server", res));
@@ -231,8 +233,7 @@ public class GameClient {
 
               } catch (final IOException exception) {
                 if (Logger.getInstance().isErrorEnabled()) {
-                  Logger.getInstance()
-                      .error(I18n.get("discoFail", ": ", exception.getMessage()));
+                  Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
                 }
               }
             })

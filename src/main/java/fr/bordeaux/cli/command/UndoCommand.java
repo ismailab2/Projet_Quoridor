@@ -59,7 +59,7 @@ public class UndoCommand implements Command {
     LOGGER.verbose("  " + I18n.get("undoOne"));
     LOGGER.verbose("  " + I18n.get("undoNb"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  undo      -> "+ I18n.get("undoExOne"));
-    LOGGER.verbose("  undo 2    -> "+ I18n.get("undoExNb"));
+    LOGGER.verbose("  undo      -> " + I18n.get("undoExOne"));
+    LOGGER.verbose("  undo 2    -> " + I18n.get("undoExNb"));
   }
 }

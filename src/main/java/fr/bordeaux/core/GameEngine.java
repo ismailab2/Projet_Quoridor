@@ -1,9 +1,9 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.ai.mcts.MctsPlayer;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.util.Logger;
-import fr.bordeaux.i18n.I18n;
 import java.io.IOException;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
@@ -90,7 +90,7 @@ public class GameEngine {
         blitzManager.pause();
       }
       if (Logger.getInstance().isInfoEnabled()) {
-        Logger.getInstance().info("{0} "+ I18n.get("won"), currentPlayer.getName());
+        Logger.getInstance().info("{0} " + I18n.get("won"), currentPlayer.getName());
       }
     }
     return true;

@@ -197,14 +197,14 @@ public class NewCommand implements Command {
     LOGGER.info("  new");
     LOGGER.info("  new [boardSize] [nbPlayer]\n");
     LOGGER.info("Description:");
-    LOGGER.info("  "+I18n.get("newDesc"));
+    LOGGER.info("  " + I18n.get("newDesc"));
     LOGGER.info("Arguments:");
-    LOGGER.info("  boardSize    : "+I18n.get("newBoardSize"));
-    LOGGER.info("  playerCount  : "+I18n.get("newNbPlayers"));
+    LOGGER.info("  boardSize    : " + I18n.get("newBoardSize"));
+    LOGGER.info("  playerCount  : " + I18n.get("newNbPlayers"));
     LOGGER.info(I18n.get("newHelp"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  new       -> 2 "+I18n.get("newEx", "9x9"));
-    LOGGER.verbose("  new 5     -> 2 "+I18n.get("newEx", "5x5"));
-    LOGGER.verbose("  new 7 4   -> 4 "+I18n.get("newEx", "7x7"));
+    LOGGER.verbose("  new       -> 2 " + I18n.get("newEx", "9x9"));
+    LOGGER.verbose("  new 5     -> 2 " + I18n.get("newEx", "5x5"));
+    LOGGER.verbose("  new 7 4   -> 4 " + I18n.get("newEx", "7x7"));
   }
 }

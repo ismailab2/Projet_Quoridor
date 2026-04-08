@@ -15,7 +15,11 @@ public final class InfoDialog {
     alert.setTitle(I18n.get("info"));
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);
-    alert.setContentText("Version 1.0\n"+I18n.get("authors") + " Isma, Khadidja, Joris, Matthieu, Cengiz. "+I18n.get("students"));
+    alert.setContentText(
+        "Version 1.0\n"
+            + I18n.get("authors")
+            + " Isma, Khadidja, Joris, Matthieu, Cengiz. "
+            + I18n.get("students"));
     alert.show();
   }
 }

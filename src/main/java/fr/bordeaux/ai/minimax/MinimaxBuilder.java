@@ -3,7 +3,6 @@ package fr.bordeaux.ai.minimax;
 import fr.bordeaux.core.Color;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.i18n.I18n;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -184,13 +183,11 @@ public class MinimaxBuilder {
           I18n.get("incorrectHeuristic", heuristicName, I18n.get("inexist")));
     }
     if (searchDepth < 0) {
-      throw new IllegalArgumentException(
-          I18n.get("depthIllegal"));
+      throw new IllegalArgumentException(I18n.get("depthIllegal"));
     }
 
     if (reflexionTime <= 0) {
-      throw new IllegalArgumentException(
-          I18n.get("reflexionTime"));
+      throw new IllegalArgumentException(I18n.get("reflexionTime"));
     }
     return new MinimaxPlayer(this);
   }

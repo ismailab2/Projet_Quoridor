@@ -1,5 +1,6 @@
 package fr.bordeaux.network;
 
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,8 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import fr.bordeaux.i18n.I18n;
 
 /**
  * This class implements a simple TCP server capable of: - Accepting a single client connection -

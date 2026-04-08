@@ -46,17 +46,17 @@ public class MoveCommand implements Command {
   public GameEngine execute(final GameEngine engine) {
     try {
       if (move.contains("-") && (move.length() == 5 || move.length() == 7)) {
-        LOGGER.debug(I18n.get("youPlayed")+" {0}", this.move);
+        LOGGER.debug(I18n.get("youPlayed") + " {0}", this.move);
         return handleMove(engine);
       } else if ((move.contains("v") || move.contains("h")) && move.length() == 3) {
-        LOGGER.debug(I18n.get("youPlayed")+" {0}", this.move);
+        LOGGER.debug(I18n.get("youPlayed") + " {0}", this.move);
         return handleWall(engine);
       } else {
         LOGGER.debug(I18n.get("helpValidCommand"));
         return engine;
       }
     } catch (final Exception e) {
-      LOGGER.error(I18n.get("readingMove")+" {0}", this.move);
+      LOGGER.error(I18n.get("readingMove") + " {0}", this.move);
       return engine;
     }
   }
@@ -67,15 +67,20 @@ public class MoveCommand implements Command {
     LOGGER.info("=== Move Commands ===\n");
     LOGGER.info("Usage:");
     LOGGER.info(I18n.get("pawnMove", "e2-e3", I18n.get("ifLegal")));
-    LOGGER.info("        "+I18n.get("illegalPawnMove"));
+    LOGGER.info("        " + I18n.get("illegalPawnMove"));
     LOGGER.info(I18n.get("pawnMove", "e2h", I18n.get("ifLegal")));
-    LOGGER.info("        "+I18n.get("placeWall", I18n.get("horizontally"), I18n.get("under"), I18n.get("e2f2cases")));
     LOGGER.info(
-        "        "+I18n.get("cantPlace", I18n.get("horizontally"), I18n.get("rightEdge")));
-    LOGGER.info("                : e2v "+I18n.get("ifLegal"));
-    LOGGER.info("        "+I18n.get("placeWall", I18n.get("vertically"), I18n.get("next"), I18n.get("e2f2cases")));
+        "        "
+            + I18n.get(
+                "placeWall", I18n.get("horizontally"), I18n.get("under"), I18n.get("e2f2cases")));
     LOGGER.info(
-        "        "+I18n.get("cantPlace", I18n.get("vertically"), I18n.get("bottomEdge")));
+        "        " + I18n.get("cantPlace", I18n.get("horizontally"), I18n.get("rightEdge")));
+    LOGGER.info("                : e2v " + I18n.get("ifLegal"));
+    LOGGER.info(
+        "        "
+            + I18n.get(
+                "placeWall", I18n.get("vertically"), I18n.get("next"), I18n.get("e2f2cases")));
+    LOGGER.info("        " + I18n.get("cantPlace", I18n.get("vertically"), I18n.get("bottomEdge")));
   }
 
   /**
@@ -139,7 +144,7 @@ public class MoveCommand implements Command {
     final Orientation orientation =
         (move.charAt(move.length() - 1) == 'v') ? Orientation.VERTICAL : Orientation.HORIZONTAL;
     if (!RuleChecker.isMoveLegal(engine.getState(), Move.wall(pos, orientation))) {
-      LOGGER.error(I18n.get("moveIllegal")+" {0}", pos);
+      LOGGER.error(I18n.get("moveIllegal") + " {0}", pos);
       return engine;
     }
     engine.play(Move.wall(pos, orientation));

@@ -80,9 +80,11 @@ public class ShowCommand implements Command {
                   I18n.get("timeLeft") + TimeConvertor.formatTime(player.getRemainingTime()));
             } else {
               writer.println(
-                  I18n.get("timeFor", 
-                  player.getName(), " ---> ",
-                  TimeConvertor.formatTime(player.getRemainingTime())));
+                  I18n.get(
+                      "timeFor",
+                      player.getName(),
+                      " ---> ",
+                      TimeConvertor.formatTime(player.getRemainingTime())));
             }
           }
 
@@ -110,8 +112,8 @@ public class ShowCommand implements Command {
     LOGGER.info("  show configuration");
     LOGGER.info("  show time\n");
     LOGGER.info("Description:");
-    LOGGER.info("  "+I18n.get("showDesc"));
-    LOGGER.verbose("  "+I18n.get("showVerb"));
+    LOGGER.info("  " + I18n.get("showDesc"));
+    LOGGER.verbose("  " + I18n.get("showVerb"));
     LOGGER.verbose("Options:");
     LOGGER.verbose("  board         : " + I18n.get("showVBoard"));
     LOGGER.verbose("  history       : " + I18n.get("showVHisto"));
@@ -155,7 +157,7 @@ public class ShowCommand implements Command {
     LOGGER.info("Description:");
     LOGGER.info("  " + I18n.get("showDescConfig"));
     LOGGER.verbose("  " + I18n.get("showDescVConfig"));
-    LOGGER.verbose("    "+ I18n.get("showCfgs"));
+    LOGGER.verbose("    " + I18n.get("showCfgs"));
     LOGGER.verbose(I18n.get("showCfgsMore"));
   }
 

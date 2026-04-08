@@ -1,9 +1,8 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
-
-import fr.bordeaux.i18n.I18n;
 
 /**
  * RuleChecker checks if moves (pawn moves or wall placements) are valid according to Quoridor

@@ -1,9 +1,9 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.main.GuiLauncher;
 import fr.bordeaux.util.Logger;
-import fr.bordeaux.i18n.I18n;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

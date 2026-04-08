@@ -36,10 +36,10 @@ public class LoadCommand implements Command {
       return engine;
     }
     try {
-      LOGGER.info(I18n.get("loading")+" {0}", tokens[1]);
+      LOGGER.info(I18n.get("loading") + " {0}", tokens[1]);
       engine.loadGame(tokens[1]);
     } catch (final Exception e) {
-      LOGGER.error(I18n.get("loadError")+" {0}", tokens[1]);
+      LOGGER.error(I18n.get("loadError") + " {0}", tokens[1]);
     }
     return engine;
   }
@@ -51,9 +51,9 @@ public class LoadCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  load FILE\n");
     LOGGER.info("Description:");
-    LOGGER.info("  "+I18n.get("loadHelp"));
+    LOGGER.info("  " + I18n.get("loadHelp"));
     LOGGER.verbose("Arguments:");
-    LOGGER.verbose("  "+ I18n.get("loadArg"));
+    LOGGER.verbose("  " + I18n.get("loadArg"));
     LOGGER.verbose(I18n.get("loadEx"));
     LOGGER.verbose("  load savegame.txt\n");
   }

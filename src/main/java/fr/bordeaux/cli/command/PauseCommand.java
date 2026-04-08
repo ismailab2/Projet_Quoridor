@@ -37,7 +37,7 @@ public class PauseCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  pause\n");
     LOGGER.info("Description:");
-    LOGGER.info("  "+I18n.get("desc"));
-    LOGGER.verbose("  "+I18n.get("descVerb"));
+    LOGGER.info("  " + I18n.get("desc"));
+    LOGGER.verbose("  " + I18n.get("descVerb"));
   }
 }

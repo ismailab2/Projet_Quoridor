@@ -1,10 +1,9 @@
 package fr.bordeaux.config;
 
+import fr.bordeaux.i18n.I18n;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
-
-import fr.bordeaux.i18n.I18n;
 
 /**
  * Manages the application configuration using a singleton pattern. This class handles loading and

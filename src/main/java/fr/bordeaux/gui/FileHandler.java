@@ -1,8 +1,7 @@
 package fr.bordeaux.gui;
 
-import java.io.File;
-
 import fr.bordeaux.i18n.I18n;
+import java.io.File;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 

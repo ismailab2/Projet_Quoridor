@@ -1,8 +1,7 @@
 package fr.bordeaux.gui;
 
-import java.io.IOException;
-
 import fr.bordeaux.i18n.I18n;
+import java.io.IOException;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;

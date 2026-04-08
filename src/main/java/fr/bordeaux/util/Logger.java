@@ -2,7 +2,6 @@ package fr.bordeaux.util;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.i18n.I18n;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;

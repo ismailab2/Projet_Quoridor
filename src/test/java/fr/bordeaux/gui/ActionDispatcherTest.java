@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
@@ -368,7 +369,8 @@ class ActionDispatcherTest extends ApplicationTest {
 
     dispatcher.dispatch(Action.PING_SERVER);
 
-    verify(dispatcher).showMessage(eq("Network"), eq("Ping Server"), contains("Not connected"));
+    verify(dispatcher)
+        .showMessage(eq("Network"), eq("Ping Server"), contains(I18n.get("notConnected")));
   }
 
   @Test

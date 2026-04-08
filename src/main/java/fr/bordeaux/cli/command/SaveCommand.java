@@ -60,7 +60,7 @@ public class SaveCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  save FILE\n");
     LOGGER.info("Description:");
-    LOGGER.info("  "+ I18n.get("saveDesc"));
+    LOGGER.info("  " + I18n.get("saveDesc"));
     LOGGER.verbose("Arguments:");
     LOGGER.verbose("  FILE   : " + I18n.get("saveFile"));
     LOGGER.verbose(I18n.get("loadEx"));

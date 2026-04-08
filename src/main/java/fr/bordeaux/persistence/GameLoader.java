@@ -2,7 +2,6 @@ package fr.bordeaux.persistence;
 
 import fr.bordeaux.core.*;
 import fr.bordeaux.i18n.I18n;
-
 import java.io.*;
 import java.util.*;
 
@@ -60,7 +59,7 @@ public final class GameLoader {
     if (!"[game]".equals(lines.get(currentLine))) {
       throw new GameLoadException(
           "ERREUR_ENTETE", 1, I18n.get("expectGame") + lines.get(currentLine));
-      }
+    }
   }
 
   /**
@@ -71,8 +70,7 @@ public final class GameLoader {
    */
   private static void validateSettingsHeader(final List<String> lines) throws GameLoadException {
     if (!"[settings]".equals(lines.get(0))) {
-      throw new GameLoadException(
-          "ERREUR_ENTETE", 1, I18n.get("expectSett") + lines.get(0));
+      throw new GameLoadException("ERREUR_ENTETE", 1, I18n.get("expectSett") + lines.get(0));
     }
   }
 
@@ -183,11 +181,7 @@ public final class GameLoader {
   private static void validatePlayerCount(final int expected, final int actual) {
     if (expected > 0 && actual != expected) {
       throw new IllegalArgumentException(
-          I18n.get("nbPlayer")
-              + expected
-              + I18n.get("actualPlayer")
-              + actual
-              + I18n.get("diff"));
+          I18n.get("nbPlayer") + expected + I18n.get("actualPlayer") + actual + I18n.get("diff"));
     }
   }
 }
