@@ -199,6 +199,86 @@ class DragAndDropTest {
   }
 
   @Test
+  void createPawnDragContent_containsCorrectPosition() {
+    ClipboardContent content = DragAndDrop.createPawnDragContent(0, 4);
+    assertEquals("0,4", content.get(getPawnFormat()));
+  }
+
+  @Test
+  void dragDetected_onCurrentPlayerPawn_consumesEvent() throws Exception {
+    StackPane startCell = findCell(0, 4);
+    MouseEvent event = mock(MouseEvent.class);
+
+    runAndWait(
+        () -> {
+          Rectangle pawn = (Rectangle) startCell.getChildren().get(0);
+          try {
+            pawn.getOnDragDetected().handle(event);
+          } catch (Exception e) {
+            // Expected in headless
+          }
+        });
+
+    verify(event).consume();
+  }
+
+  @Test
+  void dragDetected_fullCoverageWithSpy() throws Exception {
+    Board board = new Board(9);
+    GameState localState = new GameState(board, Player.createDefaultPlayers());
+    GameEngine localEngine = new GameEngine(localState, false, false, false, false, 10);
+
+    final BoardView[] viewRef = new BoardView[1];
+    runAndWait(() -> viewRef[0] = new BoardView(localEngine));
+    BoardView mockedView = viewRef[0];
+
+    Dragboard mockDragboard = mock(Dragboard.class);
+    MouseEvent event = mock(MouseEvent.class);
+
+    runAndWait(
+        () -> {
+          // Find the player's pawn cell (0, 4)
+          StackPane startCell =
+              mockedView.getChildren().stream()
+                  .filter(StackPane.class::isInstance)
+                  .map(StackPane.class::cast)
+                  .filter(cell -> getIndex(cell, true) == 0 && getIndex(cell, false) == 4)
+                  .findFirst()
+                  .orElseThrow();
+
+          // Replace the real Rectangle with a spy
+          Rectangle realPawn = (Rectangle) startCell.getChildren().get(0);
+          Rectangle spyPawn = spy(realPawn);
+
+          // Mock the native drag call to return our mock Dragboard
+          doReturn(mockDragboard).when(spyPawn).startDragAndDrop(any());
+
+          startCell.getChildren().set(0, spyPawn);
+        });
+
+    // Install handlers now: they will bind to the spyPawn!
+    runAndWait(() -> DragAndDrop.install(localEngine, mockedView));
+    waitForFxEvents();
+
+    runAndWait(
+        () -> {
+          StackPane startCell =
+              mockedView.getChildren().stream()
+                  .filter(StackPane.class::isInstance)
+                  .map(StackPane.class::cast)
+                  .filter(cell -> getIndex(cell, true) == 0 && getIndex(cell, false) == 4)
+                  .findFirst()
+                  .orElseThrow();
+
+          Rectangle pawn = (Rectangle) startCell.getChildren().get(0);
+          pawn.getOnDragDetected().handle(event);
+        });
+
+    verify(mockDragboard).setContent(any(ClipboardContent.class));
+    verify(event).consume();
+  }
+
+  @Test
   void dragOver_illegalMove_doesNotAcceptTransferMode() throws Exception {
     StackPane targetCell = findCell(5, 5);
 
