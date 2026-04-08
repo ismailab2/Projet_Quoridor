@@ -3,6 +3,7 @@ package fr.bordeaux.core;
 import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.util.Logger;
+
 import java.io.IOException;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
@@ -77,6 +78,7 @@ public class GameEngine {
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
+        Logger.getInstance().info("Invalid move! Please try again.");
       return false;
     }
 
@@ -216,7 +218,7 @@ public class GameEngine {
   /**
    * Converts a Position object into algebraic notation (e.g., "a0", "b1").
    *
-   * @param p The position to convert.
+   * @param pos The position to convert.
    * @return A string representing the coordinates.
    */
   private String posToString(final Position pos) {
