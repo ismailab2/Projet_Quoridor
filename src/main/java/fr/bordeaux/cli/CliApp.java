@@ -3,6 +3,8 @@ package fr.bordeaux.cli;
 import fr.bordeaux.cli.command.*;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.network.GameClient;
+import fr.bordeaux.network.MultiGameServer;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,8 +15,6 @@ import java.util.function.Function;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import fr.bordeaux.network.GameClient;
-import fr.bordeaux.network.MultiGameServer;
 
 /** Manages Quoridor CLI loop and commands. */
 public class CliApp {
@@ -112,12 +112,12 @@ public class CliApp {
     this(engine, terminal, reader, new MultiGameServer(), new GameClient());
   }
 
-    CliApp(
-        final GameEngine engine,
-        final Terminal terminal,
-        final LineReader reader,
-        final MultiGameServer networkServer,
-        final GameClient networkClient) {
+  CliApp(
+      final GameEngine engine,
+      final Terminal terminal,
+      final LineReader reader,
+      final MultiGameServer networkServer,
+      final GameClient networkClient) {
     this.engine = engine;
     this.terminal = terminal;
     this.reader = reader;
@@ -125,7 +125,7 @@ public class CliApp {
     this.networkClient = networkClient;
     this.networkClient.setServerMessageHandler(this::handleServerMessage);
     commandRegistry = new HashMap<>();
-    
+
     registerAllCommands();
   }
 
@@ -284,7 +284,7 @@ public class CliApp {
 
     final String command = tokens[0].toLowerCase(Locale.US);
     if (handleNetworkCommand(input, tokens, command)) {
-       return;
+      return;
     }
     final Command cmd;
 
@@ -336,57 +336,58 @@ public class CliApp {
   }
 
   private boolean handleNetworkCommand(
-    final String input, final String[] tokens, final String command) {
-  try {
-    switch (command) {
-      case CMD_SERVER -> handleServerCommand(tokens);
-      case CMD_JOIN -> handleJoinCommand(tokens);
-      case CMD_PING -> networkClient.ping();
-      case CMD_PLAYERS -> LOGGER.info(networkServer.listPlayers());
-      case CMD_SCOREBOARD -> LOGGER.info(networkServer.getScoreboard());
-      case CMD_HELLO -> handleHelloCommand(input);
-      case CMD_NEW -> {
-        if (tokens.length > 1 && looksLikePlayerId(tokens[1])) {
-          handleNetworkNewCommand(tokens);
-        } else {
+      final String input, final String[] tokens, final String command) {
+    try {
+      switch (command) {
+        case CMD_SERVER -> handleServerCommand(tokens);
+        case CMD_JOIN -> handleJoinCommand(tokens);
+        case CMD_PING -> networkClient.ping();
+        case CMD_PLAYERS -> LOGGER.info(networkServer.listPlayers());
+        case CMD_SCOREBOARD -> LOGGER.info(networkServer.getScoreboard());
+        case CMD_HELLO -> handleHelloCommand(input);
+        case CMD_NEW -> {
+          if (tokens.length > 1 && looksLikePlayerId(tokens[1])) {
+            handleNetworkNewCommand(tokens);
+          } else {
+            return false;
+          }
+        }
+        case "move" -> {
+          if (networkClient.isConnected() && tokens.length > 1) {
+            pendingNetworkMove = input.substring("move ".length()).trim();
+            networkClient.sendMove(pendingNetworkMove);
+          } else {
+            return false;
+          }
+        }
+        case CMD_QUIT -> {
+          if (!networkClient.isConnected()) {
+            return false;
+          }
+          networkClient.quit();
+          LOGGER.info("Returned to local mode.");
+        }
+        default -> {
+          if (networkClient.isConnected()) {
+            pendingNetworkMove = input;
+            networkClient.sendMove(pendingNetworkMove);
+            return true;
+          }
           return false;
         }
       }
-      case "move" -> {
-        if (networkClient.isConnected() && tokens.length > 1) {
-          pendingNetworkMove =input.substring("move ".length()).trim();
-          networkClient.sendMove(pendingNetworkMove);
-        } else {
-          return false;
-        }
-      }
-      case CMD_QUIT -> {
-        if (!networkClient.isConnected()) {
-          return false;
-        }
-        networkClient.quit();
-        LOGGER.info("Returned to local mode.");
-      }
-      default -> {
-        if (networkClient.isConnected()) {
-          pendingNetworkMove = input;
-          networkClient.sendMove(pendingNetworkMove);
-          return true;
-        }
-        return false;
-      }
+      return true;
+    } catch (final IllegalArgumentException exception) {
+      LOGGER.info("Error: " + exception.getMessage());
+      return true;
     }
-    return true;
-  } catch (final IllegalArgumentException exception) {
-    LOGGER.info("Error: " + exception.getMessage());
-    return true;
   }
-}
 
-/**
- * Handles server management subcommands from the CLI.
- * @param tokens the command tokens, starting with "server"
- */
+  /**
+   * Handles server management subcommands from the CLI.
+   *
+   * @param tokens the command tokens, starting with "server"
+   */
   private void handleServerCommand(final String[] tokens) {
     if (tokens.length < 2) {
       LOGGER.info("Usage: server start [PORT] | server stop | server list | server status");
@@ -406,9 +407,10 @@ public class CliApp {
   }
 
   /**
- * Handles the join command and connects the client to a remote server.
- * @param tokens the command tokens, optionally containing an IP address and port
- */
+   * Handles the join command and connects the client to a remote server.
+   *
+   * @param tokens the command tokens, optionally containing an IP address and port
+   */
   private void handleJoinCommand(final String[] tokens) {
     final String target = tokens.length > 1 ? tokens[1] : DEFAULT_NETWORK_HOST;
     final String[] hostPort = target.split(":");
@@ -421,9 +423,10 @@ public class CliApp {
   }
 
   /**
- * Handles the hello command and sends the local player name to the server.
- * @param input the raw command entered by the user
- */
+   * Handles the hello command and sends the local player name to the server.
+   *
+   * @param input the raw command entered by the user
+   */
   private void handleHelloCommand(final String input) {
     final String name = input.substring(CMD_HELLO.length()).trim();
     if (name.isEmpty()) {
@@ -434,9 +437,10 @@ public class CliApp {
   }
 
   /**
- * Handles the network new command by creating a game between connected player IDs.
- * @param tokens the command tokens containing the player identifiers
- */
+   * Handles the network new command by creating a game between connected player IDs.
+   *
+   * @param tokens the command tokens containing the player identifiers
+   */
   private void handleNetworkNewCommand(final String[] tokens) {
     if (tokens.length < 3 || tokens.length > 5) {
       LOGGER.info("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
@@ -450,19 +454,19 @@ public class CliApp {
 
   /**
    * Checks whether a token looks like a server-side player identifier.
+   *
    * @param value the token to check
    * @return true if the token matches the expected player ID format, false otherwise
-  */
+   */
   private boolean looksLikePlayerId(final String value) {
     return value.toUpperCase(Locale.US).matches("C\\d+");
   }
 
-
   /**
- * Handles server messages and keeps the local CLI board synchronized with network moves.
- *
- * @param message message received from the server
- */
+   * Handles server messages and keeps the local CLI board synchronized with network moves.
+   *
+   * @param message message received from the server
+   */
   private synchronized void handleServerMessage(final String message) {
     if ("OK".equals(message) && pendingNetworkMove != null) {
       engine = new MoveCommand(pendingNetworkMove).execute(engine);
@@ -474,7 +478,6 @@ public class CliApp {
       pendingNetworkMove = null;
     }
   }
-
 
   /** Package-private inner class to handle smart tab-completion for the CLI. */
   class SmartCompleter implements Completer {

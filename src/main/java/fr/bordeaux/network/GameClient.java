@@ -23,7 +23,7 @@ public class GameClient {
 
   /** TCP socket used for the connection */
   private Socket socket;
-  
+
   /** Input stream to read server responses */
   private BufferedReader reader;
 
@@ -89,7 +89,7 @@ public class GameClient {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        Logger.getInstance().info("Server: {0}", line);
+                        Logger.getInstance().info("Server: " + line);
                       }
                       notifyServerMessage(line);
                     } catch (InterruptedException ie) {
@@ -98,7 +98,7 @@ public class GameClient {
                       expectingDirectReply.set(false);
                     }
                   } else {
-                    Logger.getInstance().info("Server: {0}", line);
+                    Logger.getInstance().info("Server: " + line);
                     notifyServerMessage(line);
                   }
                 }
@@ -113,10 +113,10 @@ public class GameClient {
   }
 
   /**
- * Notifies the registered handler that a server message was received.
- *
- * @param message message received from the server
- */
+   * Notifies the registered handler that a server message was received.
+   *
+   * @param message message received from the server
+   */
   private void notifyServerMessage(final String message) {
     if (serverMessageHandler != null) {
       serverMessageHandler.accept(message);
@@ -124,13 +124,13 @@ public class GameClient {
   }
 
   /**
-    * Sets the handler called when an asynchronous message is received from the server.
-    *
-    * @param serverMessageHandler handler receiving the server message
-    */
+   * Sets the handler called when an asynchronous message is received from the server.
+   *
+   * @param serverMessageHandler handler receiving the server message
+   */
   public void setServerMessageHandler(final Consumer<String> serverMessageHandler) {
-      this.serverMessageHandler = serverMessageHandler;
-    }
+    this.serverMessageHandler = serverMessageHandler;
+  }
 
   /**
    * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
@@ -200,7 +200,6 @@ public class GameClient {
 
         socket.close();
         socket = null;
-        
 
       } catch (final IOException | InterruptedException exception) {
         if (exception instanceof InterruptedException) {
@@ -224,7 +223,7 @@ public class GameClient {
 
                 final String msg = "DISCOVER";
 
-                 final DatagramPacket broadcastPacket =
+                final DatagramPacket broadcastPacket =
                     new DatagramPacket(
                         msg.getBytes(StandardCharsets.UTF_8),
                         msg.length(),
@@ -233,7 +232,7 @@ public class GameClient {
 
                 udpSocket.send(broadcastPacket);
 
-                  final DatagramPacket localhostPacket =
+                final DatagramPacket localhostPacket =
                     new DatagramPacket(
                         msg.getBytes(StandardCharsets.UTF_8),
                         msg.length(),
@@ -292,8 +291,9 @@ public class GameClient {
 
   /**
    * Indicates whether the TCP socket is currently connected and open.
+   *
    * @return true if the socket exists, is connected, and is not closed; false otherwise
-  */
+   */
   public boolean isConnected() {
     return socket != null && socket.isConnected() && !socket.isClosed();
   }

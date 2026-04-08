@@ -1,8 +1,8 @@
 package fr.bordeaux.network;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.*;
 import java.net.*;
@@ -258,7 +258,7 @@ public class GameClientTest {
     assertTrue(output.contains("Server found: testServer:9000"));
   }
 
-    // Tests reseau client ajoutes
+  // Tests reseau client ajoutes
 
   @Test
   void connectedFalseByDefault() {

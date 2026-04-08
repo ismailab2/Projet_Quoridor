@@ -2,16 +2,15 @@ package fr.bordeaux.cli;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.network.GameClient;
+import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import fr.bordeaux.network.GameClient;
-import fr.bordeaux.network.MultiGameServer;
 import java.util.function.Consumer;
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
@@ -19,6 +18,7 @@ import org.jline.reader.ParsedLine;
 import org.jline.terminal.Terminal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class CliAppTest {
 
@@ -29,7 +29,6 @@ class CliAppTest {
   private Player p1;
   private MultiGameServer networkServer;
   private GameClient networkClient;
-
 
   @BeforeEach
   void setUp() {
@@ -42,7 +41,6 @@ class CliAppTest {
     networkServer = mock(MultiGameServer.class);
     networkClient = mock(GameClient.class);
     app = new CliApp(engine, terminal, reader, networkServer, networkClient);
-
   }
 
   @Test
