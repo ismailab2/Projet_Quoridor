@@ -84,7 +84,7 @@ public class MultiGameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Logger.getInstance().info("Server started on port {0}", port);
+                Logger.getInstance().info("Server started on port " + port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);

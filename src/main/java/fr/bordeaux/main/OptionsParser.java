@@ -116,7 +116,7 @@ public final class OptionsParser {
                 throw new IllegalArgumentException("--size must be an odd number");
               }
               config.setOption("board-size", args[++i]);
-            } else if (argument >= 20 && argument <= 9999) {
+            } else if (argument >= 20 && argument <= 99999) {
               config.setOption("server", "true");
               config.setOption("server-port", args[++i]);
             }
