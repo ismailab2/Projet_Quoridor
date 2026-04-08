@@ -20,13 +20,44 @@ import javafx.stage.Stage;
 /** Main JavaFX app for Quoridor. Displays board and player panels. */
 public class QuoridorApp extends Application {
 
+  /** Static width for the player panels. */
   private static final double PANEL_WIDTH = 200.0;
+
+  /** Minimum window width for the application. */
   private static final double MIN_WIDTH = 800.0;
+
+  /** Minimum window height for the application. */
   private static final double MIN_HEIGHT = 600.0;
+
+  /** Default margin used for layout spacing. */
   private static final double DEFAULT_MARGIN = 20.0;
+
+  /** Spacing between elements in the game-over overlay. */
   private static final int OVERLAY_SPACING = 20;
+
+  /** Width of the game-over overlay. */
   private static final double OVERLAY_WIDTH = 400.0;
+
+  /** Height of the game-over overlay. */
   private static final double OVERLAY_HEIGHT = 200.0;
+
+  /** Vertical spacing in the central layout box. */
+  private static final int CENTER_SPACING = 10;
+
+  /** Spacing between Hint button and its status label. */
+  private static final int HINT_AREA_SPACING = 15;
+
+  /** CSS style for the Hint button. */
+  private static final String HINT_BUTTON_STYLE = "-fx-font-size: 14px; -fx-padding: 8 16;";
+
+  /** CSS style for the Hint status label. */
+  private static final String HINT_STATUS_STYLE = "-fx-text-fill: #666666; -fx-font-style: italic;";
+
+  /** Message displayed when AI is computing a hint. */
+  private static final String HINT_BUSY_TEXT = "AI is thinking...";
+
+  /** Message displayed when AI is idle. */
+  private static final String HINT_IDLE_TEXT = "";
 
   /** Default constructor. */
   public QuoridorApp() {
@@ -35,7 +66,7 @@ public class QuoridorApp extends Application {
 
   /**
    * Called when the JavaFX application is started. Sets up the main window, game board, menu, and
-   * GUI event handling.
+   * event handling.
    *
    * @param stage the primary stage for this application
    * @throws IOException if the game engine cannot be built
@@ -59,8 +90,18 @@ public class QuoridorApp extends Application {
     final BoardView boardView = new BoardView(engine);
     final StackPane boardContainer = buildBoardContainer(boardView);
 
+    final javafx.scene.Node hintArea = createHintArea(engine, boardView);
+    if (hintArea instanceof HBox container && !container.getChildren().isEmpty()) {
+      final Button hintButton = (Button) container.getChildren().get(0);
+      dispatcher.setHintHandler(hintButton::fire);
+    }
+
+    final VBox centerBox = new VBox(CENTER_SPACING, boardContainer, hintArea);
+    centerBox.setAlignment(Pos.CENTER);
+    VBox.setVgrow(boardContainer, Priority.ALWAYS);
+
     final MainMenuBar menuBar = new MainMenuBar(dispatcher);
-    final BorderPane root = buildRootLayout(menuBar, boardContainer, panels);
+    final BorderPane root = buildRootLayout(menuBar, centerBox, panels);
 
     DragAndDrop.install(engine, boardView);
 
@@ -77,6 +118,53 @@ public class QuoridorApp extends Application {
     setupResizeListeners(scene, boardView, menuBar);
     setupAITurnListener(engine, boardView);
     setupGameOverListener(engine, boardContainer);
+  }
+
+  /**
+   * Creates the Hint button area and configures its async hinting logic.
+   *
+   * @param engine the game engine
+   * @param boardView the board view for highlighting the move
+   * @return a Node containing the Hint button and status label
+   */
+  /* default */ static javafx.scene.Node createHintArea(
+      final GameEngine engine, final BoardView boardView) {
+    final Button hintButton = new Button("Hint");
+    hintButton.setStyle(HINT_BUTTON_STYLE);
+
+    final Label statusLabel = new Label(HINT_IDLE_TEXT);
+    statusLabel.setStyle(HINT_STATUS_STYLE);
+
+    final HBox container = new HBox(HINT_AREA_SPACING, hintButton, statusLabel);
+    container.setAlignment(Pos.CENTER);
+
+    hintButton.setOnAction(
+        event -> {
+          hintButton.setDisable(true);
+          statusLabel.setText(HINT_BUSY_TEXT);
+          java.util.concurrent.CompletableFuture.supplyAsync(
+                  () -> {
+                    try {
+                      return engine.hint();
+                    } catch (IOException e) {
+                      if (Logger.getInstance().isErrorEnabled()) {
+                        Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
+                      }
+                      return null;
+                    }
+                  })
+              .thenAccept(
+                  move ->
+                      Platform.runLater(
+                          () -> {
+                            hintButton.setDisable(false);
+                            statusLabel.setText(HINT_IDLE_TEXT);
+                            if (move != null) {
+                              boardView.highlightMove(move);
+                            }
+                          }));
+        });
+    return container;
   }
 
   /**
@@ -112,7 +200,7 @@ public class QuoridorApp extends Application {
    * @return the configured BorderPane
    */
   static BorderPane buildRootLayout(
-      final MainMenuBar menuBar, final StackPane boardContainer, final PlayerPanel[] panels) {
+      final MainMenuBar menuBar, final Region centerNode, final PlayerPanel[] panels) {
 
     final BorderPane root = new BorderPane();
     final Insets margin = new Insets(DEFAULT_MARGIN);
@@ -141,7 +229,7 @@ public class QuoridorApp extends Application {
     BorderPane.setMargin(rightContainer, margin);
 
     root.setTop(menuBar);
-    root.setCenter(boardContainer);
+    root.setCenter(centerNode);
     root.setLeft(leftContainer);
     root.setRight(rightContainer);
 
@@ -196,7 +284,7 @@ public class QuoridorApp extends Application {
    */
   private void resizeBoard(final BoardView boardView, final Scene scene, final double menuHeight) {
     final double availableWidth = scene.getWidth() - (PANEL_WIDTH + DEFAULT_MARGIN * 2) * 2;
-    final double availableHeight = scene.getHeight() - menuHeight;
+    final double availableHeight = scene.getHeight() - menuHeight - 50.0;
     final double size = Math.min(availableWidth, availableHeight) - 1.0; // 1.0px safety margin
     if (size > 0.0) {
       boardView.setPrefSize(size, size);
