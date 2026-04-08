@@ -7,6 +7,7 @@ import fr.bordeaux.util.Logger;
 import java.io.IOException;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameEngine {
 
   /** The current state of the game. */
@@ -78,11 +79,17 @@ public class GameEngine {
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
-      Logger.getInstance().info(I18n.get("moveSyntax"));
+      Logger.getInstance()
+          .debug(
+              I18n.get(
+                  "engineIllegalMoveAttempt",
+                  currentState.getCurrentPlayer().getName(),
+                  move.toString()));
       return false;
     }
 
     final Player currentPlayer = currentState.getCurrentPlayer();
+    Logger.getInstance().verbose("Player {0} playing move: {1}", currentPlayer.getName(), move);
     currentState.applyMove(move);
 
     if (currentState.hasReachedGoal(currentPlayer)) {
@@ -90,9 +97,7 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      if (Logger.getInstance().isInfoEnabled()) {
-        Logger.getInstance().info("{0} " + I18n.get("won"), currentPlayer.getName());
-      }
+      Logger.getInstance().info("{0} " + I18n.get("won"), currentPlayer.getName());
     }
     return true;
   }
@@ -110,6 +115,7 @@ public class GameEngine {
       blitzManager.pause();
     }
     state.reset(boardSize, players, blitzTimeoutMs);
+    Logger.getInstance().info(I18n.get("engineNewGame", players.size()));
     initializeBlitz();
   }
 
@@ -122,9 +128,7 @@ public class GameEngine {
     try {
       fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (final IOException exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error(I18n.get("engineSave") + exception.getMessage());
-      }
+      Logger.getInstance().error(I18n.get("engineSave") + exception.getMessage());
     }
   }
 
@@ -142,9 +146,7 @@ public class GameEngine {
       state.loadState(loadedState);
       initializeBlitz();
     } catch (final IOException | GameLoadException exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error(I18n.get("engineLoad") + exception.getMessage());
-      }
+      Logger.getInstance().error(I18n.get("engineLoad") + exception.getMessage());
     }
   }
 

@@ -18,6 +18,7 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
 /** Manages Quoridor CLI loop and commands. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class CliApp {
 
   /** Help command literal. */
@@ -257,8 +258,10 @@ public class CliApp {
       }
     }
     try {
-      terminal.close();
-    } catch (IOException e) {
+      if (terminal != null) {
+        terminal.close();
+      }
+    } catch (IOException exception) {
       LOGGER.error(I18n.get("brutalClose"));
     }
   }
@@ -268,9 +271,7 @@ public class CliApp {
     final Move move = ai.getNextMove(engine.getState());
     engine.play(move);
 
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info(I18n.get("iaPlayed") + "{0}", move);
-    }
+    LOGGER.info(I18n.get("iaPlayed") + "{0}", move);
   }
 
   /**
@@ -370,7 +371,7 @@ public class CliApp {
             return false;
           }
           networkClient.quit();
-          LOGGER.info("Returned to local mode.");
+          LOGGER.info(I18n.get("returnedLocal"));
         }
         default -> {
           if (networkClient.isConnected()) {
@@ -383,7 +384,7 @@ public class CliApp {
       }
       return true;
     } catch (final IllegalArgumentException exception) {
-      LOGGER.info("Error: " + exception.getMessage());
+      LOGGER.info(I18n.get("errorPrefix") + exception.getMessage());
       return true;
     }
   }
@@ -395,7 +396,7 @@ public class CliApp {
    */
   private void handleServerCommand(final String[] tokens) {
     if (tokens.length < 2) {
-      LOGGER.info("Usage: server start [PORT] | server stop | server list | server status");
+      LOGGER.info(I18n.get("usage") + " " + I18n.get("serverStartUsage"));
       return;
     }
 
@@ -407,7 +408,7 @@ public class CliApp {
       case "stop" -> networkServer.stop();
       case "list" -> networkClient.serverList();
       case "status" -> LOGGER.info(networkServer.getServerStatus());
-      default -> LOGGER.info("Unknown server command.");
+      default -> LOGGER.info(I18n.get("unknownServerCmd"));
     }
   }
 
@@ -435,7 +436,7 @@ public class CliApp {
   private void handleHelloCommand(final String input) {
     final String name = input.substring(CMD_HELLO.length()).trim();
     if (name.isEmpty()) {
-      LOGGER.info("Usage: hello NAME");
+      LOGGER.info(I18n.get("usage") + " " + I18n.get("helloUsage"));
     } else {
       networkClient.hello(name);
     }
@@ -448,7 +449,7 @@ public class CliApp {
    */
   private void handleNetworkNewCommand(final String[] tokens) {
     if (tokens.length < 3 || tokens.length > 5) {
-      LOGGER.info("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+      LOGGER.info(I18n.get("usage") + " " + I18n.get("netNewUsage"));
       return;
     }
 

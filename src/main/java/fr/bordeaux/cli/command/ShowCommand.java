@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 /** CLI command that displays game information, board state, or history. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class ShowCommand implements Command {
 
   /** Command entered by the user */
@@ -62,12 +63,13 @@ public class ShowCommand implements Command {
       case "configurations":
       case "config":
         {
-          writer.println("verbose = " + engine.isVerbose());
-          writer.println("blitz = " + engine.isBlitz());
-          writer.println("contest = " + engine.isContest());
-          writer.println("debug = " + engine.isDebug());
-          writer.println("nb-walls = " + engine.getInitialWalls());
-          writer.println("nb-players = " + engine.getState().getPlayers().size());
+          writer.println(I18n.get("configLine", "verbose", engine.isVerbose()));
+          writer.println(I18n.get("configLine", "blitz", engine.isBlitz()));
+          writer.println(I18n.get("configLine", "contest", engine.isContest()));
+          writer.println(I18n.get("configLine", "debug", engine.isDebug()));
+          writer.println(I18n.get("configLine", "nb-walls", engine.getInitialWalls()));
+          writer.println(
+              I18n.get("configLine", "nb-players", engine.getState().getPlayers().size()));
           break;
         }
       case "time":
@@ -105,16 +107,37 @@ public class ShowCommand implements Command {
   /** Displays general help information for the show command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== SHOW Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  show board");
-    LOGGER.info("  show history");
-    LOGGER.info("  show configuration");
-    LOGGER.info("  show time\n");
-    LOGGER.info("Description:");
+    if (tokens != null && tokens.length > 1) {
+      final String subOption = tokens[1];
+      switch (subOption) {
+        case "board":
+          helpBoard();
+          return;
+        case "history":
+          helpHistory();
+          return;
+        case "time":
+          helpTime();
+          return;
+        case "configurations":
+        case "config":
+          helpConfig();
+          return;
+        default:
+          break;
+      }
+    }
+
+    LOGGER.info("=== " + I18n.get("showHelpHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("showBoardUsage"));
+    LOGGER.info("  " + I18n.get("showHistoUsage"));
+    LOGGER.info("  " + I18n.get("showConfigUsage"));
+    LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("showDesc"));
     LOGGER.verbose("  " + I18n.get("showVerb"));
-    LOGGER.verbose("Options:");
+    LOGGER.verbose(I18n.get("arguments"));
     LOGGER.verbose("  board         : " + I18n.get("showVBoard"));
     LOGGER.verbose("  history       : " + I18n.get("showVHisto"));
     LOGGER.verbose("  configuration : " + I18n.get("showVConfig"));
@@ -124,37 +147,37 @@ public class ShowCommand implements Command {
 
   /** Displays help information for the "show board" option. */
   public void helpBoard() {
-    LOGGER.info("=== SHOW BOARD ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  show board\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("showHeader") + " BOARD ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("showBoardUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("showDescBoard"));
   }
 
   /** Displays help information for the "show history" option. */
   public void helpHistory() {
-    LOGGER.info("=== SHOW HISTORY ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  show history\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("showHeader") + " HISTORY ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("showHistoUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("showDescHisto"));
   }
 
   /** Displays help information for the "show time" option. */
   public void helpTime() {
-    LOGGER.info("=== SHOW TIME ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  show time\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("showHeader") + " TIME ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("showDescTime"));
   }
 
   /** Displays help information for the "show configuration" option. */
   public void helpConfig() {
-    LOGGER.info("=== SHOW CONFIGURATION ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  show configuration\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("showHeader") + " CONFIGURATION ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("showConfigUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("showDescConfig"));
     LOGGER.verbose("  " + I18n.get("showDescVConfig"));
     LOGGER.verbose("    " + I18n.get("showCfgs"));
@@ -255,16 +278,16 @@ public class ShowCommand implements Command {
     final Move[] moves = engine.getState().getMovesPlayed();
     for (final Move move : moves) {
       final StringBuilder strMove = new StringBuilder();
-      strMove.append("Player ").append(players.get(count % nbPlayers).getName()).append(" - ");
+      strMove.append(I18n.get("historyPlayer", players.get(count % nbPlayers).getName()));
       if (move.isPawn()) {
         final Position from = move.getFrom();
-        strMove.append(posToString(from)).append('-').append(posToString(move.getTo()));
+        strMove.append(I18n.get("historyCoordPawn", posToString(from), posToString(move.getTo())));
       } else {
         final Orientation orientation = move.getOrientation();
-        strMove.append(posToString(move.getTo())).append(orientation.toString());
+        strMove.append(
+            I18n.get("historyCoordWall", posToString(move.getTo()), orientation.toString()));
       }
       count++;
-      strMove.append(';');
       writer.println(strMove.toString());
     }
     writer.println(I18n.get("newest"));

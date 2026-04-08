@@ -4,10 +4,13 @@ import fr.bordeaux.ai.base.HeuristicEvaluator;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.util.Logger;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 /** Engine responsible for executing the Minimax search algorithm. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MinimaxSearch {
 
   /** The heuristic evaluation strategy. */
@@ -15,6 +18,9 @@ public class MinimaxSearch {
 
   /** Stack used to keep track of moves for backtracking. */
   private final Deque<Move> aiStack = new ArrayDeque<>();
+
+  /** Logger for AI search. */
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** High score threshold to identify a winning state. */
   private static final int WIN_THRESHOLD = 9000;
@@ -54,10 +60,12 @@ public class MinimaxSearch {
     while (System.currentTimeMillis() < endTime) {
       final Move tempMove = miniMax(state, currentDepth, endTime);
       if (System.currentTimeMillis() >= endTime) {
+        LOGGER.debug(I18n.get("miniInterrupted", currentDepth));
         break;
       }
       if (tempMove != null) {
         lastBestMove = tempMove;
+        LOGGER.verbose(I18n.get("miniDepthComp", currentDepth, lastBestMove));
       }
       currentDepth++;
     }

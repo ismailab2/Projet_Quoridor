@@ -5,6 +5,7 @@ import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class SaveCommand implements Command {
 
   /** Command entered by the user */
@@ -40,15 +41,15 @@ public class SaveCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens.length < 2) {
-      LOGGER.info("Usage: save FILE");
-      return engine;
-    }
-    try {
-      LOGGER.info(I18n.get("attempt", tokens[1]));
-      engine.saveGame(tokens[1]);
-      LOGGER.info(I18n.get("success"));
-    } catch (final Exception e) {
-      LOGGER.error(I18n.get("failed", tokens[1]), e);
+      LOGGER.info(I18n.get("usage") + " " + I18n.get("saveUsage"));
+    } else {
+      LOGGER.info(I18n.get("attempt") + " {0}", tokens[1]);
+      try {
+        engine.saveGame(tokens[1]);
+        LOGGER.info(I18n.get("success"));
+      } catch (final Exception e) {
+        LOGGER.error(I18n.get("failed") + " {0}", tokens[1]);
+      }
     }
     return engine;
   }
@@ -56,14 +57,12 @@ public class SaveCommand implements Command {
   /** Displays help information for the save command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== SAVE Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  save FILE\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("saveHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("saveUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("saveDesc"));
-    LOGGER.verbose("Arguments:");
+    LOGGER.verbose(I18n.get("arguments"));
     LOGGER.verbose("  FILE   : " + I18n.get("saveFile"));
-    LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  save mygame.txt\n");
   }
 }

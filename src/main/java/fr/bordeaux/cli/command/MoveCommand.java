@@ -13,6 +13,7 @@ import fr.bordeaux.util.Logger;
  * CLI command that interprets and executes a player move. pawn movement or a wall placement
  * depending on the format of the input string.
  */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MoveCommand implements Command {
 
   /** Move that has been entered by the user */
@@ -64,22 +65,23 @@ public class MoveCommand implements Command {
   /** Displays help information for the move command. in the CLI. */
   @Override
   public void helpText() {
-    LOGGER.info("=== Move Commands ===\n");
-    LOGGER.info("Usage:");
+    LOGGER.info("=== " + I18n.get("moveHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
     LOGGER.info(I18n.get("pawnMove", "e2-e3", I18n.get("ifLegal")));
     LOGGER.info("        " + I18n.get("illegalPawnMove"));
-    LOGGER.info(I18n.get("pawnMove", "e2h", I18n.get("ifLegal")));
+    LOGGER.info(I18n.get("wallMove", "e2h", I18n.get("ifLegal")));
     LOGGER.info(
-        "        "
-            + I18n.get(
-                "placeWall", I18n.get("horizontally"), I18n.get("under"), I18n.get("e2f2cases")));
+        "                : e2h "
+            + I18n.get("place", I18n.get("horizontally"), I18n.get("betweenRows"), "2", "3")
+            + "\n");
     LOGGER.info(
-        "        " + I18n.get("cantPlace", I18n.get("horizontally"), I18n.get("rightEdge")));
-    LOGGER.info("                : e2v " + I18n.get("ifLegal"));
+        "                : "
+            + I18n.get("cantPlace", I18n.get("horizontally"), I18n.get("rightEdge")));
+    LOGGER.info(I18n.get("wallMove", "e2v", I18n.get("ifLegal")));
     LOGGER.info(
-        "        "
-            + I18n.get(
-                "placeWall", I18n.get("vertically"), I18n.get("next"), I18n.get("e2f2cases")));
+        "                : e2v "
+            + I18n.get("place", I18n.get("vertically"), I18n.get("betweenColumns"), "e", "f")
+            + "\n");
     LOGGER.info("        " + I18n.get("cantPlace", I18n.get("vertically"), I18n.get("bottomEdge")));
   }
 
@@ -93,7 +95,7 @@ public class MoveCommand implements Command {
    */
   public Position parsePosition(final String str) {
     if (str.length() < 2) {
-      LOGGER.error("Usage: c3-c4 / c3h / c3v");
+      LOGGER.error(I18n.get("usage") + " " + I18n.get("moveUsage"));
       throw new IllegalArgumentException(I18n.get("positionFormat"));
     }
     final int row = Integer.parseInt(str.substring(1)) - 1;
@@ -112,7 +114,7 @@ public class MoveCommand implements Command {
   public GameEngine handleMove(final GameEngine engine) {
     final String[] moves = move.split("-");
     if (moves.length != 2) {
-      LOGGER.error("Usage: c3-c4 / c3h / c3v");
+      LOGGER.error(I18n.get("usage") + " " + I18n.get("moveUsage"));
       throw new IllegalArgumentException(I18n.get("moveSyntax"));
     }
     final Position from = parsePosition(moves[0]);
@@ -124,7 +126,7 @@ public class MoveCommand implements Command {
       throw new IllegalArgumentException(I18n.get("noPawn", moves[0]));
     }
     if (!engine.play(Move.pawn(from, targetPosition))) {
-      LOGGER.error("That''s an illegal move: {0} to {1}", from, targetPosition);
+      LOGGER.error(I18n.get("illegalMoveMsg"), from, targetPosition);
       return engine;
     }
 

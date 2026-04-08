@@ -6,6 +6,7 @@ import fr.bordeaux.core.*;
 import fr.bordeaux.util.Logger;
 
 /** Initializes board, state, engine, and starts CLI interface. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class CliLauncher implements AppLauncher {
 
   /** Default board size for Quoridor (9x9) */
@@ -30,9 +31,7 @@ public class CliLauncher implements AppLauncher {
         cli.run();
       }
     } catch (final Exception e) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("CLI Error: " + e.getMessage());
-      }
+      Logger.getInstance().error("CLI Error: " + e.getMessage());
     }
   }
 }

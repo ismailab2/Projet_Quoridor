@@ -19,6 +19,7 @@ import org.jline.terminal.Terminal;
  * CLI command that starts a new game, configuring board size and players. of players, and
  * interactively asks for the type and name of each player.
  */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class NewCommand implements Command {
 
   /** Command entered by the user */
@@ -71,18 +72,11 @@ public class NewCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     GameEngine result = engine;
+
     if (tokens.length > 5) {
       LOGGER.error(I18n.get("newNbArgs"));
-    }
-
-    final int boardSizeInput = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9;
-    final int size = boardSizeInput - 1;
-    final Position[] positions = {
-      new Position(0, size / 2), new Position(size, size / 2),
-      new Position(size / 2, 0), new Position(size / 2, size)
-    };
-
-    if (tokens.length == 1) {
+    } else if (tokens.length == 1) {
+      final int size = 8;
       result =
           new GameEngine(
               new GameState(
@@ -96,17 +90,21 @@ public class NewCommand implements Command {
               engine.isDebug(),
               engine.getInitialWalls());
     } else {
+      final int boardSizeInput = Integer.parseInt(tokens[1]);
+      final int size = boardSizeInput - 1;
+      final Position[] positions = {
+        new Position(0, size / 2), new Position(size, size / 2),
+        new Position(size / 2, 0), new Position(size / 2, size)
+      };
       final int nbPlayer = tokens.length <= 2 ? 2 : Integer.parseInt(tokens[2]);
       final Board board = new Board(size + 1);
       final Player[] players = new Player[nbPlayer];
+      boolean aborted = false;
 
-      boolean interrupted = false;
-      for (int index = 0; index < nbPlayer; index++) {
+      for (int index = 0; index < nbPlayer && !aborted; index++) {
         try {
           LOGGER.info(I18n.get("playersType", I18n.get("availType")));
-          LOGGER.info(
-              "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia"
-                  + "  - [mctsnn] Monte Carlo ia with NeuralNetwork selector  - [r]andom ia");
+          LOGGER.info(I18n.get("playerTypeOptions"));
           final String typePlayer = reader.readLine(I18n.get("playersType", " >> "));
           if (typePlayer == null) {
             throw new EndOfFileException();
@@ -127,55 +125,43 @@ public class NewCommand implements Command {
           }
           switch (typePlayer) {
             case "h":
-              {
-                players[index] =
-                    new HumanPlayer(inputName, positions[index], Color.fromId(index + 1));
-                break;
-              }
+              players[index] =
+                  new HumanPlayer(inputName, positions[index], Color.fromId(index + 1));
+              break;
             case "mcts":
-              {
-                players[index] =
-                    new MctsPlayer(inputName, positions[index], Color.fromId(index + 1));
-                break;
-              }
+              players[index] = new MctsPlayer(inputName, positions[index], Color.fromId(index + 1));
+              break;
             case "mini":
-              {
-                players[index] =
-                    MinimaxPlayer.builder(inputName, positions[index], Color.fromId(index + 1))
-                        .build();
-                break;
-              }
+              players[index] =
+                  MinimaxPlayer.builder(inputName, positions[index], Color.fromId(index + 1))
+                      .build();
+              break;
             case "mctsnn":
-              {
-                players[index] =
-                    new MctsPlayer(
-                        inputName, positions[index], 2000, true, Color.fromId(index + 1));
-                break;
-              }
+              players[index] =
+                  new MctsPlayer(inputName, positions[index], 2000, true, Color.fromId(index + 1));
+              break;
             default:
-              {
-                players[index] =
-                    new RandomPlayer(inputName, positions[index], Color.fromId(index + 1));
-                break;
-              }
+              players[index] =
+                  new RandomPlayer(inputName, positions[index], Color.fromId(index + 1));
+              break;
           }
-        } catch (EndOfFileException | UserInterruptException e) {
-          LOGGER.debug(I18n.get("interruptNew"));
+        } catch (EndOfFileException | UserInterruptException exception) {
+          LOGGER.error(I18n.get("termClose"));
           try {
             terminal.close();
           } catch (Exception exc) {
             LOGGER.error(I18n.get("termClose"));
           }
-          interrupted = true;
-          break;
+          aborted = true;
         } catch (final IOException e) {
           throw new java.io.UncheckedIOException(e);
         }
       }
 
-      if (!interrupted) {
+      if (!aborted) {
         final String setNbPlayers = "nb-players=" + nbPlayer;
         new SetCommand(setNbPlayers).execute(engine);
+
         result =
             new GameEngine(
                 new GameState(board, Arrays.stream(players).toList()),
@@ -189,16 +175,15 @@ public class NewCommand implements Command {
     return result;
   }
 
-  /** Displays help information for the new command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== NEW Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  new");
-    LOGGER.info("  new [boardSize] [nbPlayer]\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("newHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("newUsageEmpty"));
+    LOGGER.info("  " + I18n.get("newUsageArgs") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("newDesc"));
-    LOGGER.info("Arguments:");
+    LOGGER.info(I18n.get("arguments"));
     LOGGER.info("  boardSize    : " + I18n.get("newBoardSize"));
     LOGGER.info("  playerCount  : " + I18n.get("newNbPlayers"));
     LOGGER.info(I18n.get("newHelp"));

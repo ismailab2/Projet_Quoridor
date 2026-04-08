@@ -3,10 +3,12 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 
 /** CLI command that displays global or detailed help information. help for a specific command. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class HelpCommand implements Command {
 
   /** Command entered by the user */
@@ -14,6 +16,9 @@ public class HelpCommand implements Command {
 
   /** Logger to display informations */
   private static final Logger LOGGER = Logger.getInstance();
+
+  /** Constant for length check when exactly one token is present */
+  private static final int UNIQUE_MATCH = 1;
 
   /** Reference from the CliApp command registry */
   private final Map<String, Function<String[], Command>> registry;
@@ -46,7 +51,7 @@ public class HelpCommand implements Command {
   public GameEngine execute(final GameEngine engine) {
     if (tokens == null) {
       LOGGER.debug(I18n.get("noCommand"));
-    } else if (tokens.length == 1) {
+    } else if (tokens.length == UNIQUE_MATCH) {
       LOGGER.debug(I18n.get("allCommandHelp"));
       helpCli();
     } else {
@@ -59,14 +64,18 @@ public class HelpCommand implements Command {
   /** Displays a short help description for this command. */
   @Override
   public void helpText() {
-    LOGGER.info("Rien");
+    LOGGER.info("=== " + I18n.get("helpHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("helpUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
+    LOGGER.info("  " + I18n.get("helpDesc"));
   }
 
   /** Displays the global help message listing all available CLI commands. */
   public void helpCli() {
-    LOGGER.info("/=== Quoridor Command Line Help ===/\n");
-    LOGGER.info("Commands :\n");
-    LOGGER.info("new [ARGS] :          " + I18n.get("newArgs"));
+    LOGGER.info(I18n.get("cliHelp") + "\n");
+    LOGGER.info(I18n.get("commands") + " \n");
+    LOGGER.info("new [ARGS] :          " + I18n.get("helpNew"));
     LOGGER.info("help [CMD] :          " + I18n.get("helpCmd"));
     LOGGER.info("                      " + I18n.get("helpCmd2"));
     LOGGER.info("help move :           " + I18n.get("helpMove"));
@@ -89,17 +98,20 @@ public class HelpCommand implements Command {
    * tokens.
    */
   public void helpFetch() {
-    if (this.tokens.length <= 1) {
-      LOGGER.info("Usage: help [CMD]");
+    if (this.tokens.length <= UNIQUE_MATCH) {
+      LOGGER.info(I18n.get("usage") + " " + I18n.get("helpUsage"));
     } else {
       final String commandName = tokens[1];
       if (registry.containsKey(commandName)) {
+        // Extract sub-tokens for the command (e.g., ["show", "board"] from ["help", "show",
+        // "board"])
+        final String[] subTokens = Arrays.copyOfRange(tokens, 1, tokens.length);
         // Temporary instance of the command to use helpText()
-        final Command cmd = registry.get(commandName).apply(new String[] {commandName});
+        final Command cmd = registry.get(commandName).apply(subTokens);
         cmd.helpText();
       } else {
         LOGGER.debug(I18n.get("unknownCmd") + "{0}", commandName);
-        LOGGER.info("Usage : help [CMD]");
+        LOGGER.info(I18n.get("usage") + " " + I18n.get("helpUsage"));
       }
     }
   }

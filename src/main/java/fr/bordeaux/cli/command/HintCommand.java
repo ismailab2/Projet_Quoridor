@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
@@ -13,14 +14,15 @@ import java.io.IOException;
  * Suggests the best move computed by the AI based on the current state. Minimax AI based on the
  * current game state.
  */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class HintCommand implements Command {
 
-  /** Logger for AI calculation messages. */
+  /** Logger to display informations */
   private static final Logger LOGGER = Logger.getInstance();
 
-  /** Creates a new HintCommand. */
+  /** Creates a HintCommand. */
   public HintCommand() {
-    LOGGER.debug("Instantiating HintCommand");
+    LOGGER.debug(I18n.get("hintInstantiating"));
   }
 
   /**
@@ -34,9 +36,10 @@ public class HintCommand implements Command {
   public GameEngine execute(final GameEngine engine) throws IOException {
     LOGGER.info(I18n.get("hintCalc"));
     final Move hint = engine.hint();
+    final GameState state = engine.getState();
 
-    if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
-      LOGGER.error("Suggested move: {0} isn''t legal", hint);
+    if (!RuleChecker.isMoveLegal(state, hint)) {
+      LOGGER.error(I18n.get("suggestedLegal"), hint);
     }
     final String bestMove = formatMove(hint);
     LOGGER.info(I18n.get("hintPlay") + "{0}", bestMove);
@@ -75,13 +78,13 @@ public class HintCommand implements Command {
   /** Displays help information for the hint command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== HINT Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  hint\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("hintHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("hintUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("hintHelp1"));
     LOGGER.info("  " + I18n.get("hintHelp3"));
-    LOGGER.verbose("Displays:");
+    LOGGER.verbose(I18n.get("arguments"));
     LOGGER.verbose("  " + I18n.get("hintHelp2"));
     LOGGER.verbose(I18n.get("hintHelpEx"));
   }

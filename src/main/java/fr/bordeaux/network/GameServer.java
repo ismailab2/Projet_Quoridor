@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** TCP server for single client. Handles PING/QUIT and UDP broadcast. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameServer {
 
   /** Default constructor. Initializes a new GameServer instance. */
@@ -65,9 +66,7 @@ public class GameServer {
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                if (Logger.getInstance().isErrorEnabled()) {
-                  Logger.getInstance().error(I18n.get("alreadyUsed") + e.getMessage());
-                }
+                Logger.getInstance().error(I18n.get("alreadyUsed") + e.getMessage());
               }
             })
         .start();

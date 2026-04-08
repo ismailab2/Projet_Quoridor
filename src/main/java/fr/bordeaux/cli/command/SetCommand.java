@@ -6,6 +6,7 @@ import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that modifies a game configuration parameter. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class SetCommand implements Command {
 
   /** Command entered by the user */
@@ -46,13 +47,13 @@ public class SetCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens == null || tokens.length < 2) {
-      LOGGER.info("Usage: set PARAM=VALUE");
+      LOGGER.info(I18n.get("usage") + ": set PARAM=VALUE");
       return engine;
     }
 
     final String argument = tokens[1];
     if (!argument.contains("=")) {
-      LOGGER.error(I18n.get("usage", " PARAM=VALUE (set debug=true)"));
+      LOGGER.error(I18n.get("setUsageExample", I18n.get("usage")));
       return engine;
     }
 
@@ -79,12 +80,14 @@ public class SetCommand implements Command {
           break;
         case "verbose":
           engine.setVerbose(Boolean.parseBoolean(value));
+          LOGGER.refreshConfig();
           break;
         case "contest":
           engine.setContest(Boolean.parseBoolean(value));
           break;
         case "debug":
           engine.setDebug(Boolean.parseBoolean(value));
+          LOGGER.refreshConfig();
           break;
         case "walls":
         case "wall":
@@ -106,15 +109,15 @@ public class SetCommand implements Command {
   /** Displays help information for the set command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== SET Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  set PARAM=VALUE\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("setHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage") + ":");
+    LOGGER.info("  " + I18n.get("setUsage") + "\n");
+    LOGGER.info(I18n.get("description") + ":");
     LOGGER.info("  " + I18n.get("setDesc"));
-    LOGGER.verbose("Arguments:");
+    LOGGER.verbose(I18n.get("arguments"));
     LOGGER.verbose("  PARAM   : " + I18n.get("setParam"));
     LOGGER.verbose("  VALUE   : " + I18n.get("setValue"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  set debug=true\n");
+    LOGGER.verbose("  " + I18n.get("setExampleCmd") + "\n");
   }
 }

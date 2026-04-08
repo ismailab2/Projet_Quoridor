@@ -20,6 +20,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 /** Main JavaFX app for Quoridor. Displays board and player panels. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class QuoridorApp extends Application {
 
   /** Static width for the player panels. */
@@ -168,9 +169,7 @@ public class QuoridorApp extends Application {
                     try {
                       return engine.hint();
                     } catch (IOException e) {
-                      if (Logger.getInstance().isErrorEnabled()) {
-                        Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
-                      }
+                      Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
                       return null;
                     }
                   });

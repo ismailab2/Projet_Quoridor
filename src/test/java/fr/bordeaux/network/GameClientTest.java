@@ -331,6 +331,8 @@ public class GameClientTest {
       instanceField.setAccessible(true);
       Logger originalLogger = (Logger) instanceField.get(null);
       Logger mockLogger = mock(Logger.class);
+      when(mockLogger.isInfoEnabled()).thenReturn(true);
+      when(mockLogger.isVerboseEnabled()).thenReturn(true);
       instanceField.set(null, mockLogger);
 
       try {
@@ -360,6 +362,8 @@ public class GameClientTest {
       instanceField.setAccessible(true);
       Logger originalLogger = (Logger) instanceField.get(null);
       Logger mockLogger = mock(Logger.class);
+      when(mockLogger.isInfoEnabled()).thenReturn(true);
+      when(mockLogger.isVerboseEnabled()).thenReturn(true);
       instanceField.set(null, mockLogger);
 
       try {
@@ -389,6 +393,8 @@ public class GameClientTest {
       instanceField.setAccessible(true);
       Logger originalLogger = (Logger) instanceField.get(null);
       Logger mockLogger = mock(Logger.class);
+      when(mockLogger.isInfoEnabled()).thenReturn(true);
+      when(mockLogger.isVerboseEnabled()).thenReturn(true);
       instanceField.set(null, mockLogger);
 
       try {

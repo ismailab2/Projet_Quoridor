@@ -1,10 +1,12 @@
 package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import org.apache.commons.cli.CommandLine;
 
 /** Handles game rules, server settings, and time constraints from CLI. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public final class GameOptionsHandler {
 
   private static final Logger LOGGER = Logger.getInstance();
@@ -25,18 +27,16 @@ public final class GameOptionsHandler {
     if (commandLine.hasOption("t")) {
       final boolean blitz = config.getBoolean("blitz", false);
       if (!blitz) {
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("--time nécessite d'activer le mode blitz. Il a donc été ignoré.");
-        }
+        LOGGER.info("--time " + I18n.get("needsBlitz"));
       } else {
         final String value = commandLine.getOptionValue("t");
         try {
           if (Integer.parseInt(value) <= 0) {
-            throw new IllegalArgumentException("--time should be higher than 0");
+            throw new IllegalArgumentException("--time " + I18n.get("higher"));
           }
           config.setOption("timeout", value);
         } catch (NumberFormatException exception) {
-          throw new IllegalArgumentException("--time requires an integer");
+          throw new IllegalArgumentException("--time " + I18n.get("requireInt"));
         }
       }
     }
@@ -47,7 +47,7 @@ public final class GameOptionsHandler {
         final int argument = Integer.parseInt(value);
         if (argument < 16 && argument > 2) {
           if (argument % 2 == 0) {
-            throw new IllegalArgumentException("--size must be an odd number");
+            throw new IllegalArgumentException("--size " + I18n.get("sizeOdd"));
           }
           config.setOption("board-size", value);
         } else if (argument >= 20 && argument <= 99999) {
@@ -55,7 +55,7 @@ public final class GameOptionsHandler {
           config.setOption("server-port", value);
         }
       } catch (NumberFormatException exception) {
-        throw new IllegalArgumentException("--server requires a integer or a port");
+        throw new IllegalArgumentException("--server " + I18n.get("requiresIntPort"));
       }
     }
 
@@ -76,12 +76,12 @@ public final class GameOptionsHandler {
       final String value = commandLine.getOptionValue("w");
       try {
         if (Integer.parseInt(value) < 0) {
-          throw new IllegalArgumentException("--walls requires to be higher than 0");
+          throw new IllegalArgumentException("--walls " + I18n.get("higher"));
         } else {
           config.setOption("nb-walls", value);
         }
       } catch (NumberFormatException exception) {
-        throw new IllegalArgumentException("--walls requires an integer");
+        throw new IllegalArgumentException("--walls " + I18n.get("requireInt"));
       }
     }
   }

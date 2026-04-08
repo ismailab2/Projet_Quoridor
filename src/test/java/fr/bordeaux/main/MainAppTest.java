@@ -34,7 +34,7 @@ public class MainAppTest {
 
   @Test
   public void testMainDaemon() {
-    // This will try to resolve mode and launch. 
+    // This will try to resolve mode and launch.
     assertDoesNotThrow(() -> MainApp.main(new String[] {"--daemon"}));
   }
 }

@@ -8,7 +8,7 @@ import java.util.List;
  * RuleChecker checks if moves (pawn moves or wall placements) are valid according to Quoridor
  * rules.
  */
-public class RuleChecker {
+public final class RuleChecker {
 
   /** Private constructor to prevent instantiation. */
   private RuleChecker() {

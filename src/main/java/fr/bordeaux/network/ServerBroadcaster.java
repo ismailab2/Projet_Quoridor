@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Sends UDP broadcast every 10s for server discovery on port 12346. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class ServerBroadcaster implements Runnable {
 
   /** Name of the server to broadcast */
@@ -66,9 +67,7 @@ public class ServerBroadcaster implements Runnable {
         Thread.sleep(delayMs);
       }
     } catch (final IOException e) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("UDP Broadcast I/O error: {0}", e.getMessage());
-      }
+      Logger.getInstance().error("UDP Broadcast I/O error: {0}", e.getMessage());
     } catch (final InterruptedException e) {
       Logger.getInstance().info("UDP Broadband interrupted.");
       Thread.currentThread().interrupt();

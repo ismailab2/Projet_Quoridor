@@ -33,8 +33,7 @@ public final class AiOptionsHandler {
         } else if ("noir".equals(aiOption) || "2".equals(aiOption)) {
           config.setOption("ai2", "true");
         } else {
-          throw new IllegalArgumentException(
-              "--ai value must be: {blanc, noir, 1, 2, a} or empty (defaults to noir)");
+          throw new IllegalArgumentException(I18n.get("aiValueErr"));
         }
       }
     }
@@ -81,8 +80,7 @@ public final class AiOptionsHandler {
     final boolean hasAi = config.getBoolean("ai1", false) || config.getBoolean("ai2", false);
 
     if (hasAi && nbPlayers > 2) {
-      throw new IllegalArgumentException(
-          "AI mode is not supported for more than 2 players (currently: " + nbPlayers + ")");
+      throw new IllegalArgumentException(I18n.get("notSupported", String.valueOf(nbPlayers)));
     }
   }
 
@@ -117,13 +115,13 @@ public final class AiOptionsHandler {
       final String value, final String parameter, final List<String> accpetedMode) {
     if (value == null) {
       throw new IllegalArgumentException(
-          "AI " + parameter + " require an argument in " + accpetedMode);
+          I18n.get("aiArgRequired", parameter, accpetedMode.toString()));
     }
     final String[] values = value.split(",");
     for (final String val : values) {
       if (!accpetedMode.contains(val.toLowerCase())) {
         throw new IllegalArgumentException(
-            "The only valid AI " + parameter + " are " + accpetedMode);
+            I18n.get("aiValidOptions", parameter, accpetedMode.toString()));
       }
     }
   }
@@ -152,7 +150,7 @@ public final class AiOptionsHandler {
     for (final String selectionItem : values) {
       final String trimmed = selectionItem.trim();
       if (!"UCT".equals(trimmed) && !"ML".equals(trimmed)) {
-        throw new IllegalArgumentException("Invalid option: " + trimmed + " for MCTS selection.");
+        throw new IllegalArgumentException(I18n.get("invalidOptionMcts", trimmed));
       }
     }
 

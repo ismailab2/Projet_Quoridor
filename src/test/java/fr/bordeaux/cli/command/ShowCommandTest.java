@@ -132,4 +132,32 @@ class ShowCommandTest {
 
     assertDoesNotThrow(command::helpConfig);
   }
+
+  @Test
+  void helpTextWithBoard() {
+    ShowCommand command = new ShowCommand(new String[] {"show", "board"});
+
+    assertDoesNotThrow(command::helpText);
+  }
+
+  @Test
+  void helpTextWithHistory() {
+    ShowCommand command = new ShowCommand(new String[] {"show", "history"});
+
+    assertDoesNotThrow(command::helpText);
+  }
+
+  @Test
+  void helpTextWithTime() {
+    ShowCommand command = new ShowCommand(new String[] {"show", "time"});
+
+    assertDoesNotThrow(command::helpText);
+  }
+
+  @Test
+  void helpTextWithConfig() {
+    ShowCommand command = new ShowCommand(new String[] {"show", "config"});
+
+    assertDoesNotThrow(command::helpText);
+  }
 }

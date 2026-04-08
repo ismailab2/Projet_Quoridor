@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
  * managing resource bundles, locale settings, and translating UI strings to support multiple
  * languages.
  */
-public class I18n {
+public final class I18n {
   private static final String BUNDLE_NAME = "international/messages";
   private static ResourceBundle bundle;
   private static Locale currentLocale;
@@ -49,12 +49,16 @@ public class I18n {
    * @param params more text
    * @return text depending on the language choosen
    */
-  public static String get(String key, String... params) {
-    String pattern = bundle.getString(key) + " ";
-    for (String s : params) {
-      pattern += s + " ";
+  public static String get(String key, Object... params) {
+    String pattern = bundle.getString(key);
+    if (params.length > 0 && pattern.contains("{0}")) {
+      return java.text.MessageFormat.format(pattern, params);
     }
-    return pattern;
+    StringBuilder sb = new StringBuilder(pattern);
+    for (Object s : params) {
+      sb.append(" ").append(s);
+    }
+    return sb.toString();
   }
 
   /** Constructs a new I18n manager. */
