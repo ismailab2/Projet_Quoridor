@@ -25,7 +25,10 @@ public class CliLauncher implements AppLauncher {
       if (loadFile != null) {
         engine.loadGame(loadFile);
       }
-      new CliApp(engine).run();
+      final CliApp cli = new CliApp(engine);
+      if (System.getProperty("quoridor.test") == null) {
+        cli.run();
+      }
     } catch (final Exception e) {
       if (Logger.getInstance().isErrorEnabled()) {
         Logger.getInstance().error("CLI Error: " + e.getMessage());

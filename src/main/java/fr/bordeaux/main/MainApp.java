@@ -28,14 +28,18 @@ public final class MainApp {
 
       final AppLauncher launcher = AppLauncherFactory.create(mode);
       launcher.launch(args, config);
-      System.exit(0);
+      if (System.getProperty("quoridor.test") == null) {
+        System.exit(0);
+      }
 
     } catch (IllegalArgumentException exception) {
       if (Logger.getInstance().isErrorEnabled()) {
         Logger.getInstance().error("{0}", exception.getMessage());
       }
       OptionsParser.printHelp();
-      System.exit(1);
+      if (System.getProperty("quoridor.test") == null) {
+        System.exit(1);
+      }
     }
   }
 }
