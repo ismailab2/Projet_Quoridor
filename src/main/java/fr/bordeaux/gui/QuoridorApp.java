@@ -1,11 +1,12 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.main.GuiLauncher;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -29,7 +30,7 @@ public class QuoridorApp extends Application {
 
   /** Default constructor. */
   public QuoridorApp() {
-    super();
+    Logger.getInstance().debug("Instantiating QuoridorApp");
   }
 
   /**
@@ -83,7 +84,7 @@ public class QuoridorApp extends Application {
    *
    * @param panel the panel to configure
    */
-  private void setupPanelSize(final PlayerPanel panel) {
+  static void setupPanelSize(final PlayerPanel panel) {
     panel.setMinWidth(PANEL_WIDTH);
     panel.setMaxWidth(PANEL_WIDTH);
     panel.setPrefWidth(PANEL_WIDTH);
@@ -95,7 +96,7 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to wrap
    * @return a StackPane containing the board view
    */
-  private StackPane buildBoardContainer(final BoardView boardView) {
+  static StackPane buildBoardContainer(final BoardView boardView) {
     final StackPane container = new StackPane(boardView);
     container.setAlignment(Pos.CENTER);
     BorderPane.setAlignment(container, Pos.CENTER);
@@ -110,7 +111,7 @@ public class QuoridorApp extends Application {
    * @param panels array of player panels
    * @return the configured BorderPane
    */
-  private BorderPane buildRootLayout(
+  static BorderPane buildRootLayout(
       final MainMenuBar menuBar, final StackPane boardContainer, final PlayerPanel[] panels) {
 
     final BorderPane root = new BorderPane();
@@ -196,7 +197,7 @@ public class QuoridorApp extends Application {
   private void resizeBoard(final BoardView boardView, final Scene scene, final double menuHeight) {
     final double availableWidth = scene.getWidth() - (PANEL_WIDTH + DEFAULT_MARGIN * 2) * 2;
     final double availableHeight = scene.getHeight() - menuHeight;
-    final double size = Math.min(availableWidth, availableHeight);
+    final double size = Math.min(availableWidth, availableHeight) - 1.0; // 1.0px safety margin
     if (size > 0.0) {
       boardView.setPrefSize(size, size);
       boardView.setMinSize(size, size);
@@ -278,14 +279,14 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to redraw after an AI move
    */
   void setupAITurnListener(final GameEngine engine, final BoardView boardView) {
-    final AtomicBoolean aiComputing = new AtomicBoolean(false);
+    final AtomicReference<Player> aiComputing = new AtomicReference<>();
     final GameState state = engine.getState();
 
     final Runnable aiTurnTask =
         () -> {
           if (!state.isGameOver() && !state.isPaused()) {
             final Player currentPlayer = state.getCurrentPlayer();
-            if (currentPlayer.isAI() && aiComputing.compareAndSet(false, true)) {
+            if (currentPlayer.isAI() && aiComputing.compareAndSet(null, currentPlayer)) {
               final Thread aiThread =
                   new Thread(
                       () -> {
@@ -293,12 +294,12 @@ public class QuoridorApp extends Application {
                         try {
                           move = currentPlayer.getNextMove(state);
                         } catch (final Exception e) {
-                          e.printStackTrace();
+                          Logger.getInstance().error("AI move computation failed", e);
                         } finally {
                           final Move finalMove = move;
                           Platform.runLater(
                               () -> {
-                                aiComputing.set(false);
+                                aiComputing.compareAndSet(currentPlayer, null);
                                 if (finalMove != null
                                     && !state.isGameOver()
                                     && !state.isPaused()
@@ -319,11 +320,7 @@ public class QuoridorApp extends Application {
     Platform.runLater(aiTurnTask);
   }
 
-  /**
-   * Called when the JavaFX application is stopped. Saves configuration or performs cleanup tasks.
-   */
+  /** Called when the JavaFX application is stopped. */
   @Override
-  public void stop() {
-    ConfigManager.getInstance().save();
-  }
+  public void stop() {}
 }

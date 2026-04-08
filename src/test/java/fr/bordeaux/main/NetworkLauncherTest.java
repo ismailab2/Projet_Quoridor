@@ -155,6 +155,17 @@ class NetworkLauncherTest {
     verify(client).serverList();
   }
 
+  @Test
+  void testLaunch_ClientJoinDefaultHostAndPort() {
+    setInput("join\nquit\n");
+    when(config.getOption("server", "false")).thenReturn("false");
+    when(client.join("localhost", 12345)).thenReturn(true);
+
+    launcher.launch(new String[] {}, config);
+
+    verify(client).join("localhost", 12345);
+  }
+
   /**
    * Verifies behavior when a network connection fails.
    *

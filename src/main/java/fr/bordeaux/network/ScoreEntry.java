@@ -15,7 +15,7 @@ public class ScoreEntry {
    * @param playerId player identifier
    * @param playerName player name
    */
-  public ScoreEntry(String playerId, String playerName) {
+  public ScoreEntry(final String playerId, final String playerName) {
     this.playerId = playerId;
     this.playerName = playerName;
     this.wins = 0;
@@ -58,7 +58,7 @@ public class ScoreEntry {
    *
    * @param playerName new player name
    */
-  public void setPlayerName(String playerName) {
+  public void setPlayerName(final String playerName) {
     this.playerName = playerName;
   }
 

@@ -128,9 +128,9 @@ public class MctsNode {
     Move result = null;
     if (!children.isEmpty()) {
       MctsNode bestNode = children.getFirst();
-      for (final MctsNode n : children) {
-        if (n.visits > bestNode.visits) {
-          bestNode = n;
+      for (final MctsNode child : children) {
+        if (child.visits > bestNode.visits) {
+          bestNode = child;
         }
       }
       result = bestNode.move;
@@ -199,22 +199,22 @@ public class MctsNode {
 
     final List<Move> legalMoves = new ArrayList<>(12);
 
-    for (final int[] dir : DIRECTIONS) {
-      final Position stepPos = new Position(curX + dir[0], curY + dir[1]);
+    for (final int[] direction : DIRECTIONS) {
+      final Position stepPos = new Position(curX + direction[0], curY + direction[1]);
       final Move stepMove = Move.pawn(currentPos, stepPos);
       if (RuleChecker.isMoveLegal(temp, stepMove)) {
         legalMoves.add(stepMove);
       }
 
-      final Position jumpPos = new Position(curX + (dir[0] * 2), curY + (dir[1] * 2));
+      final Position jumpPos = new Position(curX + (direction[0] * 2), curY + (direction[1] * 2));
       final Move jumpMove = Move.pawn(currentPos, jumpPos);
       if (RuleChecker.isMoveLegal(temp, jumpMove)) {
         legalMoves.add(jumpMove);
       }
     }
 
-    for (final int[] dir : DIAG_DIRS) {
-      final Position diagPos = new Position(curX + dir[0], curY + dir[1]);
+    for (final int[] direction : DIAG_DIRS) {
+      final Position diagPos = new Position(curX + direction[0], curY + direction[1]);
       final Move diagonalStep = Move.pawn(currentPos, diagPos);
       if (RuleChecker.isMoveLegal(temp, diagonalStep)) {
         legalMoves.add(diagonalStep);

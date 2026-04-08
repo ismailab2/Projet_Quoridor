@@ -4,11 +4,12 @@ import fr.bordeaux.config.ConfigManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.MessageFormat;
 
 /**
  * Simple logger for the Quoridor application.
  *
- * <p>Supports console or file output (INFO, DEBUG, VERBOSE, ERROR).
+ * <p>Supports console or file output (INFO, WARNING, DEBUG, VERBOSE, ERROR).
  *
  * <p>Thread-safe Singleton pattern.
  */
@@ -24,15 +25,19 @@ public final class Logger {
   /** Couleur DEBUG */
   private static final String YELLOW = "\u001B[33m";
 
-  /** Couleur VERBOSE */
+  /** Couleur WARNING */
+  private static final String YELLOW_BOLD = "\u001B[33;1m";
+
+  /** Couleur VERBOSE / TRACE */
   private static final String GREEN = "\u001B[32m";
 
   /** Couleur ERROR */
   private static final String RED = "\u001B[31m";
 
+  /** Singleton instance of the logger. */
   private static Logger instance;
 
-  /** Flux de sortie */
+  /** Flux de sortie (file or System.out) */
   private final PrintStream writer;
 
   /** Indique si le mode debug est actif */
@@ -43,8 +48,7 @@ public final class Logger {
 
   /** Constructeur privé (console). Initialise le logger avec une sortie standard. */
   private Logger() {
-    this.writer = System.out;
-    refreshConfig();
+    this.writer = null;
   }
 
   /**
@@ -58,13 +62,12 @@ public final class Logger {
     try {
       final File file = new File(System.getProperty("user.home"), logFile);
       out = new PrintStream(file);
-    } catch (IOException e) {
-      System.out.println("Erreur création fichier log, fallback console");
-      out = System.out;
+    } catch (final IOException exception) {
+      System.err.println("Erreur création fichier log, fallback console");
+      out = null;
     }
 
     this.writer = out;
-    refreshConfig();
   }
 
   /**
@@ -75,6 +78,7 @@ public final class Logger {
   public static synchronized Logger getInstance() {
     if (instance == null) {
       instance = new Logger();
+      instance.refreshConfig();
     }
     return instance;
   }
@@ -88,6 +92,7 @@ public final class Logger {
   public static synchronized Logger getInstance(final String logFile) {
     if (instance == null) {
       instance = new Logger(logFile);
+      instance.refreshConfig();
     }
     return instance;
   }
@@ -115,7 +120,30 @@ public final class Logger {
    */
   public void info(final String format, final Object... args) {
     if (isInfoEnabled()) {
-      log("[INFO]", java.text.MessageFormat.format(format, args), CYAN);
+      log("[INFO]", MessageFormat.format(format, args), CYAN);
+    }
+  }
+
+  /**
+   * Log un message de niveau WARNING.
+   *
+   * @param message message à afficher
+   */
+  public void warning(final String message) {
+    if (isWarningEnabled()) {
+      log("[WARNING]", message, YELLOW_BOLD);
+    }
+  }
+
+  /**
+   * Log un message de niveau WARNING avec des paramètres.
+   *
+   * @param format le format du message
+   * @param args les arguments du message
+   */
+  public void warning(final String format, final Object... args) {
+    if (isWarningEnabled()) {
+      log("[WARNING]", MessageFormat.format(format, args), YELLOW_BOLD);
     }
   }
 
@@ -138,7 +166,7 @@ public final class Logger {
    */
   public void debug(final String format, final Object... args) {
     if (isDebugEnabled()) {
-      log("[DEBUG]", java.text.MessageFormat.format(format, args), YELLOW);
+      log("[DEBUG]", MessageFormat.format(format, args), YELLOW);
     }
   }
 
@@ -161,7 +189,18 @@ public final class Logger {
    */
   public void verbose(final String format, final Object... args) {
     if (isVerboseEnabled()) {
-      log("[VERBOSE]", java.text.MessageFormat.format(format, args), GREEN);
+      log("[VERBOSE]", MessageFormat.format(format, args), GREEN);
+    }
+  }
+
+  /**
+   * Log un message de niveau TRACE.
+   *
+   * @param message message très détaillé
+   */
+  public void trace(final String message) {
+    if (isVerboseEnabled()) {
+      log("[TRACE]", message, GREEN);
     }
   }
 
@@ -184,7 +223,7 @@ public final class Logger {
    */
   public void error(final String format, final Object... args) {
     if (isErrorEnabled()) {
-      log("[ERROR]", java.text.MessageFormat.format(format, args), RED);
+      log("[ERROR]", MessageFormat.format(format, args), RED);
     }
   }
 
@@ -192,11 +231,14 @@ public final class Logger {
    * Log une erreur avec exception associée.
    *
    * @param message message d'erreur
-   * @param e exception associée
+   * @param exception exception associée
    */
-  public void error(final String message, final Exception e) {
+  public void error(final String message, final Throwable exception) {
     if (isErrorEnabled()) {
-      log("[ERROR]", message + " | " + e.getClass().getSimpleName(), RED);
+      log(
+          "[ERROR]",
+          message + " | " + exception.getClass().getSimpleName() + ": " + exception.getMessage(),
+          RED);
     }
   }
 
@@ -224,7 +266,14 @@ public final class Logger {
    * @param color couleur ANSI associée
    */
   private void log(final String level, final String message, final String color) {
-    writer.println(color + level + RESET + " " + message);
+    PrintStream stream = (writer != null) ? writer : System.out;
+    // Si on écrit sur la sortie standard (console), on bascule ERROR/WARNING sur stderr
+    if (writer == null && (level.contains("ERROR") || level.contains("WARNING"))) {
+      stream = System.err;
+    }
+    if (stream != null) {
+      stream.println(color + level + RESET + " " + message);
+    }
   }
 
   // =========================================================
@@ -246,6 +295,15 @@ public final class Logger {
    * @return true (toujours actif)
    */
   public boolean isInfoEnabled() {
+    return true;
+  }
+
+  /**
+   * Indique si le niveau WARNING est activé.
+   *
+   * @return true (toujours actif)
+   */
+  public boolean isWarningEnabled() {
     return true;
   }
 

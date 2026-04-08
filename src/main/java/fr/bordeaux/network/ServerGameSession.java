@@ -8,11 +8,20 @@ import java.util.List;
 /** Represents one active Quoridor game hosted by the server. */
 public class ServerGameSession {
 
+  /** Unique identifier for the game session. */
   private final String gameId;
+
+  /** Current state of the game. */
   private final GameState gameState;
+
+  /** Engine used to process moves and enforce rules. */
   private final GameEngine gameEngine;
+
+  /** List of connected client sessions involved in this game. */
   private final List<ClientSession> players;
-  ConfigManager config = ConfigManager.getInstance();
+
+  /** Configuration manager used to retrieve game settings. */
+  private final ConfigManager config = ConfigManager.getInstance();
 
   /**
    * Creates a new server-side game session for the given connected players.
@@ -20,7 +29,7 @@ public class ServerGameSession {
    * @param gameId identifier of the game session
    * @param sessions client sessions participating in the game
    */
-  public ServerGameSession(String gameId, List<ClientSession> sessions) {
+  public ServerGameSession(final String gameId, final List<ClientSession> sessions) {
     if (sessions.size() != 2 && sessions.size() != 4) {
       throw new IllegalArgumentException(
           "ServerGameSession requires 2 or 4 players, but got: " + sessions.size());
@@ -29,8 +38,8 @@ public class ServerGameSession {
     this.gameId = gameId;
     this.players = new ArrayList<>(sessions);
 
-    Board board = new Board(9);
-    List<Player> gamePlayers = new ArrayList<>();
+    final Board board = new Board(9);
+    final List<Player> gamePlayers = new ArrayList<>();
 
     if (sessions.size() >= 1) {
       gamePlayers.add(new HumanPlayer(sessions.get(0).getName(), new Position(0, 4), Color.WHITE));
@@ -46,11 +55,11 @@ public class ServerGameSession {
     }
 
     this.gameState = new GameState(board, gamePlayers, 0);
-    boolean blitz = config.getBoolean("blitz", false);
-    boolean verbose = config.getBoolean("verbose", false);
-    boolean contest = config.getBoolean("contest", false);
-    boolean debug = config.getBoolean("debug", false);
-    int initialWalls = config.getInt("initialWalls", 20);
+    final boolean blitz = config.getBoolean("blitz", false);
+    final boolean verbose = config.getBoolean("verbose", false);
+    final boolean contest = config.getBoolean("contest", false);
+    final boolean debug = config.getBoolean("debug", false);
+    final int initialWalls = config.getInt("initialWalls", 20);
     this.gameEngine = new GameEngine(gameState, blitz, verbose, contest, debug, initialWalls);
   }
 
@@ -96,8 +105,8 @@ public class ServerGameSession {
    * @param playerId player identifier
    * @return true if the player is in the game
    */
-  public boolean containsPlayer(String playerId) {
-    for (ClientSession player : players) {
+  public boolean containsPlayer(final String playerId) {
+    for (final ClientSession player : players) {
       if (player.getId().equals(playerId)) {
         return true;
       }
@@ -111,8 +120,8 @@ public class ServerGameSession {
    * @param playerId player identifier
    * @return the opponent client session, or null if not found
    */
-  public ClientSession getOpponent(String playerId) {
-    for (ClientSession player : players) {
+  public ClientSession getOpponent(final String playerId) {
+    for (final ClientSession player : players) {
       if (!player.getId().equals(playerId)) {
         return player;
       }
@@ -126,9 +135,9 @@ public class ServerGameSession {
    * @param playerId player identifier
    * @return the other client sessions in turn order
    */
-  public List<ClientSession> getOtherPlayers(String playerId) {
-    List<ClientSession> others = new ArrayList<>();
-    for (ClientSession player : players) {
+  public List<ClientSession> getOtherPlayers(final String playerId) {
+    final List<ClientSession> others = new ArrayList<>();
+    for (final ClientSession player : players) {
       if (!player.getId().equals(playerId)) {
         others.add(player);
       }
@@ -142,7 +151,7 @@ public class ServerGameSession {
    * @return current player session, or null if invalid index
    */
   public ClientSession getCurrentPlayerSession() {
-    int currentIndex = gameState.getCurrentIndexPlayer();
+    final int currentIndex = gameState.getCurrentIndexPlayer();
     if (currentIndex < 0 || currentIndex >= players.size()) {
       return null;
     }
@@ -156,7 +165,7 @@ public class ServerGameSession {
    */
   public ClientSession getWinnerSession() {
     for (int i = 0; i < gameState.getPlayers().size(); i++) {
-      Player player = gameState.getPlayers().get(i);
+      final Player player = gameState.getPlayers().get(i);
       if (gameState.hasReachedGoal(player)) {
         return players.get(i);
       }
@@ -170,8 +179,8 @@ public class ServerGameSession {
    * @param playerId player identifier
    * @return true if it is this player's turn
    */
-  public boolean isPlayerTurn(String playerId) {
-    ClientSession current = getCurrentPlayerSession();
+  public boolean isPlayerTurn(final String playerId) {
+    final ClientSession current = getCurrentPlayerSession();
     return current != null && current.getId().equals(playerId);
   }
 
@@ -181,7 +190,7 @@ public class ServerGameSession {
    * @param move move to validate and apply
    * @return true if the move was legal and applied
    */
-  public boolean applyMove(Move move) {
+  public boolean applyMove(final Move move) {
     return gameEngine.play(move);
   }
 

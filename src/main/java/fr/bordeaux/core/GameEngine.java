@@ -2,7 +2,7 @@ package fr.bordeaux.core;
 
 import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.persistence.GameLoadException;
-import fr.bordeaux.util.Log;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
@@ -72,7 +72,7 @@ public class GameEngine {
   public boolean play(final Move move) {
     final GameState currentState = this.state;
     if (currentState.isGameOver() || currentState.isPaused()) {
-      Log.info("GAME OVER OR PAUSED");
+      Logger.getInstance().info("GAME OVER OR PAUSED");
       return false;
     }
 
@@ -89,8 +89,8 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      if (Log.isInfoEnabled()) {
-        Log.info("{0} won the game!", currentPlayer.getName());
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info("{0} won the game!", currentPlayer.getName());
       }
     }
     return true;
@@ -121,8 +121,8 @@ public class GameEngine {
     try {
       fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (final IOException exception) {
-      if (Log.isErrorEnabled()) {
-        Log.error("Saving error : {0}", exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("Saving error : {0}", exception.getMessage());
       }
     }
   }
@@ -141,8 +141,8 @@ public class GameEngine {
       state.loadState(loadedState);
       initializeBlitz();
     } catch (final IOException | GameLoadException exception) {
-      if (Log.isErrorEnabled()) {
-        Log.error("Erreur chargement : {0}", exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("Erreur chargement : {0}", exception.getMessage());
       }
     }
   }
@@ -160,7 +160,7 @@ public class GameEngine {
   /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
     if (state.getCurrentPlayer().isAI()) {
-      Log.info("AI cannot pause the game.");
+      Logger.getInstance().info("AI cannot pause the game.");
       return;
     }
     final boolean newPauseState = !state.isPaused();
@@ -169,10 +169,10 @@ public class GameEngine {
     if (blitzManager != null) {
       if (newPauseState) {
         blitzManager.pause();
-        Log.info("Timer Paused.");
+        Logger.getInstance().info("Timer Paused.");
       } else {
         blitzManager.start();
-        Log.info("Timer Resumed.");
+        Logger.getInstance().info("Timer Resumed.");
       }
     }
   }

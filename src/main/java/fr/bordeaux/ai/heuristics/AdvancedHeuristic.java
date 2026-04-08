@@ -129,7 +129,7 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
 
   private Player findByColor(final GameState state, final boolean isAi) {
     return state.getPlayers().stream()
-        .filter(p -> (p.getColor() == aiColor) == isAi)
+        .filter(p -> p.getColor() == aiColor == isAi)
         .findFirst()
         .orElse(null);
   }
@@ -167,11 +167,11 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
 
     final int result;
     if (startX == 0) {
-      result = (boardSize - 1) - posX;
+      result = boardSize - 1 - posX;
     } else if (startX == boardSize - 1) {
       result = posX;
     } else if (startY == 0) {
-      result = (boardSize - 1) - posY;
+      result = boardSize - 1 - posY;
     } else {
       result = posY;
     }
@@ -199,11 +199,11 @@ public class AdvancedHeuristic implements HeuristicEvaluator {
     if (startX == 0) {
       result = posX;
     } else if (startX == boardSize - 1) {
-      result = (boardSize - 1) - posX;
+      result = boardSize - 1 - posX;
     } else if (startY == 0) {
       result = posY;
     } else {
-      result = (boardSize - 1) - posY;
+      result = boardSize - 1 - posY;
     }
     return result;
   }

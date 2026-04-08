@@ -1,7 +1,9 @@
 package fr.bordeaux.ai.nn;
 
 import fr.bordeaux.ai.base.HeuristicEvaluator;
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.Board;
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Player;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -175,26 +177,26 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
   @SuppressWarnings(SUPPRESS_LOD)
   /* Prevents cluttering GameState API with too many specific delegation methods. */
   protected float[] getFeatures(final GameState state) {
-    final Player curr = state.getCurrentPlayer();
-    final Player opp = state.getPlayers().get(1 - state.getPlayers().indexOf(curr));
+    final Player current = state.getCurrentPlayer();
+    final Player opponent = state.getPlayers().get(1 - state.getPlayers().indexOf(current));
     final float boardSize = state.getBoard().getSize();
     final float maxDist = boardSize - 1.0f;
 
     // 1. Current Player Proximity: 1.0 means the player has reached the goal,
     // 0.0 means they are at the starting line.
-    final float myProx = 1.0f - (computeDistanceToWin(state, curr) / maxDist);
+    final float myProx = 1.0f - (computeDistanceToWin(state, current) / maxDist);
 
     // 2. Opponent Distance: 1.0 means the opponent is far from their goal,
     // 0.0 means they are about to win. Higher is better for the current player.
-    final float oppDist = computeDistanceToWin(state, opp) / maxDist;
+    final float opponentDist = computeDistanceToWin(state, opponent) / maxDist;
 
     // 3. Remaining Walls: Number of walls the current player has left.
-    final float currWalls = curr.getRemainingWalls() / 10.0f;
+    final float currentWalls = current.getRemainingWalls() / 10.0f;
 
     // 4. Remaining Walls: Number of walls the opponent has left.
-    final float oppWalls = opp.getRemainingWalls() / 10.0f;
+    final float opponentWalls = opponent.getRemainingWalls() / 10.0f;
 
-    return new float[] {myProx, oppDist, currWalls, oppWalls};
+    return new float[] {myProx, opponentDist, currentWalls, opponentWalls};
   }
 
   /** Releases resources associated with the TensorFlow graph and session. */

@@ -1,6 +1,6 @@
 package fr.bordeaux.network;
 
-import fr.bordeaux.util.Log;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -66,11 +66,11 @@ public class ServerBroadcaster implements Runnable {
         Thread.sleep(delayMs);
       }
     } catch (final IOException e) {
-      if (Log.isErrorEnabled()) {
-        Log.error("UDP Broadcast I/O error: {0}", e.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("UDP Broadcast I/O error: {0}", e.getMessage());
       }
     } catch (final InterruptedException e) {
-      Log.info("UDP Broadband interrupted.");
+      Logger.getInstance().info("UDP Broadband interrupted.");
       Thread.currentThread().interrupt();
     }
   }

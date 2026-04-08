@@ -5,10 +5,10 @@ import fr.bordeaux.core.*;
 import java.util.List;
 
 /** Factory used to create and configure a GameEngine. */
-public class GameEngineFactory {
+public final class GameEngineFactory {
 
   /** Default constructor. */
-  public GameEngineFactory() {}
+  private GameEngineFactory() {}
 
   /**
    * Creates a GameEngine from the given configuration.

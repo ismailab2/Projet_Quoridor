@@ -20,11 +20,22 @@ public final class GameSaver {
   /** The size of the board (usually 9x9). */
   private static int size = 9;
 
+  /** Default board size. */
   private static final int DEFAULT_SIZE = 9;
+
+  /** Character for vertical walls. */
   private static final char VERTICAL_WALL_CHAR = '|';
+
+  /** Character for horizontal walls. */
   private static final char HORIZONTAL_WALL_CHAR = '_';
+
+  /** Character for empty cells. */
   private static final char EMPTY_CELL_CHAR = '.';
+
+  /** Starting character for coordinate column mapping. */
   private static final char POSITION_START_CHAR = 'a';
+
+  /** Starting character for player index digits. */
   private static final char PLAYER_INDEX_START_CHAR = '1';
 
   /** Private constructor to prevent instantiation. */
@@ -198,10 +209,10 @@ public final class GameSaver {
   /**
    * Saves AI player settings to the output file.
    *
-   * @param w The {@link PrintWriter} used to write to the file.
-   * @param g The current game state.
-   * @param newP The AI player whose settings are being saved.
-   * @param i The index of the player (used for formatting the key).
+   * @param writer The {@link PrintWriter} used to write to the file.
+   * @param state The current game state.
+   * @param aiPlayer The AI player whose settings are being saved.
+   * @param index The index of the player (used for formatting the key).
    */
   private static void saveAiSettings(
       final PrintWriter writer, final GameState state, final AiPlayer aiPlayer, final int index) {
@@ -219,7 +230,7 @@ public final class GameSaver {
   /**
    * Saves game parameters and player info. Writes the "[settings]" header and configurations.
    *
-   * @param w the {@link PrintWriter} used to write to the file
+   * @param writer the {@link PrintWriter} used to write to the file
    * @param engine the engine providing the configuration
    * @param state the game state containing player data
    */
@@ -237,7 +248,7 @@ public final class GameSaver {
     int index = 1;
     for (final Player player : players) {
       if (player.isAI()) {
-        final AiPlayer aiPlayer = ((AiPlayer) player);
+        final AiPlayer aiPlayer = (AiPlayer) player;
         saveAiSettings(writer, state, aiPlayer, index);
       } else {
         writeLine(writer, "player-" + index + "-name", player.getName());
@@ -261,17 +272,17 @@ public final class GameSaver {
     final Move[] moves = state.getMovesPlayed();
     final List<Player> players = state.getPlayers();
     final int playersCount = players.size();
-    int currentP = 0;
+    int currentPlayerIndex = 0;
 
     for (int index = moves.length - 1; index >= 0; index--) {
       final Move move = moves[index];
-      final String strMove = (currentP + 1) + " " + formatMove(move) + ";";
-      if (currentP == playersCount - 1) {
+      final String strMove = (currentPlayerIndex + 1) + " " + formatMove(move) + ";";
+      if (currentPlayerIndex == playersCount - 1) {
         writer.println(strMove);
       } else {
         writer.print(strMove + " ");
       }
-      currentP = (currentP + 1) % playersCount;
+      currentPlayerIndex = (currentPlayerIndex + 1) % playersCount;
     }
   }
 

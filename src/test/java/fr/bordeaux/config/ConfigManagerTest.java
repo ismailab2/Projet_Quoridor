@@ -13,8 +13,8 @@ public class ConfigManagerTest {
   @BeforeEach
   void setup() throws IOException {
     Path tempDir = Files.createTempDirectory("test-config");
-    System.setProperty("user.home", tempDir.toString());
     configFile = tempDir.resolve(".quoridorrc");
+    System.setProperty("quoridor.config.file", configFile.toString());
     resetSingleton();
     deleteConfigFile();
   }

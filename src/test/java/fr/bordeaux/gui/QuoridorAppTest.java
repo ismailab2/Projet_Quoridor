@@ -5,10 +5,13 @@ import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -222,5 +225,190 @@ class QuoridorAppTest extends ApplicationTest {
   @Test
   void testSetupAiTurnListener_PlayFailed() throws Exception {
     verifyAiTurnBranch(false, false, false, false, false, true, false);
+  }
+
+  @Test
+  void testBuildRootLayoutVariations() {
+    ActionDispatcher dispatcher = mock(ActionDispatcher.class);
+    StackPane board = new StackPane();
+
+    GameState state = mock(GameState.class);
+    Player player = mock(Player.class);
+    when(state.getPlayers()).thenReturn(List.of(player, player, player, player));
+    when(player.getColor()).thenReturn(fr.bordeaux.core.Color.WHITE);
+    when(player.getRemainingWalls()).thenReturn(10);
+
+    interact(
+        () -> {
+          MainMenuBar menu = new MainMenuBar(dispatcher);
+          // 2 players
+          PlayerPanel[] p2 = {new PlayerPanel("P1", state, 0), new PlayerPanel("P2", state, 1)};
+          BorderPane r2 = QuoridorApp.buildRootLayout(menu, board, p2);
+          assertEquals(1, ((VBox) r2.getLeft()).getChildren().size());
+          assertEquals(1, ((VBox) r2.getRight()).getChildren().size());
+
+          // 3 players
+          PlayerPanel[] p3 = {
+            new PlayerPanel("P1", state, 0),
+            new PlayerPanel("P2", state, 1),
+            new PlayerPanel("P3", state, 2)
+          };
+          BorderPane r3 = QuoridorApp.buildRootLayout(menu, board, p3);
+          assertEquals(2, ((VBox) r3.getLeft()).getChildren().size()); // 0 and 2
+          assertEquals(1, ((VBox) r3.getRight()).getChildren().size()); // 1
+
+          // 4 players
+          PlayerPanel[] p4 = {
+            new PlayerPanel("P1", state, 0),
+            new PlayerPanel("P2", state, 1),
+            new PlayerPanel("P3", state, 2),
+            new PlayerPanel("P4", state, 3)
+          };
+          BorderPane r4 = QuoridorApp.buildRootLayout(menu, board, p4);
+          assertEquals(2, ((VBox) r4.getLeft()).getChildren().size());
+          assertEquals(2, ((VBox) r4.getRight()).getChildren().size());
+        });
+  }
+
+  @Test
+  void testSetupGameOverListener_SinglePopup() {
+    GameEngine engine = mock(GameEngine.class);
+    GameState state = mock(GameState.class);
+    when(engine.getState()).thenReturn(state);
+    when(state.isGameOver()).thenReturn(true);
+    when(state.getWinner()).thenReturn(Optional.of(mock(Player.class)));
+
+    StackPane container = new StackPane();
+    // Wrap in scene to avoid NPE in focus properties
+    interact(() -> new Scene(container));
+
+    QuoridorApp app = new QuoridorApp();
+    app.setupGameOverListener(engine, container);
+
+    ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+    verify(state).addListener(captor.capture());
+
+    // Call twice
+    interact(
+        () -> {
+          captor.getValue().run();
+          captor.getValue().run();
+        });
+    WaitForAsyncUtils.waitForFxEvents();
+
+    // Only one overlay
+    assertEquals(1, container.getChildren().size());
+  }
+
+  @Test
+  void testSetupGameOverListener_ResetPopupShown() {
+    GameEngine engine = mock(GameEngine.class);
+    GameState state = mock(GameState.class);
+    when(engine.getState()).thenReturn(state);
+
+    // First call: gameOver=true
+    when(state.isGameOver()).thenReturn(true);
+    when(state.getWinner()).thenReturn(Optional.of(mock(Player.class)));
+
+    StackPane container = new StackPane();
+    QuoridorApp app = new QuoridorApp();
+    app.setupGameOverListener(engine, container);
+
+    ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+    verify(state).addListener(captor.capture());
+
+    interact(() -> captor.getValue().run());
+    WaitForAsyncUtils.waitForFxEvents();
+    assertEquals(1, container.getChildren().size());
+
+    // Reset overlay
+    interact(() -> container.getChildren().clear());
+
+    // Second call: gameOver=false (resets popupShown)
+    when(state.isGameOver()).thenReturn(false);
+    interact(() -> captor.getValue().run());
+
+    // Third call: gameOver=true (should show again)
+    when(state.isGameOver()).thenReturn(true);
+    interact(() -> captor.getValue().run());
+    WaitForAsyncUtils.waitForFxEvents();
+
+    assertEquals(1, container.getChildren().size());
+  }
+
+  @Test
+  void testSetupAiTurnListener_AiComputingGuard() throws Exception {
+    GameEngine engine = mock(GameEngine.class);
+    GameState state = mock(GameState.class);
+    BoardView boardView = mock(BoardView.class);
+    when(engine.getState()).thenReturn(state);
+
+    Player ai = mock(Player.class);
+    when(ai.isAI()).thenReturn(true);
+    when(state.getCurrentPlayer()).thenReturn(ai);
+    when(state.isGameOver()).thenReturn(false);
+    when(state.isPaused()).thenReturn(false);
+
+    // AI will block to simulate long computation
+    when(ai.getNextMove(any()))
+        .thenAnswer(
+            inv -> {
+              Thread.sleep(500);
+              return DEFAULT_MOVE;
+            });
+
+    QuoridorApp app = new QuoridorApp();
+    app.setupAITurnListener(engine, boardView);
+
+    ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+    verify(state, atLeastOnce()).addListener(captor.capture());
+
+    // Trigger manually.
+    // Atomic compareAndSet should ensure only one is actually computing.
+    interact(
+        () -> {
+          captor.getValue().run();
+          captor.getValue().run();
+        });
+
+    // Check that getNextMove was called exactly once despite multiple task triggers
+    Thread.sleep(100);
+    verify(ai, times(1)).getNextMove(any());
+  }
+
+  @Test
+  void testSetupAiTurnListener_AiException() throws Exception {
+    GameEngine engine = mock(GameEngine.class);
+    GameState state = mock(GameState.class);
+    BoardView boardView = mock(BoardView.class);
+    when(engine.getState()).thenReturn(state);
+
+    Player ai = mock(Player.class);
+    when(ai.isAI()).thenReturn(true);
+    when(state.getCurrentPlayer()).thenReturn(ai);
+    when(state.isGameOver()).thenReturn(false);
+    when(state.isPaused()).thenReturn(false);
+
+    when(ai.getNextMove(any())).thenThrow(new RuntimeException("AI Error"));
+
+    QuoridorApp app = new QuoridorApp();
+    app.setupAITurnListener(engine, boardView);
+
+    ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+    verify(state, atLeastOnce()).addListener(captor.capture());
+
+    interact(() -> captor.getValue().run());
+
+    // Give it time to run the thread
+    Thread.sleep(200);
+
+    // Ensure it didn't crash the app and didn't call play
+    verify(engine, never()).play(any());
+  }
+
+  @Test
+  void testStop() {
+    QuoridorApp app = new QuoridorApp();
+    assertDoesNotThrow(() -> app.stop());
   }
 }

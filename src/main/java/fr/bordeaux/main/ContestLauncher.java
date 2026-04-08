@@ -5,6 +5,7 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.persistence.GameLoader;
+import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,12 +27,12 @@ public final class ContestLauncher implements AppLauncher {
     final String filePath = config.getContestFile();
 
     if (filePath == null || filePath.isBlank()) {
-      System.err.println("[contest] No position file specified. Use: --contest <file>");
+      Logger.getInstance().error("[contest] No position file specified. Use: --contest <file>");
     }
 
     assert filePath != null;
     if (!Files.exists(Path.of(filePath))) {
-      System.err.println("[contest] File not found: " + filePath);
+      Logger.getInstance().error("[contest] File not found: " + filePath);
     }
 
     try {
@@ -39,19 +40,20 @@ public final class ContestLauncher implements AppLauncher {
       final GameState state = GameLoader.loadGame(engine, filePath);
       final Move best = computeBestMove(state, config);
       System.out.println(moveToString(best));
-    } catch (final IOException e) {
-      System.err.println("[contest] I/O error reading file: " + e.getMessage());
+    } catch (final IOException exception) {
+      Logger.getInstance().error("[contest] I/O error reading file: " + exception.getMessage());
       System.exit(1);
-    } catch (final GameLoadException e) {
-      System.err.println(
-          "[contest] Invalid save file ["
-              + e.getErrorType()
-              + "] at line "
-              + e.getLineNumber()
-              + ": "
-              + e.getMessage());
-    } catch (final Exception e) {
-      System.err.println("[contest] Unexpected error: " + e.getMessage());
+    } catch (final GameLoadException exception) {
+      Logger.getInstance()
+          .error(
+              "[contest] Invalid save file ["
+                  + exception.getErrorType()
+                  + "] at line "
+                  + exception.getLineNumber()
+                  + ": "
+                  + exception.getMessage());
+    } catch (final Exception exception) {
+      Logger.getInstance().error("[contest] Unexpected error: " + exception.getMessage());
     }
   }
 
@@ -75,12 +77,16 @@ public final class ContestLauncher implements AppLauncher {
 
     try {
       return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, false);
-    } catch (final Exception e) {
-      System.err.println(
-          "[contest] MCTS failed (" + e.getMessage() + "), falling back to first legal move.");
+    } catch (final Exception exception) {
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance()
+            .error(
+                "[contest] MCTS failed ({0}), falling back to first legal move.",
+                exception.getMessage());
+      }
       final List<Move> legal = state.generateLegalMoves();
       if (legal.isEmpty()) {
-        throw new IllegalStateException("No legal moves available.", e);
+        throw new IllegalStateException("No legal moves available.", exception);
       }
       return legal.get(0);
     }
@@ -94,8 +100,8 @@ public final class ContestLauncher implements AppLauncher {
     return posToString(move.getTo()) + orientation;
   }
 
-  private static String posToString(final Position p) {
-    final char letter = (char) ('a' + p.getX());
-    return String.valueOf(letter) + p.getY();
+  private static String posToString(final Position position) {
+    final char letter = (char) ('a' + position.getX());
+    return String.valueOf(letter) + position.getY();
   }
 }

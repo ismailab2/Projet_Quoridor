@@ -1,10 +1,16 @@
 package fr.bordeaux.gui;
 
-import fr.bordeaux.core.*;
+import fr.bordeaux.core.Board;
+import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Orientation;
+import fr.bordeaux.core.Player;
+import fr.bordeaux.core.Position;
+import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
 import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -13,7 +19,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import javafx.scene.control.Label;
 
 /**
  * Graphical Quoridor board. Draws cells, pawns, walls and handles interactions. Board redraws
@@ -27,21 +32,43 @@ public final class BoardView extends GridPane {
   /** References to all cell containers on the board. */
   private final StackPane[][] cells;
 
-  private final Label errorLabel = new Label();
-
+  /** Size factor for pawns relative to cell size. */
   private static final double PAWN_SIZE_FACTOR = 0.6;
-  private static final double WALL_ARC = 4.0;
-  private static final double PAWN_ARC = 15.0;
-  private static final double PAWN_STROKE_WIDTH = 5.0;
-  private static final double SHADOW_RADIUS = 5.0;
-  private static final double PULSE_DURATION = 0.5;
-  private static final double PULSE_MIN_OPACITY = 0.2;
-  private static final double PREVIEW_OPACITY = 0.4;
-  private static final int DEFAULT_CELL_SIZE = 100;
-  private static final int MIN_WALL_THICKNESS = 10;
-  private static final int WALL_THICKNESS_RATIO = 10;
 
+  /** Arc radius for rounded wall corners. */
+  private static final double WALL_ARC = 4.0;
+
+  /** Arc radius for rounded pawn corners. */
+  private static final double PAWN_ARC = 15.0;
+
+  /** Width of the pawn's border stroke. */
+  private static final double PAWN_STROKE_WIDTH = 5.0;
+
+  /** Radius for the pawn's drop shadow effect. */
+  private static final double SHADOW_RADIUS = 5.0;
+
+  /** Duration of the pulse animation in seconds. */
+  private static final double PULSE_DURATION = 0.5;
+
+  /** Minimum opacity during the pulse animation. */
+  private static final double PULSE_MIN_OPACITY = 0.2;
+
+  /** Opacity for the wall preview highlight. */
+  private static final double PREVIEW_OPACITY = 0.4;
+
+  /** Default size of a cell if dimensions are unknown. */
+  private static final int DEFAULT_CELL_SIZE = 100;
+
+  /** Minimum thickness of walls in pixels. */
+  private static final double MIN_WALL_THICKNESS = 4.0;
+
+  /** Ratio of cell size to wall thickness. */
+  private static final double WALL_THICKNESS_RATIO = 8.0;
+
+  /** Color used for placed walls. */
   private static final Color WALL_COLOR = Color.rgb(101, 67, 33);
+
+  /** semi-transparent color for wall preview. */
   private static final Color PREVIEW_COLOR = Color.rgb(139, 69, 19, PREVIEW_OPACITY);
 
   /**
@@ -52,23 +79,17 @@ public final class BoardView extends GridPane {
   public BoardView(final GameEngine engine) {
     super();
     this.engine = engine;
-
-      // Style du label d'erreur
-      errorLabel.setTextFill(Color.RED);
-      errorLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
-    //dans le GridPane en première ligne sur toute la largeur
-      add(errorLabel, 0, 0, engine.getState().getBoard().getSize(), 1);
     final GameState state = engine.getState();
     final int size = state.getBoard().getSize();
     cells = new StackPane[size][size];
     this.widthProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
+            (observable, oldValue, newValue) -> {
               drawBoard();
             });
     this.heightProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
+            (observable, oldValue, newValue) -> {
               drawBoard();
             });
     state.addListener(
@@ -86,25 +107,34 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
     final int size = board.getSize();
-    final int cellSize = getCellSize();
+    final double boardSize = size * DEFAULT_CELL_SIZE;
+    final double percent = 100.0 / size;
     for (int index = 0; index < size; index++) {
-      getColumnConstraints().add(new ColumnConstraints(cellSize));
-      getRowConstraints().add(new RowConstraints(cellSize));
+      final ColumnConstraints columnConstraints = new ColumnConstraints();
+      columnConstraints.setPercentWidth(percent);
+      columnConstraints.setHalignment(HPos.CENTER);
+      getColumnConstraints().add(columnConstraints);
+
+      final RowConstraints rowConstraints = new RowConstraints();
+      rowConstraints.setPercentHeight(percent);
+      rowConstraints.setValignment(VPos.CENTER);
+      getRowConstraints().add(rowConstraints);
     }
+    final double cellSize = getCellSize();
     for (int row = 0; row < size; row++) {
       for (int col = 0; col < size; col++) {
         final StackPane cell = new StackPane();
-        cell.setPrefSize(cellSize, cellSize);
         cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+        cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         cells[row][col] = cell;
         final int targetRow = row;
         final int targetCol = col;
         cell.setOnMouseClicked(
-            e -> {
-              if (e.getButton() == MouseButton.PRIMARY) {
+            event -> {
+              if (event.getButton() == MouseButton.PRIMARY) {
                 handleCellClick(targetRow, targetCol);
               } else {
-                handleWallClick(targetRow, targetCol, e.getButton());
+                handleWallClick(targetRow, targetCol, event.getButton());
               }
             });
         add(cell, col, row);
@@ -121,8 +151,8 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
     final Graph graph = board.getGraph();
-    final int cellSize = getCellSize();
-    final int wallThickness = getWallThickness();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
     final int size = board.getSize();
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
@@ -132,23 +162,23 @@ public final class BoardView extends GridPane {
         final int cellV2 = board.getCellId(row + 1, col + 1);
 
         if (!graph.hasEdge(cellU1, cellV1) && !graph.hasEdge(cellU2, cellV2)) {
-          final Rectangle wall = new Rectangle(cellSize * 2, wallThickness);
+          final Rectangle wall = new Rectangle(cellSize * 2.0, wallThickness);
           wall.setFill(WALL_COLOR);
           wall.setArcWidth(WALL_ARC);
           wall.setArcHeight(WALL_ARC);
           wall.setMouseTransparent(true);
           add(wall, col, row, 2, 1);
-          GridPane.setValignment(wall, VPos.BOTTOM);
+          setValignment(wall, VPos.BOTTOM);
           wall.setTranslateY(wallThickness / 2.0);
         }
         if (!graph.hasEdge(cellU1, cellU2) && !graph.hasEdge(cellV1, cellV2)) {
-          final Rectangle wall = new Rectangle(wallThickness, cellSize * 2);
+          final Rectangle wall = new Rectangle(wallThickness, cellSize * 2.0);
           wall.setFill(WALL_COLOR);
           wall.setArcWidth(WALL_ARC);
           wall.setArcHeight(WALL_ARC);
           wall.setMouseTransparent(true);
           add(wall, col, row, 1, 2);
-          GridPane.setHalignment(wall, HPos.RIGHT);
+          setHalignment(wall, HPos.RIGHT);
           wall.setTranslateX(wallThickness / 2.0);
         }
       }
@@ -157,7 +187,7 @@ public final class BoardView extends GridPane {
 
   /** Draws player pawns. Pawns listen for left click to show highlights. */
   public void drawPlayers() {
-    final int cellSize = getCellSize();
+    final double cellSize = getCellSize();
     final GameState state = engine.getState();
     final List<Player> players = state.getPlayers();
     for (final Player player : players) {
@@ -171,8 +201,7 @@ public final class BoardView extends GridPane {
       pawn.setArcHeight(PAWN_ARC);
       pawn.setStroke(Color.LIGHTGRAY);
       pawn.setStrokeWidth(PAWN_STROKE_WIDTH);
-      pawn.setEffect(
-          new javafx.scene.effect.DropShadow(SHADOW_RADIUS, javafx.scene.paint.Color.GRAY));
+      pawn.setEffect(new javafx.scene.effect.DropShadow(SHADOW_RADIUS, Color.GRAY));
 
       final fr.bordeaux.core.Color playerColor = player.getColor();
       final Color fxColor =
@@ -198,30 +227,28 @@ public final class BoardView extends GridPane {
   /** Poulse animation for the current player's pawn. */
   public void highlightCurrentPlayer() {
     final GameState state = engine.getState();
-    if (state.isGameOver()) {
-      return;
+    if (!state.isGameOver()) {
+      final Player current = state.getCurrentPlayer();
+      final Position pos = current.getPosition();
+      final int posX = pos.getX();
+      final int posY = pos.getY();
+      final StackPane cell = cells[posX][posY];
+      final Rectangle pawn =
+          cell.getChildren().stream()
+              .filter(n -> n instanceof Rectangle)
+              .map(n -> (Rectangle) n)
+              .findFirst()
+              .orElse(null);
+      if (pawn != null) {
+        final FadeTransition fadeTransition =
+            new FadeTransition(Duration.seconds(PULSE_DURATION), pawn);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(PULSE_MIN_OPACITY);
+        fadeTransition.setCycleCount(FadeTransition.INDEFINITE);
+        fadeTransition.setAutoReverse(true);
+        fadeTransition.play();
+      }
     }
-    final Player current = state.getCurrentPlayer();
-    final Position pos = current.getPosition();
-    final int posX = pos.getX();
-    final int posY = pos.getY();
-    final StackPane cell = cells[posX][posY];
-    final Rectangle pawn =
-        cell.getChildren().stream()
-            .filter(n -> n instanceof Rectangle)
-            .map(n -> (Rectangle) n)
-            .findFirst()
-            .orElse(null);
-    if (pawn == null) {
-      return;
-    }
-    final FadeTransition fadeTransition =
-        new FadeTransition(Duration.seconds(PULSE_DURATION), pawn);
-    fadeTransition.setFromValue(1.0);
-    fadeTransition.setToValue(PULSE_MIN_OPACITY);
-    fadeTransition.setCycleCount(FadeTransition.INDEFINITE);
-    fadeTransition.setAutoReverse(true);
-    fadeTransition.play();
   }
 
   /**
@@ -232,18 +259,17 @@ public final class BoardView extends GridPane {
   public void highlightAccessibleCells(final Player player) {
     final GameState state = engine.getState();
     final Player currentPlayer = state.getCurrentPlayer();
-    if (currentPlayer != player || player.isAI()) {
-      return;
-    }
-    for (final StackPane[] row : cells) {
-      for (final StackPane cell : row) {
-        cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+    if (currentPlayer == player && !player.isAI()) {
+      for (final StackPane[] row : cells) {
+        for (final StackPane cell : row) {
+          cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+        }
       }
-    }
-    for (final Position movePos : state.getLegalMoves(player)) {
-      final int posX = movePos.getX();
-      final int posY = movePos.getY();
-      cells[posX][posY].setStyle("-fx-border-color: black; -fx-background-color: lightgreen;");
+      for (final Position movePos : state.getLegalMoves(player)) {
+        final int posX = movePos.getX();
+        final int posY = movePos.getY();
+        cells[posX][posY].setStyle("-fx-border-color: black; -fx-background-color: lightgreen;");
+      }
     }
   }
 
@@ -256,18 +282,13 @@ public final class BoardView extends GridPane {
   public void handleCellClick(final int row, final int col) {
     final GameState state = engine.getState();
     final Player current = state.getCurrentPlayer();
-    if (current.isAI()) {
-        showError("AI cannot use.");
-      return;
-    }
-    final Position from = current.getPosition();
-    final Position to = new Position(row, col);
-    final Move move = Move.pawn(from, to);
-    if (engine.play(move)) {
-      drawBoard();
-    }
-    else {
-        showError("Invalide Move ! Try again please.");
+    if (!current.isAI()) {
+      final Position from = current.getPosition();
+      final Position to = new Position(row, col);
+      final Move move = Move.pawn(from, to);
+      if (engine.play(move)) {
+        drawBoard();
+      }
     }
   }
 
@@ -280,40 +301,36 @@ public final class BoardView extends GridPane {
    */
   public void handleWallClick(final int row, final int col, final MouseButton button) {
     final GameState state = engine.getState();
-    if (state.getCurrentPlayer().isAI()) {
-        showError("AI cannot place a wall.");
-      return;
-    }
-    final Orientation orientation =
-        (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
-    final Move wallMove = Move.wall(new Position(row, col), orientation);
-    if (RuleChecker.isMoveLegal(state, wallMove)) {
-      engine.play(wallMove);
-      drawBoard();
-    }
-    else{
-        showError("Invalid wall placement!");
+    final Player current = state.getCurrentPlayer();
+    if (!current.isAI()) {
+      final Orientation orientation =
+          (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+      final Move wallMove = Move.wall(new Position(row, col), orientation);
+      if (RuleChecker.isMoveLegal(state, wallMove)) {
+        engine.play(wallMove);
+        drawBoard();
+      }
     }
   }
 
   /** Creates interactive wall slots between cells. */
   private void drawWallSlots() {
-    final int cellSize = getCellSize();
-    final int wallThickness = getWallThickness();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
     final int size = engine.getState().getBoard().getSize();
     for (int row = 0; row < size - 1; row++) {
       for (int col = 0; col < size - 1; col++) {
-        final Rectangle hSlot = new Rectangle(cellSize * 2, wallThickness);
+        final Rectangle hSlot = new Rectangle(cellSize * 2.0, wallThickness);
         hSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(hSlot, row, col, Orientation.HORIZONTAL);
         add(hSlot, col, row, 2, 1);
-        GridPane.setValignment(hSlot, VPos.BOTTOM);
+        setValignment(hSlot, VPos.BOTTOM);
         hSlot.setTranslateY(wallThickness / 2.0);
-        final Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2);
+        final Rectangle vSlot = new Rectangle(wallThickness, cellSize * 2.0);
         vSlot.setFill(Color.TRANSPARENT);
         setupWallInteractions(vSlot, row, col, Orientation.VERTICAL);
         add(vSlot, col, row, 1, 2);
-        GridPane.setHalignment(vSlot, HPos.RIGHT);
+        setHalignment(vSlot, HPos.RIGHT);
         vSlot.setTranslateX(wallThickness / 2.0);
       }
     }
@@ -345,17 +362,10 @@ public final class BoardView extends GridPane {
         event -> {
           final GameState state = engine.getState();
           final Player current = state.getCurrentPlayer();
-          if (current.isAI()) {
-              showError("L'IA ne peut pas placer de mur.");
-            return;
-          }
-          if (event.getButton() == MouseButton.SECONDARY) {
+          if (!current.isAI() && event.getButton() == MouseButton.SECONDARY) {
             final Move wallMove = Move.wall(new Position(row, col), orientation);
             if (engine.play(wallMove)) {
               drawBoard();
-            }
-            else{
-                showError("Placement de mur invalide !");
             }
           }
         });
@@ -364,28 +374,21 @@ public final class BoardView extends GridPane {
   /**
    * @return cell size in pixels.
    */
-  private int getCellSize() {
-    final GameState state = engine.getState();
-    final Board board = state.getBoard();
+  private double getCellSize() {
+    final Board board = engine.getState().getBoard();
     final int size = board.getSize();
     final double available = Math.min(getWidth(), getHeight());
-    if (available <= 0.0) {
-      return DEFAULT_CELL_SIZE;
+    double cellSize = (double) DEFAULT_CELL_SIZE;
+    if (available > 0.0) {
+      cellSize = available / size;
     }
-    return (int) (available / size);
+    return cellSize;
   }
 
   /**
    * @return wall thickness in pixels.
    */
-  private int getWallThickness() {
+  private double getWallThickness() {
     return Math.max(MIN_WALL_THICKNESS, getCellSize() / WALL_THICKNESS_RATIO);
   }
-
-    private void showError(String message) {
-        errorLabel.setText("⚠ " + message);
-        PauseTransition pause = new PauseTransition(Duration.seconds(10));
-        pause.setOnFinished(event -> errorLabel.setText(""));
-        pause.play();
-    }
 }

@@ -118,8 +118,12 @@ public class MoveCommand implements Command {
       LOGGER.error("There is no pawn on the case you want to play");
       throw new IllegalArgumentException("No pawn at " + moves[0]);
     }
-    engine.play(Move.pawn(from, targetPosition));
-    (new ShowCommand()).execute(engine);
+    if (!engine.play(Move.pawn(from, targetPosition))) {
+      LOGGER.error("That''s an illegal move: {0} to {1}", from, targetPosition);
+      return engine;
+    }
+
+    new ShowCommand().execute(engine);
     return engine;
   }
 
@@ -139,7 +143,7 @@ public class MoveCommand implements Command {
       return engine;
     }
     engine.play(Move.wall(pos, orientation));
-    (new ShowCommand()).execute(engine);
+    new ShowCommand().execute(engine);
     return engine;
   }
 }

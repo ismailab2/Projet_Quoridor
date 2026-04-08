@@ -6,6 +6,7 @@ import fr.bordeaux.util.TimeConvertor;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 
@@ -20,8 +21,11 @@ public final class PlayerPanel extends VBox {
   /** Label displaying the number of walls remaining for the player. */
   private final Label wallsLabel;
 
-  /** Label displaying the remaining time for the player. */
-  private final Label timeLabel;
+  /** Label displaying main part of time. */
+  private final Label mainTimeLabel;
+
+  /** Label displaying milliseconds. */
+  private final Label millisLabel;
 
   /** Index of the player in the list of players in the GameState. */
   private final int playerIndex;
@@ -52,77 +56,79 @@ public final class PlayerPanel extends VBox {
     topBar.setStyle("-fx-background-color: " + accentColor + ";");
 
     nameLabel = new Label(playerName);
-    nameLabel.setStyle(
-        """
-            -fx-font-size: 18px;
-            -fx-font-weight: bold;
-            -fx-text-fill: #222222;
-        """);
+    nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #222222;");
 
     final Region separator = makeSeparator();
 
-    timeLabel = new Label("00:00");
-    final VBox timeBox = makeStatBox("Temps", timeLabel, accentColor);
+    mainTimeLabel = new Label("00:00");
+    mainTimeLabel.setStyle(
+        "-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + accentColor + ";");
+
+    millisLabel = new Label("");
+    millisLabel.setStyle(
+        "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: "
+            + accentColor
+            + "; -fx-opacity: 0.7;");
+
+    final HBox timeContainer = new HBox(0, mainTimeLabel, millisLabel);
+    timeContainer.setAlignment(Pos.BASELINE_CENTER);
+
+    final VBox timeBox = makeStatBox("Temps", timeContainer);
+    // ---------------------
 
     final Region separator2 = makeSeparator();
 
     wallsLabel = new Label(String.valueOf(player.getRemainingWalls()));
-    final VBox wallsBox = makeStatBox("Murs restants", wallsLabel, accentColor);
+    wallsLabel.setStyle(
+        "-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + accentColor + ";");
+    final VBox wallsBox = makeStatBox("Murs restants", wallsLabel);
 
     final VBox content = new VBox(16, nameLabel, separator, timeBox, separator2, wallsBox);
     content.setPadding(new Insets(15));
     content.setAlignment(Pos.TOP_CENTER);
-    VBox.setVgrow(content, Priority.ALWAYS);
+    setVgrow(content, Priority.ALWAYS);
 
-    setSpacing(0);
-    setPadding(new Insets(0));
-    setAlignment(Pos.TOP_CENTER);
     getChildren().addAll(topBar, content);
 
     setStyle(
-        """
-            -fx-border-color: #cccccc;
-            -fx-border-width: 1;
-            -fx-border-radius: 6;
-            -fx-background-color: #f9f9f9;
-            -fx-background-radius: 6;
-            -fx-min-width: 180;
-            -fx-max-width: 250;
-            -fx-pref-width: 200;
-        """);
+        "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 6; "
+            + "-fx-background-color: #f9f9f9; -fx-background-radius: 6; "
+            + "-fx-min-width: 180; -fx-max-width: 250; -fx-pref-width: 200;");
 
-    state.addListener(
-        () ->
-            Platform.runLater(
-                () -> {
-                  final Player p = state.getPlayers().get(playerIndex);
-                  update(p);
-                }));
     state.addTimerListener(
         () ->
             Platform.runLater(
                 () -> {
-                  final Player p = state.getPlayers().get(playerIndex);
-                  timeLabel.setText(TimeConvertor.formatTime(p.getRemainingTime()));
+                  final Player targetPlayer = state.getPlayers().get(playerIndex);
+                  final String[] times =
+                      TimeConvertor.formatTime(targetPlayer.getRemainingTime()).split(":");
+
+                  if (times.length > 2) {
+
+                    mainTimeLabel.setText(times[0] + ":" + times[1]);
+                    millisLabel.setText(":" + times[2]);
+                  } else {
+
+                    mainTimeLabel.setText(times[0] + ":" + times[1]);
+                    millisLabel.setText("");
+                  }
                 }));
+
+    state.addListener(() -> Platform.runLater(() -> update(state.getPlayers().get(playerIndex))));
   }
 
   /**
    * Creates a vertical block with a title and a centered value.
    *
    * @param title The title of the stat (e.g., "Score").
-   * @param valueLabel The label containing the stat value.
-   * @param accentColor The main color to apply to the value label.
+   * @param valueNode The JavaFX component that displays the value .
    * @return A {@link VBox} containing the title and value.
    */
-  private VBox makeStatBox(final String title, final Label valueLabel, final String accentColor) {
+  private VBox makeStatBox(final String title, final Node valueNode) {
     final Label titleLabel = new Label(title);
     titleLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #888888;");
 
-    valueLabel.setStyle(
-        "-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + accentColor + ";");
-
-    final VBox box = new VBox(4, titleLabel, valueLabel);
+    final VBox box = new VBox(4, titleLabel, valueNode);
     box.setAlignment(Pos.CENTER);
     return box;
   }
@@ -148,8 +154,9 @@ public final class PlayerPanel extends VBox {
   public void update(final Player player) {
     if (player.isDisabled()) {
       this.setOpacity(0.4);
-      timeLabel.setText("ÉLIMINÉ");
-      timeLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 20px;");
+      mainTimeLabel.setText("ÉLIMINÉ");
+      mainTimeLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 20px;");
+      millisLabel.setText("");
     } else {
       wallsLabel.setText(String.valueOf(player.getRemainingWalls()));
     }

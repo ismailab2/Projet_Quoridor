@@ -108,8 +108,8 @@ public class ActionDispatcher {
       case NEW_NETWORK_GAME -> createNetworkGame();
       case JOIN_SERVER -> joinServer();
       case SET_NETWORK_NAME -> setNetworkName();
-      case PING_SERVER -> networkClient.ping();
-      case QUIT_SERVER -> networkClient.quit();
+      case PING_SERVER -> showMessage("Network", "Ping Server", networkClient.ping());
+      case QUIT_SERVER -> showMessage("Network", "Quit Server", networkClient.quit());
       default -> {}
     }
   }
@@ -141,7 +141,8 @@ public class ActionDispatcher {
     showMessage("Network", "Server", "Server started on port " + port + ".");
   }
 
-  private void createNetworkGame() {
+  /** Prompts user to specify player IDs and starts a new network game. */
+  protected void createNetworkGame() {
     final String input =
         promptUser(
             "New Network Game",
@@ -156,7 +157,8 @@ public class ActionDispatcher {
     showMessage("Network", "New Game", multiServer.createGame(ids));
   }
 
-  private void joinServer() {
+  /** Prompts user for a server address and attempts to join. */
+  protected void joinServer() {
     final String input =
         promptUser(
             "Join Server", "Host and Port", "Enter host[:port]:", "localhost:" + DEFAULT_PORT);
@@ -180,7 +182,8 @@ public class ActionDispatcher {
     }
   }
 
-  private void setNetworkName() {
+  /** Prompts user for a player name and sends it to the server. */
+  protected void setNetworkName() {
     final String input =
         promptUser("Set Player Name", "Player Name", "Enter your player name:", "");
     if (input == null || input.isBlank()) {

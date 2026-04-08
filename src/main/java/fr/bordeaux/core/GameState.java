@@ -100,7 +100,7 @@ public class GameState {
     if (newTime <= 0) {
       target.setDisabled(true);
       int activePlayersCount = 0;
-      for (Player p : players) {
+      for (final Player p : players) {
         if (!p.isDisabled()) {
           activePlayersCount++;
         }
@@ -286,7 +286,7 @@ public class GameState {
 
   /** Moves the turn to the next player. */
   public void nextPlayer() {
-    int start = playerIndex;
+    final int start = playerIndex;
     do {
       playerIndex = (playerIndex + 1) % players.size();
     } while (players.get(playerIndex).isDisabled() && playerIndex != start);
@@ -294,7 +294,7 @@ public class GameState {
 
   /** Moves the turn to the previous player. */
   public void previousPlayer() {
-    int start = playerIndex;
+    final int start = playerIndex;
     do {
       playerIndex = (playerIndex - 1 + players.size()) % players.size();
     } while (players.get(playerIndex).isDisabled() && playerIndex != start);

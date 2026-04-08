@@ -1,7 +1,7 @@
 package fr.bordeaux.network;
 
 import fr.bordeaux.core.Move;
-import fr.bordeaux.util.Log;
+import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,7 +22,7 @@ public class MultiGameServer {
   private ServerSocket serverSocket;
 
   /** Indicates whether the server is currently running. */
-  private final AtomicBoolean running = new AtomicBoolean(false);
+  private final AtomicBoolean running;
 
   /** UDP broadcaster announcing the server on the local network. */
   private ServerBroadcaster broadcaster;
@@ -37,13 +37,13 @@ public class MultiGameServer {
   private final Object lock = new Object();
 
   /** Connected clients indexed by their identifier. */
-  private final Map<String, ClientSession> clients = new HashMap<>();
+  private final Map<String, ClientSession> clients;
 
   /** Running games indexed by their identifier. */
-  private final Map<String, ServerGameSession> games = new HashMap<>();
+  private final Map<String, ServerGameSession> games;
 
   /** Scoreboard of players known by the server. */
-  private final Map<String, ScoreEntry> scoreboard = new HashMap<>();
+  private final Map<String, ScoreEntry> scoreboard;
 
   /** Counter used to generate unique client identifiers. */
   private int nextClientId = 1;
@@ -63,7 +63,12 @@ public class MultiGameServer {
   private static final int MAX_PLAYERS = 4;
 
   /** Default constructor. */
-  public MultiGameServer() {}
+  public MultiGameServer() {
+    this.running = new AtomicBoolean(false);
+    this.clients = new HashMap<>();
+    this.games = new HashMap<>();
+    this.scoreboard = new HashMap<>();
+  }
 
   /**
    * Starts the multi-client server on the given TCP port.
@@ -79,7 +84,7 @@ public class MultiGameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Log.info("Server started on port {0}", port);
+                Logger.getInstance().info("Server started on port " + port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -89,10 +94,10 @@ public class MultiGameServer {
                 while (running.get()) {
                   final Socket socket = serverSocket.accept();
 
-                  final BufferedReader in =
+                  final BufferedReader reader =
                       new BufferedReader(
                           new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-                  final PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                  final PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
                   final String clientId;
                   synchronized (lock) {
@@ -100,7 +105,7 @@ public class MultiGameServer {
                     nextClientId++;
                   }
 
-                  final ClientSession client = new ClientSession(clientId, socket, in, out);
+                  final ClientSession client = new ClientSession(clientId, socket, reader, writer);
 
                   synchronized (lock) {
                     final String cid = client.getId();
@@ -108,8 +113,8 @@ public class MultiGameServer {
                     scoreboard.put(cid, new ScoreEntry(cid, client.getName()));
                   }
 
-                  if (Log.isInfoEnabled()) {
-                    Log.info("Client connected: {0}", clientId);
+                  if (Logger.getInstance().isInfoEnabled()) {
+                    Logger.getInstance().info("Client connected: {0}", clientId);
                   }
 
                   final Thread clientThread =
@@ -122,8 +127,8 @@ public class MultiGameServer {
 
               } catch (final IOException e) {
                 if (running.get()) {
-                  if (Log.isErrorEnabled()) {
-                    Log.error("Server error: {0}", e.getMessage());
+                  if (Logger.getInstance().isErrorEnabled()) {
+                    Logger.getInstance().error("Server error: {0}", e.getMessage());
                   }
                 }
               }
@@ -145,8 +150,8 @@ public class MultiGameServer {
           break;
         }
         client.setLastPing(System.currentTimeMillis());
-        if (Log.isInfoEnabled()) {
-          Log.info("{0} -> {1}", client.getId(), line);
+        if (Logger.getInstance().isInfoEnabled()) {
+          Logger.getInstance().info("{0} -> {1}", client.getId(), line);
         }
 
         if (line.startsWith("HELLO ")) {
@@ -163,8 +168,8 @@ public class MultiGameServer {
         }
       }
     } catch (final IOException e) {
-      if (Log.isInfoEnabled()) {
-        Log.info("Client disconnected: {0}", e.getMessage());
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info("Client disconnected: {0}", e.getMessage());
       }
     } finally {
       unregisterClient(client);
@@ -200,8 +205,8 @@ public class MultiGameServer {
     }
 
     client.close();
-    if (Log.isInfoEnabled()) {
-      Log.info("Client disconnected: {0}", clientId);
+    if (Logger.getInstance().isInfoEnabled()) {
+      Logger.getInstance().info("Client disconnected: {0}", clientId);
     }
   }
 
@@ -340,16 +345,17 @@ public class MultiGameServer {
         return "No connected players.";
       }
 
-      final StringBuilder sb = new StringBuilder();
+      final StringBuilder statusBuilder = new StringBuilder();
       for (final ClientSession client : clients.values()) {
-        sb.append(client.getId())
+        statusBuilder
+            .append(client.getId())
             .append(" ")
             .append(client.getName())
             .append(" ")
             .append(client.getStatus())
             .append("\n");
       }
-      return sb.toString().trim();
+      return statusBuilder.toString().trim();
     }
   }
 
@@ -364,11 +370,11 @@ public class MultiGameServer {
         return "Scoreboard is empty.";
       }
 
-      final StringBuilder sb = new StringBuilder();
+      final StringBuilder scoreBuilder = new StringBuilder();
       for (final ScoreEntry entry : scoreboard.values()) {
-        sb.append(entry).append("\n");
+        scoreBuilder.append(entry).append("\n");
       }
-      return sb.toString().trim();
+      return scoreBuilder.toString().trim();
     }
   }
 
@@ -386,7 +392,7 @@ public class MultiGameServer {
         result = "ERROR need between 2 and 4 players";
       } else {
         final java.util.Set<String> seenIds = new java.util.HashSet<>();
-        final java.util.List<ClientSession> sessions = new java.util.ArrayList<>();
+        final List<ClientSession> sessions = new ArrayList<>();
         boolean errorFound = false;
 
         for (final String playerId : playerIds) {
@@ -461,7 +467,7 @@ public class MultiGameServer {
     } catch (IOException ignored) {
     }
 
-    Log.info("Server stopped.");
+    Logger.getInstance().info("Server stopped.");
   }
 
   /** Disconnects every client that has been inactive for more than one minute. */
@@ -494,7 +500,8 @@ public class MultiGameServer {
                   return;
                 }
               }
-            });
+            },
+            "TimeoutChecker");
     timeoutThread.setDaemon(true);
     timeoutThread.start();
   }

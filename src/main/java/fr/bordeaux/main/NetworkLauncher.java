@@ -3,11 +3,15 @@ package fr.bordeaux.main;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
+import fr.bordeaux.util.Logger;
 import java.util.Scanner;
 
 /** CLI interface for network features. Start/stop server, join, ping. */
 @SuppressWarnings("PMD.SystemPrintln")
 public class NetworkLauncher implements AppLauncher {
+
+  private static final String DEFAULT_HOST = "localhost";
+  private static final int DEFAULT_PORT = 12345;
 
   /** Multi-game server managing multiple simultaneous games and players. */
   private final MultiGameServer multiServer;
@@ -48,11 +52,11 @@ public class NetworkLauncher implements AppLauncher {
       multiServer.start(port);
 
       if ("true".equals(daemonMode)) {
-        System.out.println("Server started in daemon mode on port " + port);
+        Logger.getInstance().info("Server started in daemon mode on port {0,number,0}", port);
         while (true) {
           try {
             Thread.sleep(1000);
-          } catch (InterruptedException e) {
+          } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             break;
           }
@@ -61,89 +65,95 @@ public class NetworkLauncher implements AppLauncher {
       }
     }
 
-    System.out.println("Commands:");
-    System.out.println("server start [port]");
-    System.out.println("server stop");
-    System.out.println("server list");
-    System.out.println("join ip[:port]");
-    System.out.println("ping");
-    System.out.println("quit");
-    System.out.println("server status");
-    System.out.println("players");
-    System.out.println("scoreboard");
-    System.out.println("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
-    System.out.println("hello NAME");
-    System.out.println("move MOVE");
+    Logger.getInstance().info("Commands:");
+    Logger.getInstance().info("server start [port]");
+    Logger.getInstance().info("server stop");
+    Logger.getInstance().info("server list");
+    Logger.getInstance().info("join [ip[:port]]");
+    Logger.getInstance().info("ping");
+    Logger.getInstance().info("quit");
+    Logger.getInstance().info("server status");
+    Logger.getInstance().info("players");
+    Logger.getInstance().info("scoreboard");
+    Logger.getInstance().info("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+    Logger.getInstance().info("hello NAME");
+    Logger.getInstance().info("move MOVE");
 
-    try (Scanner sc = new Scanner(System.in)) {
+    try (Scanner scanner = new Scanner(System.in)) {
       boolean running = true;
-      while (running && sc.hasNextLine()) {
+      while (running && scanner.hasNextLine()) {
         System.out.print("> ");
-        final String cmd = sc.nextLine();
+        final String cmd = scanner.nextLine();
 
         try {
           if (cmd.startsWith("server start")) {
-            final String[] p = cmd.split(" ");
-            final int port = (p.length > 2) ? Integer.parseInt(p[2]) : 12345;
+            final String[] parts = cmd.split(" ");
+            final int port = (parts.length > 2) ? Integer.parseInt(parts[2]) : 12345;
             multiServer.start(port);
-          } else if (cmd.equals("server stop")) {
+          } else if ("server stop".equals(cmd)) {
             multiServer.stop();
-          } else if (cmd.equals("server status")) {
-            System.out.println(multiServer.getServerStatus());
+          } else if ("server status".equals(cmd)) {
+            if (Logger.getInstance().isInfoEnabled()) {
+              Logger.getInstance().info("{0}", multiServer.getServerStatus());
+            }
 
-          } else if (cmd.equals("players")) {
-            System.out.println(multiServer.listPlayers());
+          } else if ("players".equals(cmd)) {
+            if (Logger.getInstance().isInfoEnabled()) {
+              Logger.getInstance().info("{0}", multiServer.listPlayers());
+            }
 
-          } else if (cmd.equals("scoreboard")) {
-            System.out.println(multiServer.getScoreboard());
+          } else if ("scoreboard".equals(cmd)) {
+            if (Logger.getInstance().isInfoEnabled()) {
+              Logger.getInstance().info("{0}", multiServer.getScoreboard());
+            }
 
           } else if (cmd.startsWith("new ")) {
             final String[] parts = cmd.split(" ");
             if (parts.length != 3 && parts.length != 5) {
-              System.out.println("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+              Logger.getInstance().info("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
             } else {
               final String[] playerIds = new String[parts.length - 1];
               System.arraycopy(parts, 1, playerIds, 0, playerIds.length);
-              System.out.println(multiServer.createGame(playerIds));
+              if (Logger.getInstance().isInfoEnabled()) {
+                Logger.getInstance().info("{0}", multiServer.createGame(playerIds));
+              }
             }
 
-          } else if (cmd.startsWith("join")) {
-            final String[] joinParts = cmd.split(" ");
-            if (joinParts.length < 2) {
-              System.out.println("Usage: join ip[:port]");
-              continue;
-            }
-            final String target = joinParts[1];
-            final String[] hp = target.split(":");
-            final String host = hp[0];
-            final int port = hp.length > 1 ? Integer.parseInt(hp[1]) : 12345;
+          } else if (cmd.equals("join") || cmd.startsWith("join ")) {
+            final String[] joinParts = cmd.trim().split("\\s+");
+            final String target = joinParts.length > 1 ? joinParts[1] : DEFAULT_HOST;
+            final String[] hostPort = target.split(":");
+            final String host = hostPort[0];
+            final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_PORT;
             final boolean success = client.join(host, port);
             if (!success) {
-              System.out.println("Failed to connect to " + host + ":" + port);
+              Logger.getInstance().info("Failed to connect to {0}:{1,number,0}", host, port);
             }
           } else if (cmd.startsWith("hello ")) {
             final String name = cmd.substring("hello ".length()).trim();
             client.hello(name);
-          } else if (cmd.equals("ping")) {
+          } else if ("ping".equals(cmd)) {
             client.ping();
           } else if (cmd.startsWith("move ")) {
             final String move = cmd.substring("move ".length()).trim();
             client.sendMove(move);
-          } else if (cmd.equals("server list")) {
+          } else if ("server list".equals(cmd)) {
             client.serverList();
-          } else if (cmd.equals("quit") || cmd.equals("exit")) {
-            if (cmd.equals("quit")) {
+          } else if ("quit".equals(cmd) || "exit".equals(cmd)) {
+            if ("quit".equals(cmd)) {
               client.quit();
             }
             running = false;
           } else {
-            System.out.println("Unknown command");
+            Logger.getInstance().info("Unknown command");
           }
-        } catch (Exception e) {
-          System.out.println("Error: " + e.getMessage());
+        } catch (final Exception exception) {
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info("Error: {0}", exception.getMessage());
+          }
         }
       }
     }
-    System.out.println("Network mode exited.");
+    Logger.getInstance().info("Network mode exited.");
   }
 }

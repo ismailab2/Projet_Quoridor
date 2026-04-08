@@ -11,14 +11,20 @@ public class CliLauncher implements AppLauncher {
   /** Default board size for Quoridor (9x9) */
   private static final int DEFAULT_BOARD_SIZE = 9;
 
-  /** CliLaucher */
-  public CliLauncher() {}
+  /** Default constructor. */
+  public CliLauncher() {
+    Logger.getInstance().debug("Instantiating CliLauncher");
+  }
 
   /** Starts the CLI interface. Exceptions are logged via Logger. */
   @Override
   public void launch(final String[] args, final ConfigManager config) {
     try {
       final GameEngine engine = GameEngineFactory.createGameEngine(config);
+      final String loadFile = config.getOption("load-file", null);
+      if (loadFile != null) {
+        engine.loadGame(loadFile);
+      }
       new CliApp(engine).run();
     } catch (final Exception e) {
       if (Logger.getInstance().isErrorEnabled()) {
