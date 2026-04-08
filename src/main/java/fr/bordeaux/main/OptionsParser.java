@@ -88,25 +88,43 @@ public final class OptionsParser {
     }
   }
 
-  /** Prints usage and help information to the console. */
-  public static void printHelp() {
-    logInfo("Usage: quoridor [OPTIONS]");
-    logInfo("");
-    logInfo("General options:");
-    logInfo("  -h, --help        Show this help message");
-    logInfo("  -V, --version     Display version");
-    logInfo("  -v, --verbose     Enable verbose mode");
-    logInfo("  -d, --debug       Enable debug mode");
-    logInfo("  -D, --daemon      Launch server in headless mode");
-    logInfo("");
-    logInfo("Modes:");
-    logInfo("  --contest, -c <file> Launch contest mode from file");
-    logInfo("  -g, --gui         Launch GUI mode");
-    logInfo("  -n, --net         Launch network mode");
-    logInfo("  -p, --players N   Number of players: 2, 3, or 4 (default 2)");
-    logInfo("");
-    logInfo("Blitz options:");
-    logInfo("  -b, --blitz       Enable blitz mode");
-    logInfo("  -t, --time N      Timeout in minutes (default 30)");
-  }
+    /** Prints usage and help information to the console, including all recognized arguments. */
+    /** Prints usage and help information to the console, including game options, defaults, and CLI arguments. */
+    public static void printHelp() {
+        ConfigManager config = ConfigManager.getInstance();
+
+        logInfo("Usage: quoridor [OPTIONS] [LOAD_FILE]");
+        logInfo("");
+        logInfo("General options:");
+        logInfo("  -h, --help             Show this help message");
+        logInfo("  -V, --version          Display version");
+        logInfo("  -v, --verbose          Enable verbose logging (default: " + config.getBoolean("verbose", true) + ")");
+        logInfo("  -d, --debug            Enable debug logging (default: " + config.getBoolean("debug", true) + ")");
+        logInfo("  -D, --daemon           Launch server in headless mode (default: " + config.getBoolean("daemon", false) + ")");
+        logInfo("");
+        logInfo("Modes:");
+        logInfo("  -g, --gui              Launch GUI mode");
+        logInfo("  -c, --cli              Launch CLI mode");
+        logInfo("  -n, --net, --server, -s Launch network mode");
+        logInfo("  --contest, -C <file>   Launch contest mode from file");
+        logInfo("");
+        logInfo("Game options:");
+        logInfo("  -p, --players N        Number of players (2-4) (default: " + config.getInt("nb-players", 2) + ")");
+        logInfo("  -b, --blitz            Enable blitz mode (default: " + config.getBoolean("blitz", false) + ")");
+        logInfo("  -t, --time N           Timeout in minutes (default: " + config.getInt("timeout", 30) + ")");
+        logInfo("  -w, --walls N          Number of walls per player (default: " + config.getInt("nb-walls", 20) + ")");
+        logInfo("  --size N               Board size, e.g., 9 for 9x9 (default: " + config.getInt("board-size", 9) + ")");
+        logInfo("");
+        logInfo("Load/Save:");
+        logInfo("  [LOAD_FILE]            Optional path to a saved game to load at startup");
+        logInfo("");
+        logInfo("Shortcut and configuration options:");
+        logInfo("  --shortcut-config      Open GUI to configure keyboard shortcuts");
+        logInfo("  --config <file>        Load custom configuration file");
+        logInfo("");
+        logInfo("Examples:");
+        logInfo("  java -jar quoridor.jar -g -p 4 -w 20 --size 9");
+        logInfo("  java -jar quoridor.jar -n --daemon -p 2");
+        logInfo("  java -jar quoridor.jar --contest contest_file.txt");
+    }
 }
