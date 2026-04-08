@@ -88,7 +88,6 @@ public final class OptionsParser {
     }
   }
 
-    /** Prints usage and help information to the console, including all recognized arguments. */
     /** Prints usage and help information to the console, including game options, defaults, and CLI arguments. */
     public static void printHelp() {
         ConfigManager config = ConfigManager.getInstance();
