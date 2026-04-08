@@ -3,6 +3,12 @@ package fr.bordeaux.main;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /** Interprets CLI arguments (GUI, CLI, Network) and game settings. */
 public final class OptionsParser {
@@ -12,72 +18,106 @@ public final class OptionsParser {
   private OptionsParser() {}
 
   /**
-   * Parses CLI arguments into configuration.
+   * Processes CLI arguments into configuration using Apache Commons CLI.
    *
    * @param args Command-line arguments.
    * @param config Config manager instance.
    */
   public static void parse(final String[] args, final ConfigManager config) {
-    int i = 0;
-    while (i < args.length) {
-      final String arg = args[i];
+    Options options = new Options();
 
-      int newIndex = AiOptionsHandler.handle(arg, args, i, config);
-      if (newIndex != -1) {
-        i = newIndex + 1;
-        continue;
+    // System Options
+    options.addOption(Option.builder("h").longOpt("help").desc("Show help").build());
+    options.addOption(Option.builder("V").longOpt("version").desc("Show version").build());
+    options.addOption(
+        Option.builder("c").longOpt("contest").hasArg().desc("Contest mode file").build());
+    options.addOption(Option.builder("v").longOpt("verbose").desc("Verbose mode").build());
+    options.addOption(Option.builder("d").longOpt("debug").desc("Debug mode").build());
+    options.addOption(Option.builder("D").longOpt("daemon").desc("Daemon mode").build());
+    options.addOption(Option.builder("g").longOpt("gui").desc("GUI mode").build());
+    options.addOption(Option.builder().longOpt("cli").desc("CLI mode").build());
+    options.addOption(Option.builder("n").longOpt("net").desc("Network mode").build());
+
+    // Game Options
+    options.addOption(Option.builder("b").longOpt("blitz").desc("Blitz mode").build());
+    options.addOption(
+        Option.builder("t").longOpt("time").hasArg().desc("Limité time for blitz").build());
+    options.addOption(
+        Option.builder("s").hasArg().desc("Size of the board or Server port").build());
+    options.addOption(Option.builder().longOpt("size").hasArg().desc("Size of the board").build());
+    options.addOption(Option.builder().longOpt("server").hasArg().desc("Server mode").build());
+    options.addOption(
+        Option.builder("p").longOpt("players").hasArg().desc("Number of players").build());
+    options.addOption(
+        Option.builder("w").longOpt("walls").hasArg().desc("Number of walls").build());
+
+    // AI Options
+    options.addOption(
+        Option.builder("a").longOpt("ai").hasArg().optionalArg(true).desc("Enable AI").build());
+    options.addOption(Option.builder().longOpt("ai-mode").hasArg().desc("AI algorithm").build());
+    options.addOption(
+        Option.builder().longOpt("ai-minimax-depth").hasArg().desc("AI depth").build());
+    options.addOption(Option.builder().longOpt("ai-time").hasArg().desc("AI time").build());
+    options.addOption(
+        Option.builder().longOpt("ai-minimax-scoring").hasArg().desc("AI scoring").build());
+    options.addOption(
+        Option.builder().longOpt("ai-mcts-selection").hasArg().desc("AI MCTS selection").build());
+
+    CommandLineParser parser = new DefaultParser();
+    try {
+      CommandLine commandLine = parser.parse(options, args);
+      handleSystemOptions(commandLine, config);
+      GameOptionsHandler.handle(commandLine, config);
+      AiOptionsHandler.handle(commandLine, config);
+      AiOptionsHandler.validateAiPlayerCount(config);
+
+      // Parse unresolved arguments as file to load
+      String[] leftOverArgs = commandLine.getArgs();
+      if (leftOverArgs.length > 0) {
+        config.setOption("load-file", leftOverArgs[leftOverArgs.length - 1]);
       }
-
-      newIndex = GameOptionsHandler.handle(arg, args, i, config);
-      if (newIndex != -1) {
-        i = newIndex + 1;
-        continue;
+    } catch (ParseException exception) {
+      if (exception instanceof org.apache.commons.cli.MissingArgumentException
+          || exception instanceof org.apache.commons.cli.UnrecognizedOptionException) {
+        throw new IllegalArgumentException(
+            I18n.get("invalidOpt") + " or argument missing: " + exception.getMessage(), exception);
       }
-
-      i = handleSystemOption(arg, args, i, config);
-      i++;
+      throw new IllegalArgumentException(exception.getMessage(), exception);
     }
-    AiOptionsHandler.validateAiPlayerCount(config);
   }
 
-  private static int handleSystemOption(
-      final String arg, final String[] args, final int index, final ConfigManager config) {
-    int i = index;
-    switch (arg) {
-      case "-h", "--help" -> {
-        printHelp();
-        if (System.getProperty("quoridor.test") == null) {
-          System.exit(0);
-        }
-      }
-      case "-V", "--version" -> {
-        logInfo("Quoridor version 1.0.0");
-        if (System.getProperty("quoridor.test") == null) {
-          System.exit(0);
-        }
-      }
-      case "--contest", "-c" -> {
-        if (i + 1 < args.length) {
-          config.enableContest(args[++i]);
-        } else {
-          throw new IllegalArgumentException(
-              "--contest " + I18n.get("require", I18n.get("filePath")));
-        }
-      }
-      case "-v", "--verbose" -> config.setOption("verbose", "true");
-      case "-d", "--debug" -> config.setOption("debug", "true");
-      case "-D", "--daemon" -> config.setOption("daemon", "true");
-      case "-g", "--gui", "--cli", "-n", "--net" -> {
-        // Handled elsewhere (AppModeResolver)
-      }
-      default -> {
-        if (arg.startsWith("-")) {
-          throw new IllegalArgumentException(I18n.get("invalidOpt") + arg);
-        }
-        config.setOption("load-file", arg);
+  private static void handleSystemOptions(
+      final CommandLine commandLine, final ConfigManager config) {
+    if (commandLine.hasOption("h")) {
+      printHelp();
+      if (System.getProperty("quoridor.test") == null) {
+        System.exit(0);
       }
     }
-    return i;
+    if (commandLine.hasOption("V")) {
+      logInfo("Quoridor version 1.0.0");
+      if (System.getProperty("quoridor.test") == null) {
+        System.exit(0);
+      }
+    }
+    if (commandLine.hasOption("c")) {
+      String file = commandLine.getOptionValue("c");
+      if (file == null || file.isEmpty()) {
+        throw new IllegalArgumentException(
+            "--contest " + I18n.get("require", I18n.get("filePath")));
+      }
+      config.enableContest(file);
+    }
+    if (commandLine.hasOption("v")) {
+      config.setOption("verbose", "true");
+    }
+    if (commandLine.hasOption("d")) {
+      config.setOption("debug", "true");
+    }
+    if (commandLine.hasOption("D")) {
+      config.setOption("daemon", "true");
+    }
+    // g, cli, n are parsed here but affect AppModeResolver (no action needed here)
   }
 
   /**
