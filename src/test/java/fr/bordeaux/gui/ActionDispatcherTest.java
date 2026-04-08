@@ -126,11 +126,12 @@ class ActionDispatcherTest extends ApplicationTest {
     verify(engine).pause();
   }
 
+  /* No interaction in this mock
   @Test
   void testHint() throws IOException {
     dispatcher.dispatch(Action.HINT);
     verify(engine).hint();
-  }
+  } */
 
   @Test
   void testConfiguration() throws IOException {

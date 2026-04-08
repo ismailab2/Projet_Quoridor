@@ -4,6 +4,7 @@ import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Position;
+import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
@@ -34,8 +35,11 @@ public class HintCommand implements Command {
     LOGGER.info(I18n.get("hintCalc"));
     final Move hint = engine.hint();
 
+    if (!RuleChecker.isMoveLegal(engine.getState(), hint)) {
+      LOGGER.error("Suggested move: {0} isn''t legal", hint);
+    }
     final String bestMove = formatMove(hint);
-    LOGGER.info(I18n.get("hintPlay") + " {0}", bestMove);
+    LOGGER.info(I18n.get("hintPlay")+"{0}", bestMove);
     return engine;
   }
 
@@ -75,8 +79,10 @@ public class HintCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  hint\n");
     LOGGER.info("Description:");
-    LOGGER.info("  " + I18n.get("hintHelp1"));
-    LOGGER.verbose("  " + I18n.get("hintHelp2"));
-    LOGGER.verbose("  " + I18n.get("hintHelpEx"));
+    LOGGER.info("  "+I18n.get("hintHelp1"));
+    LOGGER.info("  "+I18n.get("hintHelp3"));
+    LOGGER.verbose("Displays:");
+    LOGGER.verbose("  "+I18n.get("hintHelp2"));
+    LOGGER.verbose(I18n.get("hintHelpEx"));
   }
 }

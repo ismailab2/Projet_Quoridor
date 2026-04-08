@@ -76,7 +76,7 @@ public final class ContestLauncher implements AppLauncher {
     final long timeBudgetMs = config.getInt("ai1.time", 3) * 1000L;
 
     try {
-      return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, false);
+      return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, true);
     } catch (final Exception exception) {
       if (Logger.getInstance().isErrorEnabled()) {
         Logger.getInstance()

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.i18n.I18n;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -515,7 +516,7 @@ public class OptionsParserTest {
             InvocationTargetException.class, () -> method.invoke(null, null, "test-param"));
 
     assertTrue(itex.getCause() instanceof IllegalArgumentException);
-    assertEquals("AI test-param " + I18n.get("requireInt"), itex.getCause().getMessage());
+    assertEquals("AI test-param "+I18n.get("requireInt"), itex.getCause().getMessage());
   }
 
   @Test

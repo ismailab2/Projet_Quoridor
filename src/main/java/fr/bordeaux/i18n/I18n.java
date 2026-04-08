@@ -41,7 +41,7 @@ public class I18n {
    * @return text depending on the language choosen
    */
   public static String get(String key, String... params) {
-    String pattern = bundle.getString(key);
+    String pattern = bundle.getString(key) + " ";
     for (String s : params) {
       pattern += s + " ";
     }

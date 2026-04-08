@@ -239,7 +239,7 @@ public class CliApp {
         if (terminal != null && terminal.writer() != null) {
           terminal
               .writer()
-              .println("\n" + engine.getState().getCurrentPlayer().getName() + " réfléchit...");
+              .println("\n" + engine.getState().getCurrentPlayer().getName() + " " + I18n.get("thinking"));
           terminal.flush();
         }
         executeAiTurn();
@@ -264,7 +264,9 @@ public class CliApp {
     final Move move = ai.getNextMove(engine.getState());
     engine.play(move);
 
-    LOGGER.info(I18n.get("iaPlayed") + move.toString());
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info(I18n.get("iaPlayed")+"{0}", move);
+    }
   }
 
   /**
@@ -302,8 +304,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        LOGGER.debug(I18n.get("unknownCmd") + command);
-        LOGGER.info(I18n.get("meant", suggestion, "?"));
+        LOGGER.debug(I18n.get("unknownCmd")+"'{0}'", command);
+        LOGGER.info(I18n.get("meant")+"{0} ? ", suggestion);
       }
 
       // Default behavior (interpret as move)
@@ -417,7 +419,7 @@ public class CliApp {
     final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_NETWORK_PORT;
 
     if (!networkClient.join(host, port)) {
-      LOGGER.info("Failed to connect to " + host + ":" + port);
+      LOGGER.info(I18n.get("failedConnect", host, ":") + port);
     }
   }
 

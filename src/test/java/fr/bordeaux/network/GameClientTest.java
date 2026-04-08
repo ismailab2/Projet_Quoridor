@@ -256,7 +256,7 @@ public class GameClientTest {
     String output = outContent.toString();
 
     assertTrue(output.contains(I18n.get("broadcast")));
-    assertTrue(output.contains(I18n.get("found") + "testServer:9000"));
+    assertTrue(output.contains(I18n.get("found", "testServer:9000")));
   }
 
   // Tests reseau client ajoutes
