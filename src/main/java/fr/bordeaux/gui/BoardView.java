@@ -187,7 +187,23 @@ public final class BoardView extends GridPane {
       highlight.setArcHeight(PAWN_ARC);
       highlight.setStroke(HINT_STROKE_COLOR);
       highlight.setStrokeWidth(HINT_STROKE_WIDTH);
-      highlight.setMouseTransparent(true);
+      highlight.setMouseTransparent(false);
+      highlight.setOnMouseEntered(
+          e -> {
+            highlight.setFill(HINT_PAWN_COLOR.darker());
+            highlight.setStroke(HINT_STROKE_COLOR.darker());
+          });
+      highlight.setOnMouseExited(
+          e -> {
+            highlight.setFill(HINT_PAWN_COLOR);
+            highlight.setStroke(HINT_STROKE_COLOR);
+          });
+      highlight.setOnMouseClicked(
+          event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+              handleCellClick(target.getX(), target.getY());
+            }
+          });
       final StackPane cell = cells[target.getX()][target.getY()];
       cell.getChildren().add(highlight);
 
@@ -195,21 +211,33 @@ public final class BoardView extends GridPane {
       final Orientation orientation = highlightedMove.getOrientation();
       final double wallThickness = getWallThickness();
 
+      final Rectangle wall =
+          orientation == Orientation.HORIZONTAL
+              ? new Rectangle(cellSize * 2.0, wallThickness)
+              : new Rectangle(wallThickness, cellSize * 2.0);
+
+      wall.setFill(HINT_WALL_COLOR);
+      wall.setArcWidth(WALL_ARC);
+      wall.setArcHeight(WALL_ARC);
+      wall.setMouseTransparent(false);
+      wall.setOnMouseEntered(e -> wall.setFill(HINT_WALL_COLOR.darker()));
+      wall.setOnMouseExited(e -> wall.setFill(HINT_WALL_COLOR));
+      wall.setOnMouseClicked(
+          event -> {
+            final Player current = engine.getState().getCurrentPlayer();
+            if (!current.isAI()) {
+              final Move wallMove = Move.wall(target, orientation);
+              if (engine.play(wallMove)) {
+                drawBoard();
+              }
+            }
+          });
+
       if (orientation == Orientation.HORIZONTAL) {
-        final Rectangle wall = new Rectangle(cellSize * 2.0, wallThickness);
-        wall.setFill(HINT_WALL_COLOR);
-        wall.setArcWidth(WALL_ARC);
-        wall.setArcHeight(WALL_ARC);
-        wall.setMouseTransparent(true);
         add(wall, target.getY(), target.getX(), 2, 1);
         setValignment(wall, VPos.BOTTOM);
         wall.setTranslateY(wallThickness / 2.0);
       } else {
-        final Rectangle wall = new Rectangle(wallThickness, cellSize * 2.0);
-        wall.setFill(HINT_WALL_COLOR);
-        wall.setArcWidth(WALL_ARC);
-        wall.setArcHeight(WALL_ARC);
-        wall.setMouseTransparent(true);
         add(wall, target.getY(), target.getX(), 1, 2);
         setHalignment(wall, HPos.RIGHT);
         wall.setTranslateX(wallThickness / 2.0);

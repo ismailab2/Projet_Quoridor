@@ -434,7 +434,7 @@ class QuoridorAppTest extends ApplicationTest {
 
     interact(
         () -> {
-          javafx.scene.Node hintArea = QuoridorApp.createHintArea(engine, boardView);
+          javafx.scene.Node hintArea = new QuoridorApp().createHintArea(engine, boardView);
           HBox container = (HBox) hintArea;
           Button btn = (Button) container.getChildren().get(0);
           Label label = (Label) container.getChildren().get(1);
