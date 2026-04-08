@@ -1,21 +1,25 @@
 package fr.bordeaux.cli;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
 import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.network.GameClient;
+import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.jline.terminal.Terminal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class CliAppTest {
 
@@ -24,6 +28,8 @@ class CliAppTest {
   private LineReader reader;
   private Terminal terminal;
   private Player p1;
+  private MultiGameServer networkServer;
+  private GameClient networkClient;
 
   @BeforeEach
   void setUp() {
@@ -33,6 +39,9 @@ class CliAppTest {
     terminal = mock(Terminal.class);
     when(terminal.writer()).thenReturn(mock(PrintWriter.class));
     app = new CliApp(engine, terminal, reader);
+    networkServer = mock(MultiGameServer.class);
+    networkClient = mock(GameClient.class);
+    app = new CliApp(engine, terminal, reader, networkServer, networkClient);
   }
 
   @Test
@@ -251,5 +260,69 @@ class CliAppTest {
     assertDoesNotThrow(appWithBrokenTerminal::run);
 
     verify(mockTerminal).close();
+  }
+
+  // Tests de reseau CLI
+
+  @Test
+  void serverCommand() throws IOException {
+    app.fetch("server start 23456");
+    app.fetch("server stop");
+    app.fetch("server status");
+
+    verify(networkServer).start(23456);
+    verify(networkServer).stop();
+    verify(networkServer).getServerStatus();
+  }
+
+  @Test
+  void clientCommand() throws IOException {
+    app.fetch("join localhost:11111");
+    app.fetch("ping");
+    app.fetch("hello Alice");
+
+    verify(networkClient).join("localhost", 11111);
+    verify(networkClient).ping();
+    verify(networkClient).hello("Alice");
+  }
+
+  @Test
+  void gameCommand() throws IOException {
+    when(networkClient.isConnected()).thenReturn(true);
+
+    app.fetch("new C1 C2");
+    app.fetch("move e1-e2");
+    app.fetch("quit");
+
+    verify(networkServer).createGame("C1", "C2");
+    verify(networkClient).sendMove("e1-e2");
+    verify(networkClient).quit();
+    assertTrue(app.isRunning());
+  }
+
+  @Test
+  void boardSync() throws IOException {
+    @SuppressWarnings("unchecked")
+    final ArgumentCaptor<Consumer<String>> captor = ArgumentCaptor.forClass(Consumer.class);
+
+    verify(networkClient).setServerMessageHandler(captor.capture());
+    when(networkClient.isConnected()).thenReturn(true);
+
+    app.fetch("move e1-e2");
+    captor.getValue().accept("OK");
+
+    assertEquals(new Position(1, 4), p1.getPosition());
+  }
+
+  @Test
+  void opponentSync() {
+    @SuppressWarnings("unchecked")
+    final ArgumentCaptor<Consumer<String>> captor = ArgumentCaptor.forClass(Consumer.class);
+
+    verify(networkClient).setServerMessageHandler(captor.capture());
+
+    captor.getValue().accept("OPPONENT_MOVE e1-e2");
+
+    assertEquals(new Position(1, 4), p1.getPosition());
   }
 }

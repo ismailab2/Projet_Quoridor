@@ -58,7 +58,7 @@ public class GameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                System.out.println(I18n.get("startedPort") + port);
+                Logger.getInstance().info(I18n.get("startedPort") + port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -67,13 +67,13 @@ public class GameServer {
                 startTimeoutChecker();
 
                 clientSocket = serverSocket.accept();
-                System.out.println(I18n.get("connectedClient"));
+                Logger.getInstance().info(I18n.get("connectedClient"));
 
                 new Thread(() -> handleClient(clientSocket)).start();
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                System.out.println(I18n.get("alreadyUsed") + e.getMessage());
+                Logger.getInstance().info(I18n.get("alreadyUsed") + e.getMessage());
               }
             })
         .start();

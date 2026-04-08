@@ -79,6 +79,7 @@ public class MinimaxSearch {
     final GameState searchState = gameState.copy();
     for (final Move currentMove : searchState.generateLegalMoves()) {
       if (System.currentTimeMillis() >= endTime) {
+        bestMove = null;
         break;
       }
       push(searchState, currentMove);

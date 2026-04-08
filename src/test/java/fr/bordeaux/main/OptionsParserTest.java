@@ -506,7 +506,8 @@ public class OptionsParserTest {
 
   @Test
   public void testCheckAiInt_Null() throws Exception {
-    Method method = OptionsParser.class.getDeclaredMethod("checkAiInt", String.class, String.class);
+    Method method =
+        AiOptionsHandler.class.getDeclaredMethod("checkAiInt", String.class, String.class);
     method.setAccessible(true);
 
     InvocationTargetException itex =
@@ -520,7 +521,7 @@ public class OptionsParserTest {
   @Test
   public void testCheckAiString_Null() throws Exception {
     Method method =
-        OptionsParser.class.getDeclaredMethod(
+        AiOptionsHandler.class.getDeclaredMethod(
             "checkAiString", String.class, String.class, List.class);
     method.setAccessible(true);
 

@@ -32,7 +32,7 @@ public final class ContestLauncher implements AppLauncher {
 
     assert filePath != null;
     if (!Files.exists(Path.of(filePath))) {
-      Logger.getInstance().error("[contest] File not found: {0}", filePath);
+      Logger.getInstance().error("[contest] File not found: " + filePath);
     }
 
     try {
@@ -41,21 +41,19 @@ public final class ContestLauncher implements AppLauncher {
       final Move best = computeBestMove(state, config);
       System.out.println(moveToString(best));
     } catch (final IOException exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("[contest] I/O error reading file: {0}", exception.getMessage());
-      }
+      Logger.getInstance().error("[contest] I/O error reading file: " + exception.getMessage());
       System.exit(1);
     } catch (final GameLoadException exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance()
-            .error(
-                "[contest] Invalid save file [{0}] at line {1,number,0}: {2}",
-                exception.getErrorType(), exception.getLineNumber(), exception.getMessage());
-      }
+      Logger.getInstance()
+          .error(
+              "[contest] Invalid save file ["
+                  + exception.getErrorType()
+                  + "] at line "
+                  + exception.getLineNumber()
+                  + ": "
+                  + exception.getMessage());
     } catch (final Exception exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("[contest] Unexpected error: {0}", exception.getMessage());
-      }
+      Logger.getInstance().error("[contest] Unexpected error: " + exception.getMessage());
     }
   }
 

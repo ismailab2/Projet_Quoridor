@@ -13,9 +13,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
 public class GameClient {
@@ -38,7 +40,10 @@ public class GameClient {
   /** Flag to treat next message as a direct reply to a sync command. */
   private final AtomicBoolean expectingDirectReply;
 
-  /** Default constructor. */
+  /** Handler notified when an asynchronous message is received from the server. */
+  private Consumer<String> serverMessageHandler;
+
+  /** Constructs a GameClient for joining servers or discovery. */
   public GameClient() {
     this.syncResponse = new SynchronousQueue<>();
     this.expectingDirectReply = new AtomicBoolean(false);
@@ -87,6 +92,7 @@ public class GameClient {
                       if (!delivered) {
                         Logger.getInstance().info(I18n.get("server", line));
                       }
+                      notifyServerMessage(line);
                     } catch (InterruptedException ie) {
                       Thread.currentThread().interrupt();
                     } finally {
@@ -107,43 +113,63 @@ public class GameClient {
   }
 
   /**
+   * Notifies the registered handler that a server message was received.
+   *
+   * @param message message received from the server
+   */
+  private void notifyServerMessage(final String message) {
+    if (serverMessageHandler != null) {
+      serverMessageHandler.accept(message);
+    }
+  }
+
+  /**
+   * Sets the handler called when an asynchronous message is received from the server.
+   *
+   * @param serverMessageHandler handler receiving the server message
+   */
+  public void setServerMessageHandler(final Consumer<String> serverMessageHandler) {
+    this.serverMessageHandler = serverMessageHandler;
+  }
+
+  /**
    * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
    * receiving is measured and displayed.
    *
    * @return a status message indicating the result of the ping command.
    */
   public String ping() {
+
+    String message;
     if (!checkConnection()) {
-      return I18n.get("notConnected");
-    }
-    String res;
+      message = I18n.get("notConnected");
+    } else {
+      try {
+        final long start = System.currentTimeMillis();
 
-    try {
-      final long start = System.currentTimeMillis();
+        expectingDirectReply.set(true);
+        Logger.getInstance().info("Client: PING");
+        writer.println("PING");
 
-      expectingDirectReply.set(true);
-      Logger.getInstance().info("Client: PING");
-      writer.println("PING");
+        final String res = syncResponse.poll(5, TimeUnit.SECONDS);
+        final long rtt = System.currentTimeMillis() - start;
 
-      res = syncResponse.poll(5, TimeUnit.SECONDS);
-      final long rtt = System.currentTimeMillis() - start;
-
-      if (res != null) {
-        Logger.getInstance().info(I18n.get("server", " {0} TIME={1,number,0}ms", res) + rtt);
-      } else {
-        expectingDirectReply.set(false);
-        final String message = I18n.get("pingTimeout");
+        if (res != null) {
+          message = MessageFormat.format(I18n.get("server") + " {0} TIME={1,number,0}ms", res, rtt);
+          Logger.getInstance().info(message);
+        } else {
+          expectingDirectReply.set(false);
+          message = I18n.get("pingTimeout");
+          Logger.getInstance().info(message);
+        }
+      } catch (final InterruptedException exception) {
+        Thread.currentThread().interrupt();
+        message = I18n.get("pingInterrupt");
         Logger.getInstance().info(message);
-        return message;
       }
-    } catch (final InterruptedException exception) {
-      Thread.currentThread().interrupt();
-
-      final String message = I18n.get("pingInterrupt");
-      Logger.getInstance().info(message);
-      return message;
     }
-    return res;
+
+    return message;
   }
 
   /**
@@ -173,6 +199,7 @@ public class GameClient {
         }
 
         socket.close();
+        socket = null;
 
       } catch (final IOException | InterruptedException exception) {
         if (exception instanceof InterruptedException) {
@@ -196,14 +223,23 @@ public class GameClient {
 
                 final String msg = "DISCOVER";
 
-                final DatagramPacket packet =
+                final DatagramPacket broadcastPacket =
                     new DatagramPacket(
                         msg.getBytes(StandardCharsets.UTF_8),
                         msg.length(),
                         InetAddress.getByName("255.255.255.255"),
                         12346);
 
-                udpSocket.send(packet);
+                udpSocket.send(broadcastPacket);
+
+                final DatagramPacket localhostPacket =
+                    new DatagramPacket(
+                        msg.getBytes(StandardCharsets.UTF_8),
+                        msg.length(),
+                        InetAddress.getByName("127.0.0.1"),
+                        12346);
+
+                udpSocket.send(localhostPacket);
 
                 Logger.getInstance().info(I18n.get("broadcast"));
 
@@ -245,11 +281,20 @@ public class GameClient {
    * @return true if the socket exists and is open, false otherwise.
    */
   private boolean checkConnection() {
-    if (socket == null || socket.isClosed()) {
+    if (!isConnected()) {
       Logger.getInstance().info(I18n.get("notConnected"));
       return false;
     }
     return true;
+  }
+
+  /**
+   * Indicates whether the TCP socket is currently connected and open.
+   *
+   * @return true if the socket exists, is connected, and is not closed; false otherwise
+   */
+  public boolean isConnected() {
+    return socket != null && socket.isConnected() && !socket.isClosed();
   }
 
   /**
