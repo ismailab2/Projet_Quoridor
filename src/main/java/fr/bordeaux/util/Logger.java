@@ -1,6 +1,7 @@
 package fr.bordeaux.util;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -15,14 +16,13 @@ import java.text.MessageFormat;
  */
 @SuppressWarnings({"PMD.SystemPrintln", "PMD.SingleMethodSingleton"})
 public final class Logger {
-
-  /** Code ANSI pour reset le style */
+  /** ANSI escape code to reset text formatting to default. */
   private static final String RESET = "\u001B[0m";
 
-  /** Couleur INFO */
+  /** Coulor for INFO message */
   private static final String CYAN = "\u001B[36m";
 
-  /** Couleur DEBUG */
+  /** Coulor for DEBUG message */
   private static final String YELLOW = "\u001B[33m";
 
   /** Couleur WARNING */
@@ -31,7 +31,7 @@ public final class Logger {
   /** Couleur VERBOSE / TRACE */
   private static final String GREEN = "\u001B[32m";
 
-  /** Couleur ERROR */
+  /** Color for ERROR message */
   private static final String RED = "\u001B[31m";
 
   /** Singleton instance of the logger. */
@@ -40,21 +40,24 @@ public final class Logger {
   /** Flux de sortie (file or System.out) */
   private final PrintStream writer;
 
-  /** Indique si le mode debug est actif */
+  /** Boolean in case debug is enabled */
   private boolean debugEnabled;
 
-  /** Indique si le mode verbose est actif */
+  /** Boolean in case verbose is enabled */
   private boolean verboseEnabled;
 
-  /** Constructeur privé (console). Initialise le logger avec une sortie standard. */
+  /**
+   * Private constructor for console-based logging. Initializes settings from {@link ConfigManager}
+   * and sets output to System.out.
+   */
   private Logger() {
     this.writer = null;
   }
 
   /**
-   * Constructeur privé (fichier).
+   * Private constructor (with file).
    *
-   * @param logFile nom du fichier de log
+   * @param logFile file to put log messages
    */
   private Logger(final String logFile) {
     PrintStream out;
@@ -63,7 +66,7 @@ public final class Logger {
       final File file = new File(System.getProperty("user.home"), logFile);
       out = new PrintStream(file);
     } catch (final IOException exception) {
-      System.err.println("Erreur création fichier log, fallback console");
+      System.err.println(I18n.get("error", I18n.get("creatingLogFile")));
       out = null;
     }
 
@@ -71,9 +74,9 @@ public final class Logger {
   }
 
   /**
-   * Retourne l'instance Singleton du logger (console).
+   * Return the Logger Singleton instance.
    *
-   * @return instance unique du logger
+   * @return logger's unique instance
    */
   public static synchronized Logger getInstance() {
     if (instance == null) {
@@ -84,10 +87,10 @@ public final class Logger {
   }
 
   /**
-   * Retourne l'instance Singleton du logger avec sortie fichier.
+   * Return the Logger Singleton instance with the output file.
    *
-   * @param logFile nom du fichier de log
-   * @return instance unique du logger
+   * @param logFile file where to print the logs
+   * @return logger's unique instance
    */
   public static synchronized Logger getInstance(final String logFile) {
     if (instance == null) {
@@ -102,9 +105,9 @@ public final class Logger {
   // =========================================================
 
   /**
-   * Log un message de niveau INFO.
+   * INFO level message to display.
    *
-   * @param message message à afficher
+   * @param message message to display
    */
   public void info(final String message) {
     if (isInfoEnabled()) {
@@ -150,7 +153,7 @@ public final class Logger {
   /**
    * Log un message de niveau DEBUG.
    *
-   * @param message message à afficher
+   * @param message message to display
    */
   public void debug(final String message) {
     if (isDebugEnabled()) {
@@ -173,7 +176,7 @@ public final class Logger {
   /**
    * Log un message de niveau VERBOSE.
    *
-   * @param message message détaillé
+   * @param message message to display
    */
   public void verbose(final String message) {
     if (isVerboseEnabled()) {
@@ -207,7 +210,7 @@ public final class Logger {
   /**
    * Log un message d'erreur.
    *
-   * @param message message d'erreur
+   * @param message message to display
    */
   public void error(final String message) {
     if (isErrorEnabled()) {
@@ -246,7 +249,7 @@ public final class Logger {
   // CONFIG
   // =========================================================
 
-  /** Recharge la configuration depuis le {@link ConfigManager}. */
+  /** Reload the configuration from the {@link ConfigManager}. */
   public void refreshConfig() {
     final ConfigManager config = ConfigManager.getInstance();
 
@@ -259,11 +262,11 @@ public final class Logger {
   // =========================================================
 
   /**
-   * Méthode interne d'écriture des logs.
+   * Intern method to print a message.
    *
-   * @param level niveau du log
-   * @param message contenu du message
-   * @param color couleur ANSI associée
+   * @param level log level
+   * @param message the content to display
+   * @param color color to display the level
    */
   private void log(final String level, final String message, final String color) {
     PrintStream stream = (writer != null) ? writer : System.out;
@@ -281,45 +284,45 @@ public final class Logger {
   // =========================================================
 
   /**
-   * Indique si le niveau DEBUG est activé.
+   * Check if DEBUG level is activated.
    *
-   * @return true si activé, sinon false
+   * @return true if activated, false otherwise
    */
   public boolean isDebugEnabled() {
     return debugEnabled;
   }
 
   /**
-   * Indique si le niveau INFO est activé.
+   * Check if INFO level is activated.
    *
-   * @return true (toujours actif)
+   * @return true (always active)
    */
   public boolean isInfoEnabled() {
     return true;
   }
 
   /**
-   * Indique si le niveau WARNING est activé.
+   * Check if WARNING level is activated.
    *
-   * @return true (toujours actif)
+   * @return true (always active)
    */
   public boolean isWarningEnabled() {
     return true;
   }
 
   /**
-   * Indique si le niveau ERROR est activé.
+   * Check if ERROR level is activated.
    *
-   * @return true (toujours actif)
+   * @return true (always active)
    */
   public boolean isErrorEnabled() {
     return true;
   }
 
   /**
-   * Indique si le niveau VERBOSE est activé.
+   * Check if VERBOSE level is activated.
    *
-   * @return true si activé, sinon false
+   * @return true if activated, false otherwise
    */
   public boolean isVerboseEnabled() {
     return verboseEnabled;

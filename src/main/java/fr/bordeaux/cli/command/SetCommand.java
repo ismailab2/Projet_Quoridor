@@ -2,6 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that modifies a game configuration parameter. */
@@ -51,7 +52,7 @@ public class SetCommand implements Command {
 
     final String argument = tokens[1];
     if (!argument.contains("=")) {
-      LOGGER.error("Invalid format. Use PARAM=VALUE (e.g., set debug=true)");
+      LOGGER.error(I18n.get("usage", " PARAM=VALUE (set debug=true)"));
       return engine;
     }
 
@@ -61,7 +62,7 @@ public class SetCommand implements Command {
     final String value = parts[1].trim();
 
     if (key.isEmpty() || value.isEmpty()) {
-      LOGGER.error("Key or value cannot be empty.");
+      LOGGER.error(I18n.get("setEmpty"));
       return engine;
     }
 
@@ -94,9 +95,9 @@ public class SetCommand implements Command {
           break;
       }
 
-      LOGGER.debug("Configuration updated: {0} set to {1}", key, value);
+      LOGGER.debug(I18n.get("setUpdate", key, I18n.get("setTo"), value));
     } catch (final Exception e) {
-      LOGGER.error("Failed to update configuration for key: {0}", key);
+      LOGGER.error(I18n.get("setFailed", key), e);
     }
 
     return engine;
@@ -109,11 +110,11 @@ public class SetCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  set PARAM=VALUE\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Updates a configuration parameter of the game.\n");
+    LOGGER.info("  " + I18n.get("setDesc"));
     LOGGER.verbose("Arguments:");
-    LOGGER.verbose("  PARAM   : Name of the configuration option.");
-    LOGGER.verbose("  VALUE   : New value to assign.\n");
-    LOGGER.verbose("Example:");
+    LOGGER.verbose("  PARAM   : " + I18n.get("setParam"));
+    LOGGER.verbose("  VALUE   : " + I18n.get("setValue"));
+    LOGGER.verbose(I18n.get("loadEx"));
     LOGGER.verbose("  set debug=true\n");
   }
 }

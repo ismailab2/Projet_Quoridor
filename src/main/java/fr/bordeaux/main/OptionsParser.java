@@ -1,6 +1,7 @@
 package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** Interprets CLI arguments (GUI, CLI, Network) and game settings. */
@@ -59,7 +60,8 @@ public final class OptionsParser {
         if (i + 1 < args.length) {
           config.enableContest(args[++i]);
         } else {
-          throw new IllegalArgumentException("--contest requires a file path");
+          throw new IllegalArgumentException(
+              "--contest " + I18n.get("require", I18n.get("filePath")));
         }
       }
       case "-v", "--verbose" -> config.setOption("verbose", "true");
@@ -70,7 +72,7 @@ public final class OptionsParser {
       }
       default -> {
         if (arg.startsWith("-")) {
-          throw new IllegalArgumentException("Invalid option: " + arg);
+          throw new IllegalArgumentException(I18n.get("invalidOpt") + arg);
         }
         config.setOption("load-file", arg);
       }
@@ -92,21 +94,21 @@ public final class OptionsParser {
   public static void printHelp() {
     logInfo("Usage: quoridor [OPTIONS]");
     logInfo("");
-    logInfo("General options:");
-    logInfo("  -h, --help        Show this help message");
-    logInfo("  -V, --version     Display version");
-    logInfo("  -v, --verbose     Enable verbose mode");
-    logInfo("  -d, --debug       Enable debug mode");
-    logInfo("  -D, --daemon      Launch server in headless mode");
+    logInfo(I18n.get("geneOpt"));
+    logInfo("  -h, --help        " + I18n.get("showThis"));
+    logInfo("  -V, --version     " + I18n.get("displayVersion"));
+    logInfo("  -v, --verbose     " + I18n.get("verboseMode"));
+    logInfo("  -d, --debug       " + I18n.get("debugMode"));
+    logInfo("  -D, --daemon      " + I18n.get("headless"));
     logInfo("");
     logInfo("Modes:");
-    logInfo("  --contest, -c <file> Launch contest mode from file");
-    logInfo("  -g, --gui         Launch GUI mode");
-    logInfo("  -n, --net         Launch network mode");
-    logInfo("  -p, --players N   Number of players: 2, 3, or 4 (default 2)");
+    logInfo("  --contest, -c <file> " + I18n.get("contest"));
+    logInfo("  -g, --gui         " + I18n.get("guiMode"));
+    logInfo("  -n, --net         " + I18n.get("networkMode"));
+    logInfo("  -p, --players N   " + I18n.get("numberPlayers"));
     logInfo("");
-    logInfo("Blitz options:");
-    logInfo("  -b, --blitz       Enable blitz mode");
-    logInfo("  -t, --time N      Timeout in minutes (default 30)");
+    logInfo(I18n.get("blitzOpt"));
+    logInfo("  -b, --blitz       " + I18n.get("enableBlitz"));
+    logInfo("  -t, --time N      " + I18n.get("timeout"));
   }
 }

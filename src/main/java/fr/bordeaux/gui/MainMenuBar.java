@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.i18n.I18n;
 import java.io.IOException;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -22,29 +23,29 @@ public class MainMenuBar extends MenuBar {
   }
 
   private Menu createFileMenu() {
-    final Menu file = new Menu("File");
+    final Menu file = new Menu(I18n.get("file"));
     file.getItems()
         .addAll(
-            menuItem("New Game", Action.NEW_GAME),
-            menuItem("Load Game", Action.LOAD_GAME),
-            menuItem("Save Game", Action.SAVE_GAME),
+            menuItem(I18n.get("newGame"), Action.NEW_GAME),
+            menuItem(I18n.get("loadGame"), Action.LOAD_GAME),
+            menuItem(I18n.get("saveGame"), Action.SAVE_GAME),
             new SeparatorMenuItem(),
             menuItem("Configuration", Action.CONFIGURATION),
             menuItem("Info", Action.INFO),
             new SeparatorMenuItem(),
-            menuItem("Quit", Action.QUIT));
+            menuItem(I18n.get("menuQuit"), Action.QUIT));
     return file;
   }
 
   private Menu createGameMenu() {
-    final Menu game = new Menu("Game");
+    final Menu game = new Menu(I18n.get("menuGame"));
     game.getItems()
         .addAll(
-            menuItem("Undo", Action.UNDO),
-            menuItem("Redo", Action.REDO),
+            menuItem(I18n.get("menuUndo"), Action.UNDO),
+            menuItem(I18n.get("menuRedo"), Action.REDO),
             new SeparatorMenuItem(),
             menuItem("Pause", Action.PAUSE),
-            menuItem("Hint", Action.HINT));
+            menuItem(I18n.get("menuHint"), Action.HINT));
     return game;
   }
 

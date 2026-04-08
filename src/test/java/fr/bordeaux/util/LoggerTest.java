@@ -2,6 +2,7 @@ package fr.bordeaux.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.bordeaux.i18n.I18n;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -128,7 +129,7 @@ public class LoggerTest {
     assertNotNull(logger, "Logger should fall back to a valid instance even on IO failure");
     String errOutput = capturedErr.toString();
     assertTrue(
-        errOutput.contains("Erreur création fichier log, fallback console"),
+        errOutput.contains(I18n.get("creatingLogFile")),
         "Fallback message should be printed to stderr. Output was: " + errOutput);
 
     // Verify it still works at INFO level (fallback console logic)

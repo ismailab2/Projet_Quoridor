@@ -1,6 +1,7 @@
 package fr.bordeaux.core;
 
 import fr.bordeaux.ai.mcts.MctsPlayer;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
@@ -72,12 +73,12 @@ public class GameEngine {
   public boolean play(final Move move) {
     final GameState currentState = this.state;
     if (currentState.isGameOver() || currentState.isPaused()) {
-      Logger.getInstance().info("GAME OVER OR PAUSED");
+      Logger.getInstance().info(I18n.get("overPause"));
       return false;
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
-      Logger.getInstance().info("Invalid move! Please try again.");
+      Logger.getInstance().info(I18n.get("moveSyntax"));
       return false;
     }
 
@@ -90,7 +91,7 @@ public class GameEngine {
         blitzManager.pause();
       }
       if (Logger.getInstance().isInfoEnabled()) {
-        Logger.getInstance().info("{0} won the game!", currentPlayer.getName());
+        Logger.getInstance().info("{0} " + I18n.get("won"), currentPlayer.getName());
       }
     }
     return true;
@@ -122,7 +123,7 @@ public class GameEngine {
       fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
     } catch (final IOException exception) {
       if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("Saving error : {0}", exception.getMessage());
+        Logger.getInstance().error(I18n.get("engineSave") + exception.getMessage());
       }
     }
   }
@@ -142,7 +143,7 @@ public class GameEngine {
       initializeBlitz();
     } catch (final IOException | GameLoadException exception) {
       if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error("Erreur chargement : {0}", exception.getMessage());
+        Logger.getInstance().error(I18n.get("engineLoad") + exception.getMessage());
       }
     }
   }
@@ -169,10 +170,10 @@ public class GameEngine {
     if (blitzManager != null) {
       if (newPauseState) {
         blitzManager.pause();
-        Logger.getInstance().info("Timer Paused.");
+        Logger.getInstance().info(I18n.get("enginePause"));
       } else {
         blitzManager.start();
-        Logger.getInstance().info("Timer Resumed.");
+        Logger.getInstance().info(I18n.get("engineResume"));
       }
     }
   }

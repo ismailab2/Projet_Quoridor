@@ -2,6 +2,7 @@ package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Player;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.TimeConvertor;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -19,16 +20,13 @@ public final class PlayerPanel extends VBox {
   private final Label nameLabel;
 
   /** Label displaying the number of walls remaining for the player. */
-  /* default */ final Label wallsLabel;
+  private final Label wallsLabel;
 
   /** Label displaying main part of time. */
-  /* default */ final Label mainTimeLabel;
+  private final Label mainTimeLabel;
 
   /** Label displaying milliseconds. */
-  /* default */ final Label millisLabel;
-
-  /** Index of the player in the list of players in the GameState. */
-  private final int playerIndex;
+  private final Label millisLabel;
 
   /**
    * Constructs panel for player.
@@ -37,9 +35,7 @@ public final class PlayerPanel extends VBox {
    * @param state game state
    * @param playerIndex player index
    */
-  public PlayerPanel(final String playerName, final GameState state, final int playerIndex) {
-    super();
-    this.playerIndex = playerIndex;
+  public PlayerPanel(String playerName, GameState state, int playerIndex) {
 
     final Player player = state.getPlayers().get(playerIndex);
     final String accentColor =
@@ -73,7 +69,7 @@ public final class PlayerPanel extends VBox {
     final HBox timeContainer = new HBox(0, mainTimeLabel, millisLabel);
     timeContainer.setAlignment(Pos.BASELINE_CENTER);
 
-    final VBox timeBox = makeStatBox("Temps", timeContainer);
+    final VBox timeBox = makeStatBox(I18n.get("timer"), timeContainer);
     // ---------------------
 
     final Region separator2 = makeSeparator();
@@ -81,7 +77,7 @@ public final class PlayerPanel extends VBox {
     wallsLabel = new Label(String.valueOf(player.getRemainingWalls()));
     wallsLabel.setStyle(
         "-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + accentColor + ";");
-    final VBox wallsBox = makeStatBox("Murs restants", wallsLabel);
+    final VBox wallsBox = makeStatBox(I18n.get("walls"), wallsLabel);
 
     final VBox content = new VBox(16, nameLabel, separator, timeBox, separator2, wallsBox);
     content.setPadding(new Insets(15));
@@ -100,16 +96,15 @@ public final class PlayerPanel extends VBox {
             Platform.runLater(
                 () -> {
                   final Player targetPlayer = state.getPlayers().get(playerIndex);
-                  if (targetPlayer.isDisabled()) {
-                    return;
-                  }
                   final String[] times =
                       TimeConvertor.formatTime(targetPlayer.getRemainingTime()).split(":");
 
                   if (times.length > 2) {
+
                     mainTimeLabel.setText(times[0] + ":" + times[1]);
                     millisLabel.setText(":" + times[2]);
                   } else {
+
                     mainTimeLabel.setText(times[0] + ":" + times[1]);
                     millisLabel.setText("");
                   }
