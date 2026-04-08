@@ -15,7 +15,11 @@ public class I18n {
 
   // Default param
   static {
-    setLocale(Locale.getDefault());
+    if (System.getProperty("quoridor.test") != null) {
+      setLocale(Locale.ENGLISH);
+    } else {
+      setLocale(Locale.getDefault());
+    }
   }
 
   /**

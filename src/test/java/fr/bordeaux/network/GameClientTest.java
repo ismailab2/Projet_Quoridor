@@ -77,6 +77,8 @@ public class GameClientTest {
 
   @BeforeEach
   public void setUp() throws IOException {
+    System.setProperty("quoridor.test", "true");
+    I18n.setLocale(java.util.Locale.ENGLISH);
     outContent = new ByteArrayOutputStream();
     System.setOut(new PrintStream(outContent));
   }

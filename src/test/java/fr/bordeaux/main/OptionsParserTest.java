@@ -28,6 +28,7 @@ public class OptionsParserTest {
     config.load(); // This will save defaults to the temp file if it's empty
     config.setOption("nb-players", "2");
     System.setProperty("quoridor.test", "true");
+    I18n.setLocale(java.util.Locale.ENGLISH);
   }
 
   @org.junit.jupiter.api.AfterEach

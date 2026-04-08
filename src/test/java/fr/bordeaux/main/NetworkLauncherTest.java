@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,9 @@ class NetworkLauncherTest {
 
   @BeforeEach
   void setUp() {
+    System.setProperty("quoridor.test", "true");
+    I18n.setLocale(Locale.ENGLISH);
+
     multiServer = mock(MultiGameServer.class);
     client = mock(GameClient.class);
     config = mock(ConfigManager.class);

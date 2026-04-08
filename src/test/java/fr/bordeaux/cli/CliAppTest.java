@@ -33,6 +33,10 @@ class CliAppTest {
 
   @BeforeEach
   void setUp() {
+    System.setProperty("quoridor.test", "true");
+    I18n.get("activ"); // Force I18n class loading if not already done
+    I18n.setLocale(java.util.Locale.ENGLISH);
+
     engine = createEngine();
     p1 = engine.getState().getPlayers().getFirst();
     reader = mock(LineReader.class);
