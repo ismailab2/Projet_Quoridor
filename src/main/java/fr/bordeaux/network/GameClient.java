@@ -16,6 +16,7 @@ import java.text.MessageFormat;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
 public class GameClient {
@@ -38,7 +39,10 @@ public class GameClient {
   /** Flag to treat next message as a direct reply to a sync command. */
   private final AtomicBoolean expectingDirectReply;
 
-  /** Default constructor. */
+  /** Handler notified when an asynchronous message is received from the server. */
+  private Consumer<String> serverMessageHandler;
+
+  /** Constructs a GameClient for joining servers or discovery. */
   public GameClient() {
     this.syncResponse = new SynchronousQueue<>();
     this.expectingDirectReply = new AtomicBoolean(false);
@@ -85,15 +89,17 @@ public class GameClient {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        Logger.getInstance().info("Server: {0}", line);
+                        Logger.getInstance().info("Server: " + line);
                       }
+                      notifyServerMessage(line);
                     } catch (InterruptedException ie) {
                       Thread.currentThread().interrupt();
                     } finally {
                       expectingDirectReply.set(false);
                     }
                   } else {
-                    Logger.getInstance().info("Server: {0}", line);
+                    Logger.getInstance().info("Server: " + line);
+                    notifyServerMessage(line);
                   }
                 }
               } catch (final IOException exception) {
@@ -104,6 +110,26 @@ public class GameClient {
             });
     listenerThread.setDaemon(true);
     listenerThread.start();
+  }
+
+  /**
+   * Notifies the registered handler that a server message was received.
+   *
+   * @param message message received from the server
+   */
+  private void notifyServerMessage(final String message) {
+    if (serverMessageHandler != null) {
+      serverMessageHandler.accept(message);
+    }
+  }
+
+  /**
+   * Sets the handler called when an asynchronous message is received from the server.
+   *
+   * @param serverMessageHandler handler receiving the server message
+   */
+  public void setServerMessageHandler(final Consumer<String> serverMessageHandler) {
+    this.serverMessageHandler = serverMessageHandler;
   }
 
   /**
@@ -173,6 +199,7 @@ public class GameClient {
         }
 
         socket.close();
+        socket = null;
 
       } catch (final IOException | InterruptedException exception) {
         if (exception instanceof InterruptedException) {
@@ -196,14 +223,23 @@ public class GameClient {
 
                 final String msg = "DISCOVER";
 
-                final DatagramPacket packet =
+                final DatagramPacket broadcastPacket =
                     new DatagramPacket(
                         msg.getBytes(StandardCharsets.UTF_8),
                         msg.length(),
                         InetAddress.getByName("255.255.255.255"),
                         12346);
 
-                udpSocket.send(packet);
+                udpSocket.send(broadcastPacket);
+
+                final DatagramPacket localhostPacket =
+                    new DatagramPacket(
+                        msg.getBytes(StandardCharsets.UTF_8),
+                        msg.length(),
+                        InetAddress.getByName("127.0.0.1"),
+                        12346);
+
+                udpSocket.send(localhostPacket);
 
                 Logger.getInstance().info("Broadcast sent, waiting for responses...");
 
@@ -246,11 +282,20 @@ public class GameClient {
    * @return true if the socket exists and is open, false otherwise.
    */
   private boolean checkConnection() {
-    if (socket == null || socket.isClosed()) {
+    if (!isConnected()) {
       Logger.getInstance().info("Not connected to any server.");
       return false;
     }
     return true;
+  }
+
+  /**
+   * Indicates whether the TCP socket is currently connected and open.
+   *
+   * @return true if the socket exists, is connected, and is not closed; false otherwise
+   */
+  public boolean isConnected() {
+    return socket != null && socket.isConnected() && !socket.isClosed();
   }
 
   /**
