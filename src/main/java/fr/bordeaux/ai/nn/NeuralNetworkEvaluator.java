@@ -191,10 +191,10 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     final float opponentDist = computeDistanceToWin(state, opponent) / maxDist;
 
     // 3. Remaining Walls: Number of walls the current player has left.
-    final float currentWalls = current.getRemainingWalls() / 10.0f;
+    final float currentWalls = Math.min(1.0f, current.getRemainingWalls() / 10.0f);
 
     // 4. Remaining Walls: Number of walls the opponent has left.
-    final float opponentWalls = opponent.getRemainingWalls() / 10.0f;
+    final float opponentWalls = Math.min(1.0f, opponent.getRemainingWalls() / 10.0f);
 
     return new float[] {myProx, opponentDist, currentWalls, opponentWalls};
   }

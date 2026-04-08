@@ -32,6 +32,9 @@ public final class BoardView extends GridPane {
   /** References to all cell containers on the board. */
   private final StackPane[][] cells;
 
+  /** The highlighted move suggested by the AI, if any. */
+  private Move highlightedMove;
+
   /** Size factor for pawns relative to cell size. */
   private static final double PAWN_SIZE_FACTOR = 0.6;
 
@@ -55,6 +58,18 @@ public final class BoardView extends GridPane {
 
   /** Opacity for the wall preview highlight. */
   private static final double PREVIEW_OPACITY = 0.4;
+
+  /** Semi-transparent turquoise color for the pawn hint highlight. */
+  private static final Color HINT_PAWN_COLOR = Color.rgb(64, 224, 208, 0.4);
+
+  /** Semi-transparent turquoise color for the wall hint highlight. */
+  private static final Color HINT_WALL_COLOR = Color.rgb(64, 224, 208, 0.8);
+
+  /** Stroke color for hint highlight over pawns. */
+  private static final Color HINT_STROKE_COLOR = Color.TURQUOISE;
+
+  /** Stroke width for the hint highlight over pawns. */
+  private static final double HINT_STROKE_WIDTH = 3.0;
 
   /** Default size of a cell if dimensions are unknown. */
   private static final int DEFAULT_CELL_SIZE = 100;
@@ -94,6 +109,7 @@ public final class BoardView extends GridPane {
             });
     state.addListener(
         () -> {
+          this.highlightedMove = null;
           Platform.runLater(this::drawBoard);
         });
     drawBoard();
@@ -143,7 +159,62 @@ public final class BoardView extends GridPane {
     drawWallSlots();
     drawWalls();
     drawPlayers();
+    drawHighlightedMove();
     highlightCurrentPlayer();
+  }
+
+  /**
+   * Highlights a specific move on the board (used for hints).
+   *
+   * @param move The move to highlight.
+   */
+  public void highlightMove(final Move move) {
+    this.highlightedMove = move;
+    Platform.runLater(this::drawBoard);
+  }
+
+  /** Draws the highlighted move if one is active. */
+  private void drawHighlightedMove() {
+    if (highlightedMove == null) {
+      return;
+    }
+    final double cellSize = getCellSize();
+    final Position target = highlightedMove.getTo();
+    if (highlightedMove.isPawn()) {
+      final double pawnSize = cellSize * PAWN_SIZE_FACTOR;
+      final Rectangle highlight = new Rectangle(pawnSize, pawnSize, HINT_PAWN_COLOR);
+      highlight.setArcWidth(PAWN_ARC);
+      highlight.setArcHeight(PAWN_ARC);
+      highlight.setStroke(HINT_STROKE_COLOR);
+      highlight.setStrokeWidth(HINT_STROKE_WIDTH);
+      highlight.setMouseTransparent(true);
+      final StackPane cell = cells[target.getX()][target.getY()];
+      cell.getChildren().add(highlight);
+
+    } else {
+      final Orientation orientation = highlightedMove.getOrientation();
+      final double wallThickness = getWallThickness();
+
+      if (orientation == Orientation.HORIZONTAL) {
+        final Rectangle wall = new Rectangle(cellSize * 2.0, wallThickness);
+        wall.setFill(HINT_WALL_COLOR);
+        wall.setArcWidth(WALL_ARC);
+        wall.setArcHeight(WALL_ARC);
+        wall.setMouseTransparent(true);
+        add(wall, target.getY(), target.getX(), 2, 1);
+        setValignment(wall, VPos.BOTTOM);
+        wall.setTranslateY(wallThickness / 2.0);
+      } else {
+        final Rectangle wall = new Rectangle(wallThickness, cellSize * 2.0);
+        wall.setFill(HINT_WALL_COLOR);
+        wall.setArcWidth(WALL_ARC);
+        wall.setArcHeight(WALL_ARC);
+        wall.setMouseTransparent(true);
+        add(wall, target.getY(), target.getX(), 1, 2);
+        setHalignment(wall, HPos.RIGHT);
+        wall.setTranslateX(wallThickness / 2.0);
+      }
+    }
   }
 
   /** Draws placed walls by checking missing graph edges. Rendered as brown rectangles. */

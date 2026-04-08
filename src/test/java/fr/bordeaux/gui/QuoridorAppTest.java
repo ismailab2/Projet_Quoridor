@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -410,5 +412,58 @@ class QuoridorAppTest extends ApplicationTest {
   void testStop() {
     QuoridorApp app = new QuoridorApp();
     assertDoesNotThrow(() -> app.stop());
+  }
+
+  /** Tests the Hint button interaction and feedback. */
+  @Test
+  void testHintActionShowsThinkingMessage() throws IOException {
+    GameEngine engine = mock(GameEngine.class);
+    BoardView boardView = mock(BoardView.class);
+    Move hintMove = Move.pawn(new Position(4, 4), new Position(4, 5));
+
+    // Simulate delay
+    when(engine.hint())
+        .thenAnswer(
+            inv -> {
+              Thread.sleep(100);
+              return hintMove;
+            });
+
+    final AtomicReference<Button> btnRef = new AtomicReference<>();
+    final AtomicReference<Label> labelRef = new AtomicReference<>();
+
+    interact(
+        () -> {
+          javafx.scene.Node hintArea = QuoridorApp.createHintArea(engine, boardView);
+          HBox container = (HBox) hintArea;
+          Button btn = (Button) container.getChildren().get(0);
+          Label label = (Label) container.getChildren().get(1);
+          btnRef.set(btn);
+          labelRef.set(label);
+
+          assertEquals("", label.getText());
+          assertFalse(btn.isDisable());
+
+          btn.fire();
+
+          assertTrue(btn.isDisable());
+          assertEquals("AI is thinking...", label.getText());
+        });
+
+    // Wait for the async task and Platform.runLater
+    WaitForAsyncUtils.waitForFxEvents();
+    try {
+      Thread.sleep(300);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+    WaitForAsyncUtils.waitForFxEvents();
+
+    interact(
+        () -> {
+          assertFalse(btnRef.get().isDisable());
+          assertEquals("", labelRef.get().getText());
+          verify(boardView).highlightMove(hintMove);
+        });
   }
 }
