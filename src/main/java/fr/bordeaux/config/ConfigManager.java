@@ -1,16 +1,13 @@
 package fr.bordeaux.config;
 
+import fr.bordeaux.util.Logger;
 import fr.bordeaux.i18n.I18n;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;
 
-/**
- * Manages the application configuration using a singleton pattern. This class handles loading and
- * saving settings (like timeouts, blitz mode, or shortcuts) from a persistent file located in the
- * user's home directory.
- */
-public class ConfigManager {
+/** Singleton managed configuration for loading and saving settings. */
+public final class ConfigManager {
 
   private static ConfigManager instance;
 
@@ -79,8 +76,8 @@ public class ConfigManager {
 
       props.store(out, "Quoridor configuration");
 
-    } catch (IOException e) {
-      System.err.println(I18n.get("configError"));
+    } catch (final IOException e) {
+      Logger.getInstance().error(I18n.get("configError") + e);
     }
   }
 

@@ -78,6 +78,7 @@ public class GameEngine {
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
+      Logger.getInstance().info(I18n.get("moveSyntax"));
       return false;
     }
 
@@ -217,7 +218,7 @@ public class GameEngine {
   /**
    * Converts a Position object into algebraic notation (e.g., "a0", "b1").
    *
-   * @param p The position to convert.
+   * @param pos The position to convert.
    * @return A string representing the coordinates.
    */
   private String posToString(final Position pos) {

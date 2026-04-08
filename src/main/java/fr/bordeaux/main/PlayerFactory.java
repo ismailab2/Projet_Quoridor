@@ -108,9 +108,9 @@ public final class PlayerFactory {
    * Determines the AI search depth based on the allocated reflection time.
    *
    * @param reflexionTime the time allowed for the AI to think, in seconds.
-   * @return the calculated search depth (from 2 to 5).
+   * @return the calculated search depth (from 3 to 7).
    */
-  private static int depthBasedOnTime(final int reflexionTime) {
+  /* default */ static int depthBasedOnTime(final int reflexionTime) {
     final int result;
     if (reflexionTime <= 2) {
       result = 3;

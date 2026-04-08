@@ -13,12 +13,6 @@ public final class GameLoader {
   /** The line index where the board section starts in the save file. */
   private static final int BOARD_START = 3;
 
-  /** Default board size. */
-  private static final int BOARD_SIZE_DEFAULT = 9;
-
-  /** Default timeout in minutes. */
-  private static final int TIMEOUT_DEFAULT = 30;
-
   /** Private constructor to prevent instantiation. */
   private GameLoader() {}
 

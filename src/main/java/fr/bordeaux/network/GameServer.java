@@ -11,15 +11,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * This class implements a simple TCP server capable of: - Accepting a single client connection -
- * Handling basic commands (PING, QUIT) - Broadcasting its presence via UDP - Detecting client
- * timeouts (1 minute)
- *
- * <p>Communication protocol: - Messages are ASCII strings terminated by '\n' - Supported commands:
- * - PING → responds with PONG - QUIT → responds with BYE and disconnects client - Other → responds
- * with OK
- */
+/** TCP server for single client. Handles PING/QUIT and UDP broadcast. */
 public class GameServer {
 
   /** Default constructor. Initializes a new GameServer instance. */
@@ -73,7 +65,9 @@ public class GameServer {
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                Logger.getInstance().info(I18n.get("alreadyUsed") + e.getMessage());
+                if (Logger.getInstance().isErrorEnabled()) {
+                  Logger.getInstance().error(I18n.get("alreadyUsed") + e.getMessage());
+                }
               }
             })
         .start();
@@ -134,7 +128,7 @@ public class GameServer {
       }
 
     } catch (IOException e) {
-      System.out.println(I18n.get("disconnected"));
+      Logger.getInstance().error(I18n.get("disconnected"));
     }
 
     stop();
@@ -164,6 +158,6 @@ public class GameServer {
     } catch (IOException ignored) {
     }
 
-    System.out.println(I18n.get("stopped"));
+    Logger.getInstance().info(I18n.get("stopped"));
   }
 }

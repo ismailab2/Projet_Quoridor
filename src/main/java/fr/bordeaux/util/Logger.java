@@ -31,7 +31,7 @@ public final class Logger {
   /** Couleur VERBOSE / TRACE */
   private static final String GREEN = "\u001B[32m";
 
-  /** Coulor for ERROR message */
+  /** Color for ERROR message */
   private static final String RED = "\u001B[31m";
 
   /** Singleton instance of the logger. */
@@ -302,16 +302,16 @@ public final class Logger {
   }
 
   /**
-   * Indique si le niveau WARNING est activé.
+   * Check if WARNING level is activated.
    *
-   * @return true (toujours actif)
+   * @return true (always active)
    */
   public boolean isWarningEnabled() {
     return true;
   }
 
   /**
-   * Indique si le niveau ERROR est activé.
+   * Check if ERROR level is activated.
    *
    * @return true (always active)
    */

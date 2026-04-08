@@ -12,14 +12,11 @@ public final class InfoDialog {
   /** Displays the information dialog of the application. */
   public static void show() {
     final Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setTitle(I18n.get("info"));
+    alert.setTitle("Info du jeu Quoridor");
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);
     alert.setContentText(
-        "Version 1.0\n"
-            + I18n.get("authors")
-            + " Isma, Khadidja, Joris, Matthieu, Cengiz. "
-            + I18n.get("students"));
+        "Version : 1.0.0\n"+I18n.get("authors")+"Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \n"+I18n.get("students"));
     alert.show();
   }
 }

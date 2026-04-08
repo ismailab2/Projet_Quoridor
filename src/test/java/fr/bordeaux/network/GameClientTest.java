@@ -2,13 +2,23 @@ package fr.bordeaux.network;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import fr.bordeaux.i18n.I18n;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.SynchronousQueue;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -307,4 +317,111 @@ public class GameClientTest {
 
     client.quit();
   } */
+
+  @Test
+  void testPingTimeout() throws Exception {
+    GameClient client = new GameClient();
+    try (ServerSocket serverSocket = new ServerSocket(0)) {
+      client.join("localhost", serverSocket.getLocalPort());
+
+      Field instanceField = Logger.class.getDeclaredField("instance");
+      instanceField.setAccessible(true);
+      Logger originalLogger = (Logger) instanceField.get(null);
+      Logger mockLogger = mock(Logger.class);
+      instanceField.set(null, mockLogger);
+
+      try {
+        Field syncField = GameClient.class.getDeclaredField("syncResponse");
+        syncField.setAccessible(true);
+        SynchronousQueue<String> mockQueue = mock(SynchronousQueue.class);
+        syncField.set(client, mockQueue);
+        // Simulate timeout by returning null
+        when(mockQueue.poll(anyLong(), any())).thenReturn(null);
+
+        String result = client.ping();
+        assertTrue(result.contains("timeout"));
+        verify(mockLogger, atLeastOnce()).info("Ping timeout: no response within 5 seconds.");
+      } finally {
+        instanceField.set(null, originalLogger);
+      }
+    }
+  }
+
+  @Test
+  void testPingInterrupted() throws Exception {
+    GameClient client = new GameClient();
+    try (ServerSocket serverSocket = new ServerSocket(0)) {
+      client.join("localhost", serverSocket.getLocalPort());
+
+      Field instanceField = Logger.class.getDeclaredField("instance");
+      instanceField.setAccessible(true);
+      Logger originalLogger = (Logger) instanceField.get(null);
+      Logger mockLogger = mock(Logger.class);
+      instanceField.set(null, mockLogger);
+
+      try {
+        Field syncField = GameClient.class.getDeclaredField("syncResponse");
+        syncField.setAccessible(true);
+        SynchronousQueue<String> mockQueue = mock(SynchronousQueue.class);
+        syncField.set(client, mockQueue);
+        // Simulate interruption
+        when(mockQueue.poll(anyLong(), any())).thenThrow(new InterruptedException());
+
+        String result = client.ping();
+        assertTrue(result.contains("interrupted"));
+        verify(mockLogger, atLeastOnce()).info("Ping interrupted.");
+      } finally {
+        instanceField.set(null, originalLogger);
+      }
+    }
+  }
+
+  @Test
+  void testQuitNoBye() throws Exception {
+    GameClient client = new GameClient();
+    try (ServerSocket serverSocket = new ServerSocket(0)) {
+      client.join("localhost", serverSocket.getLocalPort());
+
+      Field instanceField = Logger.class.getDeclaredField("instance");
+      instanceField.setAccessible(true);
+      Logger originalLogger = (Logger) instanceField.get(null);
+      Logger mockLogger = mock(Logger.class);
+      instanceField.set(null, mockLogger);
+
+      try {
+        Field syncField = GameClient.class.getDeclaredField("syncResponse");
+        syncField.setAccessible(true);
+        SynchronousQueue<String> mockQueue = mock(SynchronousQueue.class);
+        syncField.set(client, mockQueue);
+        // Simulate no BYE response
+        when(mockQueue.poll(anyLong(), any())).thenReturn(null);
+
+        String result = client.quit();
+        assertTrue(result.contains("No BYE received"));
+        verify(mockLogger, atLeastOnce()).info("No BYE received, closing anyway.");
+      } finally {
+        instanceField.set(null, originalLogger);
+      }
+    }
+  }
+
+  @Test
+  void testQuitException() throws Exception {
+    GameClient client = new GameClient();
+    try (ServerSocket serverSocket = new ServerSocket(0)) {
+      client.join("localhost", serverSocket.getLocalPort());
+
+      // Inject a mock socket that throws IOException on close
+      Field socketField = GameClient.class.getDeclaredField("socket");
+      socketField.setAccessible(true);
+      Socket mockSocket = mock(Socket.class);
+      when(mockSocket.isConnected()).thenReturn(true);
+      doThrow(new IOException("Close Error")).when(mockSocket).close();
+      socketField.set(client, mockSocket);
+
+      String result = client.quit();
+      // Should handle exception silently or log it, but method should finish
+      assertNotNull(result);
+    }
+  }
 }

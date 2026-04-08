@@ -151,15 +151,4 @@ public class MoveCommand implements Command {
     new ShowCommand().execute(engine);
     return engine;
   }
-
-  /**
-   * Converts a board position into a human-readable string. The format follows the CLI coordinate
-   * notation (e.g., a0, b3).
-   *
-   * @param p the position to convert
-   * @return the string representation of the position
-   */
-  private String posToString(Position p) {
-    return (char) ('a' + p.getY()) + "" + (p.getX() + 1);
-  }
 }

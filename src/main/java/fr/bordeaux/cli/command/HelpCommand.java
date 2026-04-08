@@ -1,7 +1,10 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+<<<<<<< HEAD
 import fr.bordeaux.i18n.I18n;
+=======
+>>>>>>> main
 import fr.bordeaux.util.Logger;
 import java.util.Map;
 import java.util.function.Function;
@@ -102,7 +105,11 @@ public class HelpCommand implements Command {
         final Command cmd = registry.get(commandName).apply(new String[] {commandName});
         cmd.helpText();
       } else {
+<<<<<<< HEAD
         LOGGER.debug(I18n.get("unknownCmd") + "{0}", commandName);
+=======
+        LOGGER.debug("Unknown command : {0}", commandName);
+>>>>>>> main
         LOGGER.info("Usage : help [CMD]");
       }
     }
