@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.main.GuiLauncher;
 import fr.bordeaux.util.Logger;
@@ -75,6 +76,12 @@ public class QuoridorApp extends Application {
   public void start(final Stage stage) throws IOException {
     final GuiLauncher guiLauncher = new GuiLauncher();
     final GameEngine engine = guiLauncher.buildEngine();
+      // Chargement d’une partie si load-file est défini
+      final String loadFile = ConfigManager.getInstance().getOption("load-file", null);
+      if (loadFile != null) {
+          engine.loadGame(loadFile);
+          Logger.getInstance().debug("Loaded game from file: " + loadFile);
+      }
     final GameState state = engine.getState();
 
     final FileHandler fileHandler = new FileHandler(stage);
@@ -92,7 +99,7 @@ public class QuoridorApp extends Application {
 
     final javafx.scene.Node hintArea = createHintArea(engine, boardView);
     if (hintArea instanceof HBox container && !container.getChildren().isEmpty()) {
-      final Button hintButton = (Button) container.getChildren().get(0);
+      final Button hintButton = (Button) container.getChildren().getFirst();
       dispatcher.setHintHandler(hintButton::fire);
     }
 
@@ -195,7 +202,7 @@ public class QuoridorApp extends Application {
    * Assembles root layout components.
    *
    * @param menuBar the top menu bar
-   * @param boardContainer the center board container
+   * @param centerNode the center board container
    * @param panels array of player panels
    * @return the configured BorderPane
    */
@@ -260,19 +267,13 @@ public class QuoridorApp extends Application {
     scene
         .widthProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              resizeBoard(boardView, scene, menuBar.getHeight());
-            });
+            (obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
     scene
         .heightProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              resizeBoard(boardView, scene, menuBar.getHeight());
-            });
+            (obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
     Platform.runLater(
-        () -> {
-          resizeBoard(boardView, scene, menuBar.getHeight());
-        });
+        () -> resizeBoard(boardView, scene, menuBar.getHeight()));
   }
 
   /**
@@ -312,9 +313,7 @@ public class QuoridorApp extends Application {
                   .ifPresent(
                       winner ->
                           Platform.runLater(
-                              () -> {
-                                showGameOverOverlay(container, winner.getName(), popupShown);
-                              }));
+                              () -> showGameOverOverlay(container, winner.getName(), popupShown)));
             }
           } else {
             popupShown.set(false);
