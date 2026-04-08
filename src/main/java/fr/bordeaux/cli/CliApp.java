@@ -92,8 +92,14 @@ public class CliApp {
   /** A registry mapping command names */
   private Map<String, Function<String[], Command>> commandRegistry;
 
+  /** Local network server controlled from the CLI. */
   private final MultiGameServer networkServer;
+
+  /** TCP client controlled from the CLI. */
   private final GameClient networkClient;
+
+  /** Last move sent to the server and waiting for confirmation. */
+  private String pendingNetworkMove;
 
   /**
    * Creates a CLI application with a specific game engine, terminal and reader.
@@ -103,15 +109,24 @@ public class CliApp {
    * @param reader the line reader used to read user commands
    */
   public CliApp(final GameEngine engine, final Terminal terminal, final LineReader reader) {
+    this(engine, terminal, reader, new MultiGameServer(), new GameClient());
+  }
 
+    CliApp(
+        final GameEngine engine,
+        final Terminal terminal,
+        final LineReader reader,
+        final MultiGameServer networkServer,
+        final GameClient networkClient) {
     this.engine = engine;
     this.terminal = terminal;
     this.reader = reader;
+    this.networkServer = networkServer;
+    this.networkClient = networkClient;
+    this.networkClient.setServerMessageHandler(this::handleServerMessage);
     commandRegistry = new HashMap<>();
-
+    
     registerAllCommands();
-    this.networkServer = new MultiGameServer();
-    this.networkClient = new GameClient();
   }
 
   /** Initialises the command registry to avoid code duplication in constructors. */
@@ -147,6 +162,7 @@ public class CliApp {
     this.running = true;
     this.networkServer = new MultiGameServer();
     this.networkClient = new GameClient();
+    this.networkClient.setServerMessageHandler(this::handleServerMessage);
 
     // Create smart completer
     final Completer smartCompleter = new SmartCompleter();
@@ -231,7 +247,7 @@ public class CliApp {
         final String line = reader.readLine(">> ");
         fetch(line);
       }
-      if (engine.getState().isGameOver()) {
+      if (engine.getState().isGameOver() && !networkClient.isConnected()) {
         running = false;
       }
     }
@@ -338,7 +354,8 @@ public class CliApp {
       }
       case "move" -> {
         if (networkClient.isConnected() && tokens.length > 1) {
-          networkClient.sendMove(input.substring("move ".length()).trim());
+          pendingNetworkMove =input.substring("move ".length()).trim();
+          networkClient.sendMove(pendingNetworkMove);
         } else {
           return false;
         }
@@ -352,7 +369,8 @@ public class CliApp {
       }
       default -> {
         if (networkClient.isConnected()) {
-          networkClient.sendMove(input);
+          pendingNetworkMove = input;
+          networkClient.sendMove(pendingNetworkMove);
           return true;
         }
         return false;
@@ -437,6 +455,24 @@ public class CliApp {
   */
   private boolean looksLikePlayerId(final String value) {
     return value.toUpperCase(Locale.US).matches("C\\d+");
+  }
+
+
+  /**
+ * Handles server messages and keeps the local CLI board synchronized with network moves.
+ *
+ * @param message message received from the server
+ */
+  private synchronized void handleServerMessage(final String message) {
+    if ("OK".equals(message) && pendingNetworkMove != null) {
+      engine = new MoveCommand(pendingNetworkMove).execute(engine);
+      pendingNetworkMove = null;
+    } else if (message.startsWith("OPPONENT_MOVE ")) {
+      final String move = message.substring("OPPONENT_MOVE ".length()).trim();
+      engine = new MoveCommand(move).execute(engine);
+    } else if (message.startsWith("ERROR ")) {
+      pendingNetworkMove = null;
+    }
   }
 
 

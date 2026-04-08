@@ -2,6 +2,7 @@ package fr.bordeaux.network;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.*;
 import java.net.*;
@@ -255,5 +256,54 @@ public class GameClientTest {
 
     assertTrue(output.contains("Broadcast sent, waiting for responses..."));
     assertTrue(output.contains("Server found: testServer:9000"));
+  }
+
+    // Tests reseau client ajoutes
+
+  @Test
+  void connectedFalseByDefault() {
+    GameClient client = new GameClient();
+
+    assertFalse(client.isConnected());
+  }
+
+  @Test
+  void helloWithoutConnection() {
+    GameClient client = new GameClient();
+
+    assertDoesNotThrow(() -> client.hello("Alice"));
+    assertTrue(outContent.toString().contains("Not connected"));
+  }
+
+  @Test
+  void sendMoveWithoutConnection() {
+    GameClient client = new GameClient();
+
+    assertDoesNotThrow(() -> client.sendMove("e1-e2"));
+    assertTrue(outContent.toString().contains("Not connected"));
+  }
+
+  @Test
+  void handlerReceivesMessage() throws Exception {
+    MockServer server = new MockServer();
+    server.start();
+    synchronized (server) {
+      if (server.getPort() == 0) {
+        server.wait(1000);
+      }
+    }
+
+    GameClient client = new GameClient();
+    List<String> messages = new ArrayList<>();
+    client.setServerMessageHandler(messages::add);
+
+    assertTrue(client.join("localhost", server.getPort()));
+
+    client.hello("Alice");
+    Thread.sleep(300);
+
+    assertTrue(messages.contains("WELCOME"));
+
+    client.quit();
   }
 }

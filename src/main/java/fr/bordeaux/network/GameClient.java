@@ -15,13 +15,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
 public class GameClient {
 
   /** TCP socket used for the connection */
   private Socket socket;
-
+  
   /** Input stream to read server responses */
   private BufferedReader in;
 
@@ -36,6 +37,9 @@ public class GameClient {
 
   /** Flag to treat next message as a direct reply to a sync command. */
   private final AtomicBoolean expectingDirectReply = new AtomicBoolean(false);
+
+  /** Handler notified when an asynchronous message is received from the server. */
+  private Consumer<String> serverMessageHandler;
 
   /** Constructs a GameClient for joining servers or discovery. */
   public GameClient() {
@@ -83,6 +87,7 @@ public class GameClient {
                       if (!delivered) {
                         Logger.getInstance().info("Server: " + line);
                       }
+                      notifyServerMessage(line);
                     } catch (InterruptedException ie) {
                       Thread.currentThread().interrupt();
                     } finally {
@@ -90,6 +95,7 @@ public class GameClient {
                     }
                   } else {
                     Logger.getInstance().info("Server: " + line);
+                    notifyServerMessage(line);
                   }
                 }
               } catch (final IOException exception) {
@@ -101,8 +107,29 @@ public class GameClient {
   }
 
   /**
+ * Notifies the registered handler that a server message was received.
+ *
+ * @param message message received from the server
+ */
+  private void notifyServerMessage(final String message) {
+    if (serverMessageHandler != null) {
+      serverMessageHandler.accept(message);
+    }
+  }
+
+  /**
+    * Sets the handler called when an asynchronous message is received from the server.
+    *
+    * @param serverMessageHandler handler receiving the server message
+    */
+  public void setServerMessageHandler(final Consumer<String> serverMessageHandler) {
+      this.serverMessageHandler = serverMessageHandler;
+    }
+
+  /**
    * Sends "PING" to the server and waits for a response ("PONG"). The time between sending and
    * receiving is measured and displayed.
+   * @return the ping result message
    */
   public String ping() {
    if (!checkConnection()) {
@@ -141,6 +168,7 @@ public class GameClient {
   /**
    * Sends a "QUIT" command to the server, waits for the "BYE" response, and then closes the socket
    * connection.
+   * @return the quit result message
    */
   public String quit() {
     String message = "Client exited.";
