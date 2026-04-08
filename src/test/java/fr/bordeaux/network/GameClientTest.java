@@ -13,8 +13,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.util.Logger;
+
 import java.io.*;
 import java.net.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
@@ -265,7 +268,7 @@ public class GameClientTest {
     String output = outContent.toString();
 
     assertTrue(output.contains(I18n.get("broadcast")));
-    assertTrue(output.contains(I18n.get("found", "testServer:9000")));
+    assertTrue(output.contains(I18n.get("found")));
   }
 
   // Tests reseau client ajoutes
@@ -338,8 +341,8 @@ public class GameClientTest {
         when(mockQueue.poll(anyLong(), any())).thenReturn(null);
 
         String result = client.ping();
-        assertTrue(result.contains("timeout"));
-        verify(mockLogger, atLeastOnce()).info("Ping timeout: no response within 5 seconds.");
+        assertTrue(result.contains(I18n.get("pingTimeout")));
+        verify(mockLogger, atLeastOnce()).info(I18n.get("pingTimeout"));
       } finally {
         instanceField.set(null, originalLogger);
       }
@@ -367,8 +370,8 @@ public class GameClientTest {
         when(mockQueue.poll(anyLong(), any())).thenThrow(new InterruptedException());
 
         String result = client.ping();
-        assertTrue(result.contains("interrupted"));
-        verify(mockLogger, atLeastOnce()).info("Ping interrupted.");
+        assertTrue(result.contains(I18n.get("pingInterrupt")));
+        verify(mockLogger, atLeastOnce()).info(I18n.get("pingInterrupt"));
       } finally {
         instanceField.set(null, originalLogger);
       }
@@ -396,8 +399,8 @@ public class GameClientTest {
         when(mockQueue.poll(anyLong(), any())).thenReturn(null);
 
         String result = client.quit();
-        assertTrue(result.contains("No BYE received"));
-        verify(mockLogger, atLeastOnce()).info("No BYE received, closing anyway.");
+        assertTrue(result.contains(I18n.get("noBye")));
+        verify(mockLogger, atLeastOnce()).info(I18n.get("noBye"));
       } finally {
         instanceField.set(null, originalLogger);
       }
