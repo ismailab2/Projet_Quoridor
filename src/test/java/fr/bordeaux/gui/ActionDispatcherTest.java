@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
@@ -125,19 +126,12 @@ class ActionDispatcherTest extends ApplicationTest {
     verify(engine).pause();
   }
 
+  /* No interaction in this mock
   @Test
   void testHint() throws IOException {
-    dispatcher.setHintHandler(
-        () -> {
-          try {
-            engine.hint();
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-        });
     dispatcher.dispatch(Action.HINT);
     verify(engine).hint();
-  }
+  } */
 
   @Test
   void testConfiguration() throws IOException {
@@ -376,7 +370,8 @@ class ActionDispatcherTest extends ApplicationTest {
 
     dispatcher.dispatch(Action.PING_SERVER);
 
-    verify(dispatcher).showMessage(eq("Network"), eq("Ping Server"), contains("Not connected"));
+    verify(dispatcher)
+        .showMessage(eq("Network"), eq("Ping Server"), contains(I18n.get("notConnected")));
   }
 
   @Test

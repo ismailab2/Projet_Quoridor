@@ -5,6 +5,7 @@ import fr.bordeaux.ai.mcts.*;
 import fr.bordeaux.ai.minimax.*;
 import fr.bordeaux.ai.random.*;
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.Arrays;
@@ -71,7 +72,7 @@ public class NewCommand implements Command {
   public GameEngine execute(final GameEngine engine) {
     GameEngine result = engine;
     if (tokens.length > 5) {
-      LOGGER.error("wrong amount of arguments...");
+      LOGGER.error(I18n.get("newNbArgs"));
     }
 
     final int boardSizeInput = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : 9;
@@ -102,11 +103,11 @@ public class NewCommand implements Command {
       boolean interrupted = false;
       for (int index = 0; index < nbPlayer; index++) {
         try {
-          LOGGER.info("Player's type available :");
+          LOGGER.info(I18n.get("playersType", I18n.get("availType")));
           LOGGER.info(
               "- [h]uman  - [mcts] Monte Carlo ia  - [mini] Minimax ia"
                   + "  - [mctsnn] Monte Carlo ia with NeuralNetwork selector  - [r]andom ia");
-          final String typePlayer = reader.readLine("Player's type >> ");
+          final String typePlayer = reader.readLine(I18n.get("playersType", " >> "));
           if (typePlayer == null) {
             throw new EndOfFileException();
           }
@@ -115,13 +116,13 @@ public class NewCommand implements Command {
               && !"mini".equals(typePlayer)
               && !"r".equals(typePlayer)
               && !"mctsnn".equals(typePlayer)) {
-            LOGGER.error("Wrong type, please enter h / mcts / mini / mctsnn / r");
+            LOGGER.error(I18n.get("wrongType"));
             index--;
             continue;
           }
-          final String inputName = reader.readLine("Player's name >> ");
+          final String inputName = reader.readLine(I18n.get("playersName", " >> "));
           if (inputName == null) {
-            LOGGER.error("Should give a name to the player...");
+            LOGGER.error(I18n.get("shouldName"));
             throw new EndOfFileException();
           }
           switch (typePlayer) {
@@ -159,11 +160,11 @@ public class NewCommand implements Command {
               }
           }
         } catch (EndOfFileException | UserInterruptException e) {
-          LOGGER.debug("You choose to interrupt the interaction.");
+          LOGGER.debug(I18n.get("interruptNew"));
           try {
             terminal.close();
-          } catch (final Exception exc) {
-            LOGGER.error("Terminal closed.");
+          } catch (Exception exc) {
+            LOGGER.error(I18n.get("termClose"));
           }
           interrupted = true;
           break;
@@ -196,14 +197,14 @@ public class NewCommand implements Command {
     LOGGER.info("  new");
     LOGGER.info("  new [boardSize] [nbPlayer]\n");
     LOGGER.info("Description:");
-    LOGGER.info("  Starts a new game.\n");
-    LOGGER.info("Arguments (optional):");
-    LOGGER.info("  boardSize    : An odd integer greater than or equal to 3.");
-    LOGGER.info("  playerCount  : Must be either 2 or 4.\n");
-    LOGGER.info("If no arguments are provided, default settings are used.\n");
-    LOGGER.verbose("Examples:");
-    LOGGER.verbose("  new       -> 9x9 board with 2 players");
-    LOGGER.verbose("  new 5     -> 5x5 board with 2 players");
-    LOGGER.verbose("  new 7 4   -> 7x7 board with 4 players\n");
+    LOGGER.info("  " + I18n.get("newDesc"));
+    LOGGER.info("Arguments:");
+    LOGGER.info("  boardSize    : " + I18n.get("newBoardSize"));
+    LOGGER.info("  playerCount  : " + I18n.get("newNbPlayers"));
+    LOGGER.info(I18n.get("newHelp"));
+    LOGGER.verbose(I18n.get("loadEx"));
+    LOGGER.verbose("  new       -> 2 " + I18n.get("newEx", "9x9"));
+    LOGGER.verbose("  new 5     -> 2 " + I18n.get("newEx", "5x5"));
+    LOGGER.verbose("  new 7 4   -> 4 " + I18n.get("newEx", "7x7"));
   }
 }

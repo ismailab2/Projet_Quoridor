@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import java.util.List;
 import org.jline.reader.LineReader;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,39 +34,39 @@ class QuitCommandTest {
 
   @Test
   void executeNoSave() {
-    when(reader.readLine("Save before quitting? [y/N] >> ")).thenReturn("n");
+    when(reader.readLine(I18n.get("quitSaving", " [y/N] >> "))).thenReturn("n");
 
     QuitCommand command = new QuitCommand(reader);
     GameEngine result = command.execute(engine);
 
     assertSame(engine, result);
-    verify(reader).readLine("Save before quitting? [y/N] >> ");
-    verify(reader, never()).readLine("File path >> ");
+    verify(reader).readLine(I18n.get("quitSaving", " [y/N] >> "));
+    verify(reader, never()).readLine(I18n.get("filePath", " >> "));
   }
 
   @Test
   void executeYesSave() {
-    when(reader.readLine("Save before quitting? [y/N] >> ")).thenReturn("y");
-    when(reader.readLine("File path >> ")).thenReturn("quit_test.txt");
+    when(reader.readLine(I18n.get("quitSaving", " [y/N] >> "))).thenReturn("y");
+    when(reader.readLine(I18n.get("filePath", " >> "))).thenReturn("quit_test.txt");
 
     QuitCommand command = new QuitCommand(reader);
     GameEngine result = command.execute(engine);
 
     assertSame(engine, result);
-    verify(reader).readLine("Save before quitting? [y/N] >> ");
-    verify(reader).readLine("File path >> ");
+    verify(reader).readLine(I18n.get("quitSaving", " [y/N] >> "));
+    verify(reader).readLine(I18n.get("filePath", " >> "));
   }
 
   @Test
   void executeYesWordSave() {
-    when(reader.readLine("Save before quitting? [y/N] >> ")).thenReturn("yes");
-    when(reader.readLine("File path >> ")).thenReturn("quit_test_yes.txt");
+    when(reader.readLine(I18n.get("quitSaving", " [y/N] >> "))).thenReturn("yes");
+    when(reader.readLine(I18n.get("filePath", " >> "))).thenReturn("quit_test_yes.txt");
 
     QuitCommand command = new QuitCommand(reader);
 
     assertDoesNotThrow(() -> command.execute(engine));
 
-    verify(reader).readLine("File path >> ");
+    verify(reader).readLine(I18n.get("filePath", " >> "));
   }
 
   @Test

@@ -1,6 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that replays previously undone moves. */
@@ -38,7 +39,7 @@ public class RedoCommand implements Command {
       return engine;
     }
     final int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
-    LOGGER.info("Redoing {0} move(s)...", count);
+    LOGGER.info(I18n.get("redoing") + count + I18n.get("redoMove"));
 
     for (int i = 0; i < count; i++) {
       engine.getState().redo();
@@ -54,11 +55,11 @@ public class RedoCommand implements Command {
     LOGGER.info("  redo");
     LOGGER.info("  redo [N]");
     LOGGER.info("Description:");
-    LOGGER.info("  Replays N previously undone moves.\n");
-    LOGGER.verbose("  - If no number is specified, one move is redone.");
-    LOGGER.verbose("  - If N is specified, N moves are redone.\n");
-    LOGGER.verbose("Examples:");
-    LOGGER.verbose("  redo      -> redo one move");
-    LOGGER.verbose("  redo 3    -> redo three moves\n");
+    LOGGER.info("  " + I18n.get("redoDesc"));
+    LOGGER.verbose("  " + I18n.get("redoOne"));
+    LOGGER.verbose("  " + I18n.get("redoNb"));
+    LOGGER.verbose(I18n.get("loadEx"));
+    LOGGER.verbose("  redo      -> " + I18n.get("redoExOne"));
+    LOGGER.verbose("  redo 3    -> " + I18n.get("redoExNb"));
   }
 }

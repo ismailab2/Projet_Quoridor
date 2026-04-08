@@ -1,6 +1,7 @@
 package fr.bordeaux.main;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -92,12 +93,12 @@ public final class AiOptionsHandler {
    */
   private static void checkAiInt(final String value, final String parameter) {
     if (value == null) {
-      throw new IllegalArgumentException("AI " + parameter + " require a number");
+      throw new IllegalArgumentException("AI " + parameter + " " + I18n.get("requireInt"));
     }
     final String[] values = value.split(",");
     for (final String val : values) {
       if (Integer.parseInt(val) <= 0) {
-        throw new IllegalArgumentException("--ai-" + parameter + " should be higher than 0");
+        throw new IllegalArgumentException("--ai-" + parameter + " " + I18n.get("higher"));
       }
     }
   }

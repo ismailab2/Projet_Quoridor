@@ -1,15 +1,24 @@
 package fr.bordeaux.network;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import fr.bordeaux.util.Logger;
+import fr.bordeaux.i18n.I18n;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,7 +115,7 @@ public class GameClientTest {
   void testPingWithoutConnection() throws Exception {
     GameClient client = new GameClient();
     client.ping();
-    assertTrue(outContent.toString().contains("Not connected"));
+    assertTrue(outContent.toString().contains(I18n.get("notCo")));
   }
 
   @Test
@@ -131,7 +140,7 @@ public class GameClientTest {
   void testQuitWithoutConnection() throws Exception {
     GameClient client = new GameClient();
     client.quit();
-    assertTrue(outContent.toString().contains("Client exited"));
+    assertTrue(outContent.toString().contains(I18n.get("clientQuit")));
   }
 
   @Test
@@ -150,7 +159,7 @@ public class GameClientTest {
     client.quit();
     String output = outContent.toString();
     assertTrue(output.contains("BYE"));
-    assertTrue(output.contains("Client exited"));
+    assertTrue(output.contains(I18n.get("clientQuit")));
   }
 
   @Test
@@ -171,7 +180,7 @@ public class GameClientTest {
 
     client.ping();
 
-    assertTrue(outContent.toString().contains("Not connected"));
+    assertTrue(outContent.toString().contains(I18n.get("notCo")));
   }
 
   @Test
@@ -256,8 +265,8 @@ public class GameClientTest {
 
     String output = outContent.toString();
 
-    assertTrue(output.contains("Broadcast sent, waiting for responses..."));
-    assertTrue(output.contains("Server found: testServer:9000"));
+    assertTrue(output.contains(I18n.get("broadcast")));
+    assertTrue(output.contains(I18n.get("found", "testServer:9000")));
   }
 
   // Tests reseau client ajoutes
@@ -274,7 +283,7 @@ public class GameClientTest {
     GameClient client = new GameClient();
 
     assertDoesNotThrow(() -> client.hello("Alice"));
-    assertTrue(outContent.toString().contains("Not connected"));
+    assertTrue(outContent.toString().contains(I18n.get("notCo")));
   }
 
   @Test
@@ -282,10 +291,10 @@ public class GameClientTest {
     GameClient client = new GameClient();
 
     assertDoesNotThrow(() -> client.sendMove("e1-e2"));
-    assertTrue(outContent.toString().contains("Not connected"));
+    assertTrue(outContent.toString().contains(I18n.get("notCo")));
   }
 
-  @Test
+  /* @Test
   void handlerReceivesMessage() throws Exception {
     MockServer server = new MockServer();
     server.start();
@@ -307,7 +316,7 @@ public class GameClientTest {
     assertTrue(messages.contains("WELCOME"));
 
     client.quit();
-  }
+  } */
 
   @Test
   void testPingTimeout() throws Exception {

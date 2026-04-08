@@ -1,5 +1,7 @@
 package fr.bordeaux.core;
 
+import fr.bordeaux.i18n.I18n;
+
 /** Represents player colors in the Quoridor game. */
 public enum Color {
   /** White color (ID 1). */
@@ -44,6 +46,10 @@ public enum Color {
         return color;
       }
     }
+<<<<<<< HEAD
+    throw new IllegalArgumentException(I18n.get("unknownColor") + colorId);
+=======
     throw new IllegalArgumentException("Unknown color ID: " + colorId);
+>>>>>>> main
   }
 }

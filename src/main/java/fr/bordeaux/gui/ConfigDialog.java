@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.Scene;
@@ -22,7 +23,7 @@ public final class ConfigDialog {
   public static void show() {
 
     final Stage stage = new Stage();
-    stage.setTitle("Shortcut Configuration");
+    stage.setTitle(I18n.get("shortcut"));
     stage.setResizable(true);
 
     final GridPane grid = new GridPane();
@@ -48,7 +49,7 @@ public final class ConfigDialog {
       row++;
     }
 
-    final Button saveButton = new Button("Save");
+    final Button saveButton = new Button(I18n.get("saveButton"));
     saveButton.setOnAction(e -> stage.close());
 
     final HBox saveBox = new HBox(saveButton);

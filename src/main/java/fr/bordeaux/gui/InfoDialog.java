@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.i18n.I18n;
 import javafx.scene.control.Alert;
 
 /** Utility class used to display the application information dialog. */
@@ -15,7 +16,7 @@ public final class InfoDialog {
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);
     alert.setContentText(
-        "Version : 1.0.0\nAuthors: Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \nStudents at Bordeaux University");
+        "Version : 1.0.0\n"+I18n.get("authors")+"Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \n"+I18n.get("students"));
     alert.show();
   }
 }
