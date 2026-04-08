@@ -1,10 +1,7 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
-<<<<<<< HEAD
 import fr.bordeaux.i18n.I18n;
-=======
->>>>>>> main
 import fr.bordeaux.util.Logger;
 import java.util.Map;
 import java.util.function.Function;
@@ -69,26 +66,22 @@ public class HelpCommand implements Command {
   public void helpCli() {
     LOGGER.info("/=== Quoridor Command Line Help ===/\n");
     LOGGER.info("Commands :\n");
-    LOGGER.info("new [ARGS] :          "+I18n.get("newArgs"));
-    LOGGER.info("help [CMD] :          "+I18n.get("helpCmd"));
-    LOGGER.info(
-        "                      "+I18n.get("helpCmd2"));
-    LOGGER.info("help move :           "+I18n.get("helpMove"));
-    LOGGER.info(
-        "quit :                "+I18n.get("helpQuit"));
-    LOGGER.info("load [filename] :     "+I18n.get("helpLoad"));
-    LOGGER.info("save [filename] :     "+I18n.get("helpSave"));
-    LOGGER.info(
-        "pause :               "+I18n.get("helpPause"));
-    LOGGER.info("hint :                "+I18n.get("helpHint"));
-    LOGGER.info("undo [N] :            "+I18n.get("helpUndo"));
-    LOGGER.info("redo [N] :            "+I18n.get("helpRedo"));
-    LOGGER.info("show board :          "+I18n.get("helpBoard"));
-    LOGGER.info(
-        "show history :        "+I18n.get("helpHistory"));
-    LOGGER.info("show time :           "+I18n.get("helpTime"));
-    LOGGER.info("show configurations : "+I18n.get("helpConfigs"));
-    LOGGER.info("set PARAM=VALUE :     "+I18n.get("helpSet"));
+    LOGGER.info("new [ARGS] :          " + I18n.get("newArgs"));
+    LOGGER.info("help [CMD] :          " + I18n.get("helpCmd"));
+    LOGGER.info("                      " + I18n.get("helpCmd2"));
+    LOGGER.info("help move :           " + I18n.get("helpMove"));
+    LOGGER.info("quit :                " + I18n.get("helpQuit"));
+    LOGGER.info("load [filename] :     " + I18n.get("helpLoad"));
+    LOGGER.info("save [filename] :     " + I18n.get("helpSave"));
+    LOGGER.info("pause :               " + I18n.get("helpPause"));
+    LOGGER.info("hint :                " + I18n.get("helpHint"));
+    LOGGER.info("undo [N] :            " + I18n.get("helpUndo"));
+    LOGGER.info("redo [N] :            " + I18n.get("helpRedo"));
+    LOGGER.info("show board :          " + I18n.get("helpBoard"));
+    LOGGER.info("show history :        " + I18n.get("helpHistory"));
+    LOGGER.info("show time :           " + I18n.get("helpTime"));
+    LOGGER.info("show configurations : " + I18n.get("helpConfigs"));
+    LOGGER.info("set PARAM=VALUE :     " + I18n.get("helpSet"));
   }
 
   /**
@@ -105,11 +98,7 @@ public class HelpCommand implements Command {
         final Command cmd = registry.get(commandName).apply(new String[] {commandName});
         cmd.helpText();
       } else {
-<<<<<<< HEAD
         LOGGER.debug(I18n.get("unknownCmd") + "{0}", commandName);
-=======
-        LOGGER.debug("Unknown command : {0}", commandName);
->>>>>>> main
         LOGGER.info("Usage : help [CMD]");
       }
     }

@@ -239,7 +239,11 @@ public class CliApp {
         if (terminal != null && terminal.writer() != null) {
           terminal
               .writer()
-              .println("\n" + engine.getState().getCurrentPlayer().getName() + " " + I18n.get("thinking"));
+              .println(
+                  "\n"
+                      + engine.getState().getCurrentPlayer().getName()
+                      + " "
+                      + I18n.get("thinking"));
           terminal.flush();
         }
         executeAiTurn();
@@ -265,7 +269,7 @@ public class CliApp {
     engine.play(move);
 
     if (LOGGER.isInfoEnabled()) {
-      LOGGER.info(I18n.get("iaPlayed")+"{0}", move);
+      LOGGER.info(I18n.get("iaPlayed") + "{0}", move);
     }
   }
 
@@ -304,8 +308,8 @@ public class CliApp {
       }
 
       if (suggestion != null) {
-        LOGGER.debug(I18n.get("unknownCmd")+"'{0}'", command);
-        LOGGER.info(I18n.get("meant")+"{0} ? ", suggestion);
+        LOGGER.debug(I18n.get("unknownCmd") + "'{0}'", command);
+        LOGGER.info(I18n.get("meant") + "{0} ? ", suggestion);
       }
 
       // Default behavior (interpret as move)

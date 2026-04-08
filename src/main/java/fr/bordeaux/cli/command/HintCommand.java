@@ -39,7 +39,7 @@ public class HintCommand implements Command {
       LOGGER.error("Suggested move: {0} isn''t legal", hint);
     }
     final String bestMove = formatMove(hint);
-    LOGGER.info(I18n.get("hintPlay")+"{0}", bestMove);
+    LOGGER.info(I18n.get("hintPlay") + "{0}", bestMove);
     return engine;
   }
 
@@ -79,10 +79,10 @@ public class HintCommand implements Command {
     LOGGER.info("Usage:");
     LOGGER.info("  hint\n");
     LOGGER.info("Description:");
-    LOGGER.info("  "+I18n.get("hintHelp1"));
-    LOGGER.info("  "+I18n.get("hintHelp3"));
+    LOGGER.info("  " + I18n.get("hintHelp1"));
+    LOGGER.info("  " + I18n.get("hintHelp3"));
     LOGGER.verbose("Displays:");
-    LOGGER.verbose("  "+I18n.get("hintHelp2"));
+    LOGGER.verbose("  " + I18n.get("hintHelp2"));
     LOGGER.verbose(I18n.get("hintHelpEx"));
   }
 }

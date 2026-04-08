@@ -1,7 +1,7 @@
 package fr.bordeaux.config;
 
-import fr.bordeaux.util.Logger;
 import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.util.Logger;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Properties;

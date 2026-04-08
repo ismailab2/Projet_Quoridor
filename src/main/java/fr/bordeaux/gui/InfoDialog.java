@@ -16,7 +16,10 @@ public final class InfoDialog {
     alert.setHeaderText("Quoridor");
     alert.setGraphic(null);
     alert.setContentText(
-        "Version : 1.0.0\n"+I18n.get("authors")+"Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \n"+I18n.get("students"));
+        "Version : 1.0.0\n"
+            + I18n.get("authors")
+            + "Abdeldjabar Ismail Abdraman \n Cengiz Vasseur \nJoris Douillet \n Khadidja Ahmat Hassan \n Matthieu Pourageaud \n"
+            + I18n.get("students"));
     alert.show();
   }
 }
