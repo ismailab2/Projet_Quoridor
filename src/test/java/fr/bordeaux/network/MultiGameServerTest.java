@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import org.mockito.MockedStatic;
+import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -564,6 +566,52 @@ public class MultiGameServerTest {
       assertFalse(target.isAlive());
     }
     setRunning(server, false);
+  }
+
+  
+  @Test
+  void testServerError_LoggedWhenRunning() throws Exception {
+    MultiGameServer server = new MultiGameServer();
+
+    // Inject mock logger into the static instance field to be visible by all threads
+    Field instanceField = Logger.class.getDeclaredField("instance");
+    instanceField.setAccessible(true);
+    Logger originalLogger = (Logger) instanceField.get(null);
+    Logger mockLogger = mock(Logger.class);
+    when(mockLogger.isErrorEnabled()).thenReturn(true);
+    instanceField.set(null, mockLogger);
+
+    try {
+      // Start server normally
+      server.start(0);
+      Thread.sleep(500);
+
+      // Get real socket and close it while running is still true
+      Field socketField = MultiGameServer.class.getDeclaredField("serverSocket");
+      socketField.setAccessible(true);
+      ServerSocket realSocket = (ServerSocket) socketField.get(server);
+
+      if (realSocket != null) {
+        realSocket.close();
+      }
+
+      // Wait for catch block to be hit (max 2 seconds)
+      long start = System.currentTimeMillis();
+      boolean logged = false;
+      while (System.currentTimeMillis() - start < 2000) {
+        try {
+          verify(mockLogger, atLeastOnce()).error(eq("Server error: {0}"), anyString());
+          logged = true;
+          break;
+        } catch (AssertionError e) {
+          Thread.sleep(100);
+        }
+      }
+      assertTrue(logged, "Log should have been called within timeout");
+    } finally {
+      instanceField.set(null, originalLogger);
+      server.stop();
+    }
   }
 
   private TestData twoClients() {

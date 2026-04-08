@@ -237,4 +237,33 @@ class NetworkLauncherTest {
 
     assertTrue(testOut.toString().contains("Error: For input string: \"abc\""));
   }
+
+  /**
+   * Tests the "daemon mode" where the server starts and enters an infinite loop.
+   *
+   * <p>Simulates: server=true, daemon=true.
+   *
+   * <p>Verifies: The server starts on the specified port and correctly handles interruption.
+   */
+  @Test
+  void testLaunch_DaemonMode() throws InterruptedException {
+    when(config.getOption("server", "false")).thenReturn("true");
+    when(config.getOption("server-port", "12345")).thenReturn("12345");
+    when(config.getOption("daemon", "false")).thenReturn("true");
+
+    final Thread thread = new Thread(() -> launcher.launch(new String[] {}, config));
+    thread.start();
+
+    // Give it a bit of time to start and enter the loop
+    Thread.sleep(500);
+
+    assertTrue(thread.isAlive(), "Thread should be running in daemon mode");
+
+    thread.interrupt();
+    thread.join(2000); // Wait for thread to finish
+
+    assertFalse(thread.isAlive(), "Thread should have terminated after interruption");
+    verify(multiServer).start(12345);
+    assertTrue(testOut.toString().contains("Server started in daemon mode on port 12345"));
+  }
 }

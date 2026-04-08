@@ -67,4 +67,27 @@ public class PlayerFactoryTest {
     assertEquals(Color.BLUE, players.get(2).getColor());
     assertEquals(Color.RED, players.get(3).getColor());
   }
+
+  @Test
+  public void testDepthBasedOnTime() {
+    // Time <= 2 -> 3
+    assertEquals(3, PlayerFactory.depthBasedOnTime(1));
+    assertEquals(3, PlayerFactory.depthBasedOnTime(2));
+
+    // Time <= 5 -> 4
+    assertEquals(4, PlayerFactory.depthBasedOnTime(3));
+    assertEquals(4, PlayerFactory.depthBasedOnTime(5));
+
+    // Time <= 8 -> 5
+    assertEquals(5, PlayerFactory.depthBasedOnTime(6));
+    assertEquals(5, PlayerFactory.depthBasedOnTime(8));
+
+    // Time <= 12 -> 6
+    assertEquals(6, PlayerFactory.depthBasedOnTime(9));
+    assertEquals(6, PlayerFactory.depthBasedOnTime(12));
+
+    // Time > 12 -> 7
+    assertEquals(7, PlayerFactory.depthBasedOnTime(13));
+    assertEquals(7, PlayerFactory.depthBasedOnTime(100));
+  }
 }

@@ -19,13 +19,13 @@ public final class PlayerPanel extends VBox {
   private final Label nameLabel;
 
   /** Label displaying the number of walls remaining for the player. */
-  private final Label wallsLabel;
+  /* default */ final Label wallsLabel;
 
   /** Label displaying main part of time. */
-  private final Label mainTimeLabel;
+  /* default */ final Label mainTimeLabel;
 
   /** Label displaying milliseconds. */
-  private final Label millisLabel;
+  /* default */ final Label millisLabel;
 
   /** Index of the player in the list of players in the GameState. */
   private final int playerIndex;
@@ -100,15 +100,16 @@ public final class PlayerPanel extends VBox {
             Platform.runLater(
                 () -> {
                   final Player targetPlayer = state.getPlayers().get(playerIndex);
+                  if (targetPlayer.isDisabled()) {
+                    return;
+                  }
                   final String[] times =
                       TimeConvertor.formatTime(targetPlayer.getRemainingTime()).split(":");
 
                   if (times.length > 2) {
-
                     mainTimeLabel.setText(times[0] + ":" + times[1]);
                     millisLabel.setText(":" + times[2]);
                   } else {
-
                     mainTimeLabel.setText(times[0] + ":" + times[1]);
                     millisLabel.setText("");
                   }

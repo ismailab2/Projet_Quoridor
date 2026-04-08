@@ -1,6 +1,7 @@
 package fr.bordeaux.core;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,6 @@ public class BlitzManagerTest {
     Player player = state.getCurrentPlayer();
 
     blitz.start();
-    blitz.start();
     assertTrue(blitz.isRunning());
 
     Thread.sleep(2500);
@@ -79,5 +79,48 @@ public class BlitzManagerTest {
 
     assertEquals(
         5000, player.getRemainingTime(), "Le temps ne devrait pas avoir diminué pendant la pause");
+  }
+
+  /** Tests that the tick rate switches from slow (1s) to fast (10ms) below 60s. */
+  @Test
+  public void testSwitchToFastTick() throws InterruptedException {
+    state.setLimitTimePlayer(60200); // 60.2 seconds
+    Player player = state.getCurrentPlayer();
+
+    blitz.start();
+
+    Thread.sleep(1500);
+
+    long timeAfterSwitch = player.getRemainingTime();
+    assertTrue(timeAfterSwitch < 60000, "Time should have crossed 60s");
+
+    Thread.sleep(500);
+    assertTrue(
+        player.getRemainingTime() < timeAfterSwitch - 100,
+        "Time should decrease rapidly after switch");
+  }
+
+  /** Tests that exceptions in the task are caught and don't crash the manager. */
+  @Test
+  public void testTaskExceptionHandling() {
+    GameEngine mockedEngine = mock(GameEngine.class);
+    GameState mockedState = mock(GameState.class);
+    when(mockedEngine.getState()).thenReturn(mockedState);
+
+    Player player = mock(Player.class);
+    when(player.getRemainingTime()).thenReturn(70000L);
+    when(mockedState.getCurrentPlayer()).thenReturn(player).thenThrow(new RuntimeException("Injected task error"));
+
+    BlitzManager faultyBlitz = new BlitzManager(mockedEngine);
+
+    assertDoesNotThrow(() -> faultyBlitz.start());
+
+    try {
+      Thread.sleep(1200); // Wait for task to execute and catch exception
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+
+    assertDoesNotThrow(() -> faultyBlitz.pause());
   }
 }
