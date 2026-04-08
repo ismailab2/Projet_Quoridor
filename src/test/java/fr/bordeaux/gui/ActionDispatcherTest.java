@@ -127,6 +127,14 @@ class ActionDispatcherTest extends ApplicationTest {
 
   @Test
   void testHint() throws IOException {
+    dispatcher.setHintHandler(
+        () -> {
+          try {
+            engine.hint();
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        });
     dispatcher.dispatch(Action.HINT);
     verify(engine).hint();
   }
