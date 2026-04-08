@@ -1,6 +1,7 @@
 package fr.bordeaux.network;
 
 import fr.bordeaux.core.Move;
+import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Multi-client server for connectivity, creation, and communication. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MultiGameServer {
 
   /** TCP server socket used to accept client connections. */
@@ -113,9 +115,7 @@ public class MultiGameServer {
                     scoreboard.put(cid, new ScoreEntry(cid, client.getName()));
                   }
 
-                  if (Logger.getInstance().isInfoEnabled()) {
-                    Logger.getInstance().info("Client connected: {0}", clientId);
-                  }
+                  Logger.getInstance().info("Client connected: {0}", clientId);
 
                   final Thread clientThread =
                       new Thread(
@@ -127,9 +127,7 @@ public class MultiGameServer {
 
               } catch (final IOException e) {
                 if (running.get()) {
-                  if (Logger.getInstance().isErrorEnabled()) {
-                    Logger.getInstance().error("Server error: {0}", e.getMessage());
-                  }
+                  Logger.getInstance().error("Server error: {0}", e.getMessage());
                 }
               }
             });
@@ -150,9 +148,7 @@ public class MultiGameServer {
           break;
         }
         client.setLastPing(System.currentTimeMillis());
-        if (Logger.getInstance().isInfoEnabled()) {
-          Logger.getInstance().info("{0} -> {1}", client.getId(), line);
-        }
+        Logger.getInstance().info("{0} -> {1}", client.getId(), line);
 
         if (line.startsWith("HELLO ")) {
           processHello(client, line);
@@ -164,13 +160,12 @@ public class MultiGameServer {
         } else if (line.startsWith("MOVE ")) {
           processMove(client, line);
         } else {
+          Logger.getInstance().verbose("Unknown command from {0}: {1}", client.getId(), line);
           client.send("ERROR unknown command");
         }
       }
     } catch (final IOException e) {
-      if (Logger.getInstance().isInfoEnabled()) {
-        Logger.getInstance().info("Client disconnected: {0}", e.getMessage());
-      }
+      Logger.getInstance().info("Client disconnected: {0}", e.getMessage());
     } finally {
       unregisterClient(client);
     }
@@ -205,9 +200,7 @@ public class MultiGameServer {
     }
 
     client.close();
-    if (Logger.getInstance().isInfoEnabled()) {
-      Logger.getInstance().info("Client disconnected: {0}", clientId);
-    }
+    Logger.getInstance().info("Client disconnected: {0}", clientId);
   }
 
   /**
@@ -230,6 +223,7 @@ public class MultiGameServer {
         }
       }
       client.send("WELCOME " + clientId);
+      Logger.getInstance().verbose("Player {0} renamed to {1}", clientId, name);
     }
   }
 
@@ -263,17 +257,22 @@ public class MultiGameServer {
             final Move move = NetworkMoveParser.parseMove(moveText);
             if (!game.applyMove(move)) {
               client.send("ERROR illegal move");
+              Logger.getInstance()
+                  .verbose(I18n.get("serverInvalidMove", clientId, gameId, moveText));
             } else {
               client.send("OK");
               for (final ClientSession otherPlayer : game.getOtherPlayers(clientId)) {
                 otherPlayer.send("OPPONENT_MOVE " + moveText);
               }
+              Logger.getInstance()
+                  .verbose(I18n.get("serverMoveReceived", moveText, clientId, gameId));
               final ClientSession winner = game.getWinnerSession();
               if (winner != null) {
                 finishGame(game, winner);
               }
             }
           } catch (final IllegalArgumentException e) {
+            Logger.getInstance().debug("Invalid move format from {0}: {1}", clientId, moveText);
             client.send("ERROR invalid move format");
           }
         }
@@ -315,6 +314,7 @@ public class MultiGameServer {
       }
     }
 
+    Logger.getInstance().info("Game {0} finished. Winner: {1}", game.getGameId(), winnerId);
     games.remove(game.getGameId());
   }
 
@@ -431,6 +431,7 @@ public class MultiGameServer {
             final String turnInfo = (index == 0) ? " YOUR_TURN" : " WAIT";
             session.send("GAME_START " + gameId + turnInfo);
           }
+          Logger.getInstance().info("Game {0} created with {1} players", gameId, playerCount);
           result = "Game created: " + gameId;
         }
       }
@@ -488,6 +489,7 @@ public class MultiGameServer {
                 }
 
                 for (final ClientSession client : expiredClients) {
+                  Logger.getInstance().info(I18n.get("serverClientTimeout", client.getId()));
                   client.send("ERROR timeout");
                   client.close();
                   unregisterClient(client);

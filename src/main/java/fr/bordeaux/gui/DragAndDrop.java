@@ -85,26 +85,35 @@ public final class DragAndDrop {
       final GameEngine engine, final Rectangle pawn, final int row, final int col) {
     pawn.setOnDragDetected(
         event -> {
+          event.consume();
           final Player currentPlayer = engine.getState().getCurrentPlayer();
 
           if (currentPlayer.isAI()) {
-            event.consume();
             return;
           }
 
           final Position currentPosition = currentPlayer.getPosition();
 
           if (currentPosition.getX() != row || currentPosition.getY() != col) {
-            event.consume();
             return;
           }
 
           final Dragboard dragboard = pawn.startDragAndDrop(TransferMode.MOVE);
-          final ClipboardContent content = new ClipboardContent();
-          content.put(PAWN_FORMAT, row + "," + col);
-          dragboard.setContent(content);
-          event.consume();
+          dragboard.setContent(createPawnDragContent(row, col));
         });
+  }
+
+  /**
+   * Creates the clipboard content for a pawn move.
+   *
+   * @param row source row
+   * @param col source column
+   * @return the clipboard content
+   */
+  static ClipboardContent createPawnDragContent(final int row, final int col) {
+    final ClipboardContent content = new ClipboardContent();
+    content.put(PAWN_FORMAT, row + "," + col);
+    return content;
   }
 
   /** Installs drop handlers on a target cell. */

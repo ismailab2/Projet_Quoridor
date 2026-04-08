@@ -5,6 +5,7 @@ import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that loads a saved game from a file. state. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class LoadCommand implements Command {
 
   /** Command entered by the user */
@@ -31,15 +32,15 @@ public class LoadCommand implements Command {
    */
   @Override
   public GameEngine execute(final GameEngine engine) {
-    if (tokens.length < 2) {
-      LOGGER.info("Usage: load FILE");
-      return engine;
-    }
-    try {
-      LOGGER.info(I18n.get("loading") + " {0}", tokens[1]);
-      engine.loadGame(tokens[1]);
-    } catch (final Exception e) {
-      LOGGER.error(I18n.get("loadError") + " {0}", tokens[1]);
+    if (tokens == null || tokens.length != 2) {
+      LOGGER.info(I18n.get("usage") + ": " + I18n.get("loadUsage"));
+    } else {
+      try {
+        LOGGER.info(I18n.get("loading") + " {0}", tokens[1]);
+        engine.loadGame(tokens[1]);
+      } catch (final Exception e) {
+        LOGGER.error(I18n.get("loadError") + " {0}", tokens[1]);
+      }
     }
     return engine;
   }
@@ -47,14 +48,14 @@ public class LoadCommand implements Command {
   /** Displays help information for the load command. example. */
   @Override
   public void helpText() {
-    LOGGER.info("=== LOAD Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  load FILE\n");
-    LOGGER.info("Description:");
-    LOGGER.info("  " + I18n.get("loadHelp"));
-    LOGGER.verbose("Arguments:");
+    LOGGER.info("=== " + I18n.get("loadHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("loadUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
+    LOGGER.info("  " + I18n.get("loadDesc"));
+    LOGGER.verbose(I18n.get("arguments"));
     LOGGER.verbose("  " + I18n.get("loadArg"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  load savegame.txt\n");
+    LOGGER.verbose("  " + I18n.get("loadExampleCmd") + "\n");
   }
 }

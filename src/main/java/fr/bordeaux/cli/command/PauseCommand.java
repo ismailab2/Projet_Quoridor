@@ -5,6 +5,7 @@ import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that pauses the Blitz mode game timer. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class PauseCommand implements Command {
 
   /** Logger to display informations */
@@ -12,7 +13,7 @@ public class PauseCommand implements Command {
 
   /** Creates a PauseCommand. */
   public PauseCommand() {
-    LOGGER.debug("Instantiating PauseCommand");
+    LOGGER.debug(I18n.get("pauseInstantiating"));
   }
 
   /**
@@ -25,19 +26,21 @@ public class PauseCommand implements Command {
   public GameEngine execute(final GameEngine engine) {
     if (engine.isBlitz()) {
       LOGGER.debug(I18n.get("pausing"));
-      engine.getState().setPaused(true);
-    } else LOGGER.error(I18n.get("notBlitz"));
+      engine.pause();
+    } else {
+      LOGGER.error(I18n.get("notBlitz"));
+    }
     return engine;
   }
 
   /** Displays help information for the pause command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== PAUSE Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  pause\n");
-    LOGGER.info("Description:");
-    LOGGER.info("  " + I18n.get("desc"));
-    LOGGER.verbose("  " + I18n.get("descVerb"));
+    LOGGER.info("=== " + I18n.get("pauseHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("pauseUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
+    LOGGER.info("  " + I18n.get("pauseDesc"));
+    LOGGER.verbose("  " + I18n.get("pauseVerb"));
   }
 }

@@ -9,15 +9,21 @@ import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
+import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.util.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /** Inner class representing a node within the MCTS search tree. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MctsNode {
 
   /** The game state associated with this node. */
   private final GameState state;
+
+  /** Logger for AI search progress. */
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** The move that led to this node. */
   private final Move move;
@@ -98,6 +104,7 @@ public class MctsNode {
   public Move getBestMoveAfterSearch(
       final long limit, final int myIdx, final NeuralNetworkEvaluator evaluator) {
     final long start = System.currentTimeMillis();
+    int iterations = 0;
     while (System.currentTimeMillis() - start < limit && !Thread.currentThread().isInterrupted()) {
       MctsNode current = this;
       // Selection
@@ -115,8 +122,33 @@ public class MctsNode {
       if (current != null) {
         backpropagate(current, current.simulate(), myIdx);
       }
+      iterations++;
     }
-    return this.extractBestMove();
+
+    if (Thread.currentThread().isInterrupted()) {
+      LOGGER.debug(I18n.get("mctsInterrupted", limit));
+    }
+
+    final Move bestMove = this.extractBestMove();
+
+    MctsNode bestChild = null;
+    for (MctsNode child : children) {
+      if (child.move.equals(bestMove)) {
+        bestChild = child;
+        break;
+      }
+    }
+    final long endTime = System.currentTimeMillis();
+    Logger.getInstance()
+        .verbose(
+            I18n.get(
+                "mctsSummary",
+                iterations,
+                (endTime - start),
+                bestMove,
+                bestChild != null ? bestChild.visits : 0));
+
+    return bestMove;
   }
 
   /**

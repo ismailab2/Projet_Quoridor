@@ -3,9 +3,11 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
+import java.io.IOException;
 import org.jline.reader.LineReader;
 
 /** CLI command that exits the application after a save prompt. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class QuitCommand implements Command {
   /** Reader used for user interaction. */
   private final LineReader reader;
@@ -42,8 +44,10 @@ public class QuitCommand implements Command {
         new SaveCommand(path).execute(engine);
       }
       LOGGER.info(I18n.get("quitting"));
-      return engine;
-    } catch (Exception e) {
+      if (reader != null && reader.getTerminal() != null) {
+        reader.getTerminal().close();
+      }
+    } catch (IOException e) {
       LOGGER.error(I18n.get("quitError"), e);
     }
     return engine;
@@ -52,12 +56,11 @@ public class QuitCommand implements Command {
   /** Displays help information for the quit command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== QUIT Command ===\n");
-    LOGGER.info("Usage:");
-    LOGGER.info("  quit\n");
-    LOGGER.info("Description:");
+    LOGGER.info("=== " + I18n.get("quitHeader") + " " + I18n.get("cliTitle") + " ===\n");
+    LOGGER.info(I18n.get("usage"));
+    LOGGER.info("  " + I18n.get("quitUsage") + "\n");
+    LOGGER.info(I18n.get("description"));
     LOGGER.info("  " + I18n.get("quitDesc"));
-    LOGGER.verbose("Information:");
     LOGGER.verbose("  " + I18n.get("quitVerb"));
   }
 }

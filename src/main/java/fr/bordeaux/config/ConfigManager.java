@@ -7,12 +7,15 @@ import java.nio.file.*;
 import java.util.Properties;
 
 /** Singleton managed configuration for loading and saving settings. */
+@SuppressWarnings("PMD.GuardLogStatement")
 public final class ConfigManager {
 
-  private static ConfigManager instance;
+  private static final Logger LOGGER = Logger.getInstance();
 
   /** Configuration properties and shortcuts. */
   private final Properties props = new Properties();
+
+  private static ConfigManager instance;
 
   /** Private constructor for singleton pattern */
   private ConfigManager() {}
@@ -53,8 +56,7 @@ public final class ConfigManager {
         props.load(inputStream);
 
       } catch (final IOException e) {
-
-        System.err.println(I18n.get("warning"));
+        LOGGER.warning(I18n.get("warning"));
       }
     } else {
       props.setProperty("verbose", "true");
@@ -77,7 +79,7 @@ public final class ConfigManager {
       props.store(out, "Quoridor configuration");
 
     } catch (final IOException e) {
-      Logger.getInstance().error(I18n.get("configError") + e);
+      LOGGER.error(I18n.get("configError") + e);
     }
   }
 

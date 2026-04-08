@@ -7,7 +7,7 @@ import fr.bordeaux.util.Logger;
 import java.util.Scanner;
 
 /** CLI interface for network features. Start/stop server, join, ping. */
-@SuppressWarnings("PMD.SystemPrintln")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class NetworkLauncher implements AppLauncher {
 
   private static final String DEFAULT_HOST = "localhost";
@@ -93,19 +93,13 @@ public class NetworkLauncher implements AppLauncher {
           } else if ("server stop".equals(cmd)) {
             multiServer.stop();
           } else if ("server status".equals(cmd)) {
-            if (Logger.getInstance().isInfoEnabled()) {
-              Logger.getInstance().info("{0}", multiServer.getServerStatus());
-            }
+            Logger.getInstance().info("{0}", multiServer.getServerStatus());
 
           } else if ("players".equals(cmd)) {
-            if (Logger.getInstance().isInfoEnabled()) {
-              Logger.getInstance().info("{0}", multiServer.listPlayers());
-            }
+            Logger.getInstance().info("{0}", multiServer.listPlayers());
 
           } else if ("scoreboard".equals(cmd)) {
-            if (Logger.getInstance().isInfoEnabled()) {
-              Logger.getInstance().info("{0}", multiServer.getScoreboard());
-            }
+            Logger.getInstance().info("{0}", multiServer.getScoreboard());
 
           } else if (cmd.startsWith("new ")) {
             final String[] parts = cmd.split(" ");
@@ -114,9 +108,7 @@ public class NetworkLauncher implements AppLauncher {
             } else {
               final String[] playerIds = new String[parts.length - 1];
               System.arraycopy(parts, 1, playerIds, 0, playerIds.length);
-              if (Logger.getInstance().isInfoEnabled()) {
-                Logger.getInstance().info("{0}", multiServer.createGame(playerIds));
-              }
+              Logger.getInstance().info("{0}", multiServer.createGame(playerIds));
             }
 
           } else if (cmd.equals("join") || cmd.startsWith("join ")) {
@@ -148,9 +140,7 @@ public class NetworkLauncher implements AppLauncher {
             Logger.getInstance().info("Unknown command");
           }
         } catch (final Exception exception) {
-          if (Logger.getInstance().isInfoEnabled()) {
-            Logger.getInstance().info("Error: {0}", exception.getMessage());
-          }
+          Logger.getInstance().info("Error: {0}", exception.getMessage());
         }
       }
     }

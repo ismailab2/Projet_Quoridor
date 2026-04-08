@@ -1,5 +1,6 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.main.GuiLauncher;
 import fr.bordeaux.util.Logger;
@@ -19,6 +20,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 /** Main JavaFX app for Quoridor. Displays board and player panels. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class QuoridorApp extends Application {
 
   /** Static width for the player panels. */
@@ -79,6 +81,12 @@ public class QuoridorApp extends Application {
   public void start(final Stage stage) throws IOException {
     final GuiLauncher guiLauncher = new GuiLauncher();
     final GameEngine engine = guiLauncher.buildEngine();
+    // Chargement d’une partie si load-file est défini
+    final String loadFile = ConfigManager.getInstance().getOption("load-file", null);
+    if (loadFile != null) {
+      engine.loadGame(loadFile);
+      Logger.getInstance().debug("Loaded game from file: " + loadFile);
+    }
     final GameState state = engine.getState();
 
     state.addListener(
@@ -105,7 +113,7 @@ public class QuoridorApp extends Application {
 
     final javafx.scene.Node hintArea = createHintArea(engine, boardView);
     if (hintArea instanceof HBox container && !container.getChildren().isEmpty()) {
-      final Button hintButton = (Button) container.getChildren().get(0);
+      final Button hintButton = (Button) container.getChildren().getFirst();
       dispatcher.setHintHandler(hintButton::fire);
     }
 
@@ -162,9 +170,7 @@ public class QuoridorApp extends Application {
                     try {
                       return engine.hint();
                     } catch (IOException e) {
-                      if (Logger.getInstance().isErrorEnabled()) {
-                        Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
-                      }
+                      Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
                       return null;
                     }
                   });
@@ -214,7 +220,7 @@ public class QuoridorApp extends Application {
    * Assembles root layout components.
    *
    * @param menuBar the top menu bar
-   * @param boardContainer the center board container
+   * @param centerNode the center board container
    * @param panels array of player panels
    * @return the configured BorderPane
    */
@@ -278,20 +284,11 @@ public class QuoridorApp extends Application {
       final Scene scene, final BoardView boardView, final MainMenuBar menuBar) {
     scene
         .widthProperty()
-        .addListener(
-            (obs, oldVal, newVal) -> {
-              resizeBoard(boardView, scene, menuBar.getHeight());
-            });
+        .addListener((obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
     scene
         .heightProperty()
-        .addListener(
-            (obs, oldVal, newVal) -> {
-              resizeBoard(boardView, scene, menuBar.getHeight());
-            });
-    Platform.runLater(
-        () -> {
-          resizeBoard(boardView, scene, menuBar.getHeight());
-        });
+        .addListener((obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
+    Platform.runLater(() -> resizeBoard(boardView, scene, menuBar.getHeight()));
   }
 
   /**
@@ -331,9 +328,7 @@ public class QuoridorApp extends Application {
                   .ifPresent(
                       winner ->
                           Platform.runLater(
-                              () -> {
-                                showGameOverOverlay(container, winner.getName(), popupShown);
-                              }));
+                              () -> showGameOverOverlay(container, winner.getName(), popupShown)));
             }
           } else {
             popupShown.set(false);

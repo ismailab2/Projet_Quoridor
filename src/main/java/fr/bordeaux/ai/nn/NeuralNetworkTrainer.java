@@ -129,8 +129,9 @@ public class NeuralNetworkTrainer {
    * @param trainingData the list to append training samples to
    * @param random the random number generator for exploration
    */
-  @SuppressWarnings("PMD.LawOfDemeter")
-  /* LoD suppressed to avoid GameState API bloat from fluent builders and properties. */
+  @SuppressWarnings({
+    "PMD.LawOfDemeter"
+  }) /* LoD suppressed to avoid GameState API bloat from fluent builders and properties. */
   private void simulateAndRecordGame(
       final NeuralNetworkEvaluator evaluator,
       final List<TrainingData> trainingData,
@@ -189,8 +190,7 @@ public class NeuralNetworkTrainer {
   }
 
   /** Selects a move using epsilon-greedy exploration. */
-  @SuppressWarnings("PMD.LawOfDemeter")
-  /* LoD suppressed to avoid GameState bloat. */
+  @SuppressWarnings({"PMD.LawOfDemeter"}) /* LoD suppressed to avoid GameState bloat. */
   private Move selectExploratoryMove(final GameState state, final Random random) {
     final Move selectedMove;
 

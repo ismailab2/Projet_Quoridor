@@ -77,6 +77,8 @@ public class GameClientTest {
 
   @BeforeEach
   public void setUp() throws IOException {
+    System.setProperty("quoridor.test", "true");
+    I18n.setLocale(java.util.Locale.ENGLISH);
     outContent = new ByteArrayOutputStream();
     System.setOut(new PrintStream(outContent));
   }
@@ -329,6 +331,8 @@ public class GameClientTest {
       instanceField.setAccessible(true);
       Logger originalLogger = (Logger) instanceField.get(null);
       Logger mockLogger = mock(Logger.class);
+      when(mockLogger.isInfoEnabled()).thenReturn(true);
+      when(mockLogger.isVerboseEnabled()).thenReturn(true);
       instanceField.set(null, mockLogger);
 
       try {
@@ -358,6 +362,8 @@ public class GameClientTest {
       instanceField.setAccessible(true);
       Logger originalLogger = (Logger) instanceField.get(null);
       Logger mockLogger = mock(Logger.class);
+      when(mockLogger.isInfoEnabled()).thenReturn(true);
+      when(mockLogger.isVerboseEnabled()).thenReturn(true);
       instanceField.set(null, mockLogger);
 
       try {
@@ -387,6 +393,8 @@ public class GameClientTest {
       instanceField.setAccessible(true);
       Logger originalLogger = (Logger) instanceField.get(null);
       Logger mockLogger = mock(Logger.class);
+      when(mockLogger.isInfoEnabled()).thenReturn(true);
+      when(mockLogger.isVerboseEnabled()).thenReturn(true);
       instanceField.set(null, mockLogger);
 
       try {

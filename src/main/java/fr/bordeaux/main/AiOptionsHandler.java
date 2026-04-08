@@ -5,6 +5,7 @@ import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.cli.CommandLine;
 
 /** Handles AI-specific command line arguments and validation. */
 public final class AiOptionsHandler {
@@ -12,26 +13,19 @@ public final class AiOptionsHandler {
   private AiOptionsHandler() {}
 
   /**
-   * Processes AI-related arguments.
+   * Processes AI-related arguments using Commons CLI.
    *
-   * @param arg The current argument.
-   * @param args The full array of arguments.
-   * @param index The current index in the array.
+   * @param commandLine The parsed command line.
    * @param config The configuration manager.
-   * @return The new index after consuming arguments, or -1 if the argument is not handled here.
    */
-  public static int handle(
-      final String arg, final String[] args, final int index, final ConfigManager config) {
-    int i = index;
-    switch (arg) {
-      case "-a", "--ai" -> {
-        String aiOption = "";
-        if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
-          aiOption = args[++i].toLowerCase(Locale.ROOT);
-        }
-        if (aiOption.isEmpty()) {
-          config.setOption("ai2", "true");
-        } else if ("a".equals(aiOption)) {
+  public static void handle(final CommandLine commandLine, final ConfigManager config) {
+    if (commandLine.hasOption("a")) {
+      String aiOption = commandLine.getOptionValue("a");
+      if (aiOption == null || aiOption.trim().isEmpty()) {
+        config.setOption("ai2", "true");
+      } else {
+        aiOption = aiOption.toLowerCase(Locale.ROOT);
+        if ("a".equals(aiOption)) {
           config.setOption("ai1", "true");
           config.setOption("ai2", "true");
         } else if ("blanc".equals(aiOption) || "1".equals(aiOption)) {
@@ -39,33 +33,40 @@ public final class AiOptionsHandler {
         } else if ("noir".equals(aiOption) || "2".equals(aiOption)) {
           config.setOption("ai2", "true");
         } else {
-          throw new IllegalArgumentException(
-              "--ai value must be: {blanc, noir, 1, 2, a} or empty (defaults to noir)");
+          throw new IllegalArgumentException(I18n.get("aiValueErr"));
         }
       }
-      case "--ai-mode" -> {
-        checkAiString(args[++i], "mode", new ArrayList<>(List.of("minimax", "mcts", "iterative")));
-        applyAiOption(args[i], "mode", config);
-      }
-      case "--ai-minimax-depth" -> {
-        checkAiInt(args[++i], "minimax-depth");
-        applyAiOption(args[i], "depth", config);
-      }
-      case "--ai-time" -> {
-        checkAiInt(args[++i], "time");
-        applyAiOption(args[i], "time", config);
-      }
-      case "--ai-minimax-scoring" -> {
-        checkAiString(
-            args[++i], "scoring", new ArrayList<>(List.of("simple", "intermediate", "advanced")));
-        applyAiOption(args[i], "scoring", config);
-      }
-      case "--ai-mcts-selection" -> applyMctsOption(args[++i], config);
-      default -> {
-        return -1; // Not a game option
-      }
     }
-    return i;
+
+    if (commandLine.hasOption("ai-mode")) {
+      String value = commandLine.getOptionValue("ai-mode");
+      checkAiString(value, "mode", new ArrayList<>(List.of("minimax", "mcts", "iterative")));
+      applyAiOption(value, "mode", config);
+    }
+
+    if (commandLine.hasOption("ai-minimax-depth")) {
+      String value = commandLine.getOptionValue("ai-minimax-depth");
+      checkAiInt(value, "minimax-depth");
+      applyAiOption(value, "depth", config);
+    }
+
+    if (commandLine.hasOption("ai-time")) {
+      String value = commandLine.getOptionValue("ai-time");
+      checkAiInt(value, "time");
+      applyAiOption(value, "time", config);
+    }
+
+    if (commandLine.hasOption("ai-minimax-scoring")) {
+      String value = commandLine.getOptionValue("ai-minimax-scoring");
+      checkAiString(
+          value, "scoring", new ArrayList<>(List.of("simple", "intermediate", "advanced")));
+      applyAiOption(value, "scoring", config);
+    }
+
+    if (commandLine.hasOption("ai-mcts-selection")) {
+      String value = commandLine.getOptionValue("ai-mcts-selection");
+      applyMctsOption(value, config);
+    }
   }
 
   /**
@@ -79,8 +80,7 @@ public final class AiOptionsHandler {
     final boolean hasAi = config.getBoolean("ai1", false) || config.getBoolean("ai2", false);
 
     if (hasAi && nbPlayers > 2) {
-      throw new IllegalArgumentException(
-          "AI mode is not supported for more than 2 players (currently: " + nbPlayers + ")");
+      throw new IllegalArgumentException(I18n.get("notSupported", String.valueOf(nbPlayers)));
     }
   }
 
@@ -115,13 +115,13 @@ public final class AiOptionsHandler {
       final String value, final String parameter, final List<String> accpetedMode) {
     if (value == null) {
       throw new IllegalArgumentException(
-          "AI " + parameter + " require an argument in " + accpetedMode);
+          I18n.get("aiArgRequired", parameter, accpetedMode.toString()));
     }
     final String[] values = value.split(",");
     for (final String val : values) {
       if (!accpetedMode.contains(val.toLowerCase())) {
         throw new IllegalArgumentException(
-            "The only valid AI " + parameter + " are " + accpetedMode);
+            I18n.get("aiValidOptions", parameter, accpetedMode.toString()));
       }
     }
   }
@@ -147,10 +147,10 @@ public final class AiOptionsHandler {
   /** Specialized helper for MCTS selection with active AI check. */
   private static void applyMctsOption(final String value, final ConfigManager config) {
     final String[] values = value.split(",");
-    for (final String v : values) {
-      final String trimmed = v.trim();
+    for (final String selectionItem : values) {
+      final String trimmed = selectionItem.trim();
       if (!"UCT".equals(trimmed) && !"ML".equals(trimmed)) {
-        throw new IllegalArgumentException("Invalid option: " + trimmed + " for MCTS selection.");
+        throw new IllegalArgumentException(I18n.get("invalidOptionMcts", trimmed));
       }
     }
 

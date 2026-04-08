@@ -33,6 +33,10 @@ class CliAppTest {
 
   @BeforeEach
   void setUp() {
+    System.setProperty("quoridor.test", "true");
+    I18n.get("activ"); // Force I18n class loading if not already done
+    I18n.setLocale(java.util.Locale.ENGLISH);
+
     engine = createEngine();
     p1 = engine.getState().getPlayers().getFirst();
     reader = mock(LineReader.class);
@@ -117,6 +121,18 @@ class CliAppTest {
     GameEngine before = app.getEngine();
 
     app.fetch("help");
+
+    assertSame(before, app.getEngine());
+    assertTrue(app.isRunning());
+  }
+
+  @Test
+  void fetchSuggestion() throws IOException {
+    GameEngine before = app.getEngine();
+
+    // "helq" is 1 character away from "help", should trigger suggestion logic
+    // where dist < bestDistance
+    app.fetch("helq");
 
     assertSame(before, app.getEngine());
     assertTrue(app.isRunning());
@@ -269,10 +285,18 @@ class CliAppTest {
     app.fetch("server start 23456");
     app.fetch("server stop");
     app.fetch("server status");
+    app.fetch("server list");
+    // Invalid server command (should not crash)
+    app.fetch("server");
+    app.fetch("players");
+    app.fetch("scoreboard");
 
     verify(networkServer).start(23456);
     verify(networkServer).stop();
     verify(networkServer).getServerStatus();
+    verify(networkClient).serverList();
+    verify(networkServer).listPlayers();
+    verify(networkServer).getScoreboard();
   }
 
   @Test
@@ -292,12 +316,22 @@ class CliAppTest {
 
     app.fetch("new C1 C2");
     app.fetch("move e1-e2");
+    // Default fallback when network client is connected
+    app.fetch("some_unhandled_action");
     app.fetch("quit");
 
     verify(networkServer).createGame("C1", "C2");
+    verify(networkClient).sendMove("some_unhandled_action");
     verify(networkClient).sendMove("e1-e2");
     verify(networkClient).quit();
     assertTrue(app.isRunning());
+  }
+
+  @Test
+  void handleNetworkCommandException() throws IOException {
+    doThrow(new IllegalArgumentException("Invalid port")).when(networkServer).start(anyInt());
+    // This should be caught by catch (final IllegalArgumentException exception)
+    assertDoesNotThrow(() -> app.fetch("server start 999999"));
   }
 
   @Test

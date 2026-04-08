@@ -15,7 +15,7 @@ import java.util.List;
  * Launcher for contest mode. Reads a save file, computes best move via MCTS, and prints it in
  * algebraic notation.
  */
-@SuppressWarnings("PMD.SystemPrintln")
+@SuppressWarnings("PMD.GuardLogStatement")
 public final class ContestLauncher implements AppLauncher {
 
   ContestLauncher() {
@@ -46,12 +46,8 @@ public final class ContestLauncher implements AppLauncher {
     } catch (final GameLoadException exception) {
       Logger.getInstance()
           .error(
-              "[contest] Invalid save file ["
-                  + exception.getErrorType()
-                  + "] at line "
-                  + exception.getLineNumber()
-                  + ": "
-                  + exception.getMessage());
+              "[contest] Invalid save file [{0}] at line {1}: {2}",
+              exception.getErrorType(), exception.getLineNumber(), exception.getMessage());
     } catch (final Exception exception) {
       Logger.getInstance().error("[contest] Unexpected error: " + exception.getMessage());
     }
@@ -78,12 +74,10 @@ public final class ContestLauncher implements AppLauncher {
     try {
       return MctsPlayer.hint(state.getCurrentPlayer(), state, timeBudgetMs, true);
     } catch (final Exception exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance()
-            .error(
-                "[contest] MCTS failed ({0}), falling back to first legal move.",
-                exception.getMessage());
-      }
+      Logger.getInstance()
+          .error(
+              "[contest] MCTS failed ({0}), falling back to first legal move.",
+              exception.getMessage());
       final List<Move> legal = state.generateLegalMoves();
       if (legal.isEmpty()) {
         throw new IllegalStateException("No legal moves available.", exception);

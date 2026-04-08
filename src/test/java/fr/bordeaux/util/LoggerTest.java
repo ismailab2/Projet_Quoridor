@@ -69,8 +69,7 @@ public class LoggerTest {
   }
 
   @Test
-  @SuppressWarnings("PMD.SystemPrintln")
-  void testWarning_Stderr() {
+  void testWarn_Stderr() {
     Logger logger = Logger.getInstance();
     logger.warning("Test Warning");
     // Logger with System.out writer should redirect WARNING to System.err
@@ -135,5 +134,38 @@ public class LoggerTest {
     // Verify it still works at INFO level (fallback console logic)
     logger.info("Test message after fallback");
     assertTrue(capturedOut.toString().contains("Test message after fallback"));
+  }
+
+  @Test
+  void testParameterizedLogging() throws Exception {
+    Logger logger = Logger.getInstance();
+
+    fr.bordeaux.config.ConfigManager config = fr.bordeaux.config.ConfigManager.getInstance();
+    config.setOption("debug", "true");
+    config.setOption("verbose", "true");
+    logger.refreshConfig();
+
+    logger.info("Info {0}", "param");
+    logger.warning("Warn {0}", "param");
+    logger.error("Error {0}", "param");
+    logger.debug("Debug {0}", "param");
+    logger.verbose("Verbose string");
+    logger.verbose("Verbose {0}", "param");
+    logger.trace("Trace string");
+
+    String out = capturedOut.toString();
+    String err = capturedErr.toString();
+
+    assertTrue(out.contains("[INFO]"));
+    assertTrue(out.contains("Info param"));
+    assertTrue(err.contains("[WARNING]"));
+    assertTrue(err.contains("Warn param"));
+    assertTrue(err.contains("[ERROR]"));
+    assertTrue(err.contains("Error param"));
+    assertTrue(out.contains("[DEBUG]"));
+    assertTrue(out.contains("Debug param"));
+    assertTrue(out.contains("[VERBOSE]"));
+    assertTrue(out.contains("Verbose string"));
+    assertTrue(out.contains("Verbose param"));
   }
 }

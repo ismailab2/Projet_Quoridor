@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
+@SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameClient {
 
   /** TCP socket used for the connection */
@@ -71,9 +72,7 @@ public class GameClient {
       return true;
 
     } catch (final IOException exception) {
-      if (Logger.getInstance().isErrorEnabled()) {
-        Logger.getInstance().error(I18n.get("failedCo", ": ") + exception.getMessage());
-      }
+      Logger.getInstance().error(I18n.get("failedCo", ": ") + exception.getMessage());
       return false;
     }
   }
@@ -99,14 +98,13 @@ public class GameClient {
                       expectingDirectReply.set(false);
                     }
                   } else {
+                    Logger.getInstance().verbose("Net In: {0}", line);
                     Logger.getInstance().info(I18n.get("server", line));
                     notifyServerMessage(line);
                   }
                 }
               } catch (final IOException exception) {
-                if (Logger.getInstance().isInfoEnabled()) {
-                  Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
-                }
+                Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
               }
             });
     listenerThread.setDaemon(true);
@@ -150,6 +148,7 @@ public class GameClient {
 
         expectingDirectReply.set(true);
         Logger.getInstance().info("Client: PING");
+        Logger.getInstance().verbose("Net Out: PING");
         writer.println("PING");
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
@@ -185,6 +184,7 @@ public class GameClient {
       try {
         expectingDirectReply.set(true);
         Logger.getInstance().info("Client: QUIT");
+        Logger.getInstance().verbose("Net Out: QUIT");
         writer.println("QUIT");
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
@@ -269,9 +269,7 @@ public class GameClient {
                 Logger.getInstance().info(I18n.get("discoOver"));
 
               } catch (final IOException exception) {
-                if (Logger.getInstance().isErrorEnabled()) {
-                  Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
-                }
+                Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
               }
             })
         .start();
@@ -308,6 +306,7 @@ public class GameClient {
       return;
     }
     writer.println("HELLO " + name);
+    Logger.getInstance().verbose("Net Out: HELLO {0}", name);
   }
 
   /**
@@ -320,5 +319,6 @@ public class GameClient {
       return;
     }
     writer.println("MOVE " + move);
+    Logger.getInstance().verbose("Net Out: MOVE {0}", move);
   }
 }
