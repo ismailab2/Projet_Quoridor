@@ -101,21 +101,21 @@ public final class OptionsParser {
     logInfo("  -d, --debug       " + I18n.get("debugMode"));
     logInfo("  -D, --daemon      " + I18n.get("headless"));
     logInfo("");
-      logInfo("AI options:");
-      logInfo("  -a, --ai [MODE]        Enable AI player(s):");
-      logInfo("                         blanc | 1   -> AI for player 1");
-      logInfo("                         noir  | 2   -> AI for player 2 (default)");
-      logInfo("                         a            -> AI for both players");
-      logInfo("                         (no value)   -> AI for player 2");
-      logInfo("");
-      logInfo("  --ai-mode MODE         AI algorithm: minimax, mcts, iterative");
-      logInfo("  --ai-minimax-depth N   Depth for minimax algorithm (>0)");
-      logInfo("  --ai-time N            Time limit for AI in seconds (>0)");
-      logInfo("  --ai-minimax-scoring S Scoring method: simple, intermediate, advanced");
-      logInfo("  --ai-mcts-selection S  MCTS selection: UCT, ML");
-      logInfo("");
+    logInfo("AI options:");
+    logInfo("  -a, --ai [MODE]        Enable AI player(s):");
+    logInfo("                         blanc | 1   -> AI for player 1");
+    logInfo("                         noir  | 2   -> AI for player 2 (default)");
+    logInfo("                         a            -> AI for both players");
+    logInfo("                         (no value)   -> AI for player 2");
+    logInfo("");
+    logInfo("  --ai-mode MODE         AI algorithm: minimax, mcts, iterative");
+    logInfo("  --ai-minimax-depth N   Depth for minimax algorithm (>0)");
+    logInfo("  --ai-time N            Time limit for AI in seconds (>0)");
+    logInfo("  --ai-minimax-scoring S Scoring method: simple, intermediate, advanced");
+    logInfo("  --ai-mcts-selection S  MCTS selection: UCT, ML");
+    logInfo("");
 
-      logInfo("Modes:");
+    logInfo("Modes:");
     logInfo("  --contest, -c <file> " + I18n.get("contest"));
     logInfo("  -g, --gui         " + I18n.get("guiMode"));
     logInfo("  -n, --net         " + I18n.get("networkMode"));
@@ -126,5 +126,3 @@ public final class OptionsParser {
     logInfo("  -t, --time N      " + I18n.get("timeout"));
   }
 }
-
-

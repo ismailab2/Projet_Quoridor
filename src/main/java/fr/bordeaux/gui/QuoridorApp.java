@@ -80,12 +80,12 @@ public class QuoridorApp extends Application {
   public void start(final Stage stage) throws IOException {
     final GuiLauncher guiLauncher = new GuiLauncher();
     final GameEngine engine = guiLauncher.buildEngine();
-      // Chargement d’une partie si load-file est défini
-      final String loadFile = ConfigManager.getInstance().getOption("load-file", null);
-      if (loadFile != null) {
-          engine.loadGame(loadFile);
-          Logger.getInstance().debug("Loaded game from file: " + loadFile);
-      }
+    // Chargement d’une partie si load-file est défini
+    final String loadFile = ConfigManager.getInstance().getOption("load-file", null);
+    if (loadFile != null) {
+      engine.loadGame(loadFile);
+      Logger.getInstance().debug("Loaded game from file: " + loadFile);
+    }
     final GameState state = engine.getState();
 
     state.addListener(
@@ -284,14 +284,11 @@ public class QuoridorApp extends Application {
       final Scene scene, final BoardView boardView, final MainMenuBar menuBar) {
     scene
         .widthProperty()
-        .addListener(
-            (obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
+        .addListener((obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
     scene
         .heightProperty()
-        .addListener(
-            (obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
-    Platform.runLater(
-        () -> resizeBoard(boardView, scene, menuBar.getHeight()));
+        .addListener((obs, oldVal, newVal) -> resizeBoard(boardView, scene, menuBar.getHeight()));
+    Platform.runLater(() -> resizeBoard(boardView, scene, menuBar.getHeight()));
   }
 
   /**
