@@ -745,8 +745,6 @@ Afin de corriger cette erreur de prédiction, l'algorithme fait appel à un opti
 
 \section{Architecture du projet}
 
-\subsection{Justificatif de l’architecture}
-
 Notre projet  consiste à implémenter le jeu Quoridor en Java, en respectant strictement l’ensemble des règles détaillées
 dans la section précédente « Les règles du jeu ». Au-delà de la simple reproduction des mécaniques, notre cahier des charges
 impose plusieurs contraintes et objectifs qui influencent directement le choix de l’architecture logicielle.
@@ -759,6 +757,8 @@ Pour répondre efficacement à ces besoins complexes, nous avons choisi une arch
 inspirée de la Clean Architecture telle que décrite par Martin\cite{martin2017clean}. Cette décision repose sur plusieurs
 considérations pratiques et théoriques, toutes centrées sur la nécessité de séparer clairement les responsabilités et
 de rendre notre application à la fois extensible, maintenable et testable.
+
+\subsection{Explication en profondeur de l’Architecture }
 
 \paragraph{Principes fondamentaux de la Clean Architecture}
 
@@ -828,22 +828,6 @@ et de structuration en couches, également recommandée par Fowler\cite{fowler20
 de construire un système robuste, flexible et modulaire, capable de répondre à tous les objectifs fonctionnels et techniques
 définis dans notre cahier des charges.
 
-
-\subsection{Vue de l'architecture en couches concentriques}
-Dans cette section, nous vous proposons notre architecture globale en couches concentriques.
-Les dépendances entre packages ne doivent pointer que vers l'intérieur du système. Le
-module \textbf{core} — qui contient les entités métier — ne connaît aucun autre
-module. Ce sont \textbf{network}, \textbf{gui} ou \textbf{cli} qui dépendent de \textbf{core},
-jamais l'inverse. Cette contrainte est visible dans le diagramme.
-
-Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
-\begin{figure}[H]
-    \centering
-    \frame{\includegraphics[width=.65\textwidth]{quoridor}}
-    \caption{Une architecture en couches concentriques}\label{fig:example1}
-\end{figure}
-
-
 \subsection{Vue d'ensemble des packages}
 
 Cette organisation en packages nous permet de structurer le projet de manière claire et cohérente. Chaque package a un rôle précis, ce qui favorise la modularité, la testabilité et la maintenance du code dans notre projet. De plus, elle nous facilite l’ajout futur de fonctionnalités, qu’il s’agisse d’IA avancées, de nouvelles interfaces ou de modes de jeu supplémentaires, tout en garantissant la robustesse et la cohérence des règles de Quoridor.
@@ -892,6 +876,23 @@ Voici les onze packages distincts de notre projet, chacun ayant une responsabili
 \label{tab:packages}
 \end{table}
 
+
+
+\subsection{Vue de l'architecture en couches concentriques}
+Dans cette section, nous vous proposons notre architecture globale en couches concentriques.
+Les dépendances entre packages ne doivent pointer que vers l'intérieur du système. Le
+module \textbf{core} — qui contient les entités métier — ne connaît aucun autre
+module. Ce sont \textbf{network}, \textbf{gui} ou \textbf{cli} qui dépendent de \textbf{core},
+jamais l'inverse. Cette contrainte est visible dans le diagramme.
+
+Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
+\begin{figure}[H]
+    \centering
+    \frame{\includegraphics[width=.85\textwidth]{quoridor}}
+    \caption{Une architecture en couches concentriques}\label{fig:example1}
+\end{figure}
+
+
 \subsection{Couche Domaine --- Package \texttt{core}}
 
 Le module \textbf{core} est le cœur du système. Il encapsule l'intégralité de la logique
@@ -904,7 +905,7 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 Schéma de la couche Core de notre architecture (Fig.~\ref{fig:example0}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{core.jpg}}
+    \frame{\includegraphics[width=.85\textwidth]{core.jpg}}
     \caption{Le cœur métier (Core)}\label{fig:example0}
 \end{figure}
 
@@ -921,7 +922,7 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 Schéma de la couche Main de notre architecture (Fig.~\ref{fig:example2}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{main.jpg}}
+    \frame{\includegraphics[width=.85\textwidth]{main.jpg}}
     \caption{Couche Principale (Main)}\label{fig:example2}
 \end{figure}
 
@@ -942,17 +943,6 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
     \frame{\includegraphics[width=.85\textwidth]{cli.jpg}}
     \caption{Couche CLI}\label{fig:example3}
 \end{figure}
-
-
-\subsection{Points forts architecturaux}
-
-\begin{itemize}
-  \item \textbf{Indépendance du domaine} : notre package \texttt{core} est sans dépendance externe
-  \item \textbf{Extensibilité de l’IA} : si l'on veut implémenter un nouvel algorithme d'IA, on étend simplement \texttt{AiPlayer}
-  \item \textbf{Pattern Command en CLI} : on teste chaque commande indépendamment et elles sont extensibles
-  \item \textbf{Persistance découplée} : notre \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les classes du \texttt{core}
-  \item \textbf{Builder pour MinimaxPlayer} : on a une configuration déclarative et lisible de l’IA
-\end{itemize}
 
 \section{Revue critique du projet}
 
