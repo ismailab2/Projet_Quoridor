@@ -3,9 +3,12 @@ package fr.bordeaux.cli.command;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import fr.bordeaux.util.Logger;
+import static org.mockito.Mockito.*;
 
 class MoveCommandTest {
 
@@ -15,6 +18,7 @@ class MoveCommandTest {
 
   @BeforeEach
   void setUp() {
+    I18n.initialize();
     Board board = new Board(9);
     p1 = new HumanPlayer("Human", new Position(0, 4), Color.WHITE);
     p2 = new HumanPlayer("Bob", new Position(8, 4), Color.BLACK);
@@ -137,4 +141,40 @@ class MoveCommandTest {
 
     assertDoesNotThrow(command::helpText);
   }
+
+  @Test
+  void testParsePosition_ShortString_LoggerEnabled() {
+    MoveCommand command = new MoveCommand();
+    Logger.getInstance().setErrorEnabled(true);
+
+    assertThrows(IllegalArgumentException.class, () -> command.parsePosition("e"));
+    // This covers the branch if (LOGGER.isErrorEnabled())
+  }
+
+  @Test
+  void testParsePosition_ShortString_LoggerDisabled() {
+    MoveCommand command = new MoveCommand();
+    Logger.getInstance().setErrorEnabled(false);
+
+    assertThrows(IllegalArgumentException.class, () -> command.parsePosition("e"));
+    // This covers the branch when isErrorEnabled is false
+  }
+
+  @Test
+  void testHelpText() {
+    MoveCommand command = new MoveCommand();
+    Logger.getInstance().setInfoEnabled(false);
+
+    assertDoesNotThrow(command::helpText);
+  }
+
+  @Test
+  void testHandleMove_NullMove() {
+    MoveCommand command = new MoveCommand('e');
+    Logger.getInstance().setInfoEnabled(false);
+
+    assertThrows(IllegalArgumentException.class, () -> command.handleMove(engine));
+  }
+
+  
 }

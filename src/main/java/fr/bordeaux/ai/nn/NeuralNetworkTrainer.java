@@ -129,7 +129,7 @@ public class NeuralNetworkTrainer {
    * @param trainingData the list to append training samples to
    * @param random the random number generator for exploration
    */
-  private void simulateAndRecordGame(
+  /* package */ void simulateAndRecordGame(
       final NeuralNetworkEvaluator evaluator,
       final List<TrainingData> trainingData,
       final Random random) {
@@ -187,7 +187,7 @@ public class NeuralNetworkTrainer {
   }
 
   /** Selects a move using epsilon-greedy exploration. */
-  private Move selectExploratoryMove(final GameState state, final Random random) {
+  /* package */ Move selectExploratoryMove(final GameState state, final Random random) {
     final Move selectedMove;
 
     if (random.nextDouble() < EXPLORATION_PROB) {
@@ -208,14 +208,14 @@ public class NeuralNetworkTrainer {
    * @param features The feature array corresponding to a specific game state.
    * @param outcome The observed outcome of the simulated game.
    */
-  private record TrainingData(double[] features, double outcome) {
+  /* package */ record TrainingData(double[] features, double outcome) {
     /**
      * Constructs a new TrainingData instance.
      *
      * @param features an array of numerical features evaluating the position
      * @param outcome the float outcome representing win/loss
      */
-    private TrainingData {}
+    /* package */ TrainingData {}
   }
 
   /**

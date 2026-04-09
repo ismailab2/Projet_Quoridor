@@ -3,6 +3,7 @@ package fr.bordeaux.gui;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +22,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
+import org.mockito.MockedStatic;
+import fr.bordeaux.persistence.GameLoader;
+import java.util.ArrayList;
+import fr.bordeaux.i18n.I18n;
+
+import org.junit.jupiter.api.BeforeEach;
 
 class QuoridorAppTest extends ApplicationTest {
+
+  @BeforeEach
+  void setupI18n() {
+    I18n.initialize();
+  }
+
 
   @Override
   public void start(Stage stage) throws IOException {
@@ -472,4 +485,72 @@ class QuoridorAppTest extends ApplicationTest {
           verify(boardView).highlightMove(hintMove);
         });
   }
+
+  /** Tests the initial game loading branch in start() with a missing file. */
+  @Test
+  void testStartWithLoadFile_Failure() throws IOException {
+    ConfigManager config = ConfigManager.getInstance();
+    String originalLoadFile = config.getOption("load-file", null);
+    try {
+      config.setOption("load-file", "non_existent_file.quoridor");
+      Stage mockStage = mock(Stage.class);
+      QuoridorApp app = new QuoridorApp();
+      
+      interact(() -> {
+          try {
+              app.start(mockStage);
+          } catch (IOException e) {
+              fail("start should catch internal loading exceptions: " + e.getMessage());
+          }
+      });
+      
+      // Verification is done via coverage, but we ensure no crash occurred.
+      assertNotNull(app);
+    } finally {
+      if (originalLoadFile != null) {
+          config.setOption("load-file", originalLoadFile);
+      } else {
+          config.removeOption("load-file");
+      }
+    }
+  }
+
+  /** Tests the initial game loading branch in start() with a mock success. */
+  @Test
+  void testStartWithLoadFile_Success() throws IOException {
+    ConfigManager config = ConfigManager.getInstance();
+    String originalLoadFile = config.getOption("load-file", null);
+    
+    try (MockedStatic<GameLoader> mockedLoader = mockStatic(GameLoader.class)) {
+      config.setOption("load-file", "dummy.quoridor");
+      
+      // Use a real but minimal state
+      List<Player> players = new ArrayList<>();
+      players.add(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
+      players.add(new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
+      GameState dummyState = new GameState(new Board(9), players);
+      mockedLoader.when(() -> GameLoader.loadGame(any(), eq("dummy.quoridor")))
+                  .thenReturn(dummyState);
+      
+      Stage mockStage = mock(Stage.class);
+      QuoridorApp app = new QuoridorApp();
+      
+      interact(() -> {
+          try {
+              app.start(mockStage);
+          } catch (IOException e) {
+              fail("start should successfully load when GameLoader succeeds");
+          }
+      });
+      assertNotNull(app);
+    } finally {
+       if (originalLoadFile != null) {
+          config.setOption("load-file", originalLoadFile);
+      } else {
+          config.removeOption("load-file");
+      }
+    }
+  }
+
 }
+
