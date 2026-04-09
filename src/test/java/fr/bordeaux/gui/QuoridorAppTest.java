@@ -5,7 +5,10 @@ import static org.mockito.Mockito.*;
 
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
+import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.persistence.GameLoader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,16 +21,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
-import org.mockito.MockedStatic;
-import fr.bordeaux.persistence.GameLoader;
-import java.util.ArrayList;
-import fr.bordeaux.i18n.I18n;
-
-import org.junit.jupiter.api.BeforeEach;
 
 class QuoridorAppTest extends ApplicationTest {
 
@@ -35,7 +34,6 @@ class QuoridorAppTest extends ApplicationTest {
   void setupI18n() {
     I18n.initialize();
   }
-
 
   @Override
   public void start(Stage stage) throws IOException {
@@ -495,22 +493,23 @@ class QuoridorAppTest extends ApplicationTest {
       config.setOption("load-file", "non_existent_file.quoridor");
       Stage mockStage = mock(Stage.class);
       QuoridorApp app = new QuoridorApp();
-      
-      interact(() -> {
-          try {
+
+      interact(
+          () -> {
+            try {
               app.start(mockStage);
-          } catch (IOException e) {
+            } catch (IOException e) {
               fail("start should catch internal loading exceptions: " + e.getMessage());
-          }
-      });
-      
+            }
+          });
+
       // Verification is done via coverage, but we ensure no crash occurred.
       assertNotNull(app);
     } finally {
       if (originalLoadFile != null) {
-          config.setOption("load-file", originalLoadFile);
+        config.setOption("load-file", originalLoadFile);
       } else {
-          config.removeOption("load-file");
+        config.removeOption("load-file");
       }
     }
   }
@@ -520,37 +519,37 @@ class QuoridorAppTest extends ApplicationTest {
   void testStartWithLoadFile_Success() throws IOException {
     ConfigManager config = ConfigManager.getInstance();
     String originalLoadFile = config.getOption("load-file", null);
-    
+
     try (MockedStatic<GameLoader> mockedLoader = mockStatic(GameLoader.class)) {
       config.setOption("load-file", "dummy.quoridor");
-      
+
       // Use a real but minimal state
       List<Player> players = new ArrayList<>();
       players.add(new HumanPlayer("P1", new Position(0, 4), Color.WHITE));
       players.add(new HumanPlayer("P2", new Position(8, 4), Color.BLACK));
       GameState dummyState = new GameState(new Board(9), players);
-      mockedLoader.when(() -> GameLoader.loadGame(any(), eq("dummy.quoridor")))
-                  .thenReturn(dummyState);
-      
+      mockedLoader
+          .when(() -> GameLoader.loadGame(any(), eq("dummy.quoridor")))
+          .thenReturn(dummyState);
+
       Stage mockStage = mock(Stage.class);
       QuoridorApp app = new QuoridorApp();
-      
-      interact(() -> {
-          try {
+
+      interact(
+          () -> {
+            try {
               app.start(mockStage);
-          } catch (IOException e) {
+            } catch (IOException e) {
               fail("start should successfully load when GameLoader succeeds");
-          }
-      });
+            }
+          });
       assertNotNull(app);
     } finally {
-       if (originalLoadFile != null) {
-          config.setOption("load-file", originalLoadFile);
+      if (originalLoadFile != null) {
+        config.setOption("load-file", originalLoadFile);
       } else {
-          config.removeOption("load-file");
+        config.removeOption("load-file");
       }
     }
   }
-
 }
-

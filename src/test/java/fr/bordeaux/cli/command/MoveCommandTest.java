@@ -1,14 +1,14 @@
 package fr.bordeaux.cli.command;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
 import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.util.Logger;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import fr.bordeaux.util.Logger;
-import static org.mockito.Mockito.*;
 
 class MoveCommandTest {
 
@@ -175,6 +175,4 @@ class MoveCommandTest {
 
     assertThrows(IllegalArgumentException.class, () -> command.handleMove(engine));
   }
-
-  
 }
