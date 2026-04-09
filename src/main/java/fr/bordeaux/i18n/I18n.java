@@ -19,8 +19,31 @@ public final class I18n {
     if (System.getProperty("quoridor.test") != null) {
       setLocale(Locale.ENGLISH);
     } else {
-      setLocale(Locale.getDefault());
+      setLocale(getLocaleFromEnv(System.getenv()));
     }
+  }
+
+  /**
+   * Determine the locale from environment variables LC_ALL or LANG.
+   *
+   * @param env the environment variables map
+   * @return the determined Locale
+   */
+  static Locale getLocaleFromEnv(final java.util.Map<String, String> env) {
+    final String lcAll = env.get("LC_ALL");
+    final String lang = env.get("LANG");
+    final String localeStr = (lcAll != null && !lcAll.isEmpty()) ? lcAll : lang;
+
+    if (localeStr != null && !localeStr.isEmpty()) {
+      // Handle formats like fr_FR.UTF-8 or fr
+      final String[] parts = localeStr.split("\\.")[0].split("_");
+      if (parts.length > 1) {
+        return Locale.of(parts[0], parts[1]);
+      } else if (parts.length == 1 && !parts[0].isEmpty()) {
+        return Locale.of(parts[0]);
+      }
+    }
+    return Locale.getDefault();
   }
 
   /**
