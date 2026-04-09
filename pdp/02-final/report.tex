@@ -578,21 +578,7 @@ Cependant, l’implémentation actuelle ne couvre pas encore parfaitement l’en
 
 L’intelligence artificielle est la composante du projet qui cherche le meilleur coup à jouer selon une situation du jeu. Quoridor est un jeu où chaque décision peut avoir des conséquences bien plus loin dans la partie, comme par exemple la pose d’un mur censé bloquer l’adversaire et qui finalement se retrouve à nous bloquer nous. L’évaluation d’une position sera complexe car il faut donc prévoir à l’avance si le coup que nous jouons peut être désavantageux pour nous des dizaines de coups plus tard.
 
-Pour cela, nous avons implémenté plusieurs stratégies d’intelligence artificielle de niveaux croissants. Ces stratégies sont organisées dans le package fr.bordeaux.ai, lui-même subdivisé en plusieurs sous-packages reflétant la séparation des responsabilités :
-
-fr.bordeaux.ai.base — les abstractions communes à toutes les IA
-
-(AiPlayer, HeuristicEvaluator)
-
-fr.bordeaux.ai.random — le joueur aléatoire
-
-fr.bordeaux.ai.heuristics — les trois fonctions d’évaluation de Minimax
-
-fr.bordeaux.ai.minimax — l’algorithme Minimax et son builder
-
-fr.bordeaux.ai.mcts — l’algorithme Monte Carlo Tree Search
-
-fr.bordeaux.ai.nn — le modèle de réseau de neurones
+Pour cela, nous avons implémenté plusieurs stratégies d’intelligence artificielle de niveaux croissants. Ces stratégies sont organisées dans le package \texttt{fr.bordeaux.ai}, qui regroupe les abstractions communes dans \texttt{base} (incluant \texttt{AiPlayer} et \texttt{HeuristicEvaluator}), le joueur aléatoire dans \texttt{random}, les fonctions d’évaluation dans \texttt{heuristics}, l’algorithme Minimax dans \texttt{minimax}, le Monte Carlo Tree Search dans \texttt{mcts}, et enfin les réseaux de neurones dans le sous-package \texttt{nn}.
 
 Toutes les stratégies partagent une base commune : la classe abstraite
 
@@ -615,24 +601,13 @@ L'algorithme Minimax est une méthode conçue pour déterminer la meilleure acti
 
 \subparagraph{Structure de l'arbre de jeu Minimax}
 
-\begin{enumerate}
- Racine : L'état initial du plateau.
- Branches : Chaque nœud se ramifie en branches représentant les coups légaux disponibles.
- Feuilles : Aux extrémités de l'exploration, une fonction d'évaluation heuristique attribue un score numérique à la position (avantage pour le joueur IA, le joueur MAX).
-\end{enumerate}
+L'arbre de jeu Minimax se structure autour de trois éléments fondamentaux : la racine, qui représente l'état initial du plateau ; les branches, où chaque nœud se ramifie pour illustrer les différents coups légaux disponibles ; et enfin les feuilles, marquant les extrémités de l'exploration où une fonction d'évaluation heuristique attribue un score numérique à la position, déterminant ainsi l'avantage du joueur IA (MAX).
 
 \subparagraph{Principe d'alternance (MAX et MIN)}
 
 L'exploration de l'arbre alterne entre deux objectifs :
 
-\begin{itemize}
- Nœuds MAX (Tour de l'IA) : L'IA cherche à MAXimiser son score. Elle choisit le coup menant à l'état enfant avec la valeur heuristique la plus élevée.
-
-
- Nœuds MIN (Tour de l'Adversaire) : L'algorithme suppose que l'adversaire cherche à MINimiser le score de l'IA. Il simule le choix de l'adversaire menant à l'état enfant avec le score le plus bas.
-
-
-\end{itemize}
+Dans cette structure, l'exploration alterne entre deux objectifs complémentaires : les nœuds MAX, correspondant au tour de l'IA, où celle-ci cherche à maximiser son score en sélectionnant le coup menant à l'état enfant ayant la valeur heuristique la plus élevée, et les nœuds MIN, simulant le tour de l'adversaire, où l'algorithme suppose que celui-ci cherchera à minimiser ce même score. Ce processus garantit une prise de décision rigoureuse basée sur une anticipation rationnelle des coups adverses.
 Ce processus de remontée des valeurs (des feuilles à la racine) permet à l'IA de choisir le premier coup garantissant le meilleur résultat possible.
 
 \begin{figure}[H]
@@ -653,14 +628,7 @@ L'élagage Alpha-Bêta est l'optimisation mathématique de référence pour le M
 
 L'exploration exhaustive de l'arbre de jeu étant trop coûteuse en ressources, l'algorithme maintient deux bornes de coupe (des limites mathématiques permettant de stopper prématurément le calcul) :
 
-\begin{itemize}
- $\alpha$ : Le score minimum garanti pour le joueur MAX (l'intelligence artificielle).
-
-
- $\beta$ : Le score maximum garanti pour le joueur MIN (l'adversaire).
-
-
-\end{itemize}
+Afin de limiter la consommation de ressources lors d'une exploration exhaustive, l'algorithme maintient deux bornes de coupe essentielles : $\alpha$, représentant le score minimum garanti pour le joueur MAX (l'intelligence artificielle), et $\beta$, correspondant au score maximum garanti pour le joueur MIN (l'adversaire).
 Durant la descente dans l'arbre, l'algorithme compare constamment les options des deux joueurs, et l'exploration d'une branche est immédiatement interrompue (élaguée) dès que la condition $\alpha \ge \beta$ est validée. Pour comprendre logiquement cette mécanique, il faut considérer la valeur $\alpha$ comme l'assurance de l'intelligence artificielle (le joueur MAX) : c'est le score minimum qu'elle s'est déjà garanti en explorant une branche précédente. Lorsque l'algorithme commence à évaluer une nouvelle alternative (un autre coup possible pour MAX), il simule les réponses de l'adversaire (le joueur MIN). Si, au cours de cette simulation, l'algorithme découvre un coup pour MIN qui fait chuter l'évaluation à une valeur $\beta$ inférieure ou égale à l'assurance $\alpha$, le calcul s'arrête. En effet, le but de MIN étant de minimiser le score, il choisira à coup sûr cette réponse punitive, ou une pire encore s'il en trouve une en cherchant plus loin. Anticipant cela, MAX sait pertinemment que s'engager dans cette direction le forcera à subir ce score $\beta$, ce qui est strictement moins avantageux que son plan de secours $\alpha$ déjà sécurisé ailleurs. MAX ne choisira donc jamais d'emprunter ce chemin initialement. Par conséquent, il devient mathématiquement inutile de gaspiller du temps de calcul pour évaluer le reste de la branche, justifiant ainsi la coupe immédiate du nœud.
 
 Cette coupe radicale permet de dédier la puissance de calcul aux branches viables, augmentant mécaniquement la profondeur d'analyse dans la limite de temps impartie.
@@ -695,17 +663,7 @@ Enfin, l'algorithme gère les conditions de victoire de manière prioritaire pou
 
 L'implémentation repose sur des structures de données spécifiquement choisies pour limiter l'empreinte mémoire (la quantité de mémoire vive RAM consommée) et accélérer la vitesse d'exécution :
 
-\begin{itemize}
-File à double entrée (Deque) pour l'exploration de l'arbre : Afin d'éviter l'instanciation massive (la création répétitive et très coûteuse de nouveaux objets en mémoire pour chaque scénario), la classe MinimaxPlayer ne clone pas le plateau de jeu pour chaque branche. Elle maintient l'historique de la branche courante dans une structure de pile (Deque<Move>). L'algorithme procède par mutation directe (modification de l'état unique du plateau) grâce à un mécanisme de backtracking (retour sur ses pas) : on simule un coup pour descendre dans l'arbre, puis on le dépile pour l'annuler et remonter.
-
-
-Table de hachage sécurisée (ConcurrentHashMap) : Les paramètres internes de l'IA (profondeur, temps, heuristique) sont exportés via la méthode getSettings à l'aide d'une ConcurrentHashMap (un dictionnaire stockant des paires clé-valeur). Cette structure est spécifiquement conçue pour être thread-safe (protégée contre les crashs si plusieurs processus ou éléments de l'interface graphique tentent de la lire en même temps).
-
-
-Listes dynamiques (List) pour le calcul heuristique : Dans la classe AdvancedHeuristic, l'évaluation tactique ne s'arrête pas aux coordonnées brutes. Le calcul des distances réelles s'appuie sur une liste pour stocker la séquence des identifiants des cases validées par l'algorithme BFS (Breadth-First Search, un parcours de graphe en largeur garantissant de trouver le chemin le plus court tout en contournant les murs existants).
-
-
-\end{itemize}
+Cette implémentation repose sur des structures de données optimisées : une file à double entrée (Deque) permet d'explorer l'arbre par mutation directe et backtracking sans clonage massif du plateau ; une table de hachage sécurisée (ConcurrentHashMap) assure une extraction thread-safe des paramètres internes pour l'interface graphique ; et des listes dynamiques (List) stockent les séquences de cases validées par l'algorithme BFS pour une évaluation heuristique précise.
 
 \paragraph{L'Approfondissement Itératif (Iterative Deepening)}
 
