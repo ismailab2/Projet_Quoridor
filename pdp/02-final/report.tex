@@ -25,33 +25,500 @@
 %------------------------------------------------------------------------------
 %	MAIN MATTER
 %------------------------------------------------------------------------------
-\section{Le jeu Quoridor}
-\subsection{Histoire du jeu}
-\subsection{Les règles du jeu}
-\subsubsection{Règles de base}
-\subsubsection{Règls spéciales}
+
+\section{Explication détaillée du sujet}
+\subsection{Historique du jeu Quoridor}
+Le Quoridor est un jeu de stratégie qui ne fait pas intervenir de hasard et où tous les joueurs connaissent parfaitement l’état du jeu à chaque instant. Il a été créé par Mirko Marchesi dans les années 1970. On peut le comparer à des classiques comme les échecs ou le go, où la réflexion et la stratégie priment complètement sur la chance. C’est pour cette raison qu’il est particulièrement intéressant pour l’étude de l’intelligence artificielle et de la théorie des jeux.
+
+L’origine de Quoridor remonte à un jeu plus ancien appelé \textit{Blockade}, créé par Philip Slater. Ce jeu introduisait déjà l’idée principale : utiliser des obstacles pour ralentir l’adversaire sur un plateau quadrillé. Mirko Marchesi a repris ce concept, l’a simplifié et équilibré pour qu’aucun joueur ne puisse être totalement bloqué. Dans Quoridor, un chemin vers la ligne d’arrivée doit toujours rester ouvert pour chaque joueur, ce qui distingue ce jeu de beaucoup d’autres jeux de blocage.
+
+Le jeu a été édité et popularisé dans les années 1990 par la société Gigamic, spécialisée dans les jeux abstraits modernes. Cette période a vu l’apparition de nombreux jeux simples à comprendre mais très riches stratégiquement, et Quoridor s’inscrit parfaitement dans cette tendance avec son système minimaliste mais aux possibilités infinies.
+
+En 1997, Quoridor a remporté le prix \textit{Mind Game}, décerné par Mensa aux États-Unis, qui récompense les jeux demandant réflexion, logique et stratégie. Cette distinction a beaucoup contribué à sa notoriété internationale. Le jeu a ensuite été élu jeu de l’année dans plusieurs pays comme la France, les États-Unis, le Canada et la Belgique, confirmant son succès auprès des joueurs occasionnels comme des amateurs de stratégie.
+
+Le principe du jeu est simple mais efficace : chaque joueur a un pion et doit atteindre la ligne opposée du plateau tout en posant éventuellement des murs pour ralentir ses adversaires. Cette dualité entre avancer soi-même et gêner les autres oblige à adopter des stratégies à la fois offensives et défensives. Contrairement à d’autres jeux abstraits où l’objectif est de capturer des pièces adverses, Quoridor repose uniquement sur la gestion de l’espace et du temps.
+
+Le jeu est également intéressant d’un point de vue scientifique et informatique. Le plateau peut être modélisé comme un graphe : les cases sont des nœuds et les déplacements possibles des arêtes. Les murs viennent modifier ce graphe en supprimant certaines connexions, ce qui complique l’analyse du jeu. Cette représentation permet d’utiliser des algorithmes de parcours de graphe, comme le Breadth-First Search (BFS), pour calculer les chemins les plus courts vers l’objectif.
+
+Quoridor est souvent utilisé pour tester différentes approches d’intelligence artificielle. Sa complexité combinatoire, moins élevée que celle des échecs ou du go, reste suffisante pour rendre inefficaces les méthodes de recherche exhaustive. Cela en fait un terrain idéal pour des algorithmes comme Minimax, l’élagage alpha-bêta ou le Monte Carlo Tree Search (MCTS). La règle obligeant à laisser un chemin libre ajoute une difficulté supplémentaire pour générer et valider les coups.
+
+Plusieurs ouvrages analysent le jeu et ses stratégies. Glendenning\cite{glendenning2006quoridor} détaille les stratégies de base et insiste sur l’importance de bien choisir quand poser un mur et anticiper les actions de l’adversaire. Lloyd\cite{lloyd2022quoridor} s’est intéressé plus récemment à l’intelligence artificielle, en étudiant comment des algorithmes peuvent analyser et améliorer le jeu.
+
+Avec l’avènement du numérique, Quoridor existe aussi sous forme d’applications mobiles, de plateformes en ligne et de projets académiques. Ces versions ont permis d’élargir le nombre de joueurs et de tester de nouvelles approches algorithmiques. Elles permettent aussi de collecter des données de jeu pour faire des analyses statistiques ou de l’apprentissage automatique.
+
+Le jeu est aussi utilisé dans l’enseignement pour illustrer des concepts en informatique : graphes, algorithmes de recherche, complexité algorithmique ou systèmes multi-agents. Comme le souligne Bezakova\cite{bezakova2013boardgames}, les jeux de plateau sont un excellent support pour apprendre la stratégie algorithmique et la logique.
+
+Enfin, Quoridor est un excellent choix pour un projet informatique, car il combine plusieurs aspects : modélisation d’un système complexe, implémentation d’algorithmes de recherche, gestion de l’interface utilisateur et conception logicielle. Il est simple à comprendre mais offre une grande profondeur stratégique et un intérêt scientifique certain. Son histoire, sa popularité et les recherches qui lui sont consacrées montrent qu’il reste un jeu adapté aux défis contemporains, notamment en intelligence artificielle.
+\subsection{Principe général du jeu}
+
+Quoridor se joue sur un plateau carré composé de 9 × 9 cases dans sa version classique. Dans le cadre de notre projet, nous avons également envisagé des variantes avec des tailles différentes, allant de 3 × 3 à 15 × 15, à condition que la taille reste impaire. Cela permet de garder un bon équilibre entre les joueurs, car chacun part avec les mêmes chances.
+
+Le jeu peut se jouer à deux , trois ou à quatre joueurs. Dans une partie à 2, 3 4 joueurs, chacun commence sur une ligne opposée du plateau. Chaque joueur possède un pion qui représente sa position sur le plateau, ainsi qu’un certain nombre de murs. Au total, il y a 20 murs dans la partie, répartis entre les joueurs.
+
+Le but du jeu est simple : être le premier à atteindre la ligne opposée à celle de départ. Même si cet objectif paraît facile à comprendre, le jeu devient rapidement complexe, car les joueurs peuvent se gêner entre eux.
+
+À chaque tour, un joueur a deux choix possibles. Il peut soit déplacer son pion, soit poser un mur. Le déplacement se fait d’une seule case à la fois, vers le haut, le bas, la gauche ou la droite, à condition qu’il n’y ait pas de mur qui bloque le passage. Ce déplacement permet d’avancer vers l’objectif.
+
+L’autre possibilité est de poser un mur. Les murs servent à ralentir les adversaires en bloquant certains chemins. Ils doivent être placés entre les cases, soit horizontalement soit verticalement. Il est impossible de les placer en diagonale. Une fois posé, un mur ne peut plus être déplacé ni retiré. Cela oblige les joueurs à bien réfléchir avant de les utiliser, car ils sont en nombre limité.
+
+Une règle très importante du jeu est qu’il est interdit de bloquer complètement un joueur. Autrement dit, il doit toujours exister au moins un chemin qui lui permet d’atteindre sa ligne d’arrivée. Cette règle est essentielle, car elle garantit que la partie peut toujours continuer jusqu’à ce qu’un joueur gagne.
+
+Le jeu repose donc sur un équilibre entre avancer et bloquer les autres. Si un joueur se concentre uniquement sur sa progression, il risque de laisser ses adversaires avancer trop facilement. À l’inverse, s’il utilise trop de murs pour bloquer les autres, il peut ralentir sa propre progression ou se retrouver sans ressources en fin de partie.
+
+Dans les parties à plusieurs joueurs, la stratégie devient encore plus intéressante. En effet, chaque joueur doit faire attention à plusieurs adversaires en même temps. Parfois, bloquer un joueur peut en aider un autre sans le vouloir. Il faut donc bien observer la situation et adapter sa stratégie en permanence.
+
+D’un point de vue informatique, le plateau peut être vu comme un réseau de cases reliées entre elles. Les déplacements correspondent aux chemins possibles, et les murs viennent modifier ces chemins. Cela permet d’utiliser des algorithmes pour calculer les meilleurs trajets ou vérifier que les règles sont respectées.
+
+En résumé, Quoridor est un jeu simple à comprendre mais difficile à maîtriser. Il demande à la fois de réfléchir à ses propres déplacements et d’anticiper ceux des autres joueurs. C’est ce mélange qui rend le jeu intéressant et qui explique pourquoi il est souvent utilisé dans des projets liés à l’intelligence artificielle.
+\subsection{Règles du jeu}
+
+Le Quoridor est un jeu de stratégie dont les règles sont simples à comprendre, mais dont la profondeur stratégique est très importante. Il se joue sur un plateau carré de 9 × 9 cases (des variantes existent avec des plateaux plus petits ou plus grands tant que la taille reste impaire comme nous avons détaillés ci-haut). Le but principal est de déplacer son pion depuis sa ligne de départ jusqu’à la ligne opposée avant les autres joueurs. Le jeu se joue à deux ou à quatre joueurs, et chaque joueur dispose d’un nombre limité de murs pour ralentir ses adversaires. Pour gagner, il faut combiner habilement déplacements et placement de murs.
+
+\subsubsection{Déplacement des pions}
+
+Chaque joueur possède un pion qu’il déplace à son tour. Les déplacements sont très stricts : le pion peut avancer d’une seule case à la fois, soit vers l’avant, l’arrière, à gauche ou à droite. Il n’est jamais permis de déplacer son pion en diagonale sauf dans des situations spécifiques (que nous détaillerons plus bas). De plus, un pion ne peut jamais sortir du plateau.
+
+Le pion ne peut pas passer à travers un mur. Si un mur se trouve directement sur le chemin, le pion est obligé de s’arrêter avant celui-ci. Cela signifie qu’un mur agit comme un véritable obstacle physique qui bloque le passage, ce qui rend le placement stratégique des murs crucial pour ralentir un adversaire.
+
+Enfin, une règle fondamentale est qu’une case ne peut jamais contenir deux pions en même temps. Cela signifie qu’il n’est pas possible de "marcher sur un autre pion" ou de l’éliminer. Chaque pion occupe sa propre case et les joueurs doivent planifier leurs déplacements en tenant compte de la position des adversaires.
+
+\paragraph{Cas particulier : saut par-dessus un pion}
+Si le pion d’un autre joueur se trouve juste devant le pion du joueur actif, il est possible de le sauter. Ce saut permet de se déplacer de deux cases d’un coup, en "franchissant" le pion qui bloque le chemin. Cela ne peut se faire que si aucune autre barrière (mur ou bord du plateau) ne bloque directement l’espace derrière le pion à sauter.
+
+\paragraph{Saut diagonal}
+Dans le cas où le pion est bloqué par un autre pion et qu’un mur ou le bord du plateau empêche de sauter directement derrière le pion, le joueur peut effectuer un déplacement en diagonale. Cette règle donne une flexibilité stratégique intéressante, car elle permet d’éviter les situations où un pion serait complètement coincé par les autres. Les déplacements diagonaux ne sont donc pas une option de base mais une solution spéciale pour résoudre des situations de blocage.
+
+\subsubsection{Pose des murs}
+
+Chaque joueur dispose d’un certain nombre de murs à poser. Le placement des murs est soumis à des règles strictes qui garantissent l’équité du jeu et empêchent de bloquer complètement un adversaire.
+
+\paragraph{Règles de base pour placer un mur}
+Un mur doit toujours bloquer exactement deux cases adjacentes. Il ne peut jamais être posé en diagonale ni traverser le plateau de façon irrégulière. Un mur posé reste définitivement sur le plateau et ne peut pas être déplacé ou retiré.
+
+Un point fondamental est que le placement d’un mur ne doit jamais empêcher un joueur d’atteindre sa ligne d’arrivée. Autrement dit, il est impossible d’enfermer un joueur entre quatre murs ou de bloquer complètement toutes les routes possibles vers la victoire. Cette règle est cruciale pour que le jeu reste équitable et stratégique.
+
+\paragraph{Impact stratégique des murs}
+Les murs permettent de ralentir un adversaire ou de forcer un joueur à modifier sa trajectoire. Bien placés, ils peuvent obliger l’adversaire à prendre un chemin beaucoup plus long et ainsi offrir un avantage stratégique. Cependant, poser un mur n’est jamais gratuit : chaque joueur dispose d’un nombre limité de murs, il faut donc les utiliser avec parcimonie et intelligence.
+
+\subsubsection{Interactions entre pions et murs}
+
+L’une des subtilités de Quoridor réside dans la combinaison des déplacements des pions et des murs. Le joueur doit toujours prévoir plusieurs coups à l’avance pour éviter de se retrouver bloqué et pour optimiser la trajectoire de son pion tout en gênant ses adversaires.
+
+Par exemple, si un adversaire est proche de votre ligne de départ, il peut être judicieux de poser un mur pour l’obliger à faire un détour. À l’inverse, il peut être plus avantageux de concentrer ses murs sur des zones où plusieurs pions se croisent afin de créer des effets combinés, obligeant plusieurs adversaires à changer leur chemin.
+
+\paragraph{Exemple concret}
+Supposons qu’un joueur A a son pion devant un mur et que le joueur B est juste derrière lui. Le joueur B ne peut pas sauter par-dessus le mur pour atteindre directement l’autre côté, mais il pourra utiliser le saut diagonal si nécessaire. Les combinaisons de ces situations créent une profondeur stratégique très importante malgré la simplicité des règles de base.
+
+\subsubsection{Limitations et contraintes}
+
+Le Quoridor impose plusieurs contraintes pour maintenir l’équilibre du jeu et éviter des abus tactiques.
+
+1. **Une seule case par pion** : chaque case ne peut être occupée que par un pion, empêchant les collisions.
+2. **Murs fixes et non déplaçables** : un mur posé ne peut plus être retiré, ce qui oblige à réfléchir avant de le placer.
+3. **Chemin obligatoire** : il doit toujours rester un chemin vers la ligne d’arrivée pour chaque joueur, garantissant que personne ne soit bloqué complètement.
+4. **Déplacements limités** : un pion avance d’une seule case, sauf pour le saut par-dessus un adversaire ou le saut diagonal.
+5. **Respect des bordures** : ni les pions ni les murs ne peuvent sortir du plateau.
+
+\subsubsection{Aspects tactiques}
+
+Ces règles simples cachent une richesse stratégique immense. Le joueur doit constamment prendre des décisions tactiques : avancer son pion, poser un mur pour gêner un adversaire, anticiper ses déplacements, utiliser les sauts et diagonales de manière optimale. La combinaison des déplacements simples et des murs crée un espace de décision très vaste, où chaque coup peut avoir des conséquences sur plusieurs tours à venir.
+
+De plus, la limitation du nombre de murs et le fait que chaque joueur possède un seul pion rendent le jeu très équilibré. Le joueur doit toujours évaluer le rapport bénéfice/risque de poser un mur ou d’avancer son pion, car chaque décision influence directement la probabilité de victoire.
+
+\paragraph{Exemple de stratégie}
+Un joueur pourrait décider de ne pas poser de mur immédiatement pour avancer rapidement, mais cela peut permettre à un adversaire de progresser librement. À l’inverse, poser un mur tôt peut ralentir un adversaire, mais peut aussi le pousser à trouver un chemin plus court que prévu. La gestion de ces choix crée une tension permanente et rend chaque partie unique.
+
+\subsubsection{Conclusion sur les règles}
+
+En résumé, Quoridor repose sur des règles simples mais exigeantes : chaque pion se déplace d’une case, les murs sont limités et doivent être placés avec prudence, et il faut toujours laisser un chemin libre pour tous les joueurs. Les règles sur le saut et le saut diagonal ajoutent des subtilités qui enrichissent la stratégie. Cette combinaison de simplicité et de profondeur stratégique fait de Quoridor un jeu accessible mais riche, parfaitement adapté à l’étude des stratégies, à l’intelligence artificielle et à la réflexion logique.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.55\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{regles2}
+        \caption{Murs interdits}
+        \label{fig:murs_interdits}
+    \end{minipage}
+    \hfill % Crée un espace élastique entre les deux blocs
+    \begin{minipage}{0.55\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{regles1}
+        \caption{Saut par dessus un joueur}
+        \label{fig:saut_joueur}
+    \end{minipage}
+\end{figure}
+\subsection{Contraintes et difficultés du jeu}
+
+
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{regles3}
+        \caption{Deplacement diagonal saut d'un joueur}
+        \label{fig:regles_specifiques}
+    \end{minipage}
+    \hfill % Crée un espace élastique entre les deux blocs
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{regles3}
+        \caption{Deplacement diagonal saut d'un joueur}
+        \label{fig:regles_specifiques_bis}
+    \end{minipage}
+\end{figure}
+
+
+\subsection{Contraintes et difficultés du jeu}
+
+Le Quoridor est un jeu de stratégie dont la simplicité apparente cache des contraintes et des difficultés très importantes. Pour bien comprendre pourquoi ce jeu est si exigeant, il est nécessaire de détailler les différents types de limitations que chaque joueur doit gérer tout au long de la partie, ainsi que les défis stratégiques qu’elles impliquent. Ces contraintes touchent aussi bien la gestion des murs que les déplacements des pions, et elles s’intensifient lorsque le nombre de joueurs augmente.
+
+\subsubsection{Contraintes liées aux murs}
+
+L’une des contraintes majeures du Quoridor réside dans le nombre limité de murs que chaque joueur possède. Chaque mur représente une ressource rare et précieuse, et il n’est pas possible d’en poser autant que l’on souhaite. Cette limitation force le joueur à réfléchir à chaque placement et à évaluer soigneusement le moment où il sera le plus efficace. Poser un mur trop tôt peut ne pas avoir beaucoup d’impact, tandis que le poser trop tard peut permettre à un adversaire de prendre une avance irrattrapable.
+
+De plus, la pose de murs est soumise à plusieurs règles strictes. Il est interdit de placer un mur qui bloque complètement l’accès à la ligne d’arrivée d’un joueur, ce qui oblige à calculer chaque coup pour s’assurer que personne n’est complètement enfermé. Cela signifie que le joueur ne peut pas simplement poser un mur “au hasard” pour ralentir un adversaire : il doit anticiper les conséquences de son action sur l’ensemble du plateau et sur tous les joueurs.
+
+Chaque mur posé est permanent, ce qui renforce la pression sur le joueur. Une erreur de placement est irréversible et peut compromettre sa propre progression ou, dans certains cas, offrir un avantage stratégique à un adversaire. Cette permanence oblige les joueurs à combiner rigueur et anticipation dans leur planification.
+
+\subsubsection{Contraintes liées au mouvement des pions}
+
+Les déplacements des pions sont également soumis à des contraintes précises. Chaque pion ne peut se déplacer que d’une case à la fois, sauf dans le cas des sauts ou des déplacements diagonaux. Cette limitation impose au joueur de planifier ses trajets plusieurs tours à l’avance, car un mauvais choix peut le ralentir ou le forcer à contourner des obstacles, ce qui augmente le nombre de coups nécessaires pour atteindre la ligne d’arrivée.
+
+L’interaction entre pions et murs crée une autre contrainte importante : un joueur doit toujours tenir compte de la position des autres pions. Si un adversaire se trouve directement devant lui, le joueur peut sauter par-dessus, mais uniquement si la case derrière l’adversaire n’est pas bloquée par un mur ou le bord du plateau. Dans le cas contraire, le joueur doit effectuer un saut diagonal. Ces règles introduisent des situations complexes où chaque déplacement nécessite une analyse des possibilités immédiates et futures.
+
+\subsubsection{Contraintes dans les parties à plusieurs joueurs}
+
+Le nombre de joueurs influence fortement la complexité et les contraintes du jeu. Dans une partie à deux joueurs, le joueur doit gérer uniquement un adversaire et peut donc anticiper plus facilement les mouvements et le placement de murs. En revanche, dans une partie à quatre joueurs, chaque joueur doit surveiller les déplacements et les stratégies de trois adversaires simultanément.
+
+Cette augmentation du nombre de participants crée plusieurs difficultés supplémentaires. Tout d’abord, le joueur dispose de moins de contrôle sur l’évolution du plateau, car les autres participants peuvent poser des murs de manière imprévisible et modifier le trajet optimal. Ensuite, il devient beaucoup plus difficile de prévoir les conséquences de chaque coup, car un mur placé pour ralentir un joueur peut en même temps bénéficier à un autre adversaire en modifiant le chemin le plus court. Enfin, la gestion des murs devient plus stratégique : chaque mur doit être utilisé non seulement pour bloquer un adversaire mais aussi pour protéger sa propre progression.
+
+\subsubsection{Contraintes stratégiques et anticipatives}
+
+La vraie difficulté de Quoridor réside dans la nécessité d’adopter une stratégie à la fois anticipative et flexible. Un joueur ne peut pas se contenter de déplacer son pion de manière linéaire vers la ligne d’arrivée ou de poser des murs au hasard. Il doit constamment évaluer le plateau, prévoir les coups des adversaires et ajuster sa stratégie en fonction de la situation.
+
+Cette planification implique de jongler entre deux objectifs parfois contradictoires : avancer son pion pour se rapprocher de la victoire et ralentir ses adversaires pour gagner du temps. Chaque décision a un coût et un bénéfice, et il faut savoir les équilibrer. Par exemple, poser un mur pour bloquer un adversaire peut rallonger le chemin du joueur actuel si ce mur est mal placé, tandis qu’avancer trop rapidement son pion peut laisser l’adversaire libre de progresser sans contraintes.
+
+\paragraph{Exemple concret}
+Imaginons un joueur avec trois murs restants. Un adversaire avance rapidement et menace d’atteindre la ligne d’arrivée avant lui. Le joueur doit décider : poser immédiatement un mur pour le ralentir, ce qui risque de l’empêcher lui-même de suivre sa trajectoire optimale, ou économiser ses murs pour une situation ultérieure, en espérant pouvoir rattraper son retard autrement. Ce type de choix illustre la complexité stratégique du jeu.
+
+\subsubsection{Contraintes combinatoires et complexité}
+
+Le Quoridor est également complexe du point de vue combinatoire. Chaque tour offre plusieurs options : déplacer le pion dans une direction, poser un mur horizontal ou vertical sur une multitude de cases disponibles, ou sauter un adversaire. Cette grande variété de coups possibles fait que le nombre de positions envisageables augmente très rapidement, même après quelques tours seulement.
+
+Cette explosion combinatoire rend le calcul exhaustif des coups très difficile, et c’est pourquoi des stratégies optimales ne peuvent être trouvées que par des méthodes avancées comme l’intelligence artificielle ou la planification algorithmique. Les joueurs humains doivent donc se baser sur des heuristiques et des prévisions partielles, ce qui ajoute une couche supplémentaire de difficulté et de créativité dans le jeu.
+
+\subsubsection{Contraintes psychologiques et décisionnelles}
+
+Au-delà des contraintes techniques et stratégiques, Quoridor impose des contraintes psychologiques importantes. Le joueur doit gérer la pression de prendre des décisions optimales à chaque tour, souvent sous la menace d’avancer plus lentement qu’un adversaire. Chaque mur posé ou chaque déplacement doit être réfléchi, car une erreur peut être coûteuse.
+
+De plus, le joueur doit faire preuve de patience et d’adaptabilité. Une stratégie qui semblait efficace à un moment donné peut devenir inefficace à cause des actions des adversaires, et il faut savoir modifier son plan sans perdre de vue l’objectif final.
+
+\subsubsection{Résumé des contraintes}
+
+En résumé, les contraintes de Quoridor peuvent être classées en plusieurs catégories :
+
+\begin{itemize}
+    \item \textbf{Contraintes de ressources :} nombre limité de murs, permanence des murs posés.
+    \item \textbf{Contraintes de mouvement :} déplacement limité à une case, respect des règles de saut et diagonales.
+    \item \textbf{Contraintes stratégiques :} équilibre entre avancer son pion et ralentir les adversaires.
+    \item \textbf{Contraintes combinatoires :} grand nombre de coups possibles, explosion des positions envisageables.
+    \item \textbf{Contraintes psychologiques :} nécessité d’anticipation, gestion de la pression et adaptation continue.
+\end{itemize}
+²c
+La combinaison de toutes ces contraintes rend le Quoridor extrêmement stimulant et difficile, tout en offrant une profondeur stratégique comparable à des jeux comme les échecs. La réussite dans ce jeu dépend de la capacité du joueur à gérer simultanément les ressources, les déplacements, l’anticipation des adversaires et l’évolution dynamique du plateau. C’est cette richesse et cette complexité qui en font un excellent support d’étude pour l’intelligence artificielle, la planification algorithmique et le développement de stratégies optimales.
+
+\subsection{Jeux ou implémentations existantes}
+
+Le jeu Quoridor, bien qu’il soit souvent associé à une version physique vendue en boutique, existe aujourd’hui sous de très nombreuses formes, que ce soit sous forme matérielle traditionnelle, dans des versions numériques, ou encore comme point de départ pour des projets informatiques ou de recherche. Cette diversité d’implémentations montre à la fois l’accessibilité du jeu et l’intérêt qu’il suscite, non seulement parmi les amateurs de jeux de société, mais aussi au sein de la communauté scientifique et de celle des développeurs.
+
+\paragraph{Le jeu physique traditionnel}
+
+Dans sa forme la plus classique, Quoridor est distribué par des éditeurs de jeux de société et se trouve facilement à l’achat dans de nombreuses boutiques spécialisées ou en ligne. Ce jeu se compose d’un plateau de 9 × 9 cases, de pions pour les joueurs et d’un ensemble de murs en bois ou en plastique. La simplicité de son matériel contraste avec la profondeur stratégique qu’il offre. C’est un jeu abstrait accessible qui peut être appris en quelques minutes, mais qui peut demander des dizaines d’heures d’entraînement pour être maîtrisé. Cette accessibilité et cette profondeur expliquent en grande partie pourquoi il a su conquérir un public large, des joueurs occasionnels aux passionnés de stratégie.
+
+L’un des signes de la reconnaissance du jeu est son prix \textit{Mind Game}, décerné en 1997 par l’association Mensa, qui récompense les jeux faisant appel à la réflexion et à la logique. Cette distinction a contribué à sa diffusion internationale, ainsi qu’à sa réputation comme un jeu stimulant et intellectuellement exigeant.
+
+\paragraph{Versions en ligne et communautés de joueurs}
+
+Avec le développement des technologies numériques, Quoridor a très vite été adapté en versions informatiques. Aujourd’hui, il existe de nombreuses plateformes en ligne où il est possible de jouer à Quoridor gratuitement contre d’autres joueurs à travers le monde. Ces environnements en ligne offrent plusieurs avantages par rapport à la version physique :
+
+\begin{itemize}
+    \item \textbf{Accessibilité immédiate} : nul besoin d’acheter un plateau physique ou de trouver un adversaire en face de soi ; il suffit d’un navigateur ou d’une application.
+    \item \textbf{Matchmaking automatisé} : beaucoup de versions en ligne proposent de jumeler les joueurs par niveau, ce qui permet d’affronter des adversaires de force comparable et d’améliorer progressivement son jeu.
+    \item \textbf{Analyse des parties} : certaines plateformes offrent un historique des parties ou un système de replay permettant de revoir les coups joués, ce qui est extrêmement utile pour apprendre et s’améliorer.
+    \item \textbf{Statistiques et classement} : des systèmes de classement ELO ou similaires permettent de suivre sa progression et de se mesurer à une communauté plus large.
+\end{itemize}
+
+Ces adaptations numériques ont grandement contribué à la popularité actuelle de Quoridor, en particulier auprès d’un public jeune et connecté. Elles ont aussi facilité l’organisation de tournois, de défis et d’événements en ligne autour du jeu, ce qui a favorisé l’émergence d’une communauté active autour de Quoridor.
+
+\paragraph{Implémentations open‑source et projets personnels}
+
+Au‑delà des versions commerciales et des plateformes en ligne, le jeu a inspiré de nombreux passionnés à créer leurs propres implémentations. Sur des plateformes de partage de code telles que GitHub, il est possible de trouver plusieurs projets qui reproduisent ou étendent Quoridor dans des langages de programmation variés.
+
+Deux exemples de projets particulièrement intéressants sont :
+
+\begin{itemize}
+    \item \textbf{Le dépôt de \textit{alainrinder}} : disponible à l’adresse \href{https://github.com/alainrinder/quoridor.py}{https://github.com/alainrinder/quoridor.py}, ce projet propose une implémentation en Python de Quoridor avec une interface graphique. Il permet de jouer contre une IA basique et constitue une base solide pour quiconque souhaite étudier le jeu ou développer une IA plus avancée.
+
+    \item \textbf{Le dépôt de \textit{pavlosdais}} : disponible sur \href{https://github.com/pavlosdais/Quoridor}{https://github.com/pavlosdais/Quoridor}, ce projet propose une version du jeu en langage C fonctionnant dans le terminal. Ce type de projet est particulièrement utile pour comprendre les mécanismes internes du jeu et implémenter des moteurs de décision légers.
+\end{itemize}
+
+Ces projets sont des ressources précieuses pour les développeurs, car ils permettent de manipuler directement les structures de données associées aux plateaux, aux pions et aux murs. Ils servent aussi de point de départ pour expérimenter différentes stratégies d’IA ou pour intégrer le jeu dans des environnements plus larges.
+
+En complément de ces projets open‑source, on trouve également des tutoriels, des vidéos explicatives et des projets didactiques réalisés par des amateurs. Par exemple, une vidéo YouTube montre comment coder le jeu en Python en utilisant un environnement Jupyter Notebook (\href{https://youtu.be/KlktFXtj_qk?si=NpsYhWHdBjuhytDP}{voir la vidéo}). Ce type de contenu est particulièrement utile pour les débutants qui souhaitent comprendre les bases de l’implémentation du jeu sans partir de zéro.
+
+\paragraph{Travaux scientifiques sur Quoridor et agents de jeu}
+
+Quoridor n’est pas seulement un jeu de société apprécié des joueurs ; il a aussi attiré l’attention des chercheurs en intelligence artificielle et en informatique théorique. La raison principale est que, malgré sa simplicité apparente, Quoridor offre une complexité stratégique significative qui en fait un excellent test pour des méthodes d’IA.
+
+L’un des premiers travaux scientifiques sur ce sujet est celui de Mertens, qui s’intéresse à la conception d’un agent capable de jouer à Quoridor\cite{mertens2006quoridor}. Ce travail explore les défis associés à la modélisation du jeu, à la génération de coups légaux et à la mise en place d’une stratégie compétitive.
+
+Par la suite, plusieurs études ont adopté des méthodes plus sophistiquées pour aborder ce problème. L’une des approches dominantes dans la recherche sur les jeux combinatoires est le \textit{Monte Carlo Tree Search} (MCTS), un algorithme qui a démontré des performances remarquables sur des jeux complexes comme le go, et qui a été appliqué avec succès à Quoridor\cite{browne2012mcts}. Cet algorithme utilise des simulations statistiques pour estimer la valeur des positions de jeu et choisir les coups les plus prometteurs, ce qui en fait un candidat naturel pour des jeux à haute complexité stratégique comme Quoridor.
+
+Un autre champ important de la recherche est l’étude des heuristiques et des fonctions d’évaluation spécifiques à ce jeu. Par exemple, des travaux ont tenté de définir des mesures qui estiment la distance effective d’un pion à sa ligne d’arrivée en tenant compte des murs déjà placés, ou encore de combiner plusieurs métriques pour guider la recherche de coups dans des espaces de décision très vastes.
+
+En plus des méthodes de recherche locale comme MCTS, d’autres techniques issues de l’intelligence artificielle ont été explorées, comme :
+
+\begin{itemize}
+    \item \textbf{Les algorithmes Minimax et alpha‑bêta}, classiques dans les jeux à deux joueurs, qui explorent l’arbre des coups possibles pour déterminer les actions optimales en partant de la logique que l’adversaire joue parfaitement.
+
+    \item \textbf{Les méthodes hybrides}, qui combinent des heuristiques locales, des simulations et des approximations de valeur pour accélérer la prise de décision.
+
+    \item \textbf{L’apprentissage automatique}, où des modèles peuvent être entraînés à partir de données de parties pour apprendre des stratégies gagnantes sans programmation explicite des règles tactiques.
+\end{itemize}
+
+Le livre de Lloyd sur Quoridor explore ces aspects sous un angle plus moderne, en discutant de l’intégration d’algorithmes d’intelligence artificielle dans l’analyse stratégique du jeu\cite{lloyd2022quoridor}. Il constitue une ressource intéressante pour comprendre comment les concepts théoriques d’IA se traduisent dans la pratique du jeu.
+
+\paragraph{Ressources pédagogiques et didactiques}
+
+Au‑delà des travaux scientifiques et des implémentations logicielles, Quoridor est utilisé dans
+des contextes pédagogiques pour enseigner des concepts d’informatique. Par exemple, comme le souligne Bezakova,
+les jeux de plateau servent souvent d’introduction aux stratégies algorithmiques dans les cours d’informatique,
+car ils permettent d’illustrer des idées comme la recherche de plus court chemin, l’exploration d’arbres de décision
+ou la conception de moteurs de jeu\cite{bezakova2013boardgames}.
+
+Dans ce cadre, les étudiants peuvent s’initier à la notion de parcours de graphe pour calculer les chemins optimaux
+autour des murs, ou encore à la notion d’heuristique pour guider la prise de décision dans un espace de jeu très large.
+Ces exercices pratiques permettent de relier des concepts abstraits d’algorithmique à des situations concrètes, ce qui
+facilite l’apprentissage et la compréhension.
+
+\paragraph{Comparaison avec d’autres jeux et plateformes d’étude}
+
+Quoridor se distingue aussi lorsqu’on le compare à d’autres jeux utilisés dans les recherches en IA. Par exemple, des jeux
+comme les échecs ou le go ont des espaces de décision extrêmement vastes, mais ils reposent sur des mécaniques de capture et
+de confrontation directes. Quoridor, en revanche, repose entièrement sur la gestion de l’espace et des ressources (les murs),
+ce qui en fait un bon terrain d’étude pour des problèmes comme la planification sous contraintes, l’optimisation de trajectoires,
+ou encore la coopération et la compétition multi‑agents.
+
+Des plateformes de recherche multi‑jeux ont même intégré Quoridor comme l’un des environnements de test pour comparer les
+performances d’algorithmes génériques. Cela permet de mesurer à quel point une technique d’IA est capable de s’adapter à des jeux avec des règles différentes et des structures stratégiques variées.
+
+\paragraph{}
+
+En résumé, Quoridor est bien plus qu’un simple jeu de société. Il existe aujourd’hui sous de multiples formes — physique, numérique, open‑source et scientifique — chacune adaptée à un usage spécifique. Que ce soit pour jouer contre des amis, affronter des adversaires en ligne, étudier des stratégies d’intelligence artificielle ou enseigner des concepts informatiques, Quoridor propose un terrain riche et stimulant.
+
+Les implémentations disponibles, qu’elles soient grand public ou issues de projets personnels, montrent l’intérêt pratique du jeu, tandis que les travaux scientifiques démontrent sa pertinence comme objet d’étude. Enfin, l’utilisation de Quoridor dans des contextes pédagogiques renforce son rôle comme outil d’apprentissage de l’algorithmique et de l’intelligence artificielle. Grâce à cette diversité, Quoridor reste un jeu vivant, apprécié et étudié dans de nombreux domaines.
+
+\subsection{Objectifs du projet réalisés}
+
+Quelques objectifs qu’il était plus que nécessaire et une évidence de réaliser afin de proposer une expérience de jeu cohérente et satisfaisante étaient : 
+
+\begin{itemize}
+\item Afficher le plateau selon ses configurations (taille, position des pions et murs, murs restants);
+
+
+\item Gérer les coups disponibles à chaque tour des joueurs (coups autorisés, coups illégaux, requêtes erronées, contraintes des murs);
+
+
+\item Adapter la partie selon les configurations demandées (interface clavier/graphique, mode blitz/en ligne, adversaire humain/IA et leur nombre, nombre de murs, …);
+
+
+\item Proposer une langue adaptative selon la région du joueur (au moins anglais et français);
+
+
+\end{itemize}
+La réalisation de ces objectifs devait être notre première priorité sans quoi il aurait été compliqué de parvenir à la fin de ce projet. Nous avons alors pu accomplir ces tâches afin de poursuivre vers des objectifs plus poussés, dont nous dirions même plus challengeant.
+
+
+
+\subsection{Fonctionnalités attendues dans le cahier des charges.}
+
+Le projet requiert 15 généralités que nous avons respectés et qui auront été notre base de départ afin de fournir un code complet et rigoureux: 
+
+\begin{itemize}
+\item Langage de programmation : JAVA SE 21+;
+
+
+\item Style de codage : Coding style de Google;
+
+
+\item Documentation : Javadoc;
+
+
+\item Langue par défaut du code : Anglais;
+
+
+\item Système crible : Fonctionne sur des systèmes GNU/Linux;
+
+
+\item Tests : Tester et valider le code (à hauteur de 85% de couverture);
+
+\item Bugs : Aucun bug ne fait crasher le programme et un message d’erreur explicite est affiché à l’utilisateur;
+
+\item Performances : Mesurer et documenter sur différentes entrées ainsi que ses cas limites;
+
+\item Bibliothèques : Seul la bibliothèque du langage et celle listées sont acceptées;
+
+\item Build-system : Maven;
+
+\item Framework de tests : JUnit + Jacoco;
+
+
+\item Gestion des options : Bibliothèque commons-cli;
+
+
+\item Bibliothèque graphique : JavaFx;
+
+
+\item Internationalisation: ResourceBundle et Locale;
+
+
+\item Apprentissage automatique : Bibliothèque TensorFlow (Java API);
+
+
+\end{itemize}
+Le projet nécessitait également la réalisation de multiples tâches réparties en 40 besoins dont nous avons précisé l’avancement de chacun des 40 en annexe à la fin de ce document comprenant les objectifs cités dans la section précédente 1.6 Objectifs du projet réalisés.
+
 
 \section{Les Fonctionnalités étendues}
 
 \subsection{Fonctionnalité 1 : Réseau client/serveur et gestion multi-clients}
 
-\subsubsection{Besoin initial}
-L’un des objectifs du projet était d’ajouter une dimension réseau au jeu Quoridor afin de permettre à plusieurs joueurs d’interagir à distance. Dans une première étape, il s’agissait de mettre en place un serveur simple capable d’accepter une connexion cliente, de répondre à des commandes élémentaires telles que \texttt{PING} et \texttt{QUIT}, et de permettre au client de tester la connexion.
 
-Dans une seconde étape, l’objectif a été étendu à la gestion simultanée de plusieurs clients et de plusieurs parties en parallèle. Le serveur devait alors être capable de conserver l’état de plusieurs sessions de jeu, de créer des parties entre joueurs disponibles, de valider les coups reçus à distance et de transmettre les actions aux autres joueurs concernés.
+\subsubsections{Dimension réseau du projet Quoridor}
 
-L’intérêt de cette fonctionnalité est double. D’une part, elle transforme le jeu local en application distribuée selon une architecture client/serveur. D’autre part, elle centralise la validation des coups côté serveur, ce qui évite qu’un client applique localement des actions non vérifiées.
 
-\subsubsection{Choix de conception}
-Le choix retenu dans le projet est une architecture client/serveur. Le serveur joue le rôle d’autorité centrale : il accepte les connexions, reçoit les commandes, valide les actions envoyées par les clients et conserve l’état officiel des parties.
+L’un des objectifs principaux de notre projet consistait à étendre le jeu Quoridor à une dimension réseau, afin de permettre à plusieurs joueurs de s’affronter à distance. Cette fonctionnalité transforme radicalement la manière dont le jeu peut être pratiqué : il ne s’agit plus uniquement d’un jeu local sur un ordinateur unique, mais d’une application distribuée dans laquelle plusieurs utilisateurs interagissent via leurs machines respectives, tout en partageant un état de jeu centralisé. Cette extension réseau implique non seulement de gérer les aspects techniques liés aux communications entre machines, mais également de garantir que les règles du jeu soient respectées de manière cohérente pour tous les participants, indépendamment de leur localisation.
 
-L’implémentation repose sur deux niveaux principaux. La classe \texttt{GameServer} correspond à un serveur simple, conçu pour la première étape du réseau. Elle gère une seule connexion cliente, répond à des commandes de base comme \texttt{PING} et \texttt{QUIT}, lance un diffuseur UDP et met en place un timeout d’une minute. La classe \texttt{MultiGameServer} constitue l’extension multi-clients.
 
-Le protocole choisi est volontairement simple : les messages échangés sont des chaînes ASCII terminées par un retour à la ligne. Les commandes principales sont \texttt{HELLO}, \texttt{PING}, \texttt{QUIT} et \texttt{MOVE}, avec des réponses comme \texttt{WELCOME}, \texttt{PONG}, \texttt{BYE}, \texttt{OK}, \texttt{ERROR}, \texttt{GAME\_START}, \texttt{OPPONENT\_MOVE} et \texttt{GAME\_OVER}.
+\subsubsection{Première étape : serveur simple et tests de connectivité}
 
-Pour l’annonce de présence du serveur, le projet utilise une classe \texttt{ServerBroadcaster}. Côté client, la méthode \texttt{serverList} de \texttt{GameClient} écoute les messages UDP afin de détecter les serveurs disponibles.
 
-Enfin, la validation des coups ne repose pas sur le client. Lorsqu’un joueur envoie un coup sous forme textuelle, celui-ci est converti en objet métier \texttt{Move} par \texttt{NetworkMoveParser}, puis transmis au moteur de jeu côté serveur.
+La première étape de cette implémentation réseau a consisté à mettre en place un serveur simple. Ce serveur devait être capable d’accepter une seule connexion cliente à la fois et de traiter des commandes élémentaires. L’objectif initial n’était pas de gérer plusieurs parties ou joueurs simultanément, mais de créer un prototype fonctionnel permettant de tester la connectivité entre un client et un serveur, et de vérifier que les échanges de messages étaient correctement interprétés.
+
+
+Pour cela, nous avons défini des commandes de base telles que \texttt{PING} et \texttt{QUIT}. La commande \texttt{PING} permet au client de tester si le serveur est actif et répond correctement aux requêtes, renvoyant un \texttt{PONG} pour confirmer la disponibilité du serveur. La commande \texttt{QUIT} permet au client de terminer la session proprement, ce qui entraîne la fermeture de la connexion côté serveur et libère les ressources associées. Cette étape de validation était essentielle pour s’assurer que les échanges réseau étaient fiables et que les fondations pour un développement multi-joueurs ultérieur étaient solides.
+
+
+En parallèle, un diffuseur UDP simple a été implémenté pour permettre au serveur d’annoncer sa présence sur le réseau local. Cette annonce contient le nom du serveur et le port TCP sur lequel il est joignable. Côté client, une méthode dédiée écoute ces messages et construit une liste des serveurs disponibles. Bien que ce mécanisme reste basique et davantage adapté à des tests locaux qu’à une découverte réseau complète, il a permis de mettre en place une interaction automatisée entre clients et serveurs et d’éviter la configuration manuelle fastidieuse des adresses et ports.
+
+
+\subsubsection{Deuxième étape : multi-clients et multi-parties}
+
+
+Une fois le serveur simple opérationnel, le projet a évolué vers une architecture capable de gérer plusieurs clients et plusieurs parties simultanément. L’objectif principal était de permettre à différents joueurs de se connecter, de créer ou rejoindre des parties, et de jouer sans que leurs actions interfèrent avec d’autres parties actives.
+
+
+Pour cela, la classe \texttt{MultiGameServer} a été conçue. Contrairement au serveur simple, cette version est capable de gérer plusieurs connexions simultanées grâce à l’usage de threads distincts ou de mécanismes de programmation asynchrone. Chaque client connecté dispose ainsi de son propre canal de communication avec le serveur. De plus, le serveur conserve l’état de plusieurs sessions de jeu, ce qui permet à plusieurs parties de se dérouler en parallèle, chacune avec son tableau de scores et sa liste de joueurs. Le serveur joue ici un rôle d’autorité centrale : il reçoit toutes les commandes des clients, valide chaque action et met à jour l’état officiel du jeu avant de notifier les autres joueurs concernés. Cette centralisation est essentielle pour Quoridor, où les règles sont strictes et chaque coup doit être vérifié pour éviter toute incohérence, comme la pose d’un mur qui bloquerait totalement un joueur.
+
+
+\subsubsection{Protocole de communication et format des messages}
+
+
+Le choix du protocole de communication s’est porté sur un modèle simple, basé sur l’échange de chaînes ASCII terminées par un retour à la ligne. Cette approche présente plusieurs avantages : les messages sont faciles à lire, à comprendre et à déboguer, ce qui est particulièrement utile pendant le développement et les tests. Les commandes principales incluent :
+
+
+\begin{itemize}
+
+\item \texttt{HELLO} : initialisation de la connexion entre le client et le serveur.
+
+\item \texttt{PING} : vérification de la disponibilité du serveur.
+
+\item \texttt{QUIT} : fermeture propre de la session client.
+
+\item \texttt{MOVE} : envoi d’un coup effectué par le joueur.
+
+\end{itemize}
+
+
+Les réponses du serveur incluent des messages tels que \texttt{WELCOME}, \texttt{PONG}, \texttt{BYE}, \texttt{OK}, \texttt{ERROR}, ainsi que des notifications spécifiques au jeu comme \texttt{GAME\_START}, \texttt{OPPONENT\_MOVE} et \texttt{GAME\_OVER}. Ce format simple garantit une compréhension claire des échanges et permet au client d’interpréter rapidement les messages pour mettre à jour son interface graphique ou sa logique de jeu.
+
+
+\subsubsection{Découverte et annonce des serveurs}
+
+
+Pour rendre le jeu accessible sur un réseau local sans configuration manuelle, une classe \texttt{ServerBroadcaster} a été implémentée. Cette classe envoie régulièrement des messages UDP contenant le nom du serveur et son port TCP. Les clients, via la méthode \texttt{serverList()} de \texttt{GameClient}, écoutent ces messages et détectent les serveurs disponibles sur le réseau. Cela permet aux joueurs de choisir un serveur actif sans connaître préalablement son adresse IP. Bien que cette fonctionnalité soit encore limitée et davantage orientée vers des tests locaux, elle constitue une base solide pour des améliorations futures, notamment la découverte automatique sur de véritables réseaux étendus.
+
+
+\subsubsection{Validation des coups côté serveur}
+
+
+Un aspect central de l’architecture réseau du projet est que toutes les actions de jeu sont validées côté serveur. Lorsqu’un joueur envoie un coup, celui-ci est d’abord transmis sous forme de chaîne de caractères. La classe \texttt{NetworkMoveParser} se charge de transformer cette chaîne en objet métier \texttt{Move} reconnu par le moteur du jeu. Le serveur utilise ensuite la logique métier contenue dans le package \texttt{core} pour vérifier la légalité du coup : déplacements valides, respect des contraintes des murs, autorisation de sauts ou de déplacements diagonaux, et respect des règles de progression vers la ligne d’arrivée.
+
+
+Seule une fois validé, le coup est accepté et retransmis aux autres joueurs de la partie via le serveur. Cette centralisation garantit que tous les clients partagent une vision cohérente du plateau de jeu, évitant les incohérences qui pourraient survenir si chaque client appliquait ses propres règles localement.
+
+
+\subsubsection{Gestion des sessions et synchronisation}
+
+
+La gestion des sessions multi-parties implique également de maintenir une synchronisation stricte entre tous les participants. Chaque partie dispose d’un identifiant unique et d’une liste de joueurs connectés. Le serveur conserve un état complet de la partie, incluant la position des pions, la disposition des murs et le nombre de coups réalisés. Lorsqu’un joueur effectue une action, le serveur met à jour cet état et envoie une notification aux autres participants pour qu’ils puissent afficher la modification en temps réel sur leurs interfaces.
+
+
+Cette approche permet également de gérer les cas d’exception, tels que la déconnexion d’un joueur. Le serveur peut alors suspendre la partie, attendre le retour du joueur, ou déclarer une victoire par abandon selon les règles définies. De plus, elle permet de maintenir l’intégrité des données en cas de conflits ou d’envois simultanés de coups par différents clients.
+
+
+\subsubsection{Évolutivité et architecture future}
+
+
+L’architecture client/serveur adoptée pour le projet offre une grande flexibilité pour des évolutions futures. Il est par exemple possible d’intégrer des fonctionnalités supplémentaires telles que :
+
+
+\begin{itemize}
+
+\item un système de matchmaking pour associer automatiquement les joueurs selon leur niveau,
+
+\item des parties classées avec calcul de scores et de statistiques,
+
+\item l’intégration d’IA côté serveur pour remplacer un joueur absent ou compléter une partie,
+
+\item un suivi historique des parties pour permettre aux utilisateurs de revoir leurs stratégies,
+
+\item une sécurité renforcée avec authentification et chiffrement des communications.
+
+\end{itemize}
+
+
+En adoptant une architecture modulaire, dans laquelle la communication réseau est séparée de la logique métier et des interfaces, il est possible de faire évoluer le projet sans perturber les composants existants. Chaque module (réseau, interface, IA, logique métier) peut être testé et amélioré indépendamment.
+
+
+\subsubsection{Résumé de l’approche}
+
+
+En résumé, l’implémentation réseau de Quoridor repose sur :
+
+
+\begin{itemize}
+
+\item une architecture client/serveur centralisée garantissant la cohérence des règles,
+
+\item un protocole simple basé sur des chaînes ASCII pour faciliter le développement et le débogage,
+
+\item la gestion de plusieurs clients et parties simultanées via \texttt{MultiGameServer},
+
+\item une découverte basique de serveurs via UDP avec \texttt{ServerBroadcaster},
+
+\item la validation stricte des coups côté serveur via le moteur de jeu et \texttt{NetworkMoveParser},
+
+\item une synchronisation continue des états entre clients pour une expérience de jeu fluide et cohérente.
+
+\end{itemize}
+
+
+Cette approche permet non seulement de jouer à distance avec des amis ou d’autres utilisateurs, mais également de poser les bases d’une plateforme de jeu évolutive, modulable et sécurisée, tout en respectant strictement les règles du Quoridor original
+
 
 \subsubsection{Structures de données utilisées}
 La partie réseau s’appuie sur plusieurs structures de données importantes.
@@ -67,7 +534,20 @@ La synchronisation repose sur un verrou utilisé avec \texttt{synchronized(lock)
 Côté client, \texttt{GameClient} utilise une \texttt{SynchronousQueue<String>} pour gérer les réponses synchrones.
 
 \subsubsection{Algorithme mis en place}
-Le serveur ouvre une socket TCP, lance un thread UDP pour la diffusion et un thread de surveillance pour les timeouts.
+
+Le fonctionnement du réseau peut être décrit en plusieurs étapes.
+
+Lorsqu’un serveur simple ou multi-clients est démarré, il ouvre d’abord une socket TCP sur un port donné. Il lance ensuite un thread de diffusion UDP chargé d’annoncer périodiquement sa présence, puis un thread de surveillance chargé de détecter les clients inactifs. Dans le cas du serveur multi-clients, une boucle principale accepte ensuite chaque nouvelle connexion TCP, crée un objet ClientSession, lui attribue un identifiant unique et démarre un thread dédié à la gestion de ce client.
+
+Lorsqu’un client envoie une commande, le serveur lit la ligne reçue et décide de l’action à exécuter. Une commande \texttt{HELLO} enregistre le nom du joueur. Une commande \texttt{PING} entraîne l’envoi de PONG. Une commande \texttt{QUIT} provoque l’envoi de \texttt{BYE} puis la fermeture de la session. Une commande \texttt{MOVE} déclenche le traitement principal.
+
+Pour un coup de jeu, le serveur récupère d’abord la partie associée au client. Il vérifie ensuite que le joueur appartient bien à une partie active et que c’est bien son tour. Le texte du coup est alors converti en objet Move via NetworkMoveParser. Si le format est invalide, le serveur renvoie une erreur. Si le format est correct, le coup est transmis à la session de jeu côté serveur, qui s’appuie elle-même sur le moteur du jeu pour vérifier sa légalité. Si le moteur refuse le coup, le serveur renvoie \texttt{ERROR illegal move}. Sinon, il renvoie OK au joueur concerné, puis diffuse \texttt{OPPONENT\_MOVE} etc. aux autres joueurs de la partie.
+
+Après chaque coup valide, le serveur vérifie si la partie est terminée. Si un gagnant est détecté, il met à jour le tableau des scores, réinitialise le statut des joueurs, envoie \texttt{GAME\_OVER WIN} au vainqueur et \texttt{GAME\_OVER LOSE} aux autres joueurs, puis supprime la partie de la table des parties actives.
+
+En parallèle, un thread de timeout examine régulièrement la liste des clients. Si un client reste inactif plus d’une minute, il est considéré comme expiré, reçoit un message d’erreur, puis est déconnecté. Si ce client participait à une partie, les autres joueurs sont remis à l’état disponible et avertis de la déconnexion.
+
+
 
 Chaque connexion crée une \texttt{ClientSession}. Lorsqu’un client envoie une commande :
 \begin{itemize}
@@ -96,6 +576,23 @@ Fin de partie :
     \item Envoi de \texttt{GAME\_OVER WIN} ou \texttt{GAME\_OVER LOSE}
 \end{itemize}
 
+
+\subsubsection{Synchronisation entre serveur et client}
+Un point important de l’algorithme mis en place concerne la synchronisation entre la partie distante et sa représentation locale côté client. Le serveur conserve l’état officiel de la partie et reste seul responsable de la validation des actions. Le client, quant à lui, n’a pas pour rôle de décider si un coup est légal ou non dans le cadre du protocole réseau ; il envoie une demande d’action et attend la réponse du serveur. Si le coup est accepté, il est alors appliqué localement afin de refléter fidèlement la progression réelle de la partie. Si le serveur refuse le coup, le client conserve son état précédent et affiche simplement le message d’erreur reçu. Ce mécanisme évite les divergences entre l’état du client et celui du serveur.
+
+Cette synchronisation concerne également les coups joués par les autres participants. Lorsqu’un joueur adverse effectue une action valide, le serveur transmet cette information aux autres clients concernés. Chaque client reçoit alors un message réseau, convertit le texte correspondant en objet métier, puis l’applique à son propre moteur local. Ainsi, même si chaque client possède une représentation locale du plateau, cette représentation reste construite à partir des validations émises par le serveur, ce qui garantit la cohérence de la partie distribuée.
+
+\subsubsection{Intégration dans les interfaces}
+Depuis les premières versions de cette fonctionnalité, l’intégration réseau a été étendue dans les différentes interfaces du projet. En mode ligne de commande, les commandes réseau ne servent plus uniquement à établir une connexion, mais également à maintenir la partie locale cohérente avec les messages reçus depuis le serveur. Lorsqu’un coup est envoyé par le client et validé côté serveur, il est ensuite rejoué localement afin que l’état affiché corresponde bien à l’état officiel de la partie. De la même manière, lorsqu’un coup adverse est reçu, il est interprété puis appliqué localement pour conserver la synchronisation entre les deux côtés.
+
+Dans l’interface graphique, cette intégration a également été mise en place. Le joueur peut rejoindre un serveur, définir son nom, lancer une partie réseau et jouer directement depuis le plateau graphique. Contrairement au mode local, les actions effectuées dans l’interface ne sont pas appliquées immédiatement par le client. Elles sont d’abord converties en messages réseau puis envoyées au serveur, qui conserve le rôle d’autorité centrale. Une fois la réponse reçue, l’interface met à jour le moteur de jeu local et rafraîchit l’affichage. Cette organisation permet de réutiliser le moteur existant tout en gardant une séparation claire entre l’interface utilisateur, la communication réseau et la validation des règles.
+
+\subsubsection{Lien avec les autres composants du projet}
+Cette fonctionnalité réseau ne repose pas sur une logique isolée, mais s’appuie directement sur plusieurs structures et algorithmes déjà présents dans le noyau du projet. Elle mobilise notamment la représentation des positions, des déplacements et des murs, la gestion de l’état de la partie, la validation des coups ainsi que les mécanismes de calcul d’accessibilité utilisés par le moteur de jeu.
+
+Le réseau agit donc comme une couche supplémentaire de communication et de coordination, sans remplacer les règles métiers déjà implémentées dans le cœur du projet.
+
+
 \subsubsection{Difficultés rencontrées}
 
 La principale difficulté de cette fonctionnalité a été la gestion de la
@@ -122,30 +619,35 @@ Une troisième difficulté a été l’intégration du protocole réseau avec la
 Enfin, la découverte de serveurs a demandé une conception séparant deux types d’échanges : le TCP, utilisé pour la communication fiable entre client et serveur pendant la partie, et l’UDP, utilisé pour l’annonce de présence du serveur. Dans l’état actuel du projet, cette partie existe bien mais reste encore partiellement finalisée.
 
 
+\subsubsection{Difficulté d’intégration entre réseau et interfaces}
+Une difficulté supplémentaire a concerné l’intégration concrète du réseau dans les interfaces déjà existantes du projet. En effet, le moteur de jeu avait initialement été conçu pour fonctionner en mode local, où une action utilisateur peut être appliquée directement. Dans le mode réseau, ce fonctionnement doit être adapté : l’action saisie par le joueur doit d’abord être transformée en message texte, envoyée au serveur, puis éventuellement rejouée localement seulement après validation. Cela impose une logique différente de celle du mode local, car l’interface doit être capable d’attendre une confirmation distante avant de modifier son propre état.
+
+Cette contrainte est particulièrement visible dans l’interface graphique, où l’utilisateur interagit directement avec le plateau. Il a donc fallu faire en sorte que les clics et déplacements effectués sur le plateau ne déclenchent pas immédiatement une modification définitive du jeu, mais passent d’abord par la couche réseau. Cette adaptation a demandé de bien articuler les responsabilités entre l’interface, le client réseau et le moteur de jeu, afin de garder une expérience cohérente tout en respectant le rôle central du serveur.
+
+
+
 \subsubsection{Tests réalisés}
 
 La fonctionnalité réseau a été accompagnée de plusieurs tests unitaires.
 
-La classe GameServerTest vérifie le fonctionnement du serveur simple. Les tests confirment qu’un client peut se connecter, qu’un message PING reçoit bien PONG, qu’une commande QUIT reçoit BYE, et qu’une commande inconnue reçoit une réponse générique.
+La classe \texttt{GameServerTest} vérifie le fonctionnement du serveur simple. Les tests confirment qu’un client peut se connecter, qu’un message PING reçoit bien PONG, qu’une commande QUIT reçoit BYE, et qu’une commande inconnue reçoit une réponse générique.
 
-La classe GameClientTest vérifie les comportements essentiels du client. Les tests contrôlent la réussite ou l’échec d’une connexion, l’affichage d’un message d’erreur lorsqu’aucune connexion n’est active, l’envoi correct des commandes HELLO, MOVE et QUIT, ainsi que la commande serverList() à l’aide d’un faux serveur UDP.
+La classe \texttt{GameClientTest} vérifie les comportements essentiels du client. Les tests contrôlent la réussite ou l’échec d’une connexion, l’affichage d’un message d’erreur lorsqu’aucune connexion n’est active, l’envoi correct des commandes HELLO, MOVE et QUIT, ainsi que la commande serverList() à l’aide d’un faux serveur UDP.
 
-La classe MultiGameServerTest couvre une partie importante de la logique multi-clients. On y retrouve notamment des tests sur l’état du serveur, la liste des joueurs, le tableau des scores, la création de parties à deux ou quatre joueurs, le changement de statut des joueurs, la gestion des tours, les erreurs liées à un joueur absent ou indisponible, ainsi que certains comportements liés à la validation des coups, à leur diffusion et à la fin d’une partie.
+La classe \texttt{MultiGameServerTest} couvre une partie importante de la logique multi-clients. On y retrouve notamment des tests sur l’état du serveur, la liste des joueurs, le tableau des scores, la création de parties à deux ou quatre joueurs, le changement de statut des joueurs, la gestion des tours, les erreurs liées à un joueur absent ou indisponible, ainsi que certains comportements liés à la validation des coups, à leur diffusion et à la fin d’une partie.
 
-D’autres tests existent également autour de classes connexes comme NetworkMoveParserTest, ServerBroadcasterTest, ClientSessionTest, ServerGameSessionTest et NetworkLauncherTest. Dans l’ensemble, ces tests montrent que la partie réseau n’a pas seulement été commencée, mais qu’elle a réellement été structurée et vérifiée.
+D’autres tests existent également autour de classes connexes comme \texttt{NetworkMoveParserTest, ServerBroadcasterTest, ClientSessionTest, ServerGameSessionTest et NetworkLauncherTest}. Dans l’ensemble, ces tests montrent que la partie réseau n’a pas seulement été commencée, mais qu’elle a réellement été structurée et vérifiée.
 
 \subsubsection{Résultat final}
+
 
 Au stade actuel du projet, la fonctionnalité réseau est bien avancée et constitue une partie importante du système. Le projet contient un serveur simple, ainsi qu’un serveur multi-clients permettant de gérer plusieurs joueurs simultanément, de créer des parties à deux ou quatre joueurs, de maintenir un tableau des scores et de valider les coups à distance avant leur diffusion.
 
 Le résultat obtenu montre que l’architecture du projet est suffisamment modulaire pour réutiliser le moteur de jeu existant dans un contexte réseau. Cette réutilisation est un point fort, car elle évite de dupliquer les règles du jeu entre le mode local et le mode distant.
 
-Cependant, l’implémentation actuelle ne couvre pas encore parfaitement l’ensemble du cahier des charges. La gestion multi-clients et multi-parties est globalement réalisée et fonctionnelle. En revanche, la découverte complète des serveurs sur le réseau local reste partielle. Par ailleurs, même si des commandes réseau existent en mode ligne de commande et dans l’interface graphique, leur intégration n’est pas encore totalement finalisée dans toutes les interfaces. Il est donc plus juste de dire que la partie la plus avancée du réseau est satisfaisante dans l’ensemble, mais que certains points restent à améliorer.
+Cependant, l’implémentation actuelle ne couvre pas encore parfaitement l’ensemble du cahier des charges. La gestion multi-clients et multi-parties est globalement réalisée et fonctionnelle. L’intégration réseau dans le mode ligne de commande est opérationnelle, et l’intégration dans l’interface graphique permet également de rejoindre un serveur, de lancer une partie réseau, d’envoyer des coups et de mettre à jour l’affichage en fonction des réponses du serveur. En revanche, la découverte complète des serveurs sur le réseau local reste partielle. De plus, certains aspects de l’intégration graphique restent encore simplifiés, notamment pour l’initialisation locale des parties réseau qui est surtout pensée pour le cas de deux joueurs. Il est donc plus juste de dire que la fonctionnalité réseau est satisfaisante dans l’ensemble, tout en conservant quelques points d’amélioration.
 
 
-% =============================
-% IA
-% =============================
 
 \subsection{Fonctionnalité 2 AI: }
 
@@ -291,22 +793,21 @@ Bien que l'algorithme Minimax soit redoutable, son exploration systématique mon
 
 \subparagraph{Mécanique de l'Algorithme Monte Carlo Tree Search}
 
-Contrairement au Minimax qui tente d'évaluer toutes les éventualités, le MCTS ne vérifie pas toutes les possibilités. Il s'agit d'une approche probabiliste, signifiant qu'elle fait intervenir l'aléatoire dans ses choix de simulation, et asymétrique, car elle concentre sa puissance de calcul pour explorer en profondeur les branches les plus prometteuses plutôt que de parcourir l'arbre de manière uniforme. Le processus itératif s'exécute en boucle selon quatre phases distinctes orchestrées par la méthode getBestMoveAfterSearch dans la classe MctsNode.
+Contrairement au Minimax qui tente d'évaluer toutes les éventualités, le MCTS ne vérifie pas toutes les possibilités. Il s'agit d'une approche probabiliste, signifiant qu'elle fait intervenir l'aléatoire dans ses choix de simulation, et asymétrique, car elle concentre sa puissance de calcul pour explorer en profondeur les branches les plus prometteuses plutôt que de parcourir l'arbre de manière uniforme\cite{browne2012mcts}. Le processus itératif s'exécute en boucle selon quatre phases distinctes orchestrées par la méthode getBestMoveAfterSearch dans la classe MctsNode.
 
-La première phase est la sélection, étape au cours de laquelle l'algorithme amorce sa recherche en descendant dans l'arbre depuis la racine. Le but de cette descente est de trouver le candidat idéal pour poursuivre l'exploration. L'algorithme obéit à une règle de priorité stricte dictant le passage à l'étape suivante. En effet, tant qu'un état a déjà testé l'intégralité de ses coups possibles et possède des nœuds enfants, la phase de sélection continue de s'enfoncer dans l'arbre. À chaque intersection, l'intelligence artificielle choisit de descendre vers le nœud enfant le plus "prometteur", c'est-à-dire celui qui maximise le score évalué par la méthode bestUCT. Ce score prometteur désigne le meilleur compromis mathématique calculé entre l'exploitation d'une branche affichant déjà un fort taux de victoire et l'exploration nécessaire des chemins encore peu visités, le score UCT est expliqué plus en détail après.
+La première phase est la sélection, étape au cours de laquelle l'algorithme amorce sa recherche en descendant dans l'arbre depuis la racine. Le but de cette descente est de trouver le candidat idéal pour poursuivre l'exploration. L'algorithme obéit à une règle de priorité stricte dictant le passage à l'étape suivante. En effet, tant qu'un état a déjà testé l'intégralité de ses coups possibles et possède des nœuds enfants, la phase de sélection continue de s'enfoncer dans l'arbre. À chaque intersection, l'intelligence artificielle choisit de descendre vers le nœud enfant le plus "prometteur", c'est-à-dire celui qui maximise le score évalué par la méthode bestUCT. Ce score prometteur désigne le meilleur compromis mathématique calculé entre l'exploitation d'une branche affichant déjà un fort taux de victoire et l'exploration nécessaire des chemins encore peu visités, principe fondamental du MCTS\cite{browne2012mcts}.
 
 Cependant, dès que l'algorithme croise au cours de sa descente un nœud disposant encore d'au moins un coup légal non essayé (une condition vérifiée dynamiquement par la méthode hasUntriedLegalMoves), la phase de sélection s'arrête net. Ce nœud partiellement exploré devient alors la cible prioritaire absolue pour la phase suivante, garantissant ainsi que l'arbre s'élargisse systématiquement pour évaluer toutes les options initiales d'une position avant de se creuser aveuglément en profondeur.
 
-Vient ensuite la phase d'expansion. Si le nœud sélectionné n'est pas un état de fin de partie, un coup non testé est extrait pour créer un nouveau nœud enfant dans l'arbre de recherche. Pour implémenter cela efficacement, la classe MctsNode s'appuie sur des listes dynamiques. Lors de sa création, chaque état génère et stocke ses coups potentiels dans une liste dédiée nommée untriedMoves. Afin de garantir la stochasticité de l'algorithme, c'est-à-dire l'introduction d'un hasard mathématique visant à neutraliser l'ordre prévisible dans lequel le jeu génère initialement les actions, comme par exemple regarder d’abord les coups de pion avant la pose de murs, cette collection est immédiatement mélangée grâce à la fonction Collections.shuffle. Ainsi, toutes les options tactiques bénéficient d'une probabilité strictement égale d'être explorées, ce qui empêche l'intelligence artificielle de développer des angles morts stratégiques et d'orienter artificiellement les statistiques de l'arbre de recherche.
+Vient ensuite la phase d'expansion. Si le nœud sélectionné n'est pas un état de fin de partie, un coup non testé est extrait pour créer un nouveau nœud enfant dans l'arbre de recherche. Pour implémenter cela efficacement, la classe MctsNode s'appuie sur des listes dynamiques. Lors de sa création, chaque état génère et stocke ses coups potentiels dans une liste dédiée nommée untriedMoves. Afin de garantir la stochasticité de l'algorithme, c'est-à-dire l'introduction d'un hasard mathématique visant à neutraliser l'ordre prévisible dans lequel le jeu génère initialement les actions, cette collection est immédiatement mélangée grâce à la fonction Collections.shuffle\cite{browne2012mcts}.
 
-Une optimisation majeure de cette phase d'expansion réside dans la vérification paresseuse des coups. Dans un jeu comme Quoridor, calculer la légalité absolue de toutes les poses de murs possibles est extrêmement lourd en ressources, car il faut lancer des algorithmes de parcours de graphe pour s'assurer qu'aucun joueur n'est définitivement bloqué. Pour éviter ce goulet d'étranglement, la création du nœud génère uniquement des coups dits "pseudo-légaux" (des coups respectant les règles de base mais sans vérification approfondie des blocages). Ce n'est qu'au moment précis où l'algorithme s'apprête à étendre l'arbre, via la méthode hasUntriedLegalMoves, qu'il vérifie concrètement si le dernier coup de la liste mélangée respecte la totalité des règles via le RuleChecker. Si le coup s'avère illégal, il est simplement retiré de la liste et l'algorithme évalue le suivant dans le dessous de la pile. Cette approche économise énormément de temps de calcul en ignorant la vérification stricte des centaines de coups potentiels qui ne seront de toute façon jamais piochés par le MCTS dans le temps imparti.
+Une optimisation majeure de cette phase d'expansion réside dans la vérification paresseuse des coups. Dans un jeu comme Quoridor, calculer la légalité absolue de toutes les poses de murs possibles est extrêmement lourd en ressources. Pour éviter ce goulet d'étranglement, la création du nœud génère uniquement des coups dits "pseudo-légaux". Ce type d’optimisation est couramment utilisé dans les implémentations pratiques du MCTS\cite{respall2018mcts}.
 
-Par ailleurs, l'algorithme gère de manière proactive le scénario où le coup tiré lors de l'expansion mène directement à une victoire. Si le nouvel état généré est identifié comme une fin de partie, il devient mathématiquement inutile de gaspiller du temps de calcul pour y lancer des simulations aléatoires. Le nœud est alors explicitement verrouillé et l'algorithme court-circuite l'étape suivante pour passer directement à la phase de rétropropagation. La branche victorieuse est ainsi figée, ce qui permet à la puissance de calcul de se concentrer exclusivement sur l'évaluation des autres alternatives.
+Par ailleurs, l'algorithme gère de manière proactive le scénario où le coup tiré lors de l'expansion mène directement à une victoire. Si le nouvel état généré est identifié comme une fin de partie, il devient inutile de lancer des simulations supplémentaires. Le nœud est alors verrouillé et l'algorithme passe directement à la phase de rétropropagation.
 
-Dans le cas contraire, si l'expansion aboutit à un état en cours de jeu, l'algorithme enclenche la troisième phase : la simulation (couramment appelée Playout). À partir de ce nouveau nœud, l'algorithme simule une fin de partie en jouant une série de déplacements purement aléatoires jusqu'à déterminer un vainqueur ou atteindre une limite de sécurité fixée à 200 tours.
+Dans le cas contraire, si l'expansion aboutit à un état en cours de jeu, l'algorithme enclenche la troisième phase : la simulation (Playout). À partir de ce nouveau nœud, l'algorithme simule une fin de partie en jouant une série de déplacements aléatoires jusqu'à déterminer un vainqueur.
 
-Enfin, la rétropropagation (Backpropagation) clôture le cycle en remontant le résultat de cette simulation (ou de la victoire immédiate) le long de la branche explorée afin de mettre à jour les statistiques mathématiques de chaque nœud parent traversé jusqu'à la racine. Concrètement, chaque nœud de l'arbre conserve en mémoire deux variables entières distinctes : son nombre total de visites et son nombre de victoires accumulées. Lors de cette phase de remontée, l'algorithme incrémente systématiquement de un le compteur de visites de chaque nœud parent rencontré. Parallèlement, il compare l'index du joueur gagnant de la simulation avec celui de l'intelligence artificielle : si l'IA est victorieuse, le compteur de victoires de ces mêmes nœuds est également incrémenté. Ces deux données sont fondamentales, car leur division permet de calculer le taux de victoire brut d'une branche, une métrique indispensable qui sera ensuite réinjectée dans la formule mathématique UCT lors de la phase de sélection des itérations suivantes pour guider les futurs choix de l'algorithme.
-
+Enfin, la rétropropagation (Backpropagation) clôture le cycle en remontant le résultat de cette simulation le long de la branche explorée afin de mettre à jour les statistiques des nœuds parents. Chaque nœud conserve un nombre de visites et un nombre de victoires. Ces valeurs permettent de calculer le taux de victoire utilisé dans la formule UCT pour guider les futures explorations.
 
 \subparagraph{Exploration et Exploitation : Le Calcul UCT}
 
@@ -346,30 +847,98 @@ Afin de corriger cette erreur de prédiction, l'algorithme fait appel à un opti
 
 \section{Architecture du projet}
 
-\subsection{Justification du choix d’architecture}
+\subsection{Justificatif de l’architecture}
 
-Comme décrit dans le cahier des charges, notre projet qui consiste a implementer le jeu quoridor en java
-decrit au ci-haut doit respecter l’ensemble des règles du jeu Quoridor.
-De plus, il nous est demandé de mettre en œuvre trois modes d’interaction :
-ligne de commande (CLI), interface graphique (GUI) et jeu en réseau, ainsi
-que plusieurs intelligences artificielles (Minimax et Monte Carlo Tree Search).
+Notre projet  consiste à implémenter le jeu Quoridor en Java, en respectant strictement l’ensemble des règles détaillées
+dans la section précédente « Les règles du jeu ». Au-delà de la simple reproduction des mécaniques, notre cahier des charges
+impose plusieurs contraintes et objectifs qui influencent directement le choix de l’architecture logicielle.
+En particulier, nous devons intégrer trois modes d’interaction distincts : le mode en ligne de commande (CLI),
+une interface graphique (GUI) et un mode réseau permettant de jouer avec d’autres utilisateurs à distance.
+À cela s’ajoutent des exigences concernant l’intelligence artificielle : le système doit pouvoir exécuter plusieurs algorithmes,
+notamment Minimax et Monte Carlo Tree Search (MCTS), pour simuler des adversaires compétitifs et variés.
 
+Pour répondre efficacement à ces besoins complexes, nous avons choisi une architecture modulaire orientée domaine,
+inspirée de la Clean Architecture telle que décrite par Martin\cite{martin2017clean}. Cette décision repose sur plusieurs
+considérations pratiques et théoriques, toutes centrées sur la nécessité de séparer clairement les responsabilités et
+de rendre notre application à la fois extensible, maintenable et testable.
 
-Pour répondre à tous ces exigences, nous avons opté pour une architecture modulaire orientée domaine,
-inspirée de la Clean Architecture\cite{martin2017clean}.
+\paragraph{Principes fondamentaux de la Clean Architecture}
 
-La Clean Architecture repose sur un principe fondamental : la séparation entre la logique métier et les détails d’implémentation. Dans ce modèle :
-Le cœur domaine contient toutes les entités métier de l’application. Il est totalement indépendant.
-Les adaptateurs  (CLI, GUI, réseau, persistance, IA) interagissent avec le cœur via des interfaces abstraites et des implémentations concrètes.
-par cette architecture nous garantisons  la cohérente du logique métier, on peut  facilement ecrire des teste,
-ajouter de nouvelles IA ou interfaces et nous sommes sur de la robustesse de notre jeu, car toutes les actions passent par la validation du cœur métier et en fin on peut facilement
-Maintenir notre jeu, car les modifications sur l’interface n’impactent pas le cœur.
+La Clean Architecture repose sur un principe central : la séparation stricte entre la logique métier et les détails techniques
+de l’implémentation. Dans notre contexte, cela signifie que toutes les règles et entités du jeu — pions, murs, plateaux, mouvements,
+validation des coups, état de la partie — sont encapsulées dans un cœur métier indépendant de toute interface utilisateur,
+du réseau ou de l’intelligence artificielle. Ce cœur, que nous avons regroupé dans le package \texttt{Core}, contient toutes
+les entités et services nécessaires au fonctionnement du jeu. Il ne connaît rien des mécanismes de présentation, de stockage
+ou de communication, ce qui garantit que la logique métier reste cohérente et isolée.
 
+Cette approche est cohérente avec les recommandations de Fowler\cite{fowler2002patterns} sur les patterns d’architecture logicielle.
+Fowler insiste sur la nécessité de séparer les préoccupations et de structurer les systèmes en couches bien définies, afin de réduire
+les dépendances entre les composants et de faciliter la maintenance. En suivant ce principe, notre architecture repose sur des couches
+clairement identifiées :
+\begin{itemize}
+    \item \textbf{Cœur métier (\texttt{Core})} : contient toutes les entités métier, les règles de validation, les calculs de victoire et les états de partie.
+    \item \textbf{Interfaces d’adaptation (\texttt{Adapters})} : représentent les points d’entrée et de sortie du système, tels que la CLI, la GUI, le réseau et les modules d’IA.
+    \item \textbf{Infrastructure (\texttt{Infrastructure})} : regroupe les implémentations concrètes nécessaires pour faire communiquer le cœur métier avec les interfaces, comme la persistance ou les modules de communication réseau.
+\end{itemize}
+
+\paragraph{Avantages pratiques de cette approche}
+
+L’un des principaux avantages de cette architecture est sa modularité. En séparant clairement le cœur métier des interfaces, nous pouvons :
+\begin{itemize}
+    \item Développer et tester chaque composant de manière indépendante. Les tests unitaires peuvent se concentrer uniquement sur le cœur métier sans nécessiter l’exécution de la GUI ou du réseau.
+    \item Ajouter de nouvelles fonctionnalités ou interfaces sans impacter les modules existants. Par exemple, il est possible de créer une nouvelle version web ou mobile de Quoridor simplement en développant un nouvel adaptateur qui interagit avec le cœur via des interfaces abstraites.
+    \item Introduire ou modifier les algorithmes d’intelligence artificielle (Minimax, MCTS, ou d’autres) sans toucher aux règles du jeu. Chaque algorithme peut être implémenté comme un service indépendant qui sollicite le cœur métier pour connaître l’état de la partie et proposer un coup.
+\end{itemize}
+
+Un autre avantage majeur réside dans la robustesse et la sécurité fonctionnelle. Toutes les actions initiées par un joueur ou par un algorithme passent par le cœur métier pour validation. Cela signifie qu’aucune interface ne peut créer d’état invalide : impossible de poser un mur illégal, de déplacer un pion hors du plateau ou de contourner les règles fondamentales. Cette approche centralise la logique critique et prévient les bugs liés à des incohérences entre différents modules.
+
+\paragraph{Interaction entre couches et adaptateurs}
+
+Les adaptateurs constituent le lien entre le monde extérieur et le cœur métier. Chaque adaptateur utilise des interfaces abstraites définies dans le cœur pour communiquer avec celui-ci. Par exemple :
+\begin{itemize}
+    \item La CLI lit les entrées du joueur (déplacement de pion ou pose de mur), transmet ces actions au cœur métier via l’interface \texttt{GameEngine}, puis affiche le résultat sur le terminal.
+    \item La GUI capte les clics de l’utilisateur sur le plateau graphique, envoie les actions au cœur, puis met à jour l’affichage en fonction de l’état retourné.
+    \item Le module réseau convertit les messages reçus d’un autre joueur en actions valides, puis informe le cœur métier. De même, les changements d’état du cœur sont convertis en messages envoyés aux clients connectés.
+    \item Les modules d’IA consultent le cœur métier pour analyser l’état du plateau et générer le meilleur coup possible selon la stratégie choisie.
+\end{itemize}
+
+Cette conception permet à chaque adaptateur de se concentrer sur ses responsabilités spécifiques sans se soucier des règles métier, tout en assurant une cohérence globale du système.
+
+\paragraph{Testabilité et maintenance}
+
+L’un des aspects les plus valorisés de cette architecture est sa testabilité. Le cœur métier peut être testé en isolation complète, ce qui permet de vérifier toutes les règles du jeu, la gestion des murs, la détection de victoire et les comportements spécifiques sans dépendre de l’interface graphique ou du réseau. Cela réduit considérablement les risques d’erreurs et simplifie la détection de bugs.
+
+De plus, la maintenance est facilitée. Si, à l’avenir, nous souhaitons modifier l’interface graphique ou ajouter un mode de jeu supplémentaire, aucune modification n’est nécessaire dans le cœur métier. Les interfaces sont découplées, ce qui signifie que les changements techniques ou esthétiques ne perturbent pas la logique fondamentale du jeu. Cette modularité garantit également une meilleure évolutivité à long terme : le projet peut croître et intégrer de nouvelles fonctionnalités sans remettre en cause les composants existants.
+
+\paragraph{Flexibilité pour les algorithmes d’intelligence artificielle}
+
+Dans le cadre de notre projet, la Clean Architecture est particulièrement adaptée à l’intégration d’algorithmes d’IA. La séparation des couches permet d’implémenter indépendamment :
+\begin{itemize}
+    \item \textbf{Minimax}, pour évaluer systématiquement les coups et anticiper les réponses de l’adversaire dans un arbre de décision.
+    \item \textbf{Monte Carlo Tree Search (MCTS)}, pour explorer de manière probabiliste les coups et identifier les stratégies les plus prometteuses.
+\end{itemize}
+
+Chaque algorithme interagit uniquement avec le cœur métier via des interfaces abstraites, ce qui permet d’ajouter ou de remplacer
+un algorithme sans modifier la logique du jeu. Par exemple, nous pourrions expérimenter un nouvel algorithme hybride combinant
+MCTS et Minimax, ou encore intégrer des techniques d’apprentissage automatique pour améliorer les performances de l’IA, sans toucher
+au reste de l’architecture.
+
+\paragraph{}
+
+En résumé, le choix d’une architecture modulaire orientée domaine, inspirée de la Clean Architecture\cite{martin2017clean},
+se justifie pleinement par les besoins spécifiques de notre projet Quoridor. Elle garantit la cohérence de la logique métier,
+facilite l’intégration de multiples interfaces, permet l’ajout et le test d’algorithmes d’intelligence artificielle variés,
+et assure une maintenance et une évolutivité sur le long terme. L’adoption des principes de séparation des responsabilités
+et de structuration en couches, également recommandée par Fowler\cite{fowler2002patterns}, renforce cette cohérence et permet
+de construire un système robuste, flexible et modulaire, capable de répondre à tous les objectifs fonctionnels et techniques
+définis dans notre cahier des charges.
 
 \subsection{Vue d'ensemble des packages}
 
+Cette organisation en packages nous permet de structurer le projet de manière claire et cohérente. Chaque package a un rôle précis, ce qui favorise la modularité, la testabilité et la maintenance du code dans notre projet. De plus, elle nous facilite l’ajout futur de fonctionnalités, qu’il s’agisse d’IA avancées, de nouvelles interfaces ou de modes de jeu supplémentaires, tout en garantissant la robustesse et la cohérence des règles de Quoridor.
+
 Voici les  onze packages distincts de notre projet, chacun ayant une responsabilité bien définie que les decrivons de
-manieres brefs ici:
+ici:
 
 
 \begin{table}[H]
@@ -378,27 +947,35 @@ manieres brefs ici:
     \hline
     \textbf{Package} & \textbf{Responsabilité} \\
     \hline
-    core & Entités métier : Board, GameState, Player, Move, Position, GameEngine, RuleChecker \\
+    core & constitue le cœur métier de l’application. Il regroupe toutes les entités fondamentales du jeu,
+    telles que \texttt{Board} pour représenter le plateau, \texttt{GameState} pour l’état général de la partie,
+    \texttt{Player} pour les joueurs, \texttt{Move} pour les déplacements, \texttt{Position} pour la localisation des pions,
+    ainsi que \texttt{GameEngine} et \texttt{RuleChecker} pour gérer les règles et la logique de progression du jeu.
+    Ce package est totalement indépendant des interfaces graphiques, de la ligne de commande ou des modules réseau,
+    ce qui garantit que toutes les règles sont appliquées de manière cohérente, quel que soit le mode de jeu choisi. \\
     \hline
-    Main & Point d'entrée, résolution du mode de lancement, patron Factory \\
+    Main & contient le point d’entrée de l’application. Il est responsable de la résolution du mode de lancement,
+    que ce soit en CLI, en GUI ou en réseau, et applique le patron \textit{Factory} pour initialiser les composants
+    nécessaires selon le contexte. Cette centralisation du lancement permet de simplifier la configuration initiale
+    et de garantir que tous les modules sont correctement instanciés avant le démarrage de la partie. \\
     \hline
-    cli & Interface en ligne de commande avec le pattern Command pour chaque action utilisateur \\
+    cli & gère l’interface en ligne de commande. Il utilise le pattern \textit{Command} pour représenter chaque action que l’utilisateur peut effectuer, qu’il s’agisse de déplacer un pion, de poser un mur ou de demander l’aide. Ce design permet de découpler les commandes de l’exécution effective et de faciliter l’ajout de nouvelles commandes sans modifier la logique existante. \\
     \hline
-    gui & Interface graphique comportant les menus 'File' et 'Game' (JavaFX), proposant des raccourcis clavier. L’utilisateur doit pouvoir définir ses propres raccourcis pour chaque action listée \\
+    gui & basé sur JavaFX, implémente l’interface graphique. Il propose des menus principaux tels que \texttt{File} et \texttt{Game}, et permet à l’utilisateur de définir ses propres raccourcis clavier pour chaque action. Cette flexibilité améliore l’expérience utilisateur et rend l’interface plus ergonomique, tout en séparant la présentation de la logique métier contenue dans le package \texttt{core}.\\
     \hline
-    network & Implémente les commandes réseau de base et étendues pour gérer plusieurs clients simultanément, en utilisant un thread par client ou de la programmation asynchrone. Serveur TCP avec découverte UDP et client réseau \\
+    network & est dédié à la gestion des fonctionnalités réseau. Il implémente un serveur TCP capable de gérer plusieurs clients simultanément, soit via un thread par client, soit par programmation asynchrone. Il intègre également une découverte UDP pour faciliter la connexion automatique des clients au serveur. Ce package assure la communication entre joueurs distants et garantit que toutes les actions reçues sont validées par le cœur métier. \\
     \hline
-    ai & Joueurs IA : Random, Minimax (alpha-beta, iterative deepening), MCTS, réseau de neurones \\
+    ai & regroupe les différentes intelligences artificielles implémentées dans le projet. Il inclut des IA simples aléatoires, des IA basées sur Minimax avec élagage alpha-bêta et \textit{iterative deepening}, des IA utilisant Monte Carlo Tree Search, et des prototypes utilisant des réseaux de neurones. Ce package interagit uniquement avec le cœur métier via des interfaces abstraites, permettant d’échanger ou d’ajouter de nouveaux algorithmes facilement. \\
     \hline
-    persistence & Sérialisation/désérialisation de l’état de jeu vers un fichier texte \\
+    persistence & s’occupe de la sérialisation et désérialisation de l’état de jeu vers un fichier texte. Il assure que l’utilisateur peut sauvegarder et recharger une partie à tout moment, en conservant la cohérence des données avec le cœur métier. \\
     \hline
-    util & Logger singleton partagé dans toute l’application \\
+    util & contient des outils généraux, dont un \textit{Logger} singleton utilisé par l’ensemble de l’application pour tracer les actions, les erreurs et les événements importants, facilitant ainsi le débogage et la maintenance. \\
     \hline
-    i18n & Gestion de la langue du logiciel. Si les variables d’environnement 'LANG' ou 'LC\_ALL' sont définies, le programme doit les utiliser pour déterminer la langue à utiliser \\
+    i18n & gère  la langue du logiciel. Il détecte automatiquement les variables d’environnement \texttt{LANG} ou \texttt{LC\_ALL} pour déterminer la langue par défaut, et permet d’adapter l’affichage et les messages aux préférences de l’utilisateur. \\
     \hline
-    graph & Module Graph et GraphBuilder implémenté sous la forme d’une liste d’adjacence (adjacency list) pour représenter l’état du plateau de jeu \\
+    graph & fournit une représentation du plateau sous forme de graphe, avec une liste d’adjacence. Il contient le \texttt{GraphBuilder} qui permet de modéliser dynamiquement les mouvements possibles et les blocages liés aux murs, facilitant ainsi les calculs pour les IA et la validation des coups. \\
     \hline
-    config & Fichier de configuration nommé '.quoridorrc', placé à la racine du répertoire de l’utilisateur (HOME). Le fichier est lu au démarrage du programme s’il est présent, et les options qu’il contient sont utilisées par défaut. Sinon, un fichier de configuration minimal est créé automatiquement \\
+    config & s’occupe de la configuration globale du logiciel. Il lit un fichier \texttt{.quoridorrc} situé dans le répertoire personnel de l’utilisateur (HOME) pour appliquer les options par défaut. Si le fichier est absent, un fichier minimal est créé automatiquement. Ce package centralise toutes les préférences, évitant la duplication de la configuration dans différents modules. \\
     \hline
 \end{tabular}
 \caption{Vue d'ensemble des packages}
@@ -415,12 +992,11 @@ jamais l'inverse. Cette contrainte est visible dans le diagramme.
 schema en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{layered_architectures.png}}
+    \frame{\includegraphics[width=.85\textwidth]{architecture_quoridor}}
     \caption{Une architecture en couches}\label{fig:example1}
 \end{figure}
 
 \subsection{Couche Domaine --- Package \texttt{core}}
-
 
 Le module \textbf{core} est le coeur du systeme. Il encapsule l'integralite de la logique
 metier du jeu et n'a aucune dependance externe. Le \textbf{RuleChecker}
@@ -432,7 +1008,7 @@ voici un diagramme indique comment son lié les differents classes du package co
 schema du couche core de notre architecture(Fig.~\ref{fig:example0}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{core.jpg}}
+    \frame{\includegraphics[width=.85\textwidth]{core.jpg}}
     \caption{Une architecture en couches}\label{fig:example0}
 \end{figure}
 
@@ -449,7 +1025,7 @@ voici un diagramme indique comment son lié les differents classes du package ma
 schema du couche main de notre architecture (Fig.~\ref{fig:example2}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{main.jpg}}
+    \frame{\includegraphics[width=.85\textwidth]{main.jpg}}
     \caption{Une architecture en couches}\label{fig:example2}
 \end{figure}
 
@@ -467,7 +1043,7 @@ voici un diagramme indique comment son lié les differents classes du package cl
 schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.65\textwidth]{cli.jpg}}
+    \frame{\includegraphics[width=.85\textwidth]{cli.jpg}}
     \caption{Une architecture en couches}\label{fig:example3}
 \end{figure}
 
@@ -475,11 +1051,11 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 \subsection{Points forts architecturaux}
 
 \begin{itemize}
-  \item \textbf{Indépendance du domaine} : le package \texttt{core} est du Java pur, sans dépendance externe
-  \item \textbf{Extensibilité de l’IA} : tout nouvel algorithme étend simplement \texttt{AiPlayer}
-  \item \textbf{Pattern Command en CLI} : chaque commande est testable et extensible indépendamment
-  \item \textbf{Persistance découplée} : \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les interfaces du \texttt{core}
-  \item \textbf{Builder pour MinimaxPlayer} : configuration déclarative et lisible de l’IA
+  \item \textbf{Indépendance du domaine} : notre package \texttt{core} est sans dépendance externe
+  \item \textbf{Extensibilité de l’IA} : Si on veut implementer un nouveau algorithme d'IA on étend simplement \texttt{AiPlayer}
+  \item \textbf{Pattern Command en CLI} : on fait tester chaque commande indépendamment et elles sont extensible
+  \item \textbf{Persistance découplée} : notre \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les classes du \texttt{core}
+  \item \textbf{Builder pour MinimaxPlayer} : on a une configuration déclarative et lisible de l’IA
 \end{itemize}
 
 \subsection{Axes d'amélioration}
@@ -492,7 +1068,7 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 %------------------------------------------------------------------------------
 
 \nocite{*}
-\bibliographystyle{plain}
+\bibliographystyle{unsrt}
 \bibliography{bibliography.bib}
 
 %------------------------------------------------------------------------------
@@ -593,9 +1169,9 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
         \hline
         F38 & Réseau : Basique & Découverte UDP, connexion TCP, ping/pong et client/serveur simple. & FAIT \\
         \hline
-        F39 & Réseau : Multi-clients & Serveur gérant plusieurs parties, scoreboard et validation anti-triche. & NON FAIT \\
+        F39 & Réseau : Multi-clients & Serveur gérant plusieurs parties, scoreboard et validation anti-triche. &  FAIT \\
         \hline
-        F40 & Réseau : Invitations & Système avancé d'invitations (accept/decline) et gestion des statuts joueurs. & NON FAIT \\
+        F40 & Réseau : Invitations & Système avancé d'invitations (accept/decline) et gestion des statuts joueurs. & Partiellement FAIT \\
         \hline
     \end{tabular}
     \caption{Vue d'ensemble des besoins leurs realisations}
