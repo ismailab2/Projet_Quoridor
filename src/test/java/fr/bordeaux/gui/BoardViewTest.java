@@ -68,7 +68,7 @@ class BoardViewTest {
 
   @Test
   void testHandleCellClickCallsEnginePlay() {
-  Rectangle slot =
+    Rectangle slot =
         boardView.getChildren().stream()
             .filter(n -> n instanceof Rectangle)
             .map(n -> (Rectangle) n)
@@ -255,7 +255,7 @@ class BoardViewTest {
   }
 
   /** Test clicking on a wall slot (interactive zone between cells) triggers engine.play */
-   @Test
+  @Test
   void testWallSlotClickCallsEnginePlay() {
     Rectangle slot =
         boardView.getChildren().stream()

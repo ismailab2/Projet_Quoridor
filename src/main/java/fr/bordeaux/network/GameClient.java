@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,6 +45,18 @@ public class GameClient {
 
   /** Handler notified when an asynchronous message is received from the server. */
   private Consumer<String> serverMessageHandler;
+
+  /** UDP port used for server discovery. */
+  private static final int DISCOVERY_PORT = 12346;
+
+  /** Discovery listening window in milliseconds. */
+  private static final long DISCOVERY_WINDOW_MS = 5000L;
+
+  /** Delay after which a server is considered expired. */
+  private static final long SERVER_EXPIRATION_MS = 30000L;
+
+  /** Servers discovered recently on the local network. */
+  private final Map<String, Long> discoveredServers = new ConcurrentHashMap<>();
 
   /** Constructs a GameClient for joining servers or discovery. */
   public GameClient() {
@@ -214,65 +228,66 @@ public class GameClient {
   }
 
   /** Broadcasts "DISCOVER" and listens for server responses for 5s. */
-  public void serverList() {
-    new Thread(
-            () -> {
-              try (DatagramSocket udpSocket = new DatagramSocket()) {
+  public String serverList() {
+    try (DatagramSocket udpSocket = new DatagramSocket()) {
 
-                udpSocket.setBroadcast(true);
-                udpSocket.setSoTimeout(5000);
+      udpSocket.setBroadcast(true);
+      udpSocket.setSoTimeout(5000);
 
-                final String msg = "DISCOVER";
+      final String msg = "DISCOVER";
 
-                final DatagramPacket broadcastPacket =
-                    new DatagramPacket(
-                        msg.getBytes(StandardCharsets.UTF_8),
-                        msg.length(),
-                        InetAddress.getByName("255.255.255.255"),
-                        12346);
+      final DatagramPacket broadcastPacket =
+          new DatagramPacket(
+              msg.getBytes(StandardCharsets.UTF_8),
+              msg.length(),
+              InetAddress.getByName("255.255.255.255"),
+              12346);
 
-                udpSocket.send(broadcastPacket);
+      udpSocket.send(broadcastPacket);
 
-                final DatagramPacket localhostPacket =
-                    new DatagramPacket(
-                        msg.getBytes(StandardCharsets.UTF_8),
-                        msg.length(),
-                        InetAddress.getByName("127.0.0.1"),
-                        12346);
+      final DatagramPacket localhostPacket =
+          new DatagramPacket(
+              msg.getBytes(StandardCharsets.UTF_8),
+              msg.length(),
+              InetAddress.getByName("127.0.0.1"),
+              12346);
 
-                udpSocket.send(localhostPacket);
+      udpSocket.send(localhostPacket);
 
-                Logger.getInstance().info(I18n.get("broadcast"));
+      final long start = System.currentTimeMillis();
 
-                final long start = System.currentTimeMillis();
+      while (System.currentTimeMillis() - start < 5000) {
+        try {
+          final byte[] buf = new byte[1024];
+          final DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
 
-                while (System.currentTimeMillis() - start < 5000) {
-                  try {
-                    final byte[] buf = new byte[1024];
-                    final DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
+          udpSocket.receive(receivedPacket);
 
-                    udpSocket.receive(receivedPacket);
+          final String serverInfo =
+              new String(
+                      receivedPacket.getData(),
+                      0,
+                      receivedPacket.getLength(),
+                      StandardCharsets.UTF_8)
+                  .trim();
 
-                    final String serverInfo =
-                        new String(
-                            receivedPacket.getData(),
-                            0,
-                            receivedPacket.getLength(),
-                            StandardCharsets.UTF_8);
-                    Logger.getInstance().info(I18n.get("found", serverInfo));
+          discoveredServers.put(serverInfo, System.currentTimeMillis());
+        } catch (final SocketTimeoutException ignored) {
+          break;
+        }
+      }
+    } catch (final IOException exception) {
+      Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
+    }
 
-                  } catch (final SocketTimeoutException ignored) {
-                    break;
-                  }
-                }
+    final long now = System.currentTimeMillis();
+    discoveredServers.entrySet().removeIf(entry -> now - entry.getValue() > 30000);
 
-                Logger.getInstance().info(I18n.get("discoOver"));
+    if (discoveredServers.isEmpty()) {
+      return "No servers discovered.";
+    }
 
-              } catch (final IOException exception) {
-                Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
-              }
-            })
-        .start();
+    return String.join("\n", discoveredServers.keySet());
   }
 
   /**

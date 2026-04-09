@@ -10,6 +10,7 @@ import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
 import fr.bordeaux.graph.Graph;
 import java.util.List;
+import java.util.Optional;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
@@ -36,7 +37,7 @@ public final class BoardView extends GridPane {
   private final StackPane[][] cells;
 
   /** The highlighted move suggested by the AI, if any. */
-  private Move highlightedMove;
+  private Optional<Move> highlightedMove = Optional.empty();
 
   /** Size factor for pawns relative to cell size. */
   private static final double PAWN_SIZE_FACTOR = 0.6;
@@ -78,10 +79,13 @@ public final class BoardView extends GridPane {
   private static final int DEFAULT_CELL_SIZE = 100;
 
   /** Minimum thickness of walls in pixels. */
-  private static final double MIN_WALL_THICKNESS = 4.0;
+  private static final double MIN_WALL_WIDTH = 4.0;
 
   /** Ratio of cell size to wall thickness. */
-  private static final double WALL_THICKNESS_RATIO = 8.0;
+  private static final double WALL_WIDTH_RATIO = 8.0;
+
+  /** Minimum visible size threshold before using dynamic board sizing. */
+  private static final double MIN_SIZE = 0.0;
 
   /** Color used for placed walls. */
   private static final Color WALL_COLOR = Color.rgb(101, 67, 33);
@@ -100,7 +104,8 @@ public final class BoardView extends GridPane {
     this.engine = engine;
     this.dispatcher = dispatcher;
     final GameState state = engine.getState();
-    final int size = state.getBoard().getSize();
+    final Board board = state.getBoard();
+    final int size = board.getSize();
     cells = new StackPane[size][size];
     this.widthProperty()
         .addListener(
@@ -114,7 +119,7 @@ public final class BoardView extends GridPane {
             });
     state.addListener(
         () -> {
-          this.highlightedMove = null;
+          this.highlightedMove = Optional.empty();
           Platform.runLater(this::drawBoard);
         });
     drawBoard();
@@ -128,7 +133,6 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Board board = state.getBoard();
     final int size = board.getSize();
-    final double boardSize = size * DEFAULT_CELL_SIZE;
     final double percent = 100.0 / size;
     for (int index = 0; index < size; index++) {
       final ColumnConstraints columnConstraints = new ColumnConstraints();
@@ -141,7 +145,6 @@ public final class BoardView extends GridPane {
       rowConstraints.setValignment(VPos.CENTER);
       getRowConstraints().add(rowConstraints);
     }
-    final double cellSize = getCellSize();
     for (int row = 0; row < size; row++) {
       for (int col = 0; col < size; col++) {
         final StackPane cell = new StackPane();
@@ -174,83 +177,20 @@ public final class BoardView extends GridPane {
    * @param move The move to highlight.
    */
   public void highlightMove(final Move move) {
-    this.highlightedMove = move;
+    this.highlightedMove = Optional.of(move);
     Platform.runLater(this::drawBoard);
   }
 
   /** Draws the highlighted move if one is active. */
   private void drawHighlightedMove() {
-    if (highlightedMove == null) {
+    if (highlightedMove.isEmpty()) {
       return;
     }
-    final double cellSize = getCellSize();
-    final Position target = highlightedMove.getTo();
-    if (highlightedMove.isPawn()) {
-      final double pawnSize = cellSize * PAWN_SIZE_FACTOR;
-      final Rectangle highlight = new Rectangle(pawnSize, pawnSize, HINT_PAWN_COLOR);
-      highlight.setArcWidth(PAWN_ARC);
-      highlight.setArcHeight(PAWN_ARC);
-      highlight.setStroke(HINT_STROKE_COLOR);
-      highlight.setStrokeWidth(HINT_STROKE_WIDTH);
-      highlight.setMouseTransparent(false);
-      highlight.setOnMouseEntered(
-          e -> {
-            highlight.setFill(HINT_PAWN_COLOR.darker());
-            highlight.setStroke(HINT_STROKE_COLOR.darker());
-          });
-      highlight.setOnMouseExited(
-          e -> {
-            highlight.setFill(HINT_PAWN_COLOR);
-            highlight.setStroke(HINT_STROKE_COLOR);
-          });
-      highlight.setOnMouseClicked(
-          event -> {
-            if (event.getButton() == MouseButton.PRIMARY) {
-              handleCellClick(target.getX(), target.getY());
-            }
-          });
-      final StackPane cell = cells[target.getX()][target.getY()];
-      cell.getChildren().add(highlight);
-
+    final Move move = highlightedMove.orElseThrow();
+    if (move.isPawn()) {
+      drawHighlightedPawnMove(move);
     } else {
-      final Orientation orientation = highlightedMove.getOrientation();
-      final double wallThickness = getWallThickness();
-
-      final Rectangle wall =
-          orientation == Orientation.HORIZONTAL
-              ? new Rectangle(cellSize * 2.0, wallThickness)
-              : new Rectangle(wallThickness, cellSize * 2.0);
-
-      wall.setFill(HINT_WALL_COLOR);
-      wall.setArcWidth(WALL_ARC);
-      wall.setArcHeight(WALL_ARC);
-      wall.setMouseTransparent(false);
-      wall.setOnMouseEntered(e -> wall.setFill(HINT_WALL_COLOR.darker()));
-      wall.setOnMouseExited(e -> wall.setFill(HINT_WALL_COLOR));
-      wall.setOnMouseClicked(
-          event -> {
-            final GameState state = engine.getState();
-            final Player current = engine.getState().getCurrentPlayer();
-            if (!current.isAI()) {
-              if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
-                return;
-              }
-              final Move wallMove = Move.wall(target, orientation);
-              if (RuleChecker.isMoveLegal(state, wallMove)) {
-                dispatcher.playBoardMove(wallMove);
-              }
-            }
-          });
-
-      if (orientation == Orientation.HORIZONTAL) {
-        add(wall, target.getY(), target.getX(), 2, 1);
-        setValignment(wall, VPos.BOTTOM);
-        wall.setTranslateY(wallThickness / 2.0);
-      } else {
-        add(wall, target.getY(), target.getX(), 1, 2);
-        setHalignment(wall, HPos.RIGHT);
-        wall.setTranslateX(wallThickness / 2.0);
-      }
+      drawHighlightedWallMove(move);
     }
   }
 
@@ -367,7 +307,7 @@ public final class BoardView extends GridPane {
   public void highlightAccessibleCells(final Player player) {
     final GameState state = engine.getState();
     final Player currentPlayer = state.getCurrentPlayer();
-    if (currentPlayer == player && !player.isAI()) {
+    if (currentPlayer.equals(player) && !player.isAI()) {
       for (final StackPane[] row : cells) {
         for (final StackPane cell : row) {
           cell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
@@ -393,13 +333,13 @@ public final class BoardView extends GridPane {
     if (!current.isAI()) {
       if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
         return;
-       }
-        final Position from = current.getPosition();
-        final Position to = new Position(row, col);
-        final Move move = Move.pawn(from, to);
-        dispatcher.playBoardMove(move);
-   }
-}
+      }
+      final Position from = current.getPosition();
+      final Position destination = new Position(row, col);
+      final Move move = Move.pawn(from, destination);
+      dispatcher.playBoardMove(move);
+    }
+  }
 
   /**
    * Places wall on right/other click.
@@ -412,11 +352,11 @@ public final class BoardView extends GridPane {
     final GameState state = engine.getState();
     final Player current = state.getCurrentPlayer();
     if (!current.isAI()) {
-       if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
+      if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
         return;
       }
       final Orientation orientation =
-          (button == MouseButton.SECONDARY) ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+          button == MouseButton.SECONDARY ? Orientation.HORIZONTAL : Orientation.VERTICAL;
       final Move wallMove = Move.wall(new Position(row, col), orientation);
       if (RuleChecker.isMoveLegal(state, wallMove)) {
         dispatcher.playBoardMove(wallMove);
@@ -492,8 +432,8 @@ public final class BoardView extends GridPane {
     final Board board = engine.getState().getBoard();
     final int size = board.getSize();
     final double available = Math.min(getWidth(), getHeight());
-    double cellSize = (double) DEFAULT_CELL_SIZE;
-    if (available > 0.0) {
+    double cellSize = DEFAULT_CELL_SIZE;
+    if (available > MIN_SIZE) {
       cellSize = available / size;
     }
     return cellSize;
@@ -503,6 +443,103 @@ public final class BoardView extends GridPane {
    * @return wall thickness in pixels.
    */
   private double getWallThickness() {
-    return Math.max(MIN_WALL_THICKNESS, getCellSize() / WALL_THICKNESS_RATIO);
+    return Math.max(MIN_WALL_WIDTH, getCellSize() / WALL_WIDTH_RATIO);
+  }
+
+  private void addToCell(final int row, final int col, final Rectangle rectangle) {
+    cells[row][col].getChildren().add(rectangle);
+  }
+
+  /** Draws the pawn overlay used to highlight a suggested move. */
+  private void drawHighlightedPawnMove(final Move move) {
+    final Position target = move.getTo();
+    final int targetRow = target.getX();
+    final int targetCol = target.getY();
+    final double pawnSize = getCellSize() * PAWN_SIZE_FACTOR;
+    final Rectangle highlight = new Rectangle(pawnSize, pawnSize, HINT_PAWN_COLOR);
+    highlight.setArcWidth(PAWN_ARC);
+    highlight.setArcHeight(PAWN_ARC);
+    highlight.setStroke(HINT_STROKE_COLOR);
+    highlight.setStrokeWidth(HINT_STROKE_WIDTH);
+    highlight.setMouseTransparent(false);
+    highlight.setOnMouseEntered(
+        event -> {
+          highlight.setFill(HINT_PAWN_COLOR.darker());
+          highlight.setStroke(HINT_STROKE_COLOR.darker());
+        });
+    highlight.setOnMouseExited(
+        event -> {
+          highlight.setFill(HINT_PAWN_COLOR);
+          highlight.setStroke(HINT_STROKE_COLOR);
+        });
+    highlight.setOnMouseClicked(
+        event -> {
+          if (event.getButton() == MouseButton.PRIMARY) {
+            handleCellClick(targetRow, targetCol);
+          }
+        });
+    addToCell(targetRow, targetCol, highlight);
+  }
+
+  /** Draws the wall overlay used to highlight a suggested move. */
+  private void drawHighlightedWallMove(final Move move) {
+    final Position target = move.getTo();
+    final int targetRow = target.getX();
+    final int targetCol = target.getY();
+    final Orientation orientation = move.getOrientation();
+    final double cellSize = getCellSize();
+    final double wallThickness = getWallThickness();
+    final Rectangle wall = createHintWallRectangle(orientation, cellSize, wallThickness);
+    wall.setOnMouseClicked(event -> playHighlightedWallMove(target, orientation));
+    placeHighlightedWall(wall, orientation, targetRow, targetCol, wallThickness);
+  }
+
+  /** Creates the highlighted wall rectangle with hover styling. */
+  private Rectangle createHintWallRectangle(
+      final Orientation orientation, final double cellSize, final double wallThickness) {
+    final Rectangle wall =
+        orientation == Orientation.HORIZONTAL
+            ? new Rectangle(cellSize * 2.0, wallThickness)
+            : new Rectangle(wallThickness, cellSize * 2.0);
+    wall.setFill(HINT_WALL_COLOR);
+    wall.setArcWidth(WALL_ARC);
+    wall.setArcHeight(WALL_ARC);
+    wall.setMouseTransparent(false);
+    wall.setOnMouseEntered(event -> wall.setFill(HINT_WALL_COLOR.darker()));
+    wall.setOnMouseExited(event -> wall.setFill(HINT_WALL_COLOR));
+    return wall;
+  }
+
+  /** Plays the highlighted wall move when it is legal for the current player. */
+  private void playHighlightedWallMove(final Position target, final Orientation orientation) {
+    final GameState state = engine.getState();
+    final Player current = state.getCurrentPlayer();
+    if (!current.isAI()) {
+      if (dispatcher.isNetworkGame() && !dispatcher.isMyTurn()) {
+        return;
+      }
+      final Move wallMove = Move.wall(target, orientation);
+      if (RuleChecker.isMoveLegal(state, wallMove)) {
+        dispatcher.playBoardMove(wallMove);
+      }
+    }
+  }
+
+  /** Places the highlighted wall rectangle at the expected grid location. */
+  private void placeHighlightedWall(
+      final Rectangle wall,
+      final Orientation orientation,
+      final int targetRow,
+      final int targetCol,
+      final double wallThickness) {
+    if (orientation == Orientation.HORIZONTAL) {
+      add(wall, targetCol, targetRow, 2, 1);
+      setValignment(wall, VPos.BOTTOM);
+      wall.setTranslateY(wallThickness / 2.0);
+    } else {
+      add(wall, targetCol, targetRow, 1, 2);
+      setHalignment(wall, HPos.RIGHT);
+      wall.setTranslateX(wallThickness / 2.0);
+    }
   }
 }

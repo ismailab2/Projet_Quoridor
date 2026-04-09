@@ -19,7 +19,7 @@ public class ServerBroadcaster implements Runnable {
   private final int port;
 
   /** UDP port used for broadcasting server presence. */
-  private static final int BROADCAST_PORT = 12346;
+  private static final int BROADCAST_PORT = 12_346;
 
   /** Flag controlling the broadcasting loop */
   private final AtomicBoolean running = new AtomicBoolean(true);
@@ -34,7 +34,7 @@ public class ServerBroadcaster implements Runnable {
    * @param port TCP port of the server.
    */
   public ServerBroadcaster(final String name, final int port) {
-    this(name, port, 10000);
+    this(name, port, 10_000);
   }
 
   /**
@@ -55,7 +55,7 @@ public class ServerBroadcaster implements Runnable {
   public void run() {
     try (DatagramSocket socket = new DatagramSocket()) {
       socket.setBroadcast(true);
-      final InetAddress address = InetAddress.getByName("127.0.0.1"); // localhost pour test
+      final InetAddress address = InetAddress.getLoopbackAddress();
 
       while (running.get()) {
         final String msg = name + ":" + port;

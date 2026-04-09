@@ -21,6 +21,9 @@ import org.jline.terminal.TerminalBuilder;
 @SuppressWarnings({"PMD.GuardLogStatement"})
 public class CliApp {
 
+  /** Network move command literal. */
+  private static final String CMD_MOVE = "move";
+
   /** Help command literal. */
   private static final String CMD_HELP = "help";
 
@@ -54,15 +57,29 @@ public class CliApp {
   /** Set command literal. */
   private static final String CMD_SET = "set";
 
+  /** Server command literal. */
   private static final String CMD_SERVER = "server";
+
+  /** Join command literal. */
   private static final String CMD_JOIN = "join";
+
+  /** Ping command literal. */
   private static final String CMD_PING = "ping";
+
+  /** Players command literal. */
   private static final String CMD_PLAYERS = "players";
+
+  /** Scoreboard command literal. */
   private static final String CMD_SCOREBOARD = "scoreboard";
+
+  /** Hello command literal. */
   private static final String CMD_HELLO = "hello";
 
-  private static final String DEFAULT_NETWORK_HOST = "localhost";
-  private static final int DEFAULT_NETWORK_PORT = 12345;
+  /** Default host used when the CLI connects to a network server. */
+  private static final String DEFAULT_HOST = "localhost";
+
+  /** Default port used when the CLI connects to a network server. */
+  private static final int DEFAULT_PORT = 12_345;
 
   /** Board option literal. */
   private static final String OPT_BOARD = "board";
@@ -101,7 +118,7 @@ public class CliApp {
   private final GameClient networkClient;
 
   /** Last move sent to the server and waiting for confirmation. */
-  private String pendingNetworkMove;
+  private String pendingMove;
 
   /**
    * Creates a CLI application with a specific game engine, terminal and reader.
@@ -114,7 +131,7 @@ public class CliApp {
     this(engine, terminal, reader, new MultiGameServer(), new GameClient());
   }
 
-  CliApp(
+  /* default */ CliApp(
       final GameEngine engine,
       final Terminal terminal,
       final LineReader reader,
@@ -235,16 +252,11 @@ public class CliApp {
       show.execute(engine);
     }
     while (running) {
-
-      if (engine.getState().getCurrentPlayer().isAI()) {
+      final GameState state = engine.getState();
+      final Player currentPlayer = state.getCurrentPlayer();
+      if (currentPlayer.isAI()) {
         if (terminal != null && terminal.writer() != null) {
-          terminal
-              .writer()
-              .println(
-                  "\n"
-                      + engine.getState().getCurrentPlayer().getName()
-                      + " "
-                      + I18n.get("thinking"));
+          terminal.writer().println("\n" + currentPlayer.getName() + " " + I18n.get("thinking"));
           terminal.flush();
         }
         executeAiTurn();
@@ -253,7 +265,7 @@ public class CliApp {
         final String line = reader.readLine(">> ");
         fetch(line);
       }
-      if (engine.getState().isGameOver() && !networkClient.isConnected()) {
+      if (state.isGameOver() && !networkClient.isConnected()) {
         running = false;
       }
     }
@@ -266,9 +278,9 @@ public class CliApp {
     }
   }
 
-  void executeAiTurn() {
-    final Player ai = engine.getState().getCurrentPlayer();
-    final Move move = ai.getNextMove(engine.getState());
+  /* default */ void executeAiTurn() {
+    final Player currentAi = engine.getState().getCurrentPlayer();
+    final Move move = currentAi.getNextMove(engine.getState());
     engine.play(move);
 
     LOGGER.info(I18n.get("iaPlayed") + "{0}", move);
@@ -284,39 +296,39 @@ public class CliApp {
   public void fetch(final String input) throws IOException {
     firstTab = true;
     final String[] tokens = input.trim().split("\\s+");
-    if (tokens.length == 0 || tokens[0].isEmpty()) {
-      return;
-    }
+    boolean shouldExecute = tokens.length != 0 && !tokens[0].isEmpty();
 
-    final String command = tokens[0].toLowerCase(Locale.US);
-    if (handleNetworkCommand(input, tokens, command)) {
-      return;
-    }
-    final Command cmd;
+    if (shouldExecute) {
+      final String command = tokens[0].toLowerCase(Locale.US);
+      shouldExecute = !handleNetworkCommand(input, tokens, command);
+      if (shouldExecute) {
+        final Command cmd;
 
-    if (commandRegistry.containsKey(command)) {
-      cmd = commandRegistry.get(command).apply(tokens);
-    } else {
-      String suggestion = null;
-      int bestDistance = 3; // Only suggest if the mistake is small (1 or 2 chars)
+        if (commandRegistry.containsKey(command)) {
+          cmd = commandRegistry.get(command).apply(tokens);
+        } else {
+          String suggestion = null;
+          int bestDistance = 3; // Only suggest if the mistake is small (1 or 2 chars)
 
-      for (final String registered : commandRegistry.keySet()) {
-        final int dist = calculateDistance(command, registered);
-        if (dist < bestDistance) {
-          bestDistance = dist;
-          suggestion = registered;
+          for (final String registered : commandRegistry.keySet()) {
+            final int dist = calculateDistance(command, registered);
+            if (dist < bestDistance) {
+              bestDistance = dist;
+              suggestion = registered;
+            }
+          }
+
+          if (suggestion != null) {
+            LOGGER.debug(I18n.get("unknownCmd") + "'{0}'", command);
+            LOGGER.info(I18n.get("meant") + "{0} ? ", suggestion);
+          }
+
+          // Default behavior (interpret as move)
+          cmd = new MoveCommand(input);
         }
+        engine = cmd.execute(engine);
       }
-
-      if (suggestion != null) {
-        LOGGER.debug(I18n.get("unknownCmd") + "'{0}'", command);
-        LOGGER.info(I18n.get("meant") + "{0} ? ", suggestion);
-      }
-
-      // Default behavior (interpret as move)
-      cmd = new MoveCommand(input);
     }
-    engine = cmd.execute(engine);
   }
 
   private int calculateDistance(final String userCmd, final String command) {
@@ -343,6 +355,7 @@ public class CliApp {
 
   private boolean handleNetworkCommand(
       final String input, final String[] tokens, final String command) {
+    boolean handled = true;
     try {
       switch (command) {
         case CMD_SERVER -> handleServerCommand(tokens);
@@ -355,38 +368,39 @@ public class CliApp {
           if (tokens.length > 1 && looksLikePlayerId(tokens[1])) {
             handleNetworkNewCommand(tokens);
           } else {
-            return false;
+            handled = false;
           }
         }
-        case "move" -> {
+        case CMD_MOVE -> {
           if (networkClient.isConnected() && tokens.length > 1) {
-            pendingNetworkMove = input.substring("move ".length()).trim();
-            networkClient.sendMove(pendingNetworkMove);
+            pendingMove = input.substring(CMD_MOVE.length() + 1).trim();
+            networkClient.sendMove(pendingMove);
           } else {
-            return false;
+            handled = false;
           }
         }
         case CMD_QUIT -> {
           if (!networkClient.isConnected()) {
-            return false;
+            handled = false;
+          } else {
+            networkClient.quit();
+            LOGGER.info(I18n.get("returnedLocal"));
           }
-          networkClient.quit();
-          LOGGER.info(I18n.get("returnedLocal"));
         }
         default -> {
           if (networkClient.isConnected()) {
-            pendingNetworkMove = input;
-            networkClient.sendMove(pendingNetworkMove);
-            return true;
+            pendingMove = input;
+            networkClient.sendMove(pendingMove);
+          } else {
+            handled = false;
           }
-          return false;
         }
       }
-      return true;
     } catch (final IllegalArgumentException exception) {
       LOGGER.info(I18n.get("errorPrefix") + exception.getMessage());
-      return true;
+      handled = true;
     }
+    return handled;
   }
 
   /**
@@ -402,11 +416,11 @@ public class CliApp {
 
     switch (tokens[1].toLowerCase(Locale.US)) {
       case "start" -> {
-        final int port = tokens.length > 2 ? Integer.parseInt(tokens[2]) : DEFAULT_NETWORK_PORT;
+        final int port = tokens.length > 2 ? Integer.parseInt(tokens[2]) : DEFAULT_PORT;
         networkServer.start(port);
       }
       case "stop" -> networkServer.stop();
-      case "list" -> networkClient.serverList();
+      case "list" -> LOGGER.info(networkClient.serverList());
       case "status" -> LOGGER.info(networkServer.getServerStatus());
       default -> LOGGER.info(I18n.get("unknownServerCmd"));
     }
@@ -418,10 +432,10 @@ public class CliApp {
    * @param tokens the command tokens, optionally containing an IP address and port
    */
   private void handleJoinCommand(final String[] tokens) {
-    final String target = tokens.length > 1 ? tokens[1] : DEFAULT_NETWORK_HOST;
+    final String target = tokens.length > 1 ? tokens[1] : DEFAULT_HOST;
     final String[] hostPort = target.split(":");
-    final String host = hostPort[0].isBlank() ? DEFAULT_NETWORK_HOST : hostPort[0];
-    final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_NETWORK_PORT;
+    final String host = hostPort[0].isBlank() ? DEFAULT_HOST : hostPort[0];
+    final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_PORT;
 
     if (!networkClient.join(host, port)) {
       LOGGER.info(I18n.get("failedConnect", host, ":") + port);
@@ -473,20 +487,22 @@ public class CliApp {
    *
    * @param message message received from the server
    */
-  private synchronized void handleServerMessage(final String message) {
-    if ("OK".equals(message) && pendingNetworkMove != null) {
-      engine = new MoveCommand(pendingNetworkMove).execute(engine);
-      pendingNetworkMove = null;
-    } else if (message.startsWith("OPPONENT_MOVE ")) {
-      final String move = message.substring("OPPONENT_MOVE ".length()).trim();
-      engine = new MoveCommand(move).execute(engine);
-    } else if (message.startsWith("ERROR ")) {
-      pendingNetworkMove = null;
+  private void handleServerMessage(final String message) {
+    synchronized (this) {
+      if ("OK".equals(message) && pendingMove != null) {
+        engine = new MoveCommand(pendingMove).execute(engine);
+        clearPendingMove();
+      } else if (message.startsWith("OPPONENT_MOVE ")) {
+        final String move = message.substring("OPPONENT_MOVE ".length()).trim();
+        engine = new MoveCommand(move).execute(engine);
+      } else if (message.startsWith("ERROR ")) {
+        clearPendingMove();
+      }
     }
   }
 
   /** Package-private inner class to handle smart tab-completion for the CLI. */
-  class SmartCompleter implements Completer {
+  /* default */ class SmartCompleter implements Completer {
     @Override
     public void complete(
         final LineReader reader, final ParsedLine line, final List<Candidate> candidates) {
@@ -516,7 +532,7 @@ public class CliApp {
               CMD_UNDO,
               CMD_SET,
               CMD_SHOW + " " + OPT_BOARD,
-              "move",
+              CMD_MOVE,
               CMD_SHOW + " time",
               CMD_SHOW + " configurations",
               CMD_SHOW + " history");
@@ -557,5 +573,10 @@ public class CliApp {
         }
       }
     }
+  }
+
+  /** Clears the move waiting for a network validation. */
+  private void clearPendingMove() {
+    pendingMove = null;
   }
 }

@@ -1,16 +1,16 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.config.ConfigManager;
-import fr.bordeaux.core.GameEngine;
-import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Color;
+import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.HumanPlayer;
 import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
-import fr.bordeaux.network.NetworkMoveParser;
 import fr.bordeaux.main.PlayerFactory;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
+import fr.bordeaux.network.NetworkMoveParser;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +20,18 @@ import javafx.scene.control.TextInputDialog;
 
 /** Bridge between GUI events and underlying game logic or dialogs. */
 public class ActionDispatcher {
+
+  /** Common title used by network-related dialogs. */
+  private static final String NETWORK_TITLE = "Network";
+
+  /** Number of host/port tokens when an explicit port is provided. */
+  private static final int HOST_PORT_PARTS = 2;
+
+  /** Prefix used by the server to announce the opponent move. */
+  private static final String OPP_MOVE_PREFIX = "OPPONENT_MOVE ";
+
+  /** Prefix used by the server to announce a network game start. */
+  private static final String GAME_START_PREFIX = "GAME_START ";
 
   /** Reference to the game engine to execute game-related actions */
   private final GameEngine engine;
@@ -36,7 +48,7 @@ public class ActionDispatcher {
   /** The client instance for multiplayer games. */
   private final GameClient networkClient = new GameClient();
 
-    /** Board view used to refresh the GUI after network messages. */
+  /** Board view used to refresh the GUI after network messages. */
   private BoardView boardView;
 
   /** Last move sent to the server and still waiting for validation. */
@@ -73,7 +85,6 @@ public class ActionDispatcher {
     this.engine = engine;
     this.fileHandler = fileHandler;
     this.networkClient.setServerMessageHandler(this::handleServerMessage);
-
   }
 
   /**
@@ -131,23 +142,18 @@ public class ActionDispatcher {
       case START_SERVER -> startServer();
       case STOP_SERVER -> {
         multiServer.stop();
-        showMessage("Network", "Server", "Server stopped.");
+        showMessage(NETWORK_TITLE, "Server", "Server stopped.");
       }
-      case SERVER_LIST -> {
-        networkClient.serverList();
-        showMessage(
-            "Network",
-            "Server List",
-            "Server discovery started. Check the console for discovered servers.");
-      }
-      case SERVER_STATUS -> showMessage("Network", "Server Status", multiServer.getServerStatus());
-      case PLAYERS -> showMessage("Network", "Connected Players", multiServer.listPlayers());
-      case SCOREBOARD -> showMessage("Network", "Scoreboard", multiServer.getScoreboard());
+      case SERVER_LIST -> showMessage("Network", "Server List", networkClient.serverList());
+      case SERVER_STATUS ->
+          showMessage(NETWORK_TITLE, "Server Status", multiServer.getServerStatus());
+      case PLAYERS -> showMessage(NETWORK_TITLE, "Connected Players", multiServer.listPlayers());
+      case SCOREBOARD -> showMessage(NETWORK_TITLE, "Scoreboard", multiServer.getScoreboard());
       case NEW_NETWORK_GAME -> createNetworkGame();
       case JOIN_SERVER -> joinServer();
       case SET_NETWORK_NAME -> setNetworkName();
-      case PING_SERVER -> showMessage("Network", "Ping Server", networkClient.ping());
-      case QUIT_SERVER -> showMessage("Network", "Quit Server", networkClient.quit());
+      case PING_SERVER -> showMessage(NETWORK_TITLE, "Ping Server", networkClient.ping());
+      case QUIT_SERVER -> showMessage(NETWORK_TITLE, "Quit Server", networkClient.quit());
       default -> {}
     }
   }
@@ -165,9 +171,8 @@ public class ActionDispatcher {
     }
     networkGame = false;
     myTurn = false;
-    pendingMove = null;
+    clearPendingMove();
     engine.newGame(size, players, timeout);
-
   }
 
   private void startServer() {
@@ -211,16 +216,16 @@ public class ActionDispatcher {
     final String[] hostPort = input.trim().split(":");
     final String host = hostPort[0];
     final int port;
-    if (hostPort.length > 1) {
+    if (hostPort.length == HOST_PORT_PARTS) {
       port = Integer.parseInt(hostPort[1]);
     } else {
       port = DEFAULT_PORT;
     }
 
     if (networkClient.join(host, port)) {
-      showMessage("Network", "Join Server", "Connected to " + host + ":" + port + ".");
+      showMessage(NETWORK_TITLE, "Join Server", "Connected to " + host + ":" + port + ".");
     } else {
-      showMessage("Network", "Join Server", "Failed to connect to " + host + ":" + port + ".");
+      showMessage(NETWORK_TITLE, "Join Server", "Failed to connect to " + host + ":" + port + ".");
     }
   }
 
@@ -234,10 +239,10 @@ public class ActionDispatcher {
 
     localPlayerName = input.trim();
     networkClient.hello(localPlayerName);
-    showMessage("Network", "Player Name", "Name sent to server.");
+    showMessage(NETWORK_TITLE, "Player Name", "Name sent to server.");
   }
 
-    /**
+  /**
    * Registers the board view so the dispatcher can refresh it after network updates.
    *
    * @param boardView the board view used by the GUI
@@ -265,32 +270,19 @@ public class ActionDispatcher {
   }
 
   /**
-   * Plays a move from the GUI board.
-   * In local mode the move is applied directly.
-   * In network mode the move is sent to the server.
+   * Plays a move from the GUI board. In local mode the move is applied directly. In network mode
+   * the move is sent to the server.
    *
    * @param move move chosen on the board
    */
   public void playBoardMove(final Move move) {
-    if (!networkGame) {
+    if (networkGame) {
+      playNetworkBoardMove(move);
+    } else {
       if (engine.play(move) && boardView != null) {
         boardView.drawBoard();
       }
-      return;
     }
-
-    if (!myTurn) {
-      showMessage("Network", "Turn", "It is not your turn.");
-      return;
-    }
-
-    if (pendingMove != null) {
-      showMessage("Network", "Move", "A move is already waiting for validation.");
-      return;
-    }
-
-    pendingMove = moveToText(move);
-    networkClient.sendMove(pendingMove);
   }
 
   /**
@@ -301,40 +293,40 @@ public class ActionDispatcher {
   private void handleServerMessage(final String message) {
     Platform.runLater(
         () -> {
-          if (message.startsWith("GAME_START ")) {
+          if (message.startsWith(GAME_START_PREFIX)) {
             final boolean startsNow = message.contains("YOUR_TURN");
             networkGame = true;
             myTurn = startsNow;
-            pendingMove = null;
+            clearPendingMove();
             setupNetworkBoard(startsNow);
-            showMessage("Network", "Game Start", startsNow ? "Your turn." : "Opponent's turn.");
+            showMessage(NETWORK_TITLE, "Game Start", startsNow ? "Your turn." : "Opponent's turn.");
           } else if ("OK".equals(message) && pendingMove != null) {
             applyNetworkMove(pendingMove);
-            pendingMove = null;
+            clearPendingMove();
             myTurn = false;
-          } else if (message.startsWith("OPPONENT_MOVE ")) {
-            final String moveText = message.substring("OPPONENT_MOVE ".length()).trim();
+          } else if (message.startsWith(OPP_MOVE_PREFIX)) {
+            final String moveText = message.substring(OPP_MOVE_PREFIX.length()).trim();
             applyNetworkMove(moveText);
             myTurn = true;
           } else if (message.startsWith("ERROR ")) {
-            pendingMove = null;
-            showMessage("Network", "Server Error", message);
+            clearPendingMove();
+            showMessage(NETWORK_TITLE, "Server Error", message);
           } else if (message.startsWith("GAME_OVER ")) {
-            pendingMove = null;
+            clearPendingMove();
             myTurn = false;
             networkGame = false;
           } else if ("SERVER_STOPPED".equals(message)) {
-            pendingMove = null;
+            clearPendingMove();
             myTurn = false;
             networkGame = false;
-            showMessage("Network", "Server", "Server stopped.");
+            showMessage(NETWORK_TITLE, "Server", "Server stopped.");
           }
         });
   }
 
   /**
-   * Creates a fresh local board that matches the network game start.
-   * This minimal version is designed for a two-player network game.
+   * Creates a fresh local board that matches the network game start. This minimal version is
+   * designed for a two-player network game.
    *
    * @param startsNow true if the local player starts first
    */
@@ -380,12 +372,14 @@ public class ActionDispatcher {
    * @return network text for the move
    */
   private String moveToText(final Move move) {
+    final String moveText;
     if (move.isPawn()) {
-      return positionToText(move.getFrom()) + "-" + positionToText(move.getTo());
+      moveText = positionToText(move.getFrom()) + "-" + positionToText(move.getTo());
+    } else {
+      final char orientationLetter = move.getOrientation().name().charAt(0);
+      moveText = positionToText(move.getTo()) + Character.toLowerCase(orientationLetter);
     }
-
-    final char orientationLetter = move.getOrientation().name().charAt(0);
-    return positionToText(move.getTo()) + Character.toLowerCase(orientationLetter);
+    return moveText;
   }
 
   /**
@@ -432,5 +426,22 @@ public class ActionDispatcher {
     alert.setHeaderText(header);
     alert.setContentText(content);
     alert.show();
+  }
+
+  /** Sends a move to the server when the current network state allows it. */
+  private void playNetworkBoardMove(final Move move) {
+    if (!myTurn) {
+      showMessage(NETWORK_TITLE, "Turn", "It is not your turn.");
+    } else if (pendingMove != null) {
+      showMessage(NETWORK_TITLE, "Move", "A move is already waiting for validation.");
+    } else {
+      pendingMove = moveToText(move);
+      networkClient.sendMove(pendingMove);
+    }
+  }
+
+  /** Clears the move waiting for server validation. */
+  private void clearPendingMove() {
+    pendingMove = null;
   }
 }

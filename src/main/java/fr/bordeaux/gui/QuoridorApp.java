@@ -11,8 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -22,6 +24,27 @@ import javafx.stage.Stage;
 /** Main JavaFX app for Quoridor. Displays board and player panels. */
 @SuppressWarnings({"PMD.GuardLogStatement"})
 public class QuoridorApp extends Application {
+
+  /** First panel index. */
+  private static final int FIRST_PANEL = 0;
+
+  /** Second panel index. */
+  private static final int SECOND_PANEL = 1;
+
+  /** Third panel index. */
+  private static final int THIRD_PANEL = 2;
+
+  /** Fourth panel index. */
+  private static final int FOURTH_PANEL = 3;
+
+  /** Height kept for controls outside the board. */
+  private static final double RESERVED_HEIGHT = 50.0;
+
+  /** Small margin removed to avoid overflow. */
+  private static final double RESIZE_MARGIN = 1.0;
+
+  /** Minimum positive board size accepted during resize. */
+  private static final double MIN_BOARD_SIZE = 0.0;
 
   /** Static width for the player panels. */
   private static final double PANEL_WIDTH = 200.0;
@@ -67,6 +90,7 @@ public class QuoridorApp extends Application {
 
   /** Default constructor. */
   public QuoridorApp() {
+    super();
     Logger.getInstance().debug("Instantiating QuoridorApp");
   }
 
@@ -197,7 +221,7 @@ public class QuoridorApp extends Application {
    *
    * @param panel the panel to configure
    */
-  static void setupPanelSize(final PlayerPanel panel) {
+  /* default */ static void setupPanelSize(final PlayerPanel panel) {
     panel.setMinWidth(PANEL_WIDTH);
     panel.setMaxWidth(PANEL_WIDTH);
     panel.setPrefWidth(PANEL_WIDTH);
@@ -209,7 +233,7 @@ public class QuoridorApp extends Application {
    * @param boardView the board view to wrap
    * @return a StackPane containing the board view
    */
-  static StackPane buildBoardContainer(final BoardView boardView) {
+  /* default */ static StackPane buildBoardContainer(final BoardView boardView) {
     final StackPane container = new StackPane(boardView);
     container.setAlignment(Pos.CENTER);
     BorderPane.setAlignment(container, Pos.CENTER);
@@ -224,30 +248,32 @@ public class QuoridorApp extends Application {
    * @param panels array of player panels
    * @return the configured BorderPane
    */
-  static BorderPane buildRootLayout(
-      final MainMenuBar menuBar, final Region centerNode, final PlayerPanel[] panels) {
+  /* default */ static BorderPane buildRootLayout(
+      final MainMenuBar menuBar, final Region centerNode, final PlayerPanel... panels) {
 
     final BorderPane root = new BorderPane();
     final Insets margin = new Insets(DEFAULT_MARGIN);
 
     final VBox leftContainer = new VBox(DEFAULT_MARGIN);
     leftContainer.setAlignment(Pos.CENTER);
+    final ObservableList<Node> leftChildren = leftContainer.getChildren();
 
-    if (panels.length > 0) {
-      leftContainer.getChildren().add(panels[0]);
+    if (panels.length > FIRST_PANEL) {
+      leftChildren.add(panels[FIRST_PANEL]);
     }
-    if (panels.length > 2) {
-      leftContainer.getChildren().add(panels[2]);
+    if (panels.length > THIRD_PANEL) {
+      leftChildren.add(panels[THIRD_PANEL]);
     }
 
     final VBox rightContainer = new VBox(DEFAULT_MARGIN);
     rightContainer.setAlignment(Pos.CENTER);
+    final ObservableList<Node> rightChildren = rightContainer.getChildren();
 
-    if (panels.length > 1) {
-      rightContainer.getChildren().add(panels[1]);
+    if (panels.length > SECOND_PANEL) {
+      rightChildren.add(panels[SECOND_PANEL]);
     }
-    if (panels.length > 3) {
-      rightContainer.getChildren().add(panels[3]);
+    if (panels.length > FOURTH_PANEL) {
+      rightChildren.add(panels[FOURTH_PANEL]);
     }
 
     BorderPane.setMargin(leftContainer, margin);
@@ -300,9 +326,9 @@ public class QuoridorApp extends Application {
    */
   private void resizeBoard(final BoardView boardView, final Scene scene, final double menuHeight) {
     final double availableWidth = scene.getWidth() - (PANEL_WIDTH + DEFAULT_MARGIN * 2) * 2;
-    final double availableHeight = scene.getHeight() - menuHeight - 50.0;
-    final double size = Math.min(availableWidth, availableHeight) - 1.0; // 1.0px safety margin
-    if (size > 0.0) {
+    final double availableHeight = scene.getHeight() - menuHeight - RESERVED_HEIGHT;
+    final double size = Math.min(availableWidth, availableHeight) - RESIZE_MARGIN;
+    if (size > MIN_BOARD_SIZE) {
       boardView.setPrefSize(size, size);
       boardView.setMinSize(size, size);
       boardView.setMaxSize(size, size);
@@ -315,7 +341,7 @@ public class QuoridorApp extends Application {
    * @param engine the game engine to observe
    * @param container the container where the overlay will be displayed
    */
-  void setupGameOverListener(final GameEngine engine, final StackPane container) {
+  /* default */ void setupGameOverListener(final GameEngine engine, final StackPane container) {
     final AtomicBoolean popupShown = new AtomicBoolean(false);
     final GameState state = engine.getState();
 
@@ -343,7 +369,7 @@ public class QuoridorApp extends Application {
    * @param winnerName the name of the winning player
    * @param popupShown the flag to reset when the overlay is closed
    */
-  void showGameOverOverlay(
+  /* default */ void showGameOverOverlay(
       final StackPane container, final String winnerName, final AtomicBoolean popupShown) {
     final VBox overlay = new VBox(OVERLAY_SPACING);
     overlay.setAlignment(Pos.CENTER);
@@ -370,8 +396,10 @@ public class QuoridorApp extends Application {
           popupShown.set(false);
         });
 
-    overlay.getChildren().addAll(titleLabel, winLabel, closeBtn);
-    container.getChildren().add(overlay);
+    final ObservableList<Node> overlayChildren = overlay.getChildren();
+    final ObservableList<Node> containerChildren = container.getChildren();
+    overlayChildren.addAll(titleLabel, winLabel, closeBtn);
+    containerChildren.add(overlay);
   }
 
   /**
@@ -380,7 +408,7 @@ public class QuoridorApp extends Application {
    * @param engine the game engine to interact with
    * @param boardView the board view to redraw after an AI move
    */
-  void setupAITurnListener(final GameEngine engine, final BoardView boardView) {
+  /* default */ void setupAITurnListener(final GameEngine engine, final BoardView boardView) {
     final AtomicReference<Player> aiComputing = new AtomicReference<>();
     final GameState state = engine.getState();
 
@@ -405,7 +433,7 @@ public class QuoridorApp extends Application {
                                 if (finalMove != null
                                     && !state.isGameOver()
                                     && !state.isPaused()
-                                    && state.getCurrentPlayer() == currentPlayer) {
+                                    && currentPlayer.equals(state.getCurrentPlayer())) {
                                   if (engine.play(finalMove)) {
                                     boardView.drawBoard();
                                   }
@@ -424,5 +452,7 @@ public class QuoridorApp extends Application {
 
   /** Called when the JavaFX application is stopped. */
   @Override
-  public void stop() {}
+  public void stop() {
+    // No explicit shutdown work is required here.
+  }
 }

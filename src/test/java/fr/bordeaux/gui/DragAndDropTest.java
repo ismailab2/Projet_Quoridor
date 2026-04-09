@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
@@ -24,7 +25,6 @@ class DragAndDropTest {
   private BoardView boardView;
   private ActionDispatcher dispatcher;
 
-
   @BeforeAll
   static void initJavaFx() {
     new JFXPanel();
@@ -37,7 +37,7 @@ class DragAndDropTest {
     state = new GameState(board, Player.createDefaultPlayers());
     engine = new GameEngine(state, false, false, false, false, 10);
 
-     dispatcher = new ActionDispatcher(engine, null);
+    dispatcher = new ActionDispatcher(engine, null);
 
     runAndWait(() -> boardView = new BoardView(engine, dispatcher));
     runAndWait(() -> DragAndDrop.install(engine, boardView, dispatcher));
@@ -232,9 +232,9 @@ class DragAndDropTest {
     Board board = new Board(9);
     GameState localState = new GameState(board, Player.createDefaultPlayers());
     GameEngine localEngine = new GameEngine(localState, false, false, false, false, 10);
-
+    ActionDispatcher localDispatcher = new ActionDispatcher(localEngine, null);
     final BoardView[] viewRef = new BoardView[1];
-    runAndWait(() -> viewRef[0] = new BoardView(localEngine));
+    runAndWait(() -> viewRef[0] = new BoardView(localEngine, localDispatcher));
     BoardView mockedView = viewRef[0];
 
     Dragboard mockDragboard = mock(Dragboard.class);
@@ -262,7 +262,7 @@ class DragAndDropTest {
         });
 
     // Install handlers now: they will bind to the spyPawn!
-    runAndWait(() -> DragAndDrop.install(localEngine, mockedView));
+    runAndWait(() -> DragAndDrop.install(localEngine, mockedView, localDispatcher));
     waitForFxEvents();
 
     runAndWait(
