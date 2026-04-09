@@ -116,6 +116,15 @@ public final class ConfigManager {
   }
 
   /**
+   * Removes a configuration option.
+   *
+   * @param key The property key to remove.
+   */
+  public void removeOption(final String key) {
+    props.remove(key);
+  }
+
+  /**
    * Retrieves a configuration option as a boolean.
    *
    * @param key The property key.
