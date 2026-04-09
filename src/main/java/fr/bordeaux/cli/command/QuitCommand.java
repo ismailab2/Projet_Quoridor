@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.jline.reader.LineReader;
 
 /** CLI command that exits the application after a save prompt. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class QuitCommand implements Command {
   /** Reader used for user interaction. */
   private final LineReader reader;
@@ -43,12 +42,16 @@ public class QuitCommand implements Command {
         final String path = reader.readLine(I18n.get("filePath", " >> "));
         new SaveCommand(path).execute(engine);
       }
-      LOGGER.info(I18n.get("quitting"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info(I18n.get("quitting"));
+      }
       if (reader != null && reader.getTerminal() != null) {
         reader.getTerminal().close();
       }
     } catch (IOException e) {
-      LOGGER.error(I18n.get("quitError"), e);
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("quitError"), e);
+      }
     }
     return engine;
   }
@@ -56,11 +59,13 @@ public class QuitCommand implements Command {
   /** Displays help information for the quit command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("quitHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("quitUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("quitDesc"));
-    LOGGER.verbose("  " + I18n.get("quitVerb"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("quitHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info("  {0}\n", I18n.get("quitUsage"));
+      LOGGER.info(I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("quitDesc"));
+    }
+    LOGGER.verbose("  {0}", I18n.get("quitVerb"));
   }
 }

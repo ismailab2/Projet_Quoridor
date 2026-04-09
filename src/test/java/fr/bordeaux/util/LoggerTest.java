@@ -47,11 +47,16 @@ public class LoggerTest {
     Field instanceField = Logger.class.getDeclaredField("instance");
     instanceField.setAccessible(true);
     instanceField.set(null, null);
+
+    Field fileField = Logger.class.getDeclaredField("logFile");
+    fileField.setAccessible(true);
+    fileField.set(null, null);
   }
 
   @Test
   void testGetInstance_NewInstanceCreation() {
-    Logger logger = Logger.getInstance(LOG_FILE_NAME);
+    Logger.setLogFile(LOG_FILE_NAME);
+    Logger logger = Logger.getInstance();
     assertNotNull(logger, "Logger should be successfully created");
 
     File logFile = new File(System.getProperty("user.home"), LOG_FILE_NAME);
@@ -105,7 +110,8 @@ public class LoggerTest {
   @Test
   void testPrivateConstructor_IOExceptionFallback() {
     String invalidFileName = ".";
-    Logger logger = Logger.getInstance(invalidFileName);
+    Logger.setLogFile(invalidFileName);
+    Logger logger = Logger.getInstance();
 
     assertNotNull(logger, "Logger should fall back to a valid instance even on IO failure");
     String errOutput = capturedErr.toString();

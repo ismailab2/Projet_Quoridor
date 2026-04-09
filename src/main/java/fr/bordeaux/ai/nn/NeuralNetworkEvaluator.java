@@ -19,9 +19,6 @@ import org.tensorflow.types.*;
 /** Heuristic evaluator using a TensorFlow-based Logistic Regression model. */
 public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable {
 
-  /** PMD string for suppressing Law of Demeter violations. */
-  /* package */ static final String SUPPRESS_LOD = "PMD.LawOfDemeter";
-
   /** The default number of training epochs. */
   private static final int DEFAULT_EPOCHS = 750;
 
@@ -98,7 +95,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
     }
   }
 
-  @SuppressWarnings(SUPPRESS_LOD)
   private void initGraph() {
     this.graph = new Graph();
     final Ops tfOps = Ops.create(graph);
@@ -174,8 +170,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
    * @param state Game state.
    * @return Feature vector.
    */
-  @SuppressWarnings(SUPPRESS_LOD)
-  /* Prevents cluttering GameState API with too many specific delegation methods. */
   protected float[] getFeatures(final GameState state) {
     final Player current = state.getCurrentPlayer();
     final Player opponent = state.getPlayers().get(1 - state.getPlayers().indexOf(current));
@@ -217,8 +211,6 @@ public class NeuralNetworkEvaluator implements HeuristicEvaluator, AutoCloseable
    * @param player the player whose distance to goal is being calculated
    * @return the number of steps required to win, or 20 if no path is found
    */
-  @SuppressWarnings(SUPPRESS_LOD)
-  /* LoD suppressed to avoid GameState bloat. */
   private int computeDistanceToWin(final GameState state, final Player player) {
     final Board board = state.getBoard();
     final fr.bordeaux.graph.Graph gameGraph = board.getGraph();

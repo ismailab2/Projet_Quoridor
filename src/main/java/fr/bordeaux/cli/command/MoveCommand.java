@@ -13,7 +13,6 @@ import fr.bordeaux.util.Logger;
  * CLI command that interprets and executes a player move. pawn movement or a wall placement
  * depending on the format of the input string.
  */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MoveCommand implements Command {
 
   /** Move that has been entered by the user */
@@ -47,17 +46,25 @@ public class MoveCommand implements Command {
   public GameEngine execute(final GameEngine engine) {
     try {
       if (move.contains("-") && (move.length() == 5 || move.length() == 7)) {
-        LOGGER.debug(I18n.get("youPlayed") + " {0}", this.move);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("{0} {1}", I18n.get("youPlayed"), this.move);
+        }
         return handleMove(engine);
       } else if ((move.contains("v") || move.contains("h")) && move.length() == 3) {
-        LOGGER.debug(I18n.get("youPlayed") + " {0}", this.move);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("{0} {1}", I18n.get("youPlayed"), this.move);
+        }
         return handleWall(engine);
       } else {
-        LOGGER.debug(I18n.get("helpValidCommand"));
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug(I18n.get("helpValidCommand"));
+        }
         return engine;
       }
     } catch (final Exception e) {
-      LOGGER.error(I18n.get("readingMove") + " {0}", this.move);
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error("{0} {1}", I18n.get("readingMove"), this.move);
+      }
       return engine;
     }
   }
@@ -65,24 +72,27 @@ public class MoveCommand implements Command {
   /** Displays help information for the move command. in the CLI. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("moveHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info(I18n.get("pawnMove", "e2-e3", I18n.get("ifLegal")));
-    LOGGER.info("        " + I18n.get("illegalPawnMove"));
-    LOGGER.info(I18n.get("wallMove", "e2h", I18n.get("ifLegal")));
-    LOGGER.info(
-        "                : e2h "
-            + I18n.get("place", I18n.get("horizontally"), I18n.get("betweenRows"), "2", "3")
-            + "\n");
-    LOGGER.info(
-        "                : "
-            + I18n.get("cantPlace", I18n.get("horizontally"), I18n.get("rightEdge")));
-    LOGGER.info(I18n.get("wallMove", "e2v", I18n.get("ifLegal")));
-    LOGGER.info(
-        "                : e2v "
-            + I18n.get("place", I18n.get("vertically"), I18n.get("betweenColumns"), "e", "f")
-            + "\n");
-    LOGGER.info("        " + I18n.get("cantPlace", I18n.get("vertically"), I18n.get("bottomEdge")));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("moveHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info(I18n.get("pawnMove", "e2-e3", I18n.get("ifLegal")));
+      LOGGER.info("        {0}", I18n.get("illegalPawnMove"));
+      LOGGER.info(I18n.get("wallMove", "e2h", I18n.get("ifLegal")));
+      LOGGER.info(
+          "                : e2h "
+              + I18n.get("place", I18n.get("horizontally"), I18n.get("betweenRows"), "2", "3")
+              + "\n");
+      LOGGER.info(
+          "                : "
+              + I18n.get("cantPlace", I18n.get("horizontally"), I18n.get("rightEdge")));
+      LOGGER.info(I18n.get("wallMove", "e2v", I18n.get("ifLegal")));
+      LOGGER.info(
+          "                : e2v "
+              + I18n.get("place", I18n.get("vertically"), I18n.get("betweenColumns"), "e", "f")
+              + "\n");
+      LOGGER.info(
+          "        {0}", I18n.get("cantPlace", I18n.get("vertically"), I18n.get("bottomEdge")));
+    }
   }
 
   /**
@@ -95,7 +105,9 @@ public class MoveCommand implements Command {
    */
   public Position parsePosition(final String str) {
     if (str.length() < 2) {
-      LOGGER.error(I18n.get("usage") + " " + I18n.get("moveUsage"));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error("{0} {1}", I18n.get("usage"), I18n.get("moveUsage"));
+      }
       throw new IllegalArgumentException(I18n.get("positionFormat"));
     }
     final int row = Integer.parseInt(str.substring(1)) - 1;
@@ -114,7 +126,9 @@ public class MoveCommand implements Command {
   public GameEngine handleMove(final GameEngine engine) {
     final String[] moves = move.split("-");
     if (moves.length != 2) {
-      LOGGER.error(I18n.get("usage") + " " + I18n.get("moveUsage"));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error("{0} {1}", I18n.get("usage"), I18n.get("moveUsage"));
+      }
       throw new IllegalArgumentException(I18n.get("moveSyntax"));
     }
     final Position from = parsePosition(moves[0]);
@@ -122,11 +136,15 @@ public class MoveCommand implements Command {
 
     final Player current = engine.getState().getCurrentPlayer();
     if (!current.getPosition().equals(from)) {
-      LOGGER.error(I18n.get("noPawnPlayed"));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("noPawnPlayed"));
+      }
       throw new IllegalArgumentException(I18n.get("noPawn", moves[0]));
     }
     if (!engine.play(Move.pawn(from, targetPosition))) {
-      LOGGER.error(I18n.get("illegalMoveMsg"), from, targetPosition);
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("illegalMoveMsg"), from, targetPosition);
+      }
       return engine;
     }
 
@@ -146,7 +164,9 @@ public class MoveCommand implements Command {
     final Orientation orientation =
         (move.charAt(move.length() - 1) == 'v') ? Orientation.VERTICAL : Orientation.HORIZONTAL;
     if (!RuleChecker.isMoveLegal(engine.getState(), Move.wall(pos, orientation))) {
-      LOGGER.error(I18n.get("moveIllegal") + " {0}", pos);
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error("{0} {1}", I18n.get("moveIllegal"), pos);
+      }
       return engine;
     }
     engine.play(Move.wall(pos, orientation));

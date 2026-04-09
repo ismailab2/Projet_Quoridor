@@ -44,7 +44,6 @@ class FileHandlerTest {
    *
    * @param mock the FileChooser mock to configure
    */
-  @SuppressWarnings("unchecked")
   private void configureMock(FileChooser mock) {
     when(mock.getExtensionFilters()).thenReturn(mock(ObservableList.class));
   }

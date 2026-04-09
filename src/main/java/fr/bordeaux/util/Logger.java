@@ -16,7 +16,6 @@ import java.text.MessageFormat;
  *
  * <p>Thread-safe Singleton pattern.
  */
-@SuppressWarnings({"PMD.SystemPrintln", "PMD.SingleMethodSingleton"})
 public final class Logger implements DomainLogger {
   /** ANSI escape code to reset text formatting to default. */
   private static final String RESET = "\u001B[0m";
@@ -39,6 +38,9 @@ public final class Logger implements DomainLogger {
   /** Singleton instance of the logger. */
   private static Logger instance;
 
+  /** File to log into (if any) */
+  private static String logFile;
+
   /** Flux de sortie (file or System.out) */
   private final PrintStream writer;
 
@@ -47,6 +49,15 @@ public final class Logger implements DomainLogger {
 
   /** Boolean in case verbose is enabled */
   private boolean verboseEnabled;
+
+  /** Boolean in case info is enabled */
+  private boolean infoEnabled = true;
+
+  /** Boolean in case warning is enabled */
+  private boolean warnEnabled = true;
+
+  /** Boolean in case error is enabled */
+  private boolean errorEnabled = true;
 
   /**
    * Private constructor for console-based logging. Initializes settings from {@link ConfigManager}
@@ -68,7 +79,9 @@ public final class Logger implements DomainLogger {
       final File file = new File(System.getProperty("user.home"), logFile);
       out = new PrintStream(file);
     } catch (final IOException exception) {
-      System.err.println(I18n.get("error", I18n.get("creatingLogFile")));
+      System.err
+          .append(I18n.get("error", I18n.get("creatingLogFile")))
+          .append(System.lineSeparator());
       out = null;
     }
 
@@ -82,7 +95,11 @@ public final class Logger implements DomainLogger {
    */
   public static synchronized Logger getInstance() {
     if (instance == null) {
-      instance = new Logger();
+      if (logFile != null) {
+        instance = new Logger(logFile);
+      } else {
+        instance = new Logger();
+      }
       instance.refreshConfig();
       // Register as the domain logger
       CoreServiceProvider.setLogger(instance);
@@ -91,19 +108,13 @@ public final class Logger implements DomainLogger {
   }
 
   /**
-   * Return the Logger Singleton instance with the output file.
+   * Set the log file for the singleton instance. Must be called before the first call to
+   * getInstance().
    *
    * @param logFile file where to print the logs
-   * @return logger's unique instance
    */
-  public static synchronized Logger getInstance(final String logFile) {
-    if (instance == null) {
-      instance = new Logger(logFile);
-      instance.refreshConfig();
-      // Register as the domain logger
-      CoreServiceProvider.setLogger(instance);
-    }
-    return instance;
+  public static synchronized void setLogFile(final String logFile) {
+    Logger.logFile = logFile;
   }
 
   // =========================================================
@@ -141,7 +152,7 @@ public final class Logger implements DomainLogger {
    * @param message message à afficher
    */
   public void warning(final String message) {
-    if (isWarningEnabled()) {
+    if (isWarnEnabled()) {
       log("[WARNING]", message, YELLOW_BOLD);
     }
   }
@@ -153,7 +164,7 @@ public final class Logger implements DomainLogger {
    * @param args les arguments du message
    */
   public void warning(final String format, final Object... args) {
-    if (isWarningEnabled()) {
+    if (isWarnEnabled()) {
       log("[WARNING]", MessageFormat.format(format, args), YELLOW_BOLD);
     }
   }
@@ -205,6 +216,33 @@ public final class Logger implements DomainLogger {
   public void verbose(final String format, final Object... args) {
     if (isVerboseEnabled()) {
       log("[VERBOSE]", MessageFormat.format(format, args), GREEN);
+    }
+  }
+
+  /**
+   * Print a prompt without newline.
+   *
+   * @param message the message to display
+   */
+  @Override
+  public void prompt(final String message) {
+    final PrintStream stream = (writer != null) ? writer : System.out;
+    if (stream != null) {
+      stream.append(message);
+      stream.flush();
+    }
+  }
+
+  /**
+   * Print a raw message with newline.
+   *
+   * @param message the message to display
+   */
+  @Override
+  public void raw(final String message) {
+    final PrintStream stream = (writer != null) ? writer : System.out;
+    if (stream != null) {
+      stream.append(message).append(System.lineSeparator());
     }
   }
 
@@ -279,7 +317,13 @@ public final class Logger implements DomainLogger {
       stream = System.err;
     }
     if (stream != null) {
-      stream.println(color + level + RESET + " " + message);
+      stream
+          .append(color)
+          .append(level)
+          .append(RESET)
+          .append(" ")
+          .append(message)
+          .append(System.lineSeparator());
     }
   }
 
@@ -299,28 +343,55 @@ public final class Logger implements DomainLogger {
   /**
    * Check if INFO level is activated.
    *
-   * @return true (always active)
+   * @return true if activated
    */
   public boolean isInfoEnabled() {
-    return true;
+    return infoEnabled;
   }
 
   /**
    * Check if WARNING level is activated.
    *
-   * @return true (always active)
+   * @return true if activated
    */
-  public boolean isWarningEnabled() {
-    return true;
+  public boolean isWarnEnabled() {
+    return warnEnabled;
   }
 
   /**
    * Check if ERROR level is activated.
    *
-   * @return true (always active)
+   * @return true if activated
    */
   public boolean isErrorEnabled() {
-    return true;
+    return errorEnabled;
+  }
+
+  /**
+   * Sets whether the INFO level is enabled.
+   *
+   * @param enabled true to enable, false to disable
+   */
+  public void setInfoEnabled(final boolean enabled) {
+    this.infoEnabled = enabled;
+  }
+
+  /**
+   * Sets whether the WARNING level is enabled.
+   *
+   * @param enabled true to enable, false to disable
+   */
+  public void setWarnEnabled(final boolean enabled) {
+    this.warnEnabled = enabled;
+  }
+
+  /**
+   * Sets whether the ERROR level is enabled.
+   *
+   * @param enabled true to enable, false to disable
+   */
+  public void setErrorEnabled(final boolean enabled) {
+    this.errorEnabled = enabled;
   }
 
   /**
@@ -330,5 +401,23 @@ public final class Logger implements DomainLogger {
    */
   public boolean isVerboseEnabled() {
     return verboseEnabled;
+  }
+
+  /**
+   * Sets whether the DEBUG level is enabled.
+   *
+   * @param enabled true to enable, false to disable
+   */
+  public void setDebugEnabled(final boolean enabled) {
+    this.debugEnabled = enabled;
+  }
+
+  /**
+   * Sets whether the VERBOSE level is enabled.
+   *
+   * @param enabled true to enable, false to disable
+   */
+  public void setVerboseEnabled(final boolean enabled) {
+    this.verboseEnabled = enabled;
   }
 }

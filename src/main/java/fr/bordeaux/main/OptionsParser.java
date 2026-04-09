@@ -11,7 +11,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 /** Interprets CLI arguments (GUI, CLI, Network) and game settings. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public final class OptionsParser {
 
   private static final Logger LOGGER = Logger.getInstance();

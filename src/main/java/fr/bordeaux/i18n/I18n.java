@@ -50,7 +50,7 @@ public final class I18n implements DomainTranslator {
    * @param env the environment variables map
    * @return the determined Locale
    */
-  static Locale getLocaleFromEnv(final java.util.Map<String, String> env) {
+  public static Locale getLocaleFromEnv(final java.util.Map<String, String> env) {
     final String lcAll = env.get("LC_ALL");
     final String lang = env.get("LANG");
     final String localeStr = (lcAll != null && !lcAll.isEmpty()) ? lcAll : lang;

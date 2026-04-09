@@ -627,17 +627,14 @@ public class MultiGameServerTest {
     return data;
   }
 
-  @SuppressWarnings("unchecked")
   private Map<String, ClientSession> clients(MultiGameServer server) {
     return (Map<String, ClientSession>) getField(server, "clients");
   }
 
-  @SuppressWarnings("unchecked")
   private Map<String, ScoreEntry> scores(MultiGameServer server) {
     return (Map<String, ScoreEntry>) getField(server, "scoreboard");
   }
 
-  @SuppressWarnings("unchecked")
   private Map<String, ServerGameSession> games(MultiGameServer server) {
     return (Map<String, ServerGameSession>) getField(server, "games");
   }

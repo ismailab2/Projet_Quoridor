@@ -24,7 +24,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 /** Main JavaFX app for Quoridor. Displays board and player panels. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class QuoridorApp extends Application {
 
   /** First panel index. */
@@ -114,9 +113,11 @@ public class QuoridorApp extends Application {
         final GameState loadedState = GameLoader.loadGame(engine, loadFile);
         engine.getState().loadState(loadedState);
         engine.initializeBlitz();
-        Logger.getInstance().debug("Loaded game from file: " + loadFile);
+        Logger.getInstance().debug("Loaded game from file: {0}", loadFile);
       } catch (final Exception exception) {
-        Logger.getInstance().error("Failed to load initial game: " + exception.getMessage());
+        if (Logger.getInstance().isErrorEnabled()) {
+          Logger.getInstance().error("Failed to load initial game: {0}", exception.getMessage());
+        }
       }
     }
     final GameState state = engine.getState();
@@ -226,7 +227,9 @@ public class QuoridorApp extends Application {
     try {
       return MctsPlayer.hint(engine.getState().getCurrentPlayer(), engine.getState(), 3000, true);
     } catch (final Exception e) {
-      Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
+      }
       return null;
     }
   }

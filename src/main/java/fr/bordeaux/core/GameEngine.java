@@ -1,7 +1,6 @@
 package fr.bordeaux.core;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameEngine {
 
   /** The current state of the game. */
@@ -52,7 +51,7 @@ public class GameEngine {
   }
 
   /** Helper method to initialize the BlitzManager based on the current state. */
-  public void initializeBlitz() {
+  public final void initializeBlitz() {
     if (this.blitz) {
       this.blitzManager = new BlitzManager(this);
       this.blitzManager.start();
@@ -68,19 +67,23 @@ public class GameEngine {
   public boolean play(final Move move) {
     final GameState currentState = this.state;
     if (currentState.isGameOver() || currentState.isPaused()) {
-      CoreServiceProvider.getLogger()
-          .info(CoreServiceProvider.getTranslator().translate("overPause"));
+      if (CoreServiceProvider.getLogger().isInfoEnabled()) {
+        CoreServiceProvider.getLogger()
+            .info(CoreServiceProvider.getTranslator().translate("overPause"));
+      }
       return false;
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
-      CoreServiceProvider.getLogger()
-          .debug(
-              CoreServiceProvider.getTranslator()
-                  .translate(
-                      "engineIllegalMoveAttempt",
-                      currentState.getCurrentPlayer().getName(),
-                      move.toString()));
+      if (CoreServiceProvider.getLogger().isDebugEnabled()) {
+        CoreServiceProvider.getLogger()
+            .debug(
+                CoreServiceProvider.getTranslator()
+                    .translate(
+                        "engineIllegalMoveAttempt",
+                        currentState.getCurrentPlayer().getName(),
+                        move.toString()));
+      }
       return false;
     }
 
@@ -94,10 +97,12 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      CoreServiceProvider.getLogger()
-          .info(
-              "{0} " + CoreServiceProvider.getTranslator().translate("won"),
-              currentPlayer.getName());
+      if (CoreServiceProvider.getLogger().isInfoEnabled()) {
+        CoreServiceProvider.getLogger()
+            .info(
+                "{0} {1}",
+                currentPlayer.getName(), CoreServiceProvider.getTranslator().translate("won"));
+      }
     }
     return true;
   }
@@ -115,8 +120,10 @@ public class GameEngine {
       blitzManager.pause();
     }
     state.reset(boardSize, players, blitzTimeoutMs);
-    CoreServiceProvider.getLogger()
-        .info(CoreServiceProvider.getTranslator().translate("engineNewGame", players.size()));
+    if (CoreServiceProvider.getLogger().isInfoEnabled()) {
+      CoreServiceProvider.getLogger()
+          .info(CoreServiceProvider.getTranslator().translate("engineNewGame", players.size()));
+    }
     initializeBlitz();
   }
 
@@ -137,8 +144,10 @@ public class GameEngine {
   /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
     if (state.getCurrentPlayer().isAI()) {
-      CoreServiceProvider.getLogger()
-          .info(CoreServiceProvider.getTranslator().translate("aiCannotPause"));
+      if (CoreServiceProvider.getLogger().isInfoEnabled()) {
+        CoreServiceProvider.getLogger()
+            .info(CoreServiceProvider.getTranslator().translate("aiCannotPause"));
+      }
       return;
     }
     final boolean newPauseState = !state.isPaused();
@@ -147,12 +156,16 @@ public class GameEngine {
     if (blitzManager != null) {
       if (newPauseState) {
         blitzManager.pause();
-        CoreServiceProvider.getLogger()
-            .info(CoreServiceProvider.getTranslator().translate("enginePause"));
+        if (CoreServiceProvider.getLogger().isInfoEnabled()) {
+          CoreServiceProvider.getLogger()
+              .info(CoreServiceProvider.getTranslator().translate("enginePause"));
+        }
       } else {
         blitzManager.start();
-        CoreServiceProvider.getLogger()
-            .info(CoreServiceProvider.getTranslator().translate("engineResume"));
+        if (CoreServiceProvider.getLogger().isInfoEnabled()) {
+          CoreServiceProvider.getLogger()
+              .info(CoreServiceProvider.getTranslator().translate("engineResume"));
+        }
       }
     }
   }

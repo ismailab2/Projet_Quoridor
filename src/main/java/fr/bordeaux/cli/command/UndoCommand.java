@@ -5,7 +5,6 @@ import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that cancels previously played moves. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class UndoCommand implements Command {
   /** Command tokens. */
   private String[] tokens;
@@ -36,11 +35,15 @@ public class UndoCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens.length >= 3) {
-      LOGGER.info(I18n.get("usage") + ": undo [N]");
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0}: undo [N]", I18n.get("usage"));
+      }
       return engine;
     }
     final int count = (tokens.length > 1) ? Integer.parseInt(tokens[1]) : 1;
-    LOGGER.info(I18n.get("undoing") + count + I18n.get("redoMove"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1}{2}", I18n.get("undoing"), count, I18n.get("redoMove"));
+    }
 
     for (int i = 0; i < count; i++) {
       engine.getState().undo();
@@ -51,16 +54,18 @@ public class UndoCommand implements Command {
   /** Displays help information for the undo command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("undoHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage") + ":");
-    LOGGER.info("  " + I18n.get("undoUsageOne"));
-    LOGGER.info("  " + I18n.get("undoUsageNb") + "\n");
-    LOGGER.info(I18n.get("description") + ":");
-    LOGGER.info("  " + I18n.get("undoDesc"));
-    LOGGER.verbose("  " + I18n.get("undoOne"));
-    LOGGER.verbose("  " + I18n.get("undoNb"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("undoHeader"), I18n.get("cliTitle"));
+      LOGGER.info("{0}:", I18n.get("usage"));
+      LOGGER.info("  {0}", I18n.get("undoUsageOne"));
+      LOGGER.info("  {0}\n", I18n.get("undoUsageNb"));
+      LOGGER.info("{0}:", I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("undoDesc"));
+    }
+    LOGGER.verbose("  {0}", I18n.get("undoOne"));
+    LOGGER.verbose("  {0}", I18n.get("undoNb"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  undo      -> " + I18n.get("undoExOne"));
-    LOGGER.verbose("  undo 2    -> " + I18n.get("undoExNb"));
+    LOGGER.verbose("  undo      -> {0}", I18n.get("undoExOne"));
+    LOGGER.verbose("  undo 2    -> {0}", I18n.get("undoExNb"));
   }
 }

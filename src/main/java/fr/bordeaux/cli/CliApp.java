@@ -18,7 +18,6 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
 /** Manages Quoridor CLI loop and commands. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class CliApp {
 
   /** Network move command literal. */
@@ -274,7 +273,9 @@ public class CliApp {
         terminal.close();
       }
     } catch (IOException exception) {
-      LOGGER.error(I18n.get("brutalClose"));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("brutalClose"));
+      }
     }
   }
 
@@ -283,7 +284,9 @@ public class CliApp {
     final Move move = currentAi.getNextMove(engine.getState());
     engine.play(move);
 
-    LOGGER.info(I18n.get("iaPlayed") + "{0}", move);
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1}", I18n.get("iaPlayed"), move);
+    }
   }
 
   /**
@@ -319,8 +322,12 @@ public class CliApp {
           }
 
           if (suggestion != null) {
-            LOGGER.debug(I18n.get("unknownCmd") + "'{0}'", command);
-            LOGGER.info(I18n.get("meant") + "{0} ? ", suggestion);
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("{0}'{1}'", I18n.get("unknownCmd"), command);
+            }
+            if (LOGGER.isInfoEnabled()) {
+              LOGGER.info("{0}{1} ? ", I18n.get("meant"), suggestion);
+            }
           }
 
           // Default behavior (interpret as move)
@@ -384,7 +391,9 @@ public class CliApp {
             handled = false;
           } else {
             networkClient.quit();
-            LOGGER.info(I18n.get("returnedLocal"));
+            if (LOGGER.isInfoEnabled()) {
+              LOGGER.info(I18n.get("returnedLocal"));
+            }
           }
         }
         default -> {
@@ -397,7 +406,9 @@ public class CliApp {
         }
       }
     } catch (final IllegalArgumentException exception) {
-      LOGGER.info(I18n.get("errorPrefix") + exception.getMessage());
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0}{1}", I18n.get("errorPrefix"), exception.getMessage());
+      }
       handled = true;
     }
     return handled;
@@ -410,7 +421,9 @@ public class CliApp {
    */
   private void handleServerCommand(final String[] tokens) {
     if (tokens.length < 2) {
-      LOGGER.info(I18n.get("usage") + " " + I18n.get("serverStartUsage"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0} {1}", I18n.get("usage"), I18n.get("serverStartUsage"));
+      }
       return;
     }
 
@@ -438,7 +451,9 @@ public class CliApp {
     final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_PORT;
 
     if (!networkClient.join(host, port)) {
-      LOGGER.info(I18n.get("failedConnect", host, ":") + port);
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0}{1}", I18n.get("failedConnect", host, ":"), port);
+      }
     }
   }
 
@@ -450,7 +465,9 @@ public class CliApp {
   private void handleHelloCommand(final String input) {
     final String name = input.substring(CMD_HELLO.length()).trim();
     if (name.isEmpty()) {
-      LOGGER.info(I18n.get("usage") + " " + I18n.get("helloUsage"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0} {1}", I18n.get("usage"), I18n.get("helloUsage"));
+      }
     } else {
       networkClient.hello(name);
     }
@@ -463,13 +480,17 @@ public class CliApp {
    */
   private void handleNetworkNewCommand(final String[] tokens) {
     if (tokens.length < 3 || tokens.length > 5) {
-      LOGGER.info(I18n.get("usage") + " " + I18n.get("netNewUsage"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0} {1}", I18n.get("usage"), I18n.get("netNewUsage"));
+      }
       return;
     }
 
     final String[] playerIds = new String[tokens.length - 1];
     System.arraycopy(tokens, 1, playerIds, 0, playerIds.length);
-    LOGGER.info(networkServer.createGame(playerIds));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info(networkServer.createGame(playerIds));
+    }
   }
 
   /**

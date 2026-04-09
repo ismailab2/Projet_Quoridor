@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 /** CLI command that displays global or detailed help information. help for a specific command. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class HelpCommand implements Command {
 
   /** Command entered by the user */
@@ -50,12 +49,18 @@ public class HelpCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens == null) {
-      LOGGER.debug(I18n.get("noCommand"));
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(I18n.get("noCommand"));
+      }
     } else if (tokens.length == UNIQUE_MATCH) {
-      LOGGER.debug(I18n.get("allCommandHelp"));
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(I18n.get("allCommandHelp"));
+      }
       helpCli();
     } else {
-      LOGGER.debug(I18n.get("helpFor"), tokens[1]);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(I18n.get("helpFor"), tokens[1]);
+      }
       helpFetch();
     }
     return engine;
@@ -64,33 +69,37 @@ public class HelpCommand implements Command {
   /** Displays a short help description for this command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("helpHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("helpUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("helpDesc"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("helpHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info("  {0}\n", I18n.get("helpUsage"));
+      LOGGER.info(I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("helpDesc"));
+    }
   }
 
   /** Displays the global help message listing all available CLI commands. */
   public void helpCli() {
-    LOGGER.info(I18n.get("cliHelp") + "\n");
-    LOGGER.info(I18n.get("commands") + " \n");
-    LOGGER.info("new [ARGS] :          " + I18n.get("helpNew"));
-    LOGGER.info("help [CMD] :          " + I18n.get("helpCmd"));
-    LOGGER.info("                      " + I18n.get("helpCmd2"));
-    LOGGER.info("help move :           " + I18n.get("helpMove"));
-    LOGGER.info("quit :                " + I18n.get("helpQuit"));
-    LOGGER.info("load [filename] :     " + I18n.get("helpLoad"));
-    LOGGER.info("save [filename] :     " + I18n.get("helpSave"));
-    LOGGER.info("pause :               " + I18n.get("helpPause"));
-    LOGGER.info("hint :                " + I18n.get("helpHint"));
-    LOGGER.info("undo [N] :            " + I18n.get("helpUndo"));
-    LOGGER.info("redo [N] :            " + I18n.get("helpRedo"));
-    LOGGER.info("show board :          " + I18n.get("helpBoard"));
-    LOGGER.info("show history :        " + I18n.get("helpHistory"));
-    LOGGER.info("show time :           " + I18n.get("helpTime"));
-    LOGGER.info("show configurations : " + I18n.get("helpConfigs"));
-    LOGGER.info("set PARAM=VALUE :     " + I18n.get("helpSet"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}\n", I18n.get("cliHelp"));
+      LOGGER.info("{0} \n", I18n.get("commands"));
+      LOGGER.info("new [ARGS] :          {0}", I18n.get("helpNew"));
+      LOGGER.info("help [CMD] :          {0}", I18n.get("helpCmd"));
+      LOGGER.info("                      {0}", I18n.get("helpCmd2"));
+      LOGGER.info("help move :           {0}", I18n.get("helpMove"));
+      LOGGER.info("quit :                {0}", I18n.get("helpQuit"));
+      LOGGER.info("load [filename] :     {0}", I18n.get("helpLoad"));
+      LOGGER.info("save [filename] :     {0}", I18n.get("helpSave"));
+      LOGGER.info("pause :               {0}", I18n.get("helpPause"));
+      LOGGER.info("hint :                {0}", I18n.get("helpHint"));
+      LOGGER.info("undo [N] :            {0}", I18n.get("helpUndo"));
+      LOGGER.info("redo [N] :            {0}", I18n.get("helpRedo"));
+      LOGGER.info("show board :          {0}", I18n.get("helpBoard"));
+      LOGGER.info("show history :        {0}", I18n.get("helpHistory"));
+      LOGGER.info("show time :           {0}", I18n.get("helpTime"));
+      LOGGER.info("show configurations : {0}", I18n.get("helpConfigs"));
+      LOGGER.info("set PARAM=VALUE :     {0}", I18n.get("helpSet"));
+    }
   }
 
   /**
@@ -99,7 +108,9 @@ public class HelpCommand implements Command {
    */
   public void helpFetch() {
     if (this.tokens.length <= UNIQUE_MATCH) {
-      LOGGER.info(I18n.get("usage") + " " + I18n.get("helpUsage"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0} {1}", I18n.get("usage"), I18n.get("helpUsage"));
+      }
     } else {
       final String commandName = tokens[1];
       if (registry.containsKey(commandName)) {
@@ -110,8 +121,12 @@ public class HelpCommand implements Command {
         final Command cmd = registry.get(commandName).apply(subTokens);
         cmd.helpText();
       } else {
-        LOGGER.debug(I18n.get("unknownCmd") + "{0}", commandName);
-        LOGGER.info(I18n.get("usage") + " " + I18n.get("helpUsage"));
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("{0}{1}", I18n.get("unknownCmd"), commandName);
+        }
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("{0} {1}", I18n.get("usage"), I18n.get("helpUsage"));
+        }
       }
     }
   }

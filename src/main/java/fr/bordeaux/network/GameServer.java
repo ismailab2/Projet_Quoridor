@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** TCP server for single client. Handles PING/QUIT and UDP broadcast. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameServer {
 
   /** Default constructor. Initializes a new GameServer instance. */
@@ -51,7 +50,9 @@ public class GameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Logger.getInstance().info(I18n.get("startedPort") + port);
+                if (Logger.getInstance().isInfoEnabled()) {
+                  Logger.getInstance().info("{0}{1}", I18n.get("startedPort"), port);
+                }
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -60,13 +61,17 @@ public class GameServer {
                 startTimeoutChecker();
 
                 clientSocket = serverSocket.accept();
-                Logger.getInstance().info(I18n.get("connectedClient"));
+                if (Logger.getInstance().isInfoEnabled()) {
+                  Logger.getInstance().info(I18n.get("connectedClient"));
+                }
 
                 new Thread(() -> handleClient(clientSocket)).start();
                 // handleClient(clientSocket);
 
               } catch (IOException e) {
-                Logger.getInstance().error(I18n.get("alreadyUsed") + e.getMessage());
+                if (Logger.getInstance().isErrorEnabled()) {
+                  Logger.getInstance().error("{0}{1}", I18n.get("alreadyUsed"), e.getMessage());
+                }
               }
             })
         .start();
@@ -79,7 +84,9 @@ public class GameServer {
               while (running.get()) {
 
                 if (System.currentTimeMillis() - lastPing > 60000) {
-                  Logger.getInstance().info(I18n.get("clientTimeout"));
+                  if (Logger.getInstance().isInfoEnabled()) {
+                    Logger.getInstance().info(I18n.get("clientTimeout"));
+                  }
                   stop();
                   break;
                 }
@@ -127,7 +134,9 @@ public class GameServer {
       }
 
     } catch (IOException e) {
-      Logger.getInstance().error(I18n.get("disconnected"));
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error(I18n.get("disconnected"));
+      }
     }
 
     stop();
@@ -157,6 +166,8 @@ public class GameServer {
     } catch (IOException ignored) {
     }
 
-    Logger.getInstance().info(I18n.get("stopped"));
+    if (Logger.getInstance().isInfoEnabled()) {
+      Logger.getInstance().info(I18n.get("stopped"));
+    }
   }
 }

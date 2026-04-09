@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Multi-client server for connectivity, creation, and communication. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MultiGameServer {
 
   /** TCP server socket used to accept client connections. */
@@ -126,7 +125,7 @@ public class MultiGameServer {
                 serverSocket = new ServerSocket(port);
                 running.set(true);
 
-                Logger.getInstance().info("Server started on port " + port);
+                Logger.getInstance().info("Server started on port {0}", port);
 
                 broadcaster = new ServerBroadcaster("Quoridor", port);
                 broadcastThread = new Thread(broadcaster);
@@ -168,7 +167,9 @@ public class MultiGameServer {
 
               } catch (final IOException e) {
                 if (running.get()) {
-                  Logger.getInstance().error("Server error: {0}", e.getMessage());
+                  if (Logger.getInstance().isErrorEnabled()) {
+                    Logger.getInstance().error("Server error: {0}", e.getMessage());
+                  }
                 }
               }
             });
@@ -188,7 +189,9 @@ public class MultiGameServer {
           break;
         }
         client.setLastPing(System.currentTimeMillis());
-        Logger.getInstance().info("{0} -> {1}", client.getId(), line);
+        if (Logger.getInstance().isInfoEnabled()) {
+          Logger.getInstance().info("{0} -> {1}", client.getId(), line);
+        }
 
         if (line.startsWith(HELLO_PREFIX)) {
           processHello(client, line);
@@ -205,7 +208,9 @@ public class MultiGameServer {
         }
       }
     } catch (final IOException e) {
-      Logger.getInstance().info("Client disconnected: {0}", e.getMessage());
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info("Client disconnected: {0}", e.getMessage());
+      }
     } finally {
       unregisterClient(client);
     }
@@ -386,7 +391,9 @@ public class MultiGameServer {
       }
     }
 
-    Logger.getInstance().info("Game {0} finished. Winner: {1}", game.getGameId(), winnerId);
+    if (Logger.getInstance().isInfoEnabled()) {
+      Logger.getInstance().info("Game {0} finished. Winner: {1}", game.getGameId(), winnerId);
+    }
     games.remove(game.getGameId());
   }
 
@@ -565,7 +572,9 @@ public class MultiGameServer {
                 final List<ClientSession> expiredClients = collectExpiredClients();
 
                 for (final ClientSession client : expiredClients) {
-                  Logger.getInstance().info(I18n.get("serverClientTimeout", client.getId()));
+                  if (Logger.getInstance().isInfoEnabled()) {
+                    Logger.getInstance().info(I18n.get("serverClientTimeout", client.getId()));
+                  }
                   client.send("ERROR timeout");
                   client.close();
                   unregisterClient(client);

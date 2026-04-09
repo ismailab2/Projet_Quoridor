@@ -15,7 +15,6 @@ import java.io.IOException;
  * Suggests the best move computed by the AI based on the current state. Minimax AI based on the
  * current game state.
  */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class HintCommand implements Command {
 
   /** Logger to display informations */
@@ -23,7 +22,9 @@ public class HintCommand implements Command {
 
   /** Creates a HintCommand. */
   public HintCommand() {
-    LOGGER.debug(I18n.get("hintInstantiating"));
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(I18n.get("hintInstantiating"));
+    }
   }
 
   /**
@@ -35,15 +36,21 @@ public class HintCommand implements Command {
    */
   @Override
   public GameEngine execute(final GameEngine engine) throws IOException {
-    LOGGER.info(I18n.get("hintCalc"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info(I18n.get("hintCalc"));
+    }
     final GameState state = engine.getState();
     final Move hint = MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true);
 
     if (!RuleChecker.isMoveLegal(state, hint)) {
-      LOGGER.error(I18n.get("suggestedLegal"), hint);
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("suggestedLegal"), hint);
+      }
     }
     final String bestMove = formatMove(hint);
-    LOGGER.info(I18n.get("hintPlay") + "{0}", bestMove);
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1}", I18n.get("hintPlay"), bestMove);
+    }
     return engine;
   }
 
@@ -79,14 +86,16 @@ public class HintCommand implements Command {
   /** Displays help information for the hint command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("hintHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("hintUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("hintHelp1"));
-    LOGGER.info("  " + I18n.get("hintHelp3"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("hintHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info("  {0}\n", I18n.get("hintUsage"));
+      LOGGER.info(I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("hintHelp1"));
+      LOGGER.info("  {0}", I18n.get("hintHelp3"));
+    }
     LOGGER.verbose(I18n.get("arguments"));
-    LOGGER.verbose("  " + I18n.get("hintHelp2"));
+    LOGGER.verbose("  {0}", I18n.get("hintHelp2"));
     LOGGER.verbose(I18n.get("hintHelpEx"));
   }
 }

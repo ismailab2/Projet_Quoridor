@@ -4,7 +4,6 @@ import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.util.Logger;
 
 /** Main entry point. Loads config, parses options, and resolves launch mode. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public final class MainApp {
 
   /** Default constructor. Constructs a new MainApp instance. */
@@ -34,7 +33,9 @@ public final class MainApp {
       }
 
     } catch (IllegalArgumentException exception) {
-      Logger.getInstance().error("{0}", exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("{0}", exception.getMessage());
+      }
       OptionsParser.printHelp();
       if (System.getProperty("quoridor.test") == null) {
         System.exit(1);

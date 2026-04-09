@@ -51,6 +51,12 @@ public final class CoreServiceProvider {
 
         @Override
         public void verbose(String m, Object... p) {}
+
+        @Override
+        public void prompt(String m) {}
+
+        @Override
+        public void raw(String m) {}
       };
 
   private CoreServiceProvider() {}
