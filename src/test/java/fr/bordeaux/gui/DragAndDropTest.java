@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
 import javafx.scene.input.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -47,17 +48,57 @@ class DragAndDropTest {
   // dragExited handler
   // When the mouse leaves a cell, it must go back to beige
   @Test
-  void dragExited_resetsStyleToBeige() throws Exception {
+  void dragExited_restoresOriginalStyle() throws Exception {
     StackPane targetCell = findCell(1, 4);
+    Dragboard dragboard = mock(Dragboard.class);
     DragEvent event = mock(DragEvent.class);
 
+    when(dragboard.hasContent(getPawnFormat())).thenReturn(true);
+    when(dragboard.getContent(getPawnFormat())).thenReturn("0,4");
+    when(event.getDragboard()).thenReturn(dragboard);
+
+    // Case 1: Initial style is green (highlighted)
     runAndWait(
         () -> {
           targetCell.setStyle("-fx-border-color: black; -fx-background-color: lightgreen;");
+          targetCell.getOnDragEntered().handle(event);
+          targetCell.getOnDragExited().handle(event);
+        });
+
+    runAndWait(() -> assertTrue(targetCell.getStyle().contains("lightgreen")));
+
+    // Case 2: Initial style is beige
+    runAndWait(
+        () -> {
+          targetCell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+          targetCell.getOnDragEntered().handle(event);
+          // Verify it turned green on enter because it's a legal move (1,4)
+          assertTrue(targetCell.getStyle().contains("lightgreen"));
           targetCell.getOnDragExited().handle(event);
         });
 
     runAndWait(() -> assertTrue(targetCell.getStyle().contains("beige")));
+    verify(event, atLeastOnce()).consume();
+  }
+
+  @Test
+  void dragEntered_updatesStyleIfMoveIsLegal() throws Exception {
+    StackPane targetCell = findCell(1, 4);
+    Dragboard dragboard = mock(Dragboard.class);
+    DragEvent event = mock(DragEvent.class);
+
+    when(dragboard.hasContent(getPawnFormat())).thenReturn(true);
+    when(dragboard.getContent(getPawnFormat())).thenReturn("0,4");
+    when(event.getDragboard()).thenReturn(dragboard);
+
+    runAndWait(
+        () -> {
+          targetCell.setStyle("-fx-border-color: black; -fx-background-color: beige;");
+          targetCell.getOnDragEntered().handle(event);
+        });
+
+    assertTrue(targetCell.getStyle().contains("lightgreen"));
+    verify(event).acceptTransferModes(TransferMode.ANY);
     verify(event).consume();
   }
 
@@ -124,7 +165,7 @@ class DragAndDropTest {
   }
 
   @Test
-  void dragEntered_legalMove_changesStyleToGreen() throws Exception {
+  void dragEntered_legalMove_isTransparent() throws Exception {
     StackPane targetCell = findCell(1, 4);
 
     Dragboard dragboard = mock(Dragboard.class);
@@ -136,12 +177,12 @@ class DragAndDropTest {
 
     runAndWait(() -> targetCell.getOnDragEntered().handle(event));
 
-    runAndWait(() -> assertTrue(targetCell.getStyle().contains("lightgreen")));
+    verify(event).acceptTransferModes(TransferMode.ANY);
     verify(event).consume();
   }
 
   @Test
-  void dragEntered_illegalMove_changesStyleToGray() throws Exception {
+  void dragEntered_illegalMove_isTransparent() throws Exception {
     StackPane targetCell = findCell(5, 5);
 
     Dragboard dragboard = mock(Dragboard.class);
@@ -153,7 +194,7 @@ class DragAndDropTest {
 
     runAndWait(() -> targetCell.getOnDragEntered().handle(event));
 
-    runAndWait(() -> assertTrue(targetCell.getStyle().contains("lightgray")));
+    verify(event).acceptTransferModes(TransferMode.ANY);
     verify(event).consume();
   }
 
@@ -170,7 +211,7 @@ class DragAndDropTest {
 
     runAndWait(() -> targetCell.getOnDragOver().handle(event));
 
-    verify(event).acceptTransferModes(TransferMode.MOVE);
+    verify(event).acceptTransferModes(TransferMode.ANY);
     verify(event).consume();
   }
 
@@ -234,7 +275,11 @@ class DragAndDropTest {
     GameEngine localEngine = new GameEngine(localState, false, false, false, false, 10);
     ActionDispatcher localDispatcher = new ActionDispatcher(localEngine, null);
     final BoardView[] viewRef = new BoardView[1];
-    runAndWait(() -> viewRef[0] = new BoardView(localEngine, localDispatcher));
+    runAndWait(
+        () -> {
+          viewRef[0] = new BoardView(localEngine, localDispatcher);
+          new Scene(viewRef[0]);
+        });
     BoardView mockedView = viewRef[0];
 
     Dragboard mockDragboard = mock(Dragboard.class);
@@ -256,7 +301,7 @@ class DragAndDropTest {
           Rectangle spyPawn = spy(realPawn);
 
           // Mock the native drag call to return our mock Dragboard
-          doReturn(mockDragboard).when(spyPawn).startDragAndDrop(any());
+          doReturn(mockDragboard).when(spyPawn).startDragAndDrop(any(TransferMode[].class));
 
           startCell.getChildren().set(0, spyPawn);
         });
@@ -284,7 +329,7 @@ class DragAndDropTest {
   }
 
   @Test
-  void dragOver_illegalMove_doesNotAcceptTransferMode() throws Exception {
+  void dragOver_illegalMove_acceptsTransferModeToAvoidBarredCircle() throws Exception {
     StackPane targetCell = findCell(5, 5);
 
     Dragboard dragboard = mock(Dragboard.class);
@@ -296,7 +341,7 @@ class DragAndDropTest {
 
     runAndWait(() -> targetCell.getOnDragOver().handle(event));
 
-    verify(event, never()).acceptTransferModes(TransferMode.MOVE);
+    verify(event).acceptTransferModes(TransferMode.ANY);
     verify(event).consume();
   }
 

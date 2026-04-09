@@ -7,6 +7,7 @@ import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
 import fr.bordeaux.core.RuleChecker;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -50,8 +51,26 @@ public final class DragAndDrop {
       final GameEngine engine, final BoardView boardView, final ActionDispatcher dispatcher) {
     final Runnable attachHandlers = () -> attachHandlers(engine, boardView, dispatcher);
     final GameState state = engine.getState();
+
+    // Initial attachment
     Platform.runLater(attachHandlers);
+
+    // Re-attach when the game state changes (e.g., after a move)
     state.addListener(() -> Platform.runLater(attachHandlers));
+
+    // Re-attach when the board is redrawn (e.g., on window resize)
+    boardView
+        .getChildren()
+        .addListener((ListChangeListener<Node>) c -> Platform.runLater(attachHandlers));
+
+    // Coverage for gaps and wall slots to avoid barred circle between cells
+    boardView.setOnDragOver(
+        event -> {
+          if (event.getDragboard().hasContent(PAWN_FORMAT)) {
+            event.acceptTransferModes(TransferMode.ANY);
+          }
+          event.consume();
+        });
   }
 
   /**
@@ -104,7 +123,10 @@ public final class DragAndDrop {
             return;
           }
 
-          final Dragboard dragboard = pawn.startDragAndDrop(TransferMode.MOVE);
+          final Dragboard dragboard = pawn.startDragAndDrop(TransferMode.ANY);
+          dragboard.setDragView(pawn.snapshot(null, null));
+          dragboard.setDragViewOffsetX(pawn.getWidth() / 2.0);
+          dragboard.setDragViewOffsetY(pawn.getHeight() / 2.0);
           dragboard.setContent(createPawnDragContent(row, col));
         });
   }
@@ -132,23 +154,31 @@ public final class DragAndDrop {
     cell.setOnDragEntered(
         event -> {
           if (event.getDragboard().hasContent(PAWN_FORMAT)) {
-            final boolean isLegal = isMoveLegal(engine, event.getDragboard(), toRow, toCol);
-            cell.setStyle(STYLE_BASE + (isLegal ? COLOR_LEGAL : COLOR_ILLEGAL));
+            final boolean wasHighlighted = cell.getStyle().contains(COLOR_LEGAL);
+            cell.getProperties().put("wasHighlighted", wasHighlighted);
+
+            if (isMoveLegal(engine, event.getDragboard(), toRow, toCol)) {
+              cell.setStyle(STYLE_BASE + COLOR_LEGAL);
+            }
+            event.acceptTransferModes(TransferMode.ANY);
           }
           event.consume();
         });
 
     cell.setOnDragExited(
         event -> {
-          cell.setStyle(STYLE_BASE + COLOR_NORMAL);
+          if (event.getDragboard().hasContent(PAWN_FORMAT)) {
+            final boolean wasHighlighted =
+                (boolean) cell.getProperties().getOrDefault("wasHighlighted", false);
+            cell.setStyle(STYLE_BASE + (wasHighlighted ? COLOR_LEGAL : COLOR_NORMAL));
+          }
           event.consume();
         });
 
     cell.setOnDragOver(
         event -> {
-          if (event.getDragboard().hasContent(PAWN_FORMAT)
-              && isMoveLegal(engine, event.getDragboard(), toRow, toCol)) {
-            event.acceptTransferModes(TransferMode.MOVE);
+          if (event.getDragboard().hasContent(PAWN_FORMAT)) {
+            event.acceptTransferModes(TransferMode.ANY);
           }
           event.consume();
         });
