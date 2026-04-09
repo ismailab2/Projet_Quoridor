@@ -116,7 +116,7 @@ public final class Logger implements DomainLogger {
   public static synchronized void setLogFile(final String logFile) {
     Logger.logFile = logFile;
   }
-  
+
   /** Resets the logger singleton instance. Useful for unit tests. */
   public static synchronized void resetInstance() {
     instance = null;
