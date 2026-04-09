@@ -89,7 +89,7 @@ Si le pion d’un autre joueur se trouve juste devant le pion du joueur actif, i
 Dans le cas où le pion est bloqué par un autre pion et qu’un mur ou le bord du plateau empêche de sauter directement derrière le pion, le joueur peut effectuer un déplacement en diagonale. Cette règle donne une flexibilité stratégique intéressante, car elle permet d’éviter les situations où un pion serait complètement coincé par les autres. Les déplacements diagonaux ne sont donc pas une option de base mais une solution spéciale pour résoudre des situations de blocage (Fig.~\ref{fig:regles_specifiques}).
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.45\linewidth]{regles3}
+    \includegraphics[width=0.40\linewidth]{regles3}
     \caption{Déplacement diagonal (saut d'un joueur)}
     \label{fig:regles_specifiques}
 \end{figure}
@@ -107,14 +107,14 @@ Un point fondamental est que le placement d’un mur ne doit jamais empêcher un
 Les murs permettent de ralentir un adversaire ou de forcer un joueur à modifier sa trajectoire. Bien placés, ils peuvent obliger l’adversaire à prendre un chemin beaucoup plus long et ainsi offrir un avantage stratégique. Cependant, poser un mur n’est jamais gratuit : chaque joueur dispose d’un nombre limité de murs, il faut donc les utiliser avec parcimonie et intelligence.
 \begin{figure}[H]
     \centering
-    \begin{minipage}{0.45\textwidth}
+    \begin{minipage}{0.35\textwidth}
         \centering
         \includegraphics[width=\linewidth]{regles1}
         \caption{Position de jeu normale}
         \label{fig:position_normale}
     \end{minipage}
     \hfill
-    \begin{minipage}{0.45\textwidth}
+    \begin{minipage}{0.35\textwidth}
         \centering
         \includegraphics[width=\linewidth]{regles2}
         \caption{Murs interdits}
@@ -936,6 +936,22 @@ et de structuration en couches, également recommandée par Fowler\cite{fowler20
 de construire un système robuste, flexible et modulaire, capable de répondre à tous les objectifs fonctionnels et techniques
 définis dans notre cahier des charges.
 
+
+\subsection{Vue de l'architecture en couches concentriques}
+Dans cette section, nous vous proposons notre architecture globale en couches concentriques.
+Les dépendances entre packages ne doivent pointer que vers l'intérieur du système. Le
+module \textbf{core} — qui contient les entités métier — ne connaît aucun autre
+module. Ce sont \textbf{network}, \textbf{gui} ou \textbf{cli} qui dépendent de \textbf{core},
+jamais l'inverse. Cette contrainte est visible dans le diagramme.
+
+Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
+\begin{figure}[H]
+    \centering
+    \frame{\includegraphics[width=.65\textwidth]{quoridor}}
+    \caption{Une architecture en couches concentriques}\label{fig:example1}
+\end{figure}
+
+
 \subsection{Vue d'ensemble des packages}
 
 Cette organisation en packages nous permet de structurer le projet de manière claire et cohérente. Chaque package a un rôle précis, ce qui favorise la modularité, la testabilité et la maintenance du code dans notre projet. De plus, elle nous facilite l’ajout futur de fonctionnalités, qu’il s’agisse d’IA avancées, de nouvelles interfaces ou de modes de jeu supplémentaires, tout en garantissant la robustesse et la cohérence des règles de Quoridor.
@@ -984,20 +1000,6 @@ Voici les onze packages distincts de notre projet, chacun ayant une responsabili
 \label{tab:packages}
 \end{table}
 
-\subsection{Vue en couches concentriques}
-Dans cette section, nous vous proposons notre architecture globale en couches concentriques.
-Les dépendances entre packages ne doivent pointer que vers l'intérieur du système. Le
-module \textbf{core} — qui contient les entités métier — ne connaît aucun autre
-module. Ce sont \textbf{network}, \textbf{gui} ou \textbf{cli} qui dépendent de \textbf{core},
-jamais l'inverse. Cette contrainte est visible dans le diagramme.
-
-Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
-\begin{figure}[H]
-    \centering
-    \frame{\includegraphics[width=.85\textwidth]{architecture_quoridor}}
-    \caption{Une architecture en couches concentriques}\label{fig:example1}
-\end{figure}
-
 \subsection{Couche Domaine --- Package \texttt{core}}
 
 Le module \textbf{core} est le cœur du système. Il encapsule l'intégralité de la logique
@@ -1010,7 +1012,7 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 Schéma de la couche Core de notre architecture (Fig.~\ref{fig:example0}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{core.jpg}}
+    \frame{\includegraphics[width=.65\textwidth]{core.jpg}}
     \caption{Le cœur métier (Core)}\label{fig:example0}
 \end{figure}
 
@@ -1027,7 +1029,7 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 Schéma de la couche Main de notre architecture (Fig.~\ref{fig:example2}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{main.jpg}}
+    \frame{\includegraphics[width=.65\textwidth]{main.jpg}}
     \caption{Couche Principale (Main)}\label{fig:example2}
 \end{figure}
 
@@ -1059,8 +1061,6 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
   \item \textbf{Persistance découplée} : notre \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les classes du \texttt{core}
   \item \textbf{Builder pour MinimaxPlayer} : on a une configuration déclarative et lisible de l’IA
 \end{itemize}
-
-\subsection{Axes d'amélioration}
 
 
 
