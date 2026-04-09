@@ -3,7 +3,6 @@ package fr.bordeaux.cli.command;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.i18n.I18n;
-import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.persistence.GameLoader;
 import fr.bordeaux.util.Logger;
 

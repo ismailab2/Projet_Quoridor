@@ -136,7 +136,9 @@ class ActionDispatcherTest extends ApplicationTest {
   void testLoadGame() throws IOException {
     try (MockedStatic<GameLoader> mockedLoader = mockStatic(GameLoader.class)) {
       when(fileHandler.chooseLoadFile()).thenReturn("test.txt");
-      mockedLoader.when(() -> GameLoader.loadGame(any(), anyString())).thenReturn(mock(GameState.class));
+      mockedLoader
+          .when(() -> GameLoader.loadGame(any(), anyString()))
+          .thenReturn(mock(GameState.class));
       dispatcher.dispatch(Action.LOAD_GAME);
       mockedLoader.verify(() -> GameLoader.loadGame(engine, "test.txt"));
     }

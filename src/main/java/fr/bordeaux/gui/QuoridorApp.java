@@ -197,8 +197,7 @@ public class QuoridorApp extends Application {
           statusLabel.setText(HINT_BUSY_TEXT);
 
           final CompletableFuture<Move> future =
-              CompletableFuture.supplyAsync(
-                  () -> computeHint(engine));
+              CompletableFuture.supplyAsync(() -> computeHint(engine));
 
           currentHintTask.set(future);
 

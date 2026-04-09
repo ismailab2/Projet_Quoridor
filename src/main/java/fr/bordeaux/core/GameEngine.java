@@ -2,7 +2,6 @@ package fr.bordeaux.core;
 
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
-import java.io.IOException;
 
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
 @SuppressWarnings({"PMD.GuardLogStatement"})
@@ -120,7 +119,8 @@ public class GameEngine {
   /**
    * Saves the current game state to a file.
    *
-  /** Reverts the last move made in the game. */
+   * <p>/** Reverts the last move made in the game.
+   */
   public void undo() {
     state.undo();
   }
@@ -149,7 +149,6 @@ public class GameEngine {
       }
     }
   }
-
 
   /**
    * Returns the current state of the game.

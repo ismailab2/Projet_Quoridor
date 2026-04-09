@@ -3,8 +3,6 @@ package fr.bordeaux.gui;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fr.bordeaux.ai.mcts.MctsPlayer;
-
 import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.util.List;
