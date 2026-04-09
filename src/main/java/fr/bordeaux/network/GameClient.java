@@ -21,9 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-/**
- * TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast.
- */
+/** TCP client for network commands and server discovery. */
 @SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameClient {
 
