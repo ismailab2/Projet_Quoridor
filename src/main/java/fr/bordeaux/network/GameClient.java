@@ -47,7 +47,7 @@ public class GameClient {
   private Consumer<String> serverMessageHandler;
 
   /** UDP port used for server discovery. */
-  private static final int DISCOVERY_PORT = 12346;
+  private int discoveryPort = 12346;
 
   /** Discovery listening window in milliseconds. */
   private static final long DISCOVERY_WINDOW_MS = 5000L;
@@ -227,7 +227,11 @@ public class GameClient {
     return message;
   }
 
-  /** Broadcasts "DISCOVER" and listens for server responses for 5s. */
+  /**
+   * Broadcasts "DISCOVER" and listens for server responses for 5s.
+   *
+   * @return a message indicating the result of the server list command.
+   */
   public String serverList() {
     try (DatagramSocket udpSocket = new DatagramSocket()) {
 
@@ -241,7 +245,7 @@ public class GameClient {
               msg.getBytes(StandardCharsets.UTF_8),
               msg.length(),
               InetAddress.getByName("255.255.255.255"),
-              12346);
+              discoveryPort);
 
       udpSocket.send(broadcastPacket);
 
@@ -250,7 +254,7 @@ public class GameClient {
               msg.getBytes(StandardCharsets.UTF_8),
               msg.length(),
               InetAddress.getByName("127.0.0.1"),
-              12346);
+              discoveryPort);
 
       udpSocket.send(localhostPacket);
 
@@ -335,5 +339,14 @@ public class GameClient {
     }
     writer.println("MOVE " + move);
     Logger.getInstance().verbose("Net Out: MOVE {0}", move);
+  }
+
+  /**
+   * Sets the UDP port used for server discovery.
+   *
+   * @param port The UDP port to use.
+   */
+  public void setDiscoveryPort(final int port) {
+    this.discoveryPort = port;
   }
 }

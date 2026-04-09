@@ -19,7 +19,7 @@ public class ServerBroadcaster implements Runnable {
   private final int port;
 
   /** UDP port used for broadcasting server presence. */
-  private static final int BROADCAST_PORT = 12_346;
+  private int broadcastPort = 12_346;
 
   /** Flag controlling the broadcasting loop */
   private final AtomicBoolean running = new AtomicBoolean(true);
@@ -61,7 +61,7 @@ public class ServerBroadcaster implements Runnable {
         final String msg = name + ":" + port;
         final byte[] buf = msg.getBytes(StandardCharsets.UTF_8);
 
-        final DatagramPacket packet = new DatagramPacket(buf, buf.length, address, BROADCAST_PORT);
+        final DatagramPacket packet = new DatagramPacket(buf, buf.length, address, broadcastPort);
         socket.send(packet);
 
         Thread.sleep(delayMs);
@@ -77,5 +77,14 @@ public class ServerBroadcaster implements Runnable {
   /** Sets running flag to false for graceful exit. */
   public void stop() {
     running.set(false);
+  }
+
+  /**
+   * Sets the UDP port used for broadcasting server presence.
+   *
+   * @param port The UDP port to use.
+   */
+  public void setBroadcastPort(final int port) {
+    this.broadcastPort = port;
   }
 }

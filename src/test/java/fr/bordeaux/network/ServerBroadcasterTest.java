@@ -10,11 +10,12 @@ public class ServerBroadcasterTest {
 
   @Test
   void testBroadcastMessage() throws Exception {
-    int listenPort = 12346;
-    DatagramSocket receiver = new DatagramSocket(listenPort);
+    DatagramSocket receiver = new DatagramSocket(0);
+    int listenPort = receiver.getLocalPort();
     receiver.setSoTimeout(2000);
 
     ServerBroadcaster broadcaster = new ServerBroadcaster("testServer", 9000, 10);
+    broadcaster.setBroadcastPort(listenPort);
     Thread broadcasterThread = new Thread(broadcaster);
     broadcasterThread.start();
 

@@ -14,6 +14,7 @@ import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.testfx.util.WaitForAsyncUtils;
 
 /**
  * @class BoardViewTest
@@ -460,20 +461,146 @@ class BoardViewTest {
   }
 
   @Test
-  void testHighlightMovePawn() {
+  void testHighlightedWallMoveAppearance() {
+    Move wallMove = Move.wall(new Position(2, 2), Orientation.HORIZONTAL);
+    boardView.highlightMove(wallMove);
+    WaitForAsyncUtils.waitForFxEvents();
+
+    Rectangle hint =
+        boardView.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().toString().toLowerCase().contains("40e0d0"))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(hint, "Hint rectangle should be added to the board");
+    assertEquals(Orientation.HORIZONTAL, wallMove.getOrientation());
+  }
+
+  @Test
+  void testHighlightedWallMoveInteraction() {
+    Move wallMove = Move.wall(new Position(3, 3), Orientation.VERTICAL);
+    boardView.highlightMove(wallMove);
+    WaitForAsyncUtils.waitForFxEvents();
+
+    Rectangle hint =
+        boardView.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().toString().toLowerCase().contains("40e0d0"))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(hint);
+
+    try (MockedStatic<RuleChecker> checker = mockStatic(RuleChecker.class)) {
+      checker.when(() -> RuleChecker.isMoveLegal(any(), any())).thenReturn(true);
+      when(player1.isAI()).thenReturn(false);
+
+      var event = mock(javafx.scene.input.MouseEvent.class);
+      hint.getOnMouseClicked().handle(event);
+
+      verify(dispatcher, atLeastOnce()).playBoardMove(argThat(Move::isWall));
+    }
+  }
+
+  @Test
+  void testHighlightedWallMoveHover() {
+    Move wallMove = Move.wall(new Position(1, 1), Orientation.HORIZONTAL);
+    boardView.highlightMove(wallMove);
+    WaitForAsyncUtils.waitForFxEvents();
+
+    Rectangle hint =
+        boardView.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().toString().toLowerCase().contains("40e0d0"))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(hint);
+
+    javafx.scene.paint.Paint originalFill = hint.getFill();
+    var event = mock(javafx.scene.input.MouseEvent.class);
+
+    hint.getOnMouseEntered().handle(event);
+    assertNotEquals(originalFill, hint.getFill());
+
+    hint.getOnMouseExited().handle(event);
+    assertEquals(originalFill, hint.getFill());
+  }
+
+  @Test
+  void testHighlightedPawnMoveAppearance() {
     Move pawnMove = Move.pawn(new Position(0, 0), new Position(0, 1));
-    assertDoesNotThrow(() -> boardView.highlightMove(pawnMove));
+    boardView.highlightMove(pawnMove);
+    WaitForAsyncUtils.waitForFxEvents();
+
+    StackPane cell = findCell(0, 1);
+    assertNotNull(cell);
+
+    Rectangle hint =
+        cell.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().toString().toLowerCase().contains("40e0d0"))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(hint, "Pawn hint rectangle should be added to the target cell");
   }
 
   @Test
-  void testHighlightMoveWallHorizontal() {
-    Move wallMove = Move.wall(new Position(0, 0), Orientation.HORIZONTAL);
-    assertDoesNotThrow(() -> boardView.highlightMove(wallMove));
+  void testHighlightedPawnMoveInteraction() {
+    Move pawnMove = Move.pawn(new Position(0, 0), new Position(0, 1));
+    boardView.highlightMove(pawnMove);
+    WaitForAsyncUtils.waitForFxEvents();
+
+    StackPane cell = findCell(0, 1);
+    Rectangle hint =
+        cell.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().toString().toLowerCase().contains("40e0d0"))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(hint);
+
+    when(player1.isAI()).thenReturn(false);
+
+    var event = mock(javafx.scene.input.MouseEvent.class);
+    when(event.getButton()).thenReturn(MouseButton.PRIMARY);
+    hint.getOnMouseClicked().handle(event);
+
+    verify(dispatcher, atLeastOnce()).playBoardMove(argThat(Move::isPawn));
   }
 
   @Test
-  void testHighlightMoveWallVertical() {
-    Move wallMove = Move.wall(new Position(0, 0), Orientation.VERTICAL);
-    assertDoesNotThrow(() -> boardView.highlightMove(wallMove));
+  void testHighlightedPawnMoveHover() {
+    Move pawnMove = Move.pawn(new Position(0, 0), new Position(1, 0));
+    boardView.highlightMove(pawnMove);
+    WaitForAsyncUtils.waitForFxEvents();
+
+    StackPane cell = findCell(1, 0);
+    Rectangle hint =
+        cell.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().toString().toLowerCase().contains("40e0d0"))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(hint);
+
+    javafx.scene.paint.Paint originalFill = hint.getFill();
+    var event = mock(javafx.scene.input.MouseEvent.class);
+
+    hint.getOnMouseEntered().handle(event);
+    assertNotEquals(originalFill, hint.getFill());
+
+    hint.getOnMouseExited().handle(event);
+    assertEquals(originalFill, hint.getFill());
   }
 }

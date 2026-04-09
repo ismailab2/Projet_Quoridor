@@ -235,14 +235,23 @@ public class GameClientTest {
 
   @Test
   void serverList_findsOneServer() throws Exception {
+    final int[] serverPort = new int[1];
+    final Object lock = new Object();
+
     Thread fakeServer =
         new Thread(
             () -> {
               try (DatagramSocket socket =
-                  new DatagramSocket(12346, InetAddress.getByName("0.0.0.0"))) {
+                  new DatagramSocket(0, InetAddress.getByName("0.0.0.0"))) {
+
+                synchronized (lock) {
+                  serverPort[0] = socket.getLocalPort();
+                  lock.notifyAll();
+                }
 
                 byte[] buffer = new byte[1024];
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+                socket.setSoTimeout(5000);
                 socket.receive(request);
 
                 String message =
@@ -262,7 +271,14 @@ public class GameClientTest {
 
     fakeServer.start();
 
+    synchronized (lock) {
+      if (serverPort[0] == 0) {
+        lock.wait(2000);
+      }
+    }
+
     GameClient client = new GameClient();
+    client.setDiscoveryPort(serverPort[0]);
     String result = client.serverList();
 
     fakeServer.join(1000);
