@@ -86,19 +86,41 @@ Enfin, une règle fondamentale est qu’une case ne peut jamais contenir deux pi
 Si le pion d’un autre joueur se trouve juste devant le pion du joueur actif, il est possible de le sauter. Ce saut permet de se déplacer de deux cases d’un coup, en "franchissant" le pion qui bloque le chemin. Cela ne peut se faire que si aucune autre barrière (mur ou bord du plateau) ne bloque directement l’espace derrière le pion à sauter.
 
 \paragraph{Saut diagonal}
-Dans le cas où le pion est bloqué par un autre pion et qu’un mur ou le bord du plateau empêche de sauter directement derrière le pion, le joueur peut effectuer un déplacement en diagonale. Cette règle donne une flexibilité stratégique intéressante, car elle permet d’éviter les situations où un pion serait complètement coincé par les autres. Les déplacements diagonaux ne sont donc pas une option de base mais une solution spéciale pour résoudre des situations de blocage.
+Dans le cas où le pion est bloqué par un autre pion et qu’un mur ou le bord du plateau empêche de sauter directement derrière le pion, le joueur peut effectuer un déplacement en diagonale. Cette règle donne une flexibilité stratégique intéressante, car elle permet d’éviter les situations où un pion serait complètement coincé par les autres. Les déplacements diagonaux ne sont donc pas une option de base mais une solution spéciale pour résoudre des situations de blocage (Fig.~\ref{fig:regles_specifiques}).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\linewidth]{regles3}
+    \caption{Déplacement diagonal (saut d'un joueur)}
+    \label{fig:regles_specifiques}
+\end{figure}
 
 \subsubsection{Pose des murs}
 
 Chaque joueur dispose d’un certain nombre de murs à poser. Le placement des murs est soumis à des règles strictes qui garantissent l’équité du jeu et empêchent de bloquer complètement un adversaire.
 
 \paragraph{Règles de base pour placer un mur}
-Un mur doit toujours bloquer exactement deux cases adjacentes. Il ne peut jamais être posé en diagonale ni traverser le plateau de façon irrégulière. Un mur posé reste définitivement sur le plateau et ne peut pas être déplacé ou retiré.
+Un mur doit toujours bloquer exactement deux cases adjacentes (voir Fig.~\ref{fig:position_normale} et Fig.~\ref{fig:murs_interdits}). Il ne peut jamais être posé en diagonale ni traverser le plateau de façon irrégulière. Un mur posé reste définitivement sur le plateau et ne peut pas être déplacé ou retiré.
 
 Un point fondamental est que le placement d’un mur ne doit jamais empêcher un joueur d’atteindre sa ligne d’arrivée. Autrement dit, il est impossible d’enfermer un joueur entre quatre murs ou de bloquer complètement toutes les routes possibles vers la victoire. Cette règle est cruciale pour que le jeu reste équitable et stratégique.
 
 \paragraph{Impact stratégique des murs}
 Les murs permettent de ralentir un adversaire ou de forcer un joueur à modifier sa trajectoire. Bien placés, ils peuvent obliger l’adversaire à prendre un chemin beaucoup plus long et ainsi offrir un avantage stratégique. Cependant, poser un mur n’est jamais gratuit : chaque joueur dispose d’un nombre limité de murs, il faut donc les utiliser avec parcimonie et intelligence.
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{regles1}
+        \caption{Position de jeu normale}
+        \label{fig:position_normale}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{regles2}
+        \caption{Murs interdits}
+        \label{fig:murs_interdits}
+    \end{minipage}
+\end{figure}
 
 \subsubsection{Interactions entre pions et murs}
 
@@ -133,42 +155,7 @@ Un joueur pourrait décider de ne pas poser de mur immédiatement pour avancer r
 En résumé, Quoridor repose sur des règles simples mais exigeantes : chaque pion se déplace d’une case, les murs sont limités et doivent être placés avec prudence, et il faut toujours laisser un chemin libre pour tous les joueurs. Les règles sur le saut et le saut diagonal ajoutent des subtilités qui enrichissent la stratégie. Cette combinaison de simplicité et de profondeur stratégique fait de Quoridor un jeu accessible mais riche, parfaitement adapté à l’étude des stratégies, à l’intelligence artificielle et à la réflexion logique.
 
 
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.55\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{regles2}
-        \caption{Murs interdits}
-        \label{fig:murs_interdits}
-    \end{minipage}
-    \hfill % Crée un espace élastique entre les deux blocs
-    \begin{minipage}{0.55\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{regles1}
-        \caption{Saut par dessus un joueur}
-        \label{fig:saut_joueur}
-    \end{minipage}
-\end{figure}
-\subsection{Contraintes et difficultés du jeu}
 
-
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{regles3}
-        \caption{Deplacement diagonal saut d'un joueur}
-        \label{fig:regles_specifiques}
-    \end{minipage}
-    \hfill % Crée un espace élastique entre les deux blocs
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{regles3}
-        \caption{Deplacement diagonal saut d'un joueur}
-        \label{fig:regles_specifiques_bis}
-    \end{minipage}
-\end{figure}
 
 
 \subsection{Contraintes et difficultés du jeu}
@@ -690,7 +677,7 @@ Théorie Approfondie de l'Algorithme Minimax et Élagage Alpha-Bêta
 L'Algorithme Minimax : Stratégie en IA pour les Jeux
 
 
-L'algorithme Minimax est une méthode conçue pour déterminer la meilleure action dans les jeux à deux joueurs, déterministes et à information complète. Dans son implémentation, l’algorithme suppose que l’adversaire joue le meilleur coup à sa disposition.  Il repose sur une analyse des possibilités de jeu, structurée sous la forme d'un arbre de décision.
+L'algorithme Minimax est une méthode conçue pour déterminer la meilleure action dans les jeux à deux joueurs, déterministes et à information complète. Dans son implémentation, l’algorithme suppose que l’adversaire joue le meilleur coup à sa disposition.  Il repose sur une analyse des possibilités de jeu, structurée sous la forme d'un arbre de décision (Fig.~\ref{fig:minimax}).
 
 Structure de l'Arbre de Jeu Minimax
 
@@ -807,7 +794,7 @@ Bien que l'algorithme Minimax soit redoutable, son exploration systématique mon
 
 \subparagraph{Mécanique de l'Algorithme Monte Carlo Tree Search}
 
-Contrairement au Minimax qui tente d'évaluer toutes les éventualités, le MCTS ne vérifie pas toutes les possibilités. Il s'agit d'une approche probabiliste, signifiant qu'elle fait intervenir l'aléatoire dans ses choix de simulation, et asymétrique, car elle concentre sa puissance de calcul pour explorer en profondeur les branches les plus prometteuses plutôt que de parcourir l'arbre de manière uniforme\cite{browne2012mcts}. Le processus itératif s'exécute en boucle selon quatre phases distinctes orchestrées par la méthode getBestMoveAfterSearch dans la classe MctsNode.
+Contrairement au Minimax qui tente d’évaluer toutes les éventualités, le MCTS ne vérifie pas toutes les possibilités. Il s’agit d’une approche probabiliste, signifiant qu’elle fait intervenir l’aléatoire dans ses choix de simulation, et asymétrique, car elle concentre sa puissance de calcul pour explorer en profondeur les branches les plus prometteuses plutôt que de parcourir l’arbre de manière uniforme\cite{browne2012mcts}. Le processus itératif s’exécute en boucle selon quatre phases distinctes orchestrées par la méthode getBestMoveAfterSearch dans la classe MctsNode (Fig.~\ref{fig:mcts}).
 
 \begin{figure}[H]
     \centering
@@ -846,7 +833,7 @@ Si la méthode UCT standard est très performante pour diriger la recherche, ell
 
 L'évaluation neuronale est encapsulée dans la classe NeuralNetworkEvaluator, qui sert d'interface avec le moteur de calcul TensorFlow. Ce modèle s'appuie spécifiquement sur une architecture de type régression logistique, ce qui correspond structurellement à l'utilisation d'un unique neurone artificiel.
 
-Le fonctionnement de ce neurone repose sur une équation mathématique fondamentale où la prédiction finale est le résultat de l'opération $P = \sigma(W \cdot X + b)$. Dans cette formule, la variable $X$ représente les caractéristiques en entrée fournies par le jeu. La variable $W$ désigne les poids de la matrice, représentant l'importance accordée par l'intelligence artificielle à chaque paramètre. Enfin, la variable $b$ correspond au biais, un ajustement numérique global indépendant des entrées.
+Le fonctionnement de ce neurone repose sur une équation mathématique fondamentale où la prédiction finale est le résultat de l'opération $P = \sigma(W \cdot X + b)$ (Fig.~\ref{fig:neurone}). Dans cette formule, la variable $X$ représente les caractéristiques en entrée fournies par le jeu. La variable $W$ désigne les poids de la matrice, représentant l'importance accordée par l'intelligence artificielle à chaque paramètre. Enfin, la variable $b$ correspond au biais, un ajustement numérique global indépendant des entrées.
 
 \begin{figure}[H]
     \centering
