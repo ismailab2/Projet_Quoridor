@@ -61,9 +61,9 @@ public class BlitzManagerTest {
 
     Thread.sleep(2500);
 
-    assertEquals(0, player.getRemainingTime(), "Le temps restant devrait être de 0");
-    assertTrue(state.isGameOver(), "La partie devrait être terminée (GameOver)");
-    assertFalse(blitz.isRunning(), "Le BlitzManager devrait s'être mis en pause tout seul");
+    assertEquals(0, player.getRemainingTime(), "The remaining time should be 0");
+    assertTrue(state.isGameOver(), "The game should be over (Game Over)");
+    assertFalse(blitz.isRunning(), "BlitzManager should have paused automatically");
   }
 
   @Test
@@ -73,12 +73,12 @@ public class BlitzManagerTest {
 
     blitz.start();
     blitz.pause();
-    assertFalse(blitz.isRunning(), "Le BlitzManager ne devrait plus être actif");
+    assertFalse(blitz.isRunning(), "BlitzManager should no longer be active");
 
     Thread.sleep(1500);
 
     assertEquals(
-        5000, player.getRemainingTime(), "Le temps ne devrait pas avoir diminué pendant la pause");
+        5000, player.getRemainingTime(), "The time shouldn't have decreased during the break");
   }
 
   /** Tests that the tick rate switches from slow (1s) to fast (10ms) below 60s. */
