@@ -53,7 +53,7 @@ Enfin, Quoridor est un excellent choix pour un projet informatique, car il combi
 
 Quoridor se joue sur un plateau carré composé de 9 × 9 cases dans sa version classique. Dans le cadre de notre projet, nous avons également envisagé des variantes avec des tailles différentes, allant de 3 × 3 à 15 × 15, à condition que la taille reste impaire. Cela permet de garder un bon équilibre entre les joueurs, car chacun part avec les mêmes chances.
 
-Le jeu peut se jouer à deux , trois ou à quatre joueurs. Dans une partie à 2, 3 4 joueurs, chacun commence sur une ligne opposée du plateau. Chaque joueur possède un pion qui représente sa position sur le plateau, ainsi qu’un certain nombre de murs. Au total, il y a 20 murs dans la partie, répartis entre les joueurs.
+Le jeu peut se jouer à deux, trois ou quatre joueurs. Dans une partie à 2, 3 ou 4 joueurs, chacun commence sur une ligne opposée du plateau. Chaque joueur possède un pion qui représente sa position sur le plateau, ainsi qu’un certain nombre de murs. Au total, il y a 20 murs dans la partie, répartis entre les joueurs.
 
 Le but du jeu est simple : être le premier à atteindre la ligne opposée à celle de départ. Même si cet objectif paraît facile à comprendre, le jeu devient rapidement complexe, car les joueurs peuvent se gêner entre eux.
 
@@ -72,7 +72,7 @@ D’un point de vue informatique, le plateau peut être vu comme un réseau de c
 En résumé, Quoridor est un jeu simple à comprendre mais difficile à maîtriser. Il demande à la fois de réfléchir à ses propres déplacements et d’anticiper ceux des autres joueurs. C’est ce mélange qui rend le jeu intéressant et qui explique pourquoi il est souvent utilisé dans des projets liés à l’intelligence artificielle.
 \subsection{Règles du jeu}
 
-Le Quoridor est un jeu de stratégie dont les règles sont simples à comprendre, mais dont la profondeur stratégique est très importante. Il se joue sur un plateau carré de 9 × 9 cases (des variantes existent avec des plateaux plus petits ou plus grands tant que la taille reste impaire comme nous avons détaillés ci-haut). Le but principal est de déplacer son pion depuis sa ligne de départ jusqu’à la ligne opposée avant les autres joueurs. Le jeu se joue à deux ou à quatre joueurs, et chaque joueur dispose d’un nombre limité de murs pour ralentir ses adversaires. Pour gagner, il faut combiner habilement déplacements et placement de murs.
+Le Quoridor est un jeu de stratégie dont les règles sont simples à comprendre, mais dont la profondeur stratégique est très importante. Il se joue sur un plateau carré de 9 × 9 cases (des variantes existent avec des plateaux plus petits ou plus grands tant que la taille reste impaire comme nous l'avons fait ci-dessus). Le but principal est de déplacer son pion depuis sa ligne de départ jusqu’à la ligne opposée avant les autres joueurs. Le jeu se joue à deux ou à quatre joueurs, et chaque joueur dispose d’un nombre limité de murs pour ralentir ses adversaires. Pour gagner, il faut combiner habilement déplacements et placement de murs.
 
 \subsubsection{Déplacement des pions}
 
@@ -214,8 +214,7 @@ En résumé, les contraintes de Quoridor peuvent être classées en plusieurs ca
     \item \textbf{Contraintes combinatoires :} grand nombre de coups possibles, explosion des positions envisageables.
     \item \textbf{Contraintes psychologiques :} nécessité d’anticipation, gestion de la pression et adaptation continue.
 \end{itemize}
-²c
-La combinaison de toutes ces contraintes rend le Quoridor extrêmement stimulant et difficile, tout en offrant une profondeur stratégique comparable à des jeux comme les échecs. La réussite dans ce jeu dépend de la capacité du joueur à gérer simultanément les ressources, les déplacements, l’anticipation des adversaires et l’évolution dynamique du plateau. C’est cette richesse et cette complexité qui en font un excellent support d’étude pour l’intelligence artificielle, la planification algorithmique et le développement de stratégies optimales.
+La combinaison de toutes ces contraintes rend le Quoridor extrêmement stimulant et difficile, tout en offrant une profondeur stratégique comparable à celle des échecs. La réussite dans ce jeu dépend de la capacité du joueur à gérer simultanément les ressources, les déplacements, l’anticipation des adversaires et l’évolution dynamique du plateau. C’est cette richesse et cette complexité qui en font un excellent support d’étude pour l’intelligence artificielle, la planification algorithmique et le développement de stratégies optimales.
 
 \subsection{Jeux ou implémentations existantes}
 
@@ -504,7 +503,7 @@ En résumé, l’implémentation réseau de Quoridor repose sur :
 \end{itemize}
 
 
-Cette approche permet non seulement de jouer à distance avec des amis ou d’autres utilisateurs, mais également de poser les bases d’une plateforme de jeu évolutive, modulable et sécurisée, tout en respectant strictement les règles du Quoridor original
+Cette approche permet non seulement de jouer à distance avec des amis ou d’autres utilisateurs, mais également de poser les bases d’une plateforme de jeu évolutive, modulable et sécurisée, tout en respectant strictement les règles du Quoridor original.
 
 
 \subsubsection{Structures de données utilisées}
@@ -660,9 +659,9 @@ Pour cela, nous avons implémenté plusieurs stratégies d’intelligence artifi
 
 Toutes les stratégies partagent une base commune : la classe abstraite
 
-AiPlayer, qui hérite elle-même de Player. Cette classe impose à chaque IA d’implémenter une seule méthode centrale : getNextMove(GameState state). C’est le point d’entrée unique par lequel le moteur de jeu demande à l’IA de choisir son prochain coup. Du point de vue du moteur, peu importe que l’IA soit aléatoire ou basée sur un réseau de neurones; elle répond toujours via cette même méthode. C’est le principe du polymorphisme en programmation orientée objet.
+AiPlayer, qui hérite elle-même de Player. Cette classe impose à chaque IA d’implémenter une seule méthode centrale : \texttt{getNextMove(GameState state)}. C’est le point d’entrée unique par lequel le moteur de jeu demande à l’IA de choisir son prochain coup. Du point de vue du moteur, peu importe que l’IA soit aléatoire ou basée sur un réseau de neurones ; elle répond toujours via cette même méthode. C’est le principe du polymorphisme en programmation orientée objet.
 
-Toute classe implémentant l'interface HeuristicEvaluator doit être capable d'analyser un état de jeu donné pour lui assigner une valeur ou un score numérique, ici elle impose que toutes les heuristiques aient une méthode Evaluate(GameState state). Cette interface permet de rendre les fonctions d’évaluation interchangeables à l’exécution, sans modifier le code de l’algorithme de recherche. C’est le patron de conception Strategy : on peut changer de stratégie d’évaluation comme on changerait de règle; l’algorithme qui utilise cette règle n’a pas besoin de savoir laquelle est active. Par conséquent, l'interface Strategy est représentée par HeuristicEvaluator. Les classes AdvancedHeuristic, IntermediateHeuristic et SimpleHeuristic sont les implémentations concrètes de cette stratégie. Enfin, MiniMaxPlayer agit comme le contexte qui utilise la stratégie définie par HeuristicEvaluator.
+Toute classe implémentant l'interface \texttt{HeuristicEvaluator} doit être capable d'analyser un état de jeu donné pour lui assigner une valeur ou un score numérique. Elle impose que toutes les heuristiques aient une méthode \texttt{evaluate(GameState state)}. Cette interface permet de rendre les fonctions d’évaluation interchangeables à l’exécution, sans modifier le code de l’algorithme de recherche. C’est le patron de conception Strategy : on peut changer de stratégie d’évaluation comme on changerait de règle ; l’algorithme qui utilise cette règle n’a pas besoin de savoir laquelle est active. Par conséquent, l'interface Strategy est représentée par \texttt{HeuristicEvaluator}. Les classes \texttt{AdvancedHeuristic}, \texttt{IntermediateHeuristic} et \texttt{SimpleHeuristic} sont les implémentations concrètes de cette stratégie. Enfin, \texttt{MiniMaxPlayer} agit comme le contexte qui utilise la stratégie définie par \texttt{HeuristicEvaluator}.
 
 
 \paragraph{Le Joueur Aléatoire (RandomPlayer) : Un Acteur Fondamental}
@@ -671,28 +670,21 @@ Toute classe implémentant l'interface HeuristicEvaluator doit être capable d'a
 Avant d'explorer des algorithmes plus avancés, définissons le RandomPlayer. Il identifie tous les coups légaux possibles et en choisit un au hasard, avec une probabilité égale pour chaque option. Il est utilisé si MiniMax est interrompu par manque de temps pour atteindre la profondeur définie en paramètre.
 
 
-Théorie Approfondie de l'Algorithme Minimax et Élagage Alpha-Bêta
+\paragraph{Théorie approfondie de l'algorithme Minimax et élagage alpha-bêta}
 
+\subparagraph{L'algorithme Minimax : stratégie en IA pour les jeux}
 
-L'Algorithme Minimax : Stratégie en IA pour les Jeux
+L'algorithme Minimax est une méthode conçue pour déterminer la meilleure action dans les jeux à deux joueurs, déterministes et à information complète. Dans son implémentation, l’algorithme suppose que l’adversaire joue le meilleur coup à sa disposition. Il repose sur une analyse des possibilités de jeu, structurée sous la forme d'un arbre de décision (Fig.~\ref{fig:minimax}).
 
-
-L'algorithme Minimax est une méthode conçue pour déterminer la meilleure action dans les jeux à deux joueurs, déterministes et à information complète. Dans son implémentation, l’algorithme suppose que l’adversaire joue le meilleur coup à sa disposition.  Il repose sur une analyse des possibilités de jeu, structurée sous la forme d'un arbre de décision (Fig.~\ref{fig:minimax}).
-
-Structure de l'Arbre de Jeu Minimax
+\subparagraph{Structure de l'arbre de jeu Minimax}
 
 \begin{enumerate}
 \item Racine : L'état initial du plateau.
-
-
 \item Branches : Chaque nœud se ramifie en branches représentant les coups légaux disponibles.
-
-
 \item Feuilles : Aux extrémités de l'exploration, une fonction d'évaluation heuristique attribue un score numérique à la position (avantage pour le joueur IA, le joueur MAX).
-
-
 \end{enumerate}
-Principe d'Alternance (MAX et MIN)
+
+\subparagraph{Principe d'alternance (MAX et MIN)}
 
 L'exploration de l'arbre alterne entre deux objectifs :
 
@@ -783,7 +775,7 @@ L'implémentation repose sur des structures de données spécifiquement choisies
 
 \paragraph{L'Approfondissement Itératif (Iterative Deepening)}
 
-Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'iterative deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. L'Iterative Deepening va donc introduire une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
+Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'Iterative Deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. Cette méthode introduit donc une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
 
 Cependant, l’inconvénient de cette méthode réside dans la redondance : chaque nouvelle itération recommence l'exploration des premiers niveaux de l'arbre déjà parcourus. Cependant, dans un jeu comme le Quoridor où le facteur de branchement est important, ce surcoût reste acceptable car le temps recalculé pour une profondeur $p$ va représenter un temps de calcul très faible par rapport à celui de l'itération finale.
 
@@ -811,7 +803,6 @@ Vient ensuite la phase d'expansion. Si le nœud sélectionné n'est pas un état
 
 Une optimisation majeure de cette phase d'expansion réside dans la vérification paresseuse des coups. Dans un jeu comme Quoridor, calculer la légalité absolue de toutes les poses de murs possibles est extrêmement lourd en ressources. Pour éviter ce goulet d'étranglement, la création du nœud génère uniquement des coups dits "pseudo-légaux". Ce type d’optimisation est couramment utilisé dans les implémentations pratiques du MCTS\cite{respall2018mcts}.
 
-Par ailleurs, l'algorithme gère de manière proactive le scénario où le coup tiré lors de l'expansion mène directement à une victoire. Si le nouvel état généré est identifié comme une fin de partie, il devient inutile de lancer des simulations supplémentaires. Le nœud est alors verrouillé et l'algorithme passe directement à la phase de rétropropagation.
 
 Dans le cas contraire, si l'expansion aboutit à un état en cours de jeu, l'algorithme enclenche la troisième phase : la simulation (Playout). À partir de ce nouveau nœud, l'algorithme simule une fin de partie en jouant une série de déplacements aléatoires jusqu'à déterminer un vainqueur.
 
@@ -827,7 +818,7 @@ Mathématiquement, l'algorithme calcule pour chaque nœud enfant un score compos
 
 \subparagraph{Les Limites de la Simulation Aléatoire et l'Introduction au Machine Learning}
 
-Si la méthode UCT standard est très performante pour diriger la recherche, elle repose fondamentalement sur la phase de simulation (le Playout aléatoire) pour évaluer la qualité d'un nœud. Dans un jeu complexe, jouer des coups au hasard jusqu'à la fin de la partie peut aboutir à des résultats chaotiques qui ne reflètent pas la véritable valeur stratégique d'une position. Un simple mur placé au hasard peut fausser toute l'évaluation. Pour pallier cette limite, l'intelligence artificielle introduit un modèle d'apprentissage automatique supervisé. La classe MctsPlayer agit alors comme un aiguilleur paramétrable offrant la possibilité de configurer le moteur de recherche selon deux modes exclusifs, c'est-à-dire en utilisant soit l'approche UCT traditionnelle, soit le réseau de neurones. Lorsque l'apprentissage automatique est sélectionné, le modèle neuronal évalue instantanément les chances de victoire de la position en cours au lieu de se fier au calcul mathématique classique. Cette approche remplace ainsi avantageusement la dépendance à la lourde phase de simulation aléatoire par une prédiction déterministe et stratégiquement éclairée. Le terme déterministe certifie que pour une configuration strictement identique du plateau, le réseau de neurones renverra toujours exactement le même score de victoire, puisqu'il remplace le hasard des simulations par un calcul matriciel aux paramètres fixes. Parallèlement, cette prédiction est qualifiée de stratégiquement éclairée car elle ne se base plus sur des déplacements effectués à l'aveugle. Le modèle analyse concrètement la qualité de la position en évaluant la véritable distance séparant les joueurs de leur ligne d'arrivée et en comptabilisant le nombre de murs restants dans les réserves, appliquant ainsi une réelle compréhension tactique acquise lors de son entraînement.
+Si la méthode UCT standard est très performante pour diriger la recherche, elle repose fondamentalement sur la phase de simulation (le Playout aléatoire) pour évaluer la qualité d'un nœud. Dans un jeu complexe, jouer des coups au hasard jusqu'à la fin de la partie peut aboutir à des résultats chaotiques qui ne reflètent pas la véritable valeur stratégique d'une position. Un simple mur placé au hasard peut fausser toute l'évaluation. Pour pallier cette limite, l'intelligence artificielle introduit un modèle d'apprentissage automatique supervisé, une architecture héritée des travaux révolutionnaires d'AlphaZero combinant recherche arborescente et évaluation neuronale\cite{silver2017alphazero}. La classe \texttt{MctsPlayer} agit alors comme un aiguilleur paramétrable offrant la possibilité de configurer le moteur de recherche selon deux modes exclusifs, c'est-à-dire en utilisant soit l'approche UCT traditionnelle, soit le réseau de neurones. Lorsque l'apprentissage automatique est sélectionné, le modèle neuronal évalue instantanément les chances de victoire de la position en cours au lieu de se fier au calcul mathématique classique. Cette approche remplace ainsi avantageusement la dépendance à la lourde phase de simulation aléatoire par une prédiction déterministe et stratégiquement éclairée. Le terme déterministe certifie que pour une configuration strictement identique du plateau, le réseau de neurones renverra toujours exactement le même score de victoire, puisqu'il remplace le hasard des simulations par un calcul matriciel aux paramètres fixes. Parallèlement, cette prédiction est qualifiée de stratégiquement éclairée car elle ne se base plus sur des déplacements effectués à l'aveugle. Le modèle analyse concrètement la qualité de la position en évaluant la véritable distance séparant les joueurs de leur ligne d'arrivée et en comptabilisant le nombre de murs restants dans les réserves, appliquant ainsi une réelle compréhension tactique acquise lors de son entraînement.
 
 \subparagraph{L'Architecture du Neurone et la Gestion des Tenseurs}
 
@@ -933,10 +924,7 @@ Dans le cadre de notre projet, la Clean Architecture est particulièrement adapt
     \item \textbf{Monte Carlo Tree Search (MCTS)}, pour explorer de manière probabiliste les coups et identifier les stratégies les plus prometteuses.
 \end{itemize}
 
-Chaque algorithme interagit uniquement avec le cœur métier via des interfaces abstraites, ce qui permet d’ajouter ou de remplacer
-un algorithme sans modifier la logique du jeu. Par exemple, nous pourrions expérimenter un nouvel algorithme hybride combinant
-MCTS et Minimax, ou encore intégrer des techniques d’apprentissage automatique pour améliorer les performances de l’IA, sans toucher
-au reste de l’architecture.
+Chaque algorithme interagit uniquement avec le cœur métier via des interfaces abstraites, ce qui permet d’ajouter ou de remplacer un algorithme sans modifier la logique du jeu. Par exemple, nous pourrions expérimenter un nouvel algorithme hybride combinant MCTS et Minimax, ou encore intégrer des techniques d’apprentissage automatique pour améliorer les performances de l’IA, sans toucher au reste de l’architecture.
 
 \paragraph{}
 
@@ -952,8 +940,7 @@ définis dans notre cahier des charges.
 
 Cette organisation en packages nous permet de structurer le projet de manière claire et cohérente. Chaque package a un rôle précis, ce qui favorise la modularité, la testabilité et la maintenance du code dans notre projet. De plus, elle nous facilite l’ajout futur de fonctionnalités, qu’il s’agisse d’IA avancées, de nouvelles interfaces ou de modes de jeu supplémentaires, tout en garantissant la robustesse et la cohérence des règles de Quoridor.
 
-Voici les  onze packages distincts de notre projet, chacun ayant une responsabilité bien définie que les decrivons de
-ici:
+Voici les onze packages distincts de notre projet, chacun ayant une responsabilité bien définie que nous décrivons ici :
 
 
 \begin{table}[H]
@@ -998,68 +985,68 @@ ici:
 \end{table}
 
 \subsection{Vue en couches concentriques}
-Dans cette section nous vous proposons notre archichesture global en couches concentriques.
-les dependances entre packages ne doivent pointer que vers l'interieur du systeme. Le
-module \textbf{core} qui contient les entites metier — ne connait aucun autre
-module. C'est \textbf{network}, \textbf{gui} ou \textbf{cli} qui dependent de \textbf{core},
+Dans cette section, nous vous proposons notre architecture globale en couches concentriques.
+Les dépendances entre packages ne doivent pointer que vers l'intérieur du système. Le
+module \textbf{core} — qui contient les entités métier — ne connaît aucun autre
+module. Ce sont \textbf{network}, \textbf{gui} ou \textbf{cli} qui dépendent de \textbf{core},
 jamais l'inverse. Cette contrainte est visible dans le diagramme.
 
-schema en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
+Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[H]
     \centering
     \frame{\includegraphics[width=.85\textwidth]{architecture_quoridor}}
-    \caption{Une architecture en couches}\label{fig:example1}
+    \caption{Une architecture en couches concentriques}\label{fig:example1}
 \end{figure}
 
 \subsection{Couche Domaine --- Package \texttt{core}}
 
-Le module \textbf{core} est le coeur du systeme. Il encapsule l'integralite de la logique
-metier du jeu et n'a aucune dependance externe. Le \textbf{RuleChecker}
-appelle le module \textbf{graph} pour verifier qu'apres la pose d'un mur, chaque joueur dispose encore
+Le module \textbf{core} est le cœur du système. Il encapsule l'intégralité de la logique
+métier du jeu et n'a aucune dépendance externe. Le \textbf{RuleChecker}
+appelle le module \textbf{graph} pour vérifier qu'après la pose d'un mur, chaque joueur dispose encore
 d'un chemin vers son bord cible.
 
-voici un diagramme indique comment son lié les differents classes du package core.
+Voici un diagramme indiquant comment sont liées les différentes classes du package Core.
 
-schema du couche core de notre architecture(Fig.~\ref{fig:example0}).
+Schéma de la couche Core de notre architecture (Fig.~\ref{fig:example0}).
 \begin{figure}[H]
     \centering
     \frame{\includegraphics[width=.85\textwidth]{core.jpg}}
-    \caption{Une architecture en couches}\label{fig:example0}
+    \caption{Le cœur métier (Core)}\label{fig:example0}
 \end{figure}
 
 \subsection{Couche Principale --- Package \texttt{Main}}
-Le module \textbf{Main} joue le role de \textbf{composition root}
-: il instancie tous les autres modules et cable leurs dependances. Il utilise le pattern \textbf{Factory}
-via \textit{AppLauncher} pour creer les adaptateurs selon le mode de lancement.
+Le module \textbf{Main} joue le rôle de \textbf{composition root}
+: il instancie tous les autres modules et câble leurs dépendances. Il utilise le pattern \textbf{Factory}
+via \textit{AppLauncher} pour créer les adaptateurs selon le mode de lancement.
 
-Au demarrage, le Main lit config (.quoridorrc) pour determiner le mode de jeu. Il instancie network si une partie reseau est demandee, gui pour le
-mode graphique, cli pour le mode terminal. Il injecte les dependances dans chaque module sans que ceux-ci se connaissent mutuellement.
+Au démarrage, le Main lit la configuration (.quoridorrc) pour déterminer le mode de jeu. Il instancie network si une partie réseau est demandée, gui pour le
+mode graphique, cli pour le mode terminal. Il injecte les dépendances dans chaque module sans que ceux-ci se connaissent mutuellement.
 
-voici un diagramme indique comment son lié les differents classes du package main.
+Voici un diagramme indiquant comment sont liées les différentes classes du package Main.
 
-schema du couche main de notre architecture (Fig.~\ref{fig:example2}).
+Schéma de la couche Main de notre architecture (Fig.~\ref{fig:example2}).
 \begin{figure}[H]
     \centering
     \frame{\includegraphics[width=.85\textwidth]{main.jpg}}
-    \caption{Une architecture en couches}\label{fig:example2}
+    \caption{Couche Principale (Main)}\label{fig:example2}
 \end{figure}
 
 \subsection{Interface CLI --- Pattern Command}
-Le  module \textbf{cli} implemente le pattern \textbf{Command}
-: chaque commande saisie est encapsulee dans un objet qui connait son
-action et peut etre annulee. Ce pattern est adapte a Quoridor car il
-permet de rejouer ou d'annuler l'historique des coups. Notre  cli  est instancie par Main au meme titre que gui et network. Il lit les
-entrees console, les parse, construit les objets Command correspondants et les execute sur \textit{GameEngine}.
-Le plateau est affiche en ASCII en sortie standard.
+Le module \textbf{cli} implémente le pattern \textbf{Command}
+: chaque commande saisie est encapsulée dans un objet qui connaît son
+action et peut être annulée. Ce pattern est adapté à Quoridor car il
+permet de rejouer ou d'annuler l'historique des coups. Notre CLI est instanciée par Main au même titre que GUI et Network. Il lit les
+entrées console, les analyse (parse), construit les objets Command correspondants et les exécute sur \textit{GameEngine}.
+Le plateau est affiché en ASCII sur la sortie standard.
 
-voici un diagramme indique comment son lié les differents classes du package cli.
+Voici un diagramme indiquant comment sont liées les différentes classes du package CLI.
 
 
 schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 \begin{figure}[H]
     \centering
     \frame{\includegraphics[width=.85\textwidth]{cli.jpg}}
-    \caption{Une architecture en couches}\label{fig:example3}
+    \caption{Couche CLI}\label{fig:example3}
 \end{figure}
 
 
@@ -1067,8 +1054,8 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 
 \begin{itemize}
   \item \textbf{Indépendance du domaine} : notre package \texttt{core} est sans dépendance externe
-  \item \textbf{Extensibilité de l’IA} : Si on veut implementer un nouveau algorithme d'IA on étend simplement \texttt{AiPlayer}
-  \item \textbf{Pattern Command en CLI} : on fait tester chaque commande indépendamment et elles sont extensible
+  \item \textbf{Extensibilité de l’IA} : si l'on veut implémenter un nouvel algorithme d'IA, on étend simplement \texttt{AiPlayer}
+  \item \textbf{Pattern Command en CLI} : on teste chaque commande indépendamment et elles sont extensibles
   \item \textbf{Persistance découplée} : notre \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les classes du \texttt{core}
   \item \textbf{Builder pour MinimaxPlayer} : on a une configuration déclarative et lisible de l’IA
 \end{itemize}
@@ -1189,7 +1176,7 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
         F40 & Réseau : Invitations & Système avancé d'invitations (accept/decline) et gestion des statuts joueurs. & Partiellement FAIT \\
         \hline
     \end{tabular}
-    \caption{Vue d'ensemble des besoins leurs realisations}
+    \caption{Vue d'ensemble des besoins et leurs réalisations}
     \label{tab:besoins4colonnes}
 \end{table}
 
