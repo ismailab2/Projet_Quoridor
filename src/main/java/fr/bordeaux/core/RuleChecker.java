@@ -1,6 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.i18n.I18n;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,7 @@ public final class RuleChecker {
 
   /** Private constructor to prevent instantiation. */
   private RuleChecker() {
-    throw new AssertionError(I18n.get("assertChecker"));
+    throw new AssertionError(CoreServiceProvider.getTranslator().translate("assertChecker"));
   }
 
   /**

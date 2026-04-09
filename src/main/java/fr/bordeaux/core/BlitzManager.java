@@ -1,6 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.util.Logger;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -103,7 +102,8 @@ public class BlitzManager {
         }
 
       } catch (Exception e) {
-        Logger.getInstance().error("Blitz task failed", e);
+        CoreServiceProvider.getLogger()
+            .error(CoreServiceProvider.getTranslator().translate("blitzTaskFailed"), e);
       }
     }
   }

@@ -1,5 +1,7 @@
 package fr.bordeaux.i18n;
 
+import fr.bordeaux.core.CoreServiceProvider;
+import fr.bordeaux.core.DomainTranslator;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -7,7 +9,7 @@ import java.util.ResourceBundle;
  * Provides internationalization support for the application. Manages resource bundles, locale
  * settings, and translated UI strings.
  */
-public final class I18n {
+public final class I18n implements DomainTranslator {
   /** Base path of the translation bundles. */
   private static final String BUNDLE_NAME = "international/messages";
 
@@ -16,11 +18,30 @@ public final class I18n {
 
   /** Initializes the default locale used by the application. */
   static {
+    initialize();
+  }
+
+  /** Force initialization and registration. */
+  public static void initialize() {
     if (System.getProperty("quoridor.test") != null) {
       setLocale(Locale.ENGLISH);
     } else {
       setLocale(getLocaleFromEnv(System.getenv()));
     }
+    // Register as the domain translator
+    CoreServiceProvider.setTranslator(getInstance());
+  }
+
+  /** Singleton instance for domain service registration. */
+  private static final I18n INSTANCE = new I18n();
+
+  /**
+   * Get the singleton instance.
+   *
+   * @return the singleton instance.
+   */
+  public static I18n getInstance() {
+    return INSTANCE;
   }
 
   /**
@@ -53,6 +74,16 @@ public final class I18n {
    */
   public static void setLocale(final Locale locale) {
     bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+  }
+
+  @Override
+  public String translate(final String key) {
+    return get(key);
+  }
+
+  @Override
+  public String translate(final String key, final Object... params) {
+    return get(key, params);
   }
 
   /**

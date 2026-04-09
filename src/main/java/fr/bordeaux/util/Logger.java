@@ -1,6 +1,8 @@
 package fr.bordeaux.util;
 
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.core.CoreServiceProvider;
+import fr.bordeaux.core.DomainLogger;
 import fr.bordeaux.i18n.I18n;
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.text.MessageFormat;
  * <p>Thread-safe Singleton pattern.
  */
 @SuppressWarnings({"PMD.SystemPrintln", "PMD.SingleMethodSingleton"})
-public final class Logger {
+public final class Logger implements DomainLogger {
   /** ANSI escape code to reset text formatting to default. */
   private static final String RESET = "\u001B[0m";
 
@@ -82,6 +84,8 @@ public final class Logger {
     if (instance == null) {
       instance = new Logger();
       instance.refreshConfig();
+      // Register as the domain logger
+      CoreServiceProvider.setLogger(instance);
     }
     return instance;
   }
@@ -96,6 +100,8 @@ public final class Logger {
     if (instance == null) {
       instance = new Logger(logFile);
       instance.refreshConfig();
+      // Register as the domain logger
+      CoreServiceProvider.setLogger(instance);
     }
     return instance;
   }
@@ -109,6 +115,7 @@ public final class Logger {
    *
    * @param message message to display
    */
+  @Override
   public void info(final String message) {
     if (isInfoEnabled()) {
       log("[INFO]", message, CYAN);
@@ -121,6 +128,7 @@ public final class Logger {
    * @param format message format (MessageFormat style, e.g., "{0}")
    * @param args les arguments du message
    */
+  @Override
   public void info(final String format, final Object... args) {
     if (isInfoEnabled()) {
       log("[INFO]", MessageFormat.format(format, args), CYAN);
@@ -155,6 +163,7 @@ public final class Logger {
    *
    * @param message message to display
    */
+  @Override
   public void debug(final String message) {
     if (isDebugEnabled()) {
       log("[DEBUG]", message, YELLOW);
@@ -167,6 +176,7 @@ public final class Logger {
    * @param format le format du message
    * @param args les arguments du message
    */
+  @Override
   public void debug(final String format, final Object... args) {
     if (isDebugEnabled()) {
       log("[DEBUG]", MessageFormat.format(format, args), YELLOW);
@@ -178,6 +188,7 @@ public final class Logger {
    *
    * @param message message to display
    */
+  @Override
   public void verbose(final String message) {
     if (isVerboseEnabled()) {
       log("[VERBOSE]", message, GREEN);
@@ -190,20 +201,10 @@ public final class Logger {
    * @param format le format du message
    * @param args les arguments du message
    */
+  @Override
   public void verbose(final String format, final Object... args) {
     if (isVerboseEnabled()) {
       log("[VERBOSE]", MessageFormat.format(format, args), GREEN);
-    }
-  }
-
-  /**
-   * Log un message de niveau TRACE.
-   *
-   * @param message message très détaillé
-   */
-  public void trace(final String message) {
-    if (isVerboseEnabled()) {
-      log("[TRACE]", message, GREEN);
     }
   }
 
@@ -212,6 +213,7 @@ public final class Logger {
    *
    * @param message message to display
    */
+  @Override
   public void error(final String message) {
     if (isErrorEnabled()) {
       log("[ERROR]", message, RED);
@@ -224,6 +226,7 @@ public final class Logger {
    * @param format le format du message
    * @param args les arguments du message
    */
+  @Override
   public void error(final String format, final Object... args) {
     if (isErrorEnabled()) {
       log("[ERROR]", MessageFormat.format(format, args), RED);
@@ -236,6 +239,7 @@ public final class Logger {
    * @param message message d'erreur
    * @param exception exception associée
    */
+  @Override
   public void error(final String message, final Throwable exception) {
     if (isErrorEnabled()) {
       log(

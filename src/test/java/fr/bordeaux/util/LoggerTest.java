@@ -103,24 +103,6 @@ public class LoggerTest {
   }
 
   @Test
-  void testTrace_StdoutWhenVerbose() {
-    Logger logger = Logger.getInstance();
-    // Simulate verbose enabled (might need refreshConfig or reflection)
-    try {
-      Field verboseField = Logger.class.getDeclaredField("verboseEnabled");
-      verboseField.setAccessible(true);
-      verboseField.set(logger, true);
-    } catch (Exception e) {
-      fail(e.getMessage());
-    }
-
-    logger.trace("Test Trace");
-    String output = capturedOut.toString();
-    assertTrue(output.contains("[TRACE]"), "Output was: " + output);
-    assertTrue(output.contains("Test Trace"), "Output was: " + output);
-  }
-
-  @Test
   void testPrivateConstructor_IOExceptionFallback() {
     String invalidFileName = ".";
     Logger logger = Logger.getInstance(invalidFileName);
@@ -151,7 +133,6 @@ public class LoggerTest {
     logger.debug("Debug {0}", "param");
     logger.verbose("Verbose string");
     logger.verbose("Verbose {0}", "param");
-    logger.trace("Trace string");
 
     String out = capturedOut.toString();
     String err = capturedErr.toString();

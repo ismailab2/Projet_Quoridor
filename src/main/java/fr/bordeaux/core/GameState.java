@@ -1,6 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.i18n.I18n;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -47,7 +46,8 @@ public class GameState {
    */
   public GameState(final Board board, final List<Player> players, final int playerIndex) {
     if (players.size() < MIN_PLAYERS || players.size() > MAX_PLAYERS) {
-      throw new IllegalArgumentException(I18n.get("playersMust") + players.size());
+      throw new IllegalArgumentException(
+          CoreServiceProvider.getTranslator().translate("playersMust") + players.size());
     }
 
     this.board = board;

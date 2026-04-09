@@ -1,8 +1,5 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.i18n.I18n;
-import fr.bordeaux.util.Logger;
-
 /** Core engine for Quoridor game logic, player turns, and AI hints. */
 @SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameEngine {
@@ -71,22 +68,25 @@ public class GameEngine {
   public boolean play(final Move move) {
     final GameState currentState = this.state;
     if (currentState.isGameOver() || currentState.isPaused()) {
-      Logger.getInstance().info(I18n.get("overPause"));
+      CoreServiceProvider.getLogger()
+          .info(CoreServiceProvider.getTranslator().translate("overPause"));
       return false;
     }
 
     if (!RuleChecker.isMoveLegal(currentState, move)) {
-      Logger.getInstance()
+      CoreServiceProvider.getLogger()
           .debug(
-              I18n.get(
-                  "engineIllegalMoveAttempt",
-                  currentState.getCurrentPlayer().getName(),
-                  move.toString()));
+              CoreServiceProvider.getTranslator()
+                  .translate(
+                      "engineIllegalMoveAttempt",
+                      currentState.getCurrentPlayer().getName(),
+                      move.toString()));
       return false;
     }
 
     final Player currentPlayer = currentState.getCurrentPlayer();
-    Logger.getInstance().verbose("Player {0} playing move: {1}", currentPlayer.getName(), move);
+    CoreServiceProvider.getLogger()
+        .verbose("Player {0} playing move: {1}", currentPlayer.getName(), move);
     currentState.applyMove(move);
 
     if (currentState.hasReachedGoal(currentPlayer)) {
@@ -94,7 +94,10 @@ public class GameEngine {
       if (blitzManager != null) {
         blitzManager.pause();
       }
-      Logger.getInstance().info("{0} " + I18n.get("won"), currentPlayer.getName());
+      CoreServiceProvider.getLogger()
+          .info(
+              "{0} " + CoreServiceProvider.getTranslator().translate("won"),
+              currentPlayer.getName());
     }
     return true;
   }
@@ -112,7 +115,8 @@ public class GameEngine {
       blitzManager.pause();
     }
     state.reset(boardSize, players, blitzTimeoutMs);
-    Logger.getInstance().info(I18n.get("engineNewGame", players.size()));
+    CoreServiceProvider.getLogger()
+        .info(CoreServiceProvider.getTranslator().translate("engineNewGame", players.size()));
     initializeBlitz();
   }
 
@@ -133,7 +137,8 @@ public class GameEngine {
   /** Toggles the pause state of the game and synchronization with the Blitz timer. */
   public void pause() {
     if (state.getCurrentPlayer().isAI()) {
-      Logger.getInstance().info("AI cannot pause the game.");
+      CoreServiceProvider.getLogger()
+          .info(CoreServiceProvider.getTranslator().translate("aiCannotPause"));
       return;
     }
     final boolean newPauseState = !state.isPaused();
@@ -142,10 +147,12 @@ public class GameEngine {
     if (blitzManager != null) {
       if (newPauseState) {
         blitzManager.pause();
-        Logger.getInstance().info(I18n.get("enginePause"));
+        CoreServiceProvider.getLogger()
+            .info(CoreServiceProvider.getTranslator().translate("enginePause"));
       } else {
         blitzManager.start();
-        Logger.getInstance().info(I18n.get("engineResume"));
+        CoreServiceProvider.getLogger()
+            .info(CoreServiceProvider.getTranslator().translate("engineResume"));
       }
     }
   }
