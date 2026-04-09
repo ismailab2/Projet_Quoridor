@@ -9,7 +9,10 @@ import java.util.Scanner;
 /** CLI interface for network features. Start/stop server, join, ping. */
 public class NetworkLauncher implements AppLauncher {
 
+  /** Default host used when no address is provided. */
   private static final String DEFAULT_HOST = "localhost";
+  
+  /** Default TCP port used when no port is provided. */
   private static final int DEFAULT_PORT = 12345;
 
   /** Multi-game server managing multiple simultaneous games and players. */
@@ -137,7 +140,7 @@ public class NetworkLauncher implements AppLauncher {
             final String move = cmd.substring("move ".length()).trim();
             client.sendMove(move);
           } else if ("server list".equals(cmd)) {
-            client.serverList();
+            Logger.getInstance().info("{0}", client.serverList());
           } else if ("quit".equals(cmd) || "exit".equals(cmd)) {
             if ("quit".equals(cmd)) {
               client.quit();

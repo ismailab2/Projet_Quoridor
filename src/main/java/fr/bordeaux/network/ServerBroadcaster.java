@@ -20,6 +20,9 @@ public class ServerBroadcaster implements Runnable {
   /** UDP port used for broadcasting server presence. */
   private int broadcastPort = 12_346;
 
+  /** Broadcast address used for UDP server discovery. */
+  private static final String BROADCAST_ADDRESS = "255.255.255.255";
+
   /** Flag controlling the broadcasting loop */
   private final AtomicBoolean running = new AtomicBoolean(true);
 
@@ -54,17 +57,15 @@ public class ServerBroadcaster implements Runnable {
   public void run() {
     try (DatagramSocket socket = new DatagramSocket()) {
       socket.setBroadcast(true);
-      final InetAddress address = InetAddress.getLoopbackAddress();
+      final InetAddress address = InetAddress.getByName(BROADCAST_ADDRESS);
 
+      final String msg = name + ":" + port;
+      final byte[] buf = msg.getBytes(StandardCharsets.UTF_8);
+      final DatagramPacket packet = new DatagramPacket(buf, buf.length, address, broadcastPort);
       while (running.get()) {
-        final String msg = name + ":" + port;
-        final byte[] buf = msg.getBytes(StandardCharsets.UTF_8);
-
-        final DatagramPacket packet = new DatagramPacket(buf, buf.length, address, broadcastPort);
-        socket.send(packet);
-
-        Thread.sleep(delayMs);
-      }
+      socket.send(packet);
+      Thread.sleep(delayMs);
+    }
     } catch (final IOException e) {
       if (Logger.getInstance().isErrorEnabled()) {
         Logger.getInstance().error("UDP Broadcast I/O error: {0}", e.getMessage());
