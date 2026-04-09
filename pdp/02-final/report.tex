@@ -176,7 +176,7 @@ Ces adaptations numériques ont grandement contribué à la popularité actuelle
 Au‑delà des versions commerciales et des plateformes en ligne, le jeu a inspiré de nombreux passionnés à créer leurs propres implémentations. Sur des plateformes de partage de code telles que GitHub, il est possible de trouver plusieurs projets qui reproduisent ou étendent Quoridor dans des langages de programmation variés.
 
 
-Deux exemples de projets particulièrement intéressants illustrent cette diversité. \textbf{Le dépôt de \textit{alainrinder}}, disponible à l’adresse \href{https://github.com/alainrinder/quoridor.py}{https://github.com/alainrinder/quoridor.py}, propose une implémentation en Python avec interface graphique, idéale pour étudier le jeu ou développer une IA. Parallèlement, \textbf{le dépôt de \textit{pavlosdais}}, accessible sur \href{https://github.com/pavlosdais/Quoridor}{https://github.com/pavlosdais/Quoridor}, propose une version en langage C fonctionnant dans le terminal, utile pour comprendre les mécanismes internes et implémenter des moteurs légers.
+Deux exemples de projets particulièrement intéressants illustrent cette diversité. \textbf{Le dépôt de \textit{alainrinder}}, disponible à l’adresse \href{https://github.com/alainrinder/quoridor.py}{\url{https://github.com/alainrinder/quoridor.py}}, propose une implémentation en Python avec interface graphique, idéale pour étudier le jeu ou développer une IA. Parallèlement, \textbf{le dépôt de \textit{pavlosdais}}, accessible sur \href{https://github.com/pavlosdais/Quoridor}{\url{https://github.com/pavlosdais/Quoridor}}, propose une version en langage C fonctionnant dans le terminal, utile pour comprendre les mécanismes internes et implémenter des moteurs légers.
 
 Ces projets sont des ressources précieuses pour les développeurs, car ils permettent de manipuler directement les structures de données associées aux plateaux, aux pions et aux murs. Ils servent aussi de point de départ pour expérimenter différentes stratégies d’IA ou pour intégrer le jeu dans des environnements plus larges.
 
@@ -635,7 +635,7 @@ ou de communication, ce qui garantit que la logique métier reste cohérente et 
 Cette approche est cohérente avec les recommandations de Fowler\cite{fowler2002patterns} sur les patterns d’architecture logicielle.
 Fowler insiste sur la nécessité de séparer les préoccupations et de structurer les systèmes en couches bien définies, afin de réduire
 les dépendances entre les composants et de faciliter la maintenance.
-En suivant ce principe, notre architecture repose sur des couches clairement identifiées : le \textbf{Cœur métier (\texttt{Core})} qui regroupe les entités métier et les règles de validation ; les \textbf{Interfaces d’adaptation (\texttt{Adapters})} qui servent de points d’entrée et de sortie comme la CLI ou la GUI ; et l'\textbf{Infrastructure (\texttt{Infrastructure})} qui assure la communication concrète et la persistance.
+En suivant ce principe, notre architecture repose sur quatre couches concentriques clairement identifiées : la \textbf{Lancement et Initialisation (\texttt{L1})} qui regroupe le mode de démarrage (\texttt{main}) et les interfaces utilisateur ; les \textbf{Adaptateurs applicatifs (\texttt{L2})} incluant l'intelligence artificielle et la persistance ; le \textbf{Support Domaine (\texttt{L3})} fournissant les services techniques comme le logging et la traduction ; et enfin le \textbf{centre du système (\texttt{L4})} constitué du cœur métier pur (\texttt{Core} et \texttt{Graph}).
 
 \paragraph{Avantages pratiques de cette approche}
 
@@ -691,7 +691,7 @@ Voici les onze packages distincts de notre projet, chacun ayant une responsabili
     Ce package est totalement indépendant des interfaces graphiques, de la ligne de commande ou des modules réseau,
     ce qui garantit que toutes les règles sont appliquées de manière cohérente, quel que soit le mode de jeu choisi. \\
     \hline
-    Main & contient le point d’entrée de l’application. Il est responsable de la résolution du mode de lancement,
+    main & contient le point d’entrée de l’application. Il est responsable de la résolution du mode de lancement,
     que ce soit en CLI, en GUI ou en réseau, et applique le patron \textit{Factory} pour initialiser les composants
     nécessaires selon le contexte. Cette centralisation du lancement permet de simplifier la configuration initiale
     et de garantir que tous les modules sont correctement instanciés avant le démarrage de la partie. \\
@@ -722,16 +722,21 @@ Voici les onze packages distincts de notre projet, chacun ayant une responsabili
 
 
 \subsection{Vue de l'architecture en couches concentriques}
-Dans cette section, nous vous proposons notre architecture globale en couches concentriques.
-Les dépendances entre packages ne doivent pointer que vers l'intérieur du système. Le
-module \textbf{core} — qui contient les entités métier — ne connaît aucun autre
-module. Ce sont \textbf{network}, \textbf{gui} ou \textbf{cli} qui dépendent de \textbf{core},
-jamais l'inverse. Cette contrainte est visible dans le diagramme.
+
+Dans cette section, nous présentons notre architecture structurée en quatre couches concentriques, où les dépendances pointent exclusivement vers l'intérieur pour préserver l'intégrité du domaine. 
+
+\textbf{Couche 1 : Points d'Entrée et Lancement.} Elle regroupe les packages \texttt{main}, \texttt{gui}, \texttt{cli} et \texttt{network}. Cette couche est responsable de la capture des intentions de l'utilisateur ou des événements réseaux pour les transmettre aux couches plus profondes.
+
+\textbf{Couche 2 : Adaptateurs Applicatifs.} Elle comprend les packages \texttt{ai}, \texttt{persistence} et \texttt{config}. Elle traduit les besoins de l'application (sauvegarde, intelligence artificielle, options de configuration) en actions sur le domaine.
+
+\textbf{Couche 3 : Support et Infrastructure de Domaine.} Elle intègre \texttt{i18n} et \texttt{util}. Ces modules fournissent des services de traduction et de journalisation au Domaine via un mécanisme d'inversion de dépendance.
+
+\textbf{Couche 4 : Centre du Domaine.} C'est le cœur du système composé de \texttt{core} et \texttt{graph}. Ce centre ne possède aucune dépendance vers l'extérieur et contient l'intégralité des règles métier.
 
 Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=0.75\textwidth]{quoridor}}
+    \frame{\includegraphics[width=1\textwidth]{quoridor}}
     \caption{Une architecture en couches concentriques}\label{fig:example1}
 \end{figure}
 
