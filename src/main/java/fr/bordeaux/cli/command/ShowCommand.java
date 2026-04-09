@@ -2,6 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Orientation;
 import fr.bordeaux.core.Player;
@@ -16,6 +17,21 @@ import java.util.List;
 @SuppressWarnings({"PMD.GuardLogStatement"})
 public class ShowCommand implements Command {
 
+  /** Configuration translation key reused in the output. */
+  private static final String CONFIG_LINE_KEY = "configLine";
+
+  /** Header prefix used by help sections. */
+  private static final String HELP_HEADER_PREFIX = "=== ";
+
+  /** Usage translation key reused by help sections. */
+  private static final String USAGE_KEY = "usage";
+
+  /** Description translation key reused by help sections. */
+  private static final String DESCRIPTION_KEY = "description";
+
+  /** Shared translation key for show section headers. */
+  private static final String SHOW_HEADER_KEY = "showHeader";
+
   /** Command entered by the user */
   private String[] tokens;
 
@@ -23,7 +39,7 @@ public class ShowCommand implements Command {
   private static final Logger LOGGER = Logger.getInstance();
 
   /** Where the show command will write */
-  private final PrintStream writer = System.out;
+  private static final PrintStream WRITER = System.out;
 
   /** Creates a ShowCommand with the default option "board". */
   public ShowCommand() {
@@ -35,8 +51,8 @@ public class ShowCommand implements Command {
    *
    * @param tokens the tokens entered by the user
    */
-  public ShowCommand(final String[] tokens) {
-    this.tokens = tokens;
+  public ShowCommand(final String... tokens) {
+    this.tokens = tokens.clone();
   }
 
   /**
@@ -54,6 +70,7 @@ public class ShowCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     final String option = tokens[1];
+    final GameState state = engine.getState();
     switch (option) {
       case "board":
         {
@@ -63,25 +80,24 @@ public class ShowCommand implements Command {
       case "configurations":
       case "config":
         {
-          writer.println(I18n.get("configLine", "verbose", engine.isVerbose()));
-          writer.println(I18n.get("configLine", "blitz", engine.isBlitz()));
-          writer.println(I18n.get("configLine", "contest", engine.isContest()));
-          writer.println(I18n.get("configLine", "debug", engine.isDebug()));
-          writer.println(I18n.get("configLine", "nb-walls", engine.getInitialWalls()));
-          writer.println(
-              I18n.get("configLine", "nb-players", engine.getState().getPlayers().size()));
+          WRITER.println(I18n.get(CONFIG_LINE_KEY, "verbose", engine.isVerbose()));
+          WRITER.println(I18n.get(CONFIG_LINE_KEY, "blitz", engine.isBlitz()));
+          WRITER.println(I18n.get(CONFIG_LINE_KEY, "contest", engine.isContest()));
+          WRITER.println(I18n.get(CONFIG_LINE_KEY, "debug", engine.isDebug()));
+          WRITER.println(I18n.get(CONFIG_LINE_KEY, "nb-walls", engine.getInitialWalls()));
+          WRITER.println(I18n.get(CONFIG_LINE_KEY, "nb-players", state.getPlayers().size()));
           break;
         }
       case "time":
         {
-          final List<Player> players = engine.getState().getPlayers();
-          final Player currentPlayer = engine.getState().getCurrentPlayer();
+          final List<Player> players = state.getPlayers();
+          final Player currentPlayer = state.getCurrentPlayer();
           for (final Player player : players) {
             if (player.equals(currentPlayer)) {
-              writer.println(
+              WRITER.println(
                   I18n.get("timeLeft") + TimeConvertor.formatTime(player.getRemainingTime()));
             } else {
-              writer.println(
+              WRITER.println(
                   I18n.get(
                       "timeFor",
                       player.getName(),
@@ -107,77 +123,85 @@ public class ShowCommand implements Command {
   /** Displays general help information for the show command. */
   @Override
   public void helpText() {
+    boolean helpDisplayed = false;
     if (tokens != null && tokens.length > 1) {
       final String subOption = tokens[1];
       switch (subOption) {
         case "board":
           helpBoard();
-          return;
+          helpDisplayed = true;
+          break;
         case "history":
           helpHistory();
-          return;
+          helpDisplayed = true;
+          break;
         case "time":
           helpTime();
-          return;
+          helpDisplayed = true;
+          break;
         case "configurations":
         case "config":
           helpConfig();
-          return;
+          helpDisplayed = true;
+          break;
         default:
           break;
       }
     }
 
-    LOGGER.info("=== " + I18n.get("showHelpHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("showBoardUsage"));
-    LOGGER.info("  " + I18n.get("showHistoUsage"));
-    LOGGER.info("  " + I18n.get("showConfigUsage"));
-    LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("showDesc"));
-    LOGGER.verbose("  " + I18n.get("showVerb"));
-    LOGGER.verbose(I18n.get("arguments"));
-    LOGGER.verbose("  board         : " + I18n.get("showVBoard"));
-    LOGGER.verbose("  history       : " + I18n.get("showVHisto"));
-    LOGGER.verbose("  configuration : " + I18n.get("showVConfig"));
-    LOGGER.verbose("  time          : " + I18n.get("showVTime"));
-    LOGGER.verbose(I18n.get("showVMore"));
+    if (!helpDisplayed) {
+      LOGGER.info(
+          HELP_HEADER_PREFIX + I18n.get("showHelpHeader") + " " + I18n.get("cliTitle") + " ===\n");
+      LOGGER.info(I18n.get(USAGE_KEY));
+      LOGGER.info("  " + I18n.get("showBoardUsage"));
+      LOGGER.info("  " + I18n.get("showHistoUsage"));
+      LOGGER.info("  " + I18n.get("showConfigUsage"));
+      LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
+      LOGGER.info(I18n.get(DESCRIPTION_KEY));
+      LOGGER.info("  " + I18n.get("showDesc"));
+      LOGGER.verbose("  " + I18n.get("showVerb"));
+      LOGGER.verbose(I18n.get("arguments"));
+      LOGGER.verbose("  board         : " + I18n.get("showVBoard"));
+      LOGGER.verbose("  history       : " + I18n.get("showVHisto"));
+      LOGGER.verbose("  configuration : " + I18n.get("showVConfig"));
+      LOGGER.verbose("  time          : " + I18n.get("showVTime"));
+      LOGGER.verbose(I18n.get("showVMore"));
+    }
   }
 
   /** Displays help information for the "show board" option. */
   public void helpBoard() {
-    LOGGER.info("=== " + I18n.get("showHeader") + " BOARD ===\n");
-    LOGGER.info(I18n.get("usage"));
+    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " BOARD ===\n");
+    LOGGER.info(I18n.get(USAGE_KEY));
     LOGGER.info("  " + I18n.get("showBoardUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
+    LOGGER.info(I18n.get(DESCRIPTION_KEY));
     LOGGER.info("  " + I18n.get("showDescBoard"));
   }
 
   /** Displays help information for the "show history" option. */
   public void helpHistory() {
-    LOGGER.info("=== " + I18n.get("showHeader") + " HISTORY ===\n");
-    LOGGER.info(I18n.get("usage"));
+    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " HISTORY ===\n");
+    LOGGER.info(I18n.get(USAGE_KEY));
     LOGGER.info("  " + I18n.get("showHistoUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
+    LOGGER.info(I18n.get(DESCRIPTION_KEY));
     LOGGER.info("  " + I18n.get("showDescHisto"));
   }
 
   /** Displays help information for the "show time" option. */
   public void helpTime() {
-    LOGGER.info("=== " + I18n.get("showHeader") + " TIME ===\n");
-    LOGGER.info(I18n.get("usage"));
+    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " TIME ===\n");
+    LOGGER.info(I18n.get(USAGE_KEY));
     LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
+    LOGGER.info(I18n.get(DESCRIPTION_KEY));
     LOGGER.info("  " + I18n.get("showDescTime"));
   }
 
   /** Displays help information for the "show configuration" option. */
   public void helpConfig() {
-    LOGGER.info("=== " + I18n.get("showHeader") + " CONFIGURATION ===\n");
-    LOGGER.info(I18n.get("usage"));
+    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " CONFIGURATION ===\n");
+    LOGGER.info(I18n.get(USAGE_KEY));
     LOGGER.info("  " + I18n.get("showConfigUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
+    LOGGER.info(I18n.get(DESCRIPTION_KEY));
     LOGGER.info("  " + I18n.get("showDescConfig"));
     LOGGER.verbose("  " + I18n.get("showDescVConfig"));
     LOGGER.verbose("    " + I18n.get("showCfgs"));
@@ -190,18 +214,19 @@ public class ShowCommand implements Command {
    * @param engine the current game engine
    */
   private void printBoard(final GameEngine engine) {
-    final Board board = engine.getState().getBoard();
+    final GameState state = engine.getState();
+    final Board board = state.getBoard();
     final int boardSize = board.getSize();
     for (int col = 0; col < boardSize; col++) {
-      writer.print(((char) ('A' + col)) + " ");
+      WRITER.print(((char) ('A' + col)) + " ");
     }
-    writer.println("");
+    WRITER.println("");
     for (int row = 0; row < boardSize; row++) {
       for (int col = 0; col < boardSize; col++) {
         boolean playerFound = false;
-        for (final Player player : engine.getState().getPlayers()) {
+        for (final Player player : state.getPlayers()) {
           if (player.getPosition().equals(new Position(row, col)) && !player.isDisabled()) {
-            writer.print(
+            WRITER.print(
                 player.getColor().getId()
                     + ((col != boardSize - 1) ? printWall(board, row, col, false) : " "));
             playerFound = true;
@@ -209,21 +234,21 @@ public class ShowCommand implements Command {
           }
         }
         if (!playerFound) {
-          writer.print("_" + ((col != boardSize - 1) ? printWall(board, row, col, false) : " "));
+          WRITER.print("_" + ((col != boardSize - 1) ? printWall(board, row, col, false) : " "));
         }
         if (col == boardSize - 1) {
-          writer.print(row + 1);
+          WRITER.print(row + 1);
         }
       }
       if (row != boardSize - 1) {
-        writer.println("");
+        WRITER.println("");
         for (int col = 0; col < boardSize; col++) {
-          writer.print(printWall(board, row, col, true));
+          WRITER.print(printWall(board, row, col, true));
         }
-        writer.println("");
+        WRITER.println("");
       }
     }
-    writer.println("");
+    WRITER.println("");
   }
 
   /**
@@ -271,11 +296,12 @@ public class ShowCommand implements Command {
    * @param engine the current game engine
    */
   public void showHistory(final GameEngine engine) {
-    writer.println(I18n.get("oldest"));
-    final List<Player> players = engine.getState().getPlayers();
+    final GameState state = engine.getState();
+    WRITER.println(I18n.get("oldest"));
+    final List<Player> players = state.getPlayers();
     final int nbPlayers = players.size();
     int count = 0;
-    final Move[] moves = engine.getState().getMovesPlayed();
+    final Move[] moves = state.getMovesPlayed();
     for (final Move move : moves) {
       final StringBuilder strMove = new StringBuilder();
       strMove.append(I18n.get("historyPlayer", players.get(count % nbPlayers).getName()));
@@ -288,8 +314,8 @@ public class ShowCommand implements Command {
             I18n.get("historyCoordWall", posToString(move.getTo()), orientation.toString()));
       }
       count++;
-      writer.println(strMove.toString());
+      WRITER.println(strMove.toString());
     }
-    writer.println(I18n.get("newest"));
+    WRITER.println(I18n.get("newest"));
   }
 }

@@ -7,12 +7,12 @@ public final class AppModeResolver {
   private AppModeResolver() {}
 
   /**
-   * /** Resolves the application mode from command-line arguments.
+   * Resolves the application mode from command-line arguments.
    *
    * @param args command-line arguments
    * @return the resolved AppMode, or CLI if none
    */
-  public static AppMode resolve(final String[] args) {
+  public static AppMode resolve(final String... args) {
     for (final String arg : args) {
       switch (arg) {
         case "--gui":
@@ -30,9 +30,11 @@ public final class AppModeResolver {
         case "--cli":
         case "-c":
           return AppMode.CLI;
+
+        default:
+          break;
       }
     }
-
     return AppMode.CLI;
   }
 }

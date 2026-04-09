@@ -3,10 +3,19 @@ package fr.bordeaux.network;
 /** Stores scoreboard statistics for one player. */
 public class ScoreEntry {
 
+  /** Unique identifier of the player. */
   private final String playerId;
+
+  /** Display name of the player. */
   private String playerName;
+
+  /** Number of wins recorded for the player. */
   private int wins;
+
+  /** Number of losses recorded for the player. */
   private int losses;
+
+  /** Number of played games recorded for the player. */
   private int gamesPlayed;
 
   /**

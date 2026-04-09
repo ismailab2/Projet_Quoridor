@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
 import fr.bordeaux.core.Player;
 import fr.bordeaux.core.Position;
@@ -43,11 +44,14 @@ public final class DragAndDrop {
    *
    * @param engine game engine used to validate and play moves
    * @param boardView board view on which handlers are installed
+   * @param dispatcher dispatcher used to route moves in local or network mode
    */
-  public static void install(final GameEngine engine, final BoardView boardView) {
-    final Runnable attachHandlers = () -> attachHandlers(engine, boardView);
+  public static void install(
+      final GameEngine engine, final BoardView boardView, final ActionDispatcher dispatcher) {
+    final Runnable attachHandlers = () -> attachHandlers(engine, boardView, dispatcher);
+    final GameState state = engine.getState();
     Platform.runLater(attachHandlers);
-    engine.getState().addListener(() -> Platform.runLater(attachHandlers));
+    state.addListener(() -> Platform.runLater(attachHandlers));
   }
 
   /**
@@ -56,15 +60,16 @@ public final class DragAndDrop {
    * @param engine game engine used to validate moves
    * @param boardView board view containing the cells
    */
-  private static void attachHandlers(final GameEngine engine, final BoardView boardView) {
-    for (final Node node : boardView.getChildren()) {
+  private static void attachHandlers(
+      final GameEngine engine, final BoardView boardView, final ActionDispatcher dispatcher) {
+    final var boardNodes = boardView.getChildren();
+    for (final Node node : boardNodes) {
       if (!(node instanceof StackPane cell)) {
         continue;
       }
       final int row = getIndex(cell, true);
       final int col = getIndex(cell, false);
-      installDropOnCell(engine, boardView, cell, row, col);
-
+      installDropOnCell(engine, dispatcher, cell, row, col);
       for (final Node child : cell.getChildren()) {
         if (child instanceof Rectangle pawn) {
           installDragOnPawn(engine, pawn, row, col);
@@ -86,7 +91,8 @@ public final class DragAndDrop {
     pawn.setOnDragDetected(
         event -> {
           event.consume();
-          final Player currentPlayer = engine.getState().getCurrentPlayer();
+          final GameState state = engine.getState();
+          final Player currentPlayer = state.getCurrentPlayer();
 
           if (currentPlayer.isAI()) {
             return;
@@ -110,7 +116,7 @@ public final class DragAndDrop {
    * @param col source column
    * @return the clipboard content
    */
-  static ClipboardContent createPawnDragContent(final int row, final int col) {
+  /* default */ static ClipboardContent createPawnDragContent(final int row, final int col) {
     final ClipboardContent content = new ClipboardContent();
     content.put(PAWN_FORMAT, row + "," + col);
     return content;
@@ -119,7 +125,7 @@ public final class DragAndDrop {
   /** Installs drop handlers on a target cell. */
   private static void installDropOnCell(
       final GameEngine engine,
-      final BoardView boardView,
+      final ActionDispatcher dispatcher,
       final StackPane cell,
       final int toRow,
       final int toCol) {
@@ -149,14 +155,8 @@ public final class DragAndDrop {
 
     cell.setOnDragDropped(
         event -> {
-          boolean success = false;
-          if (event.getDragboard().hasContent(PAWN_FORMAT)
-              && isMoveLegal(engine, event.getDragboard(), toRow, toCol)) {
-            success = engine.play(buildMove(event.getDragboard(), toRow, toCol));
-            if (success) {
-              boardView.drawBoard();
-            }
-          }
+          final boolean success =
+              handleDrop(engine, dispatcher, event.getDragboard(), toRow, toCol);
           event.setDropCompleted(success);
           event.consume();
         });
@@ -166,6 +166,24 @@ public final class DragAndDrop {
           cell.setStyle(STYLE_BASE + COLOR_NORMAL);
           event.consume();
         });
+  }
+
+  /** Plays the dropped move when the dragboard contains a legal pawn move. */
+  private static boolean handleDrop(
+      final GameEngine engine,
+      final ActionDispatcher dispatcher,
+      final Dragboard dragboard,
+      final int toRow,
+      final int toCol) {
+    boolean success = false;
+    if (dragboard.hasContent(PAWN_FORMAT) && isMoveLegal(engine, dragboard, toRow, toCol)) {
+      final Move move = buildMove(dragboard, toRow, toCol);
+      if (!dispatcher.isNetworkGame() || dispatcher.isMyTurn()) {
+        dispatcher.playBoardMove(move);
+        success = true;
+      }
+    }
+    return success;
   }
 
   /**

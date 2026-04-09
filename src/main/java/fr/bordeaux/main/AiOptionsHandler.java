@@ -10,6 +10,15 @@ import org.apache.commons.cli.CommandLine;
 /** Handles AI-specific command line arguments and validation. */
 public final class AiOptionsHandler {
 
+  /** Configuration key enabling AI for player one. */
+  private static final String AI_1 = "ai1";
+
+  /** Configuration key enabling AI for player two. */
+  private static final String AI_2 = "ai2";
+
+  /** String value used to enable boolean configuration flags. */
+  private static final String TRUE_VALUE = "true";
+
   private AiOptionsHandler() {}
 
   /**
@@ -21,17 +30,17 @@ public final class AiOptionsHandler {
   public static void handle(final CommandLine commandLine, final ConfigManager config) {
     if (commandLine.hasOption("a")) {
       String aiOption = commandLine.getOptionValue("a");
-      if (aiOption == null || aiOption.trim().isEmpty()) {
-        config.setOption("ai2", "true");
+      if (aiOption == null || aiOption.isBlank()) {
+        config.setOption(AI_2, TRUE_VALUE);
       } else {
         aiOption = aiOption.toLowerCase(Locale.ROOT);
         if ("a".equals(aiOption)) {
-          config.setOption("ai1", "true");
-          config.setOption("ai2", "true");
+          config.setOption(AI_1, TRUE_VALUE);
+          config.setOption(AI_2, TRUE_VALUE);
         } else if ("blanc".equals(aiOption) || "1".equals(aiOption)) {
-          config.setOption("ai1", "true");
+          config.setOption(AI_1, TRUE_VALUE);
         } else if ("noir".equals(aiOption) || "2".equals(aiOption)) {
-          config.setOption("ai2", "true");
+          config.setOption(AI_2, TRUE_VALUE);
         } else {
           throw new IllegalArgumentException(I18n.get("aiValueErr"));
         }
@@ -39,32 +48,32 @@ public final class AiOptionsHandler {
     }
 
     if (commandLine.hasOption("ai-mode")) {
-      String value = commandLine.getOptionValue("ai-mode");
+      final String value = commandLine.getOptionValue("ai-mode");
       checkAiString(value, "mode", new ArrayList<>(List.of("minimax", "mcts", "iterative")));
       applyAiOption(value, "mode", config);
     }
 
     if (commandLine.hasOption("ai-minimax-depth")) {
-      String value = commandLine.getOptionValue("ai-minimax-depth");
+      final String value = commandLine.getOptionValue("ai-minimax-depth");
       checkAiInt(value, "minimax-depth");
       applyAiOption(value, "depth", config);
     }
 
     if (commandLine.hasOption("ai-time")) {
-      String value = commandLine.getOptionValue("ai-time");
+      final String value = commandLine.getOptionValue("ai-time");
       checkAiInt(value, "time");
       applyAiOption(value, "time", config);
     }
 
     if (commandLine.hasOption("ai-minimax-scoring")) {
-      String value = commandLine.getOptionValue("ai-minimax-scoring");
+      final String value = commandLine.getOptionValue("ai-minimax-scoring");
       checkAiString(
           value, "scoring", new ArrayList<>(List.of("simple", "intermediate", "advanced")));
       applyAiOption(value, "scoring", config);
     }
 
     if (commandLine.hasOption("ai-mcts-selection")) {
-      String value = commandLine.getOptionValue("ai-mcts-selection");
+      final String value = commandLine.getOptionValue("ai-mcts-selection");
       applyMctsOption(value, config);
     }
   }
@@ -119,7 +128,7 @@ public final class AiOptionsHandler {
     }
     final String[] values = value.split(",");
     for (final String val : values) {
-      if (!accpetedMode.contains(val.toLowerCase())) {
+      if (!accpetedMode.contains(val.toLowerCase(Locale.ROOT))) {
         throw new IllegalArgumentException(
             I18n.get("aiValidOptions", parameter, accpetedMode.toString()));
       }
@@ -132,12 +141,12 @@ public final class AiOptionsHandler {
     final String[] values = value.split(",");
 
     // Apply to Player 1 if AI is enabled
-    if (config.getBoolean("ai1", false)) {
+    if (config.getBoolean(AI_1, false)) {
       config.setOption("ai1." + suffix, values[0].trim());
     }
 
     // Apply to Player 2 if AI is enabled
-    if (config.getBoolean("ai2", false)) {
+    if (config.getBoolean(AI_2, false)) {
       // Use the second value if provided, otherwise fallback to the first
       final String valToSet = (values.length > 1) ? values[1] : values[0];
       config.setOption("ai2." + suffix, valToSet.trim());
@@ -154,10 +163,10 @@ public final class AiOptionsHandler {
       }
     }
 
-    if (config.getBoolean("ai1", false)) {
+    if (config.getBoolean(AI_1, false)) {
       config.setOption("ai1.selection", values[0].trim());
     }
-    if (config.getBoolean("ai2", false)) {
+    if (config.getBoolean(AI_2, false)) {
       final String valToSet = (values.length > 1) ? values[1] : values[0];
       config.setOption("ai2.selection", valToSet.trim());
     }

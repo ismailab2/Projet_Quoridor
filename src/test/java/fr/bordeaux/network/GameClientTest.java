@@ -17,6 +17,7 @@ import fr.bordeaux.util.Logger;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
@@ -230,6 +231,8 @@ public class GameClientTest {
     assertTrue(server.getReceivedMessages().contains("MOVE e2-e3"));
   }
 
+  // Tests reseau client ajoutes
+
   @Test
   void serverList_findsOneServer() throws Exception {
     Thread fakeServer =
@@ -238,16 +241,15 @@ public class GameClientTest {
               try (DatagramSocket socket =
                   new DatagramSocket(12346, InetAddress.getByName("0.0.0.0"))) {
 
-                // Wait for DISCOVER message
                 byte[] buffer = new byte[1024];
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 socket.receive(request);
 
-                String message = new String(request.getData(), 0, request.getLength());
+                String message =
+                    new String(request.getData(), 0, request.getLength(), StandardCharsets.UTF_8);
 
-                // Send back one fake server
                 if ("DISCOVER".equals(message)) {
-                  byte[] response = "testServer:9000".getBytes();
+                  byte[] response = "testServer:9000".getBytes(StandardCharsets.UTF_8);
                   DatagramPacket reply =
                       new DatagramPacket(
                           response, response.length, request.getAddress(), request.getPort());
@@ -261,18 +263,12 @@ public class GameClientTest {
     fakeServer.start();
 
     GameClient client = new GameClient();
-    client.serverList();
+    String result = client.serverList();
 
-    Thread.sleep(1000);
     fakeServer.join(1000);
 
-    String output = outContent.toString();
-
-    assertTrue(output.contains(I18n.get("broadcast")));
-    assertTrue(output.contains(I18n.get("found")));
+    assertTrue(result.contains("testServer:9000"));
   }
-
-  // Tests reseau client ajoutes
 
   @Test
   void connectedFalseByDefault() {
@@ -296,30 +292,6 @@ public class GameClientTest {
     assertDoesNotThrow(() -> client.sendMove("e1-e2"));
     assertTrue(outContent.toString().contains(I18n.get("notCo")));
   }
-
-  /* @Test
-  void handlerReceivesMessage() throws Exception {
-    MockServer server = new MockServer();
-    server.start();
-    synchronized (server) {
-      if (server.getPort() == 0) {
-        server.wait(1000);
-      }
-    }
-
-    GameClient client = new GameClient();
-    List<String> messages = new ArrayList<>();
-    client.setServerMessageHandler(messages::add);
-
-    assertTrue(client.join("localhost", server.getPort()));
-
-    client.hello("Alice");
-    Thread.sleep(300);
-
-    assertTrue(messages.contains("WELCOME"));
-
-    client.quit();
-  } */
 
   @Test
   void testPingTimeout() throws Exception {

@@ -1,14 +1,20 @@
 package fr.bordeaux.gui;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import fr.bordeaux.core.Board;
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
+import fr.bordeaux.core.Move;
+import fr.bordeaux.core.Position;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.testfx.framework.junit5.ApplicationTest;
+import org.testfx.util.WaitForAsyncUtils;
 
 class ActionDispatcherTest extends ApplicationTest {
 
@@ -82,10 +89,39 @@ class ActionDispatcherTest extends ApplicationTest {
     dispatcher = spy(realDispatcher);
   }
 
+  private static void setPrivateField(Object target, String fieldName, Object value)
+      throws Exception {
+    Field field = ActionDispatcher.class.getDeclaredField(fieldName);
+    field.setAccessible(true);
+    field.set(target, value);
+  }
+
+  private static Object getPrivateField(Object target, String fieldName) throws Exception {
+    Field field = ActionDispatcher.class.getDeclaredField(fieldName);
+    field.setAccessible(true);
+    return field.get(target);
+  }
+
+  private static void invokeHandleServerMessage(ActionDispatcher dispatcher, String message) {
+    try {
+      invokePrivate(dispatcher, "handleServerMessage", new Class<?>[] {String.class}, message);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private void injectMock(Object target, String fieldName, Object mockValue) throws Exception {
     Field field = ActionDispatcher.class.getDeclaredField(fieldName);
     field.setAccessible(true);
     field.set(target, mockValue);
+  }
+
+  private static Object invokePrivate(
+      Object target, String methodName, Class<?>[] parameterTypes, Object... args)
+      throws Exception {
+    Method method = ActionDispatcher.class.getDeclaredMethod(methodName, parameterTypes);
+    method.setAccessible(true);
+    return method.invoke(target, args);
   }
 
   @Test
@@ -166,9 +202,10 @@ class ActionDispatcherTest extends ApplicationTest {
 
   @Test
   void testServerListShowsDiscoveryMessage() throws IOException {
+    when(networkClientMock.serverList()).thenReturn("ServerA:12345");
     dispatcher.dispatch(Action.SERVER_LIST);
     verify(networkClientMock).serverList();
-    verify(dispatcher).showMessage(eq("Network"), eq("Server List"), contains("discovery"));
+    verify(dispatcher).showMessage(eq("Network"), eq("Server List"), eq("ServerA:12345"));
   }
 
   @Test
@@ -385,5 +422,202 @@ class ActionDispatcherTest extends ApplicationTest {
     dispatcher.dispatch(Action.QUIT_SERVER);
 
     verify(dispatcher).showMessage(eq("Network"), eq("Quit Server"), contains("Client exited"));
+  }
+
+  @Test
+  void isMyTurnFalse() {
+    assertFalse(dispatcher.isMyTurn());
+  }
+
+  @Test
+  void playBoardMoveLocal() {
+    BoardView boardView = mock(BoardView.class);
+    Move move = Move.pawn(new Position(0, 4), new Position(1, 4));
+
+    when(engine.play(move)).thenReturn(true);
+    dispatcher.setBoardView(boardView);
+
+    dispatcher.playBoardMove(move);
+
+    verify(engine).play(move);
+    verify(boardView).drawBoard();
+  }
+
+  @Test
+  void moveToTextPawn() throws Exception {
+    Move move = Move.pawn(new Position(0, 4), new Position(1, 4));
+
+    String text =
+        (String) invokePrivate(dispatcher, "moveToText", new Class<?>[] {Move.class}, move);
+
+    assertEquals("e1-e2", text);
+  }
+
+  @Test
+  void positionToTextOk() throws Exception {
+    String text =
+        (String)
+            invokePrivate(
+                dispatcher, "positionToText", new Class<?>[] {Position.class}, new Position(2, 6));
+
+    assertEquals("g3", text);
+  }
+
+  @Test
+  void playBoardMoveNotMyTurn() throws Exception {
+    Move move = Move.pawn(new Position(0, 4), new Position(1, 4));
+
+    setPrivateField(dispatcher, "networkGame", true);
+    setPrivateField(dispatcher, "myTurn", false);
+
+    dispatcher.playBoardMove(move);
+
+    verify(networkClientMock, never()).sendMove(anyString());
+    verify(dispatcher).showMessage("Network", "Turn", "It is not your turn.");
+  }
+
+  @Test
+  void playBoardMoveSendMove() throws Exception {
+    Move move = Move.pawn(new Position(0, 4), new Position(1, 4));
+
+    setPrivateField(dispatcher, "networkGame", true);
+    setPrivateField(dispatcher, "myTurn", true);
+    setPrivateField(dispatcher, "pendingMove", null);
+
+    dispatcher.playBoardMove(move);
+
+    verify(networkClientMock).sendMove("e1-e2");
+    assertEquals("e1-e2", getPrivateField(dispatcher, "pendingMove"));
+  }
+
+  @Test
+  void applyNetworkMoveOk() throws Exception {
+    BoardView boardView = mock(BoardView.class);
+    dispatcher.setBoardView(boardView);
+    when(engine.play(any(Move.class))).thenReturn(true);
+
+    invokePrivate(dispatcher, "applyNetworkMove", new Class<?>[] {String.class}, "e1-e2");
+
+    verify(engine).play(any(Move.class));
+    verify(boardView).drawBoard();
+  }
+
+  @Test
+  void setupNetworkBoardOk() throws Exception {
+    GameState state = mock(GameState.class);
+    Board board = mock(Board.class);
+    BoardView boardView = mock(BoardView.class);
+
+    when(engine.getState()).thenReturn(state);
+    when(state.getBoard()).thenReturn(board);
+    when(board.getSize()).thenReturn(9);
+
+    dispatcher.setBoardView(boardView);
+    setPrivateField(dispatcher, "localPlayerName", "Khadidja");
+
+    invokePrivate(dispatcher, "setupNetworkBoard", new Class<?>[] {boolean.class}, true);
+
+    verify(engine).newGame(eq(9), anyList(), isNull());
+    verify(boardView).drawBoard();
+  }
+
+  @Test
+  void handleServerMessageStart() throws Exception {
+    GameState state = mock(GameState.class);
+    Board board = mock(Board.class);
+    BoardView boardView = mock(BoardView.class);
+
+    when(engine.getState()).thenReturn(state);
+    when(state.getBoard()).thenReturn(board);
+    when(board.getSize()).thenReturn(9);
+
+    dispatcher.setBoardView(boardView);
+
+    interact(() -> invokeHandleServerMessage(dispatcher, "GAME_START YOUR_TURN"));
+    WaitForAsyncUtils.waitForFxEvents();
+
+    assertTrue((Boolean) getPrivateField(dispatcher, "networkGame"));
+    assertTrue(dispatcher.isMyTurn());
+    verify(engine).newGame(eq(9), anyList(), isNull());
+    verify(dispatcher).showMessage("Network", "Game Start", "Your turn.");
+  }
+
+  @Test
+  void handleServerMessageStop() throws Exception {
+    setPrivateField(dispatcher, "pendingMove", "e1-e2");
+    setPrivateField(dispatcher, "myTurn", true);
+    setPrivateField(dispatcher, "networkGame", true);
+
+    interact(() -> invokeHandleServerMessage(dispatcher, "SERVER_STOPPED"));
+    WaitForAsyncUtils.waitForFxEvents();
+
+    assertNull(getPrivateField(dispatcher, "pendingMove"));
+    assertFalse(dispatcher.isMyTurn());
+    assertFalse((Boolean) getPrivateField(dispatcher, "networkGame"));
+    verify(dispatcher).showMessage("Network", "Server", "Server stopped.");
+  }
+
+  @Test
+  void setupBoardFalse() throws Exception {
+    GameState state = mock(GameState.class);
+    Board board = mock(Board.class);
+    BoardView boardView = mock(BoardView.class);
+
+    when(engine.getState()).thenReturn(state);
+    when(state.getBoard()).thenReturn(board);
+    when(board.getSize()).thenReturn(9);
+
+    dispatcher.setBoardView(boardView);
+    setPrivateField(dispatcher, "localPlayerName", "Khadidja");
+
+    invokePrivate(dispatcher, "setupNetworkBoard", new Class<?>[] {boolean.class}, false);
+
+    verify(engine).newGame(eq(9), anyList(), isNull());
+    verify(boardView).drawBoard();
+  }
+
+  @Test
+  void messageOk() throws Exception {
+    BoardView boardView = mock(BoardView.class);
+    dispatcher.setBoardView(boardView);
+    when(engine.play(any(Move.class))).thenReturn(true);
+
+    setPrivateField(dispatcher, "pendingMove", "e1-e2");
+    setPrivateField(dispatcher, "myTurn", true);
+
+    interact(() -> invokeHandleServerMessage(dispatcher, "OK"));
+    WaitForAsyncUtils.waitForFxEvents();
+
+    verify(engine).play(any(Move.class));
+    verify(boardView).drawBoard();
+    assertNull(getPrivateField(dispatcher, "pendingMove"));
+    assertFalse(dispatcher.isMyTurn());
+  }
+
+  @Test
+  void messageError() throws Exception {
+    setPrivateField(dispatcher, "pendingMove", "e1-e2");
+
+    interact(() -> invokeHandleServerMessage(dispatcher, "ERROR bad move"));
+    WaitForAsyncUtils.waitForFxEvents();
+
+    assertNull(getPrivateField(dispatcher, "pendingMove"));
+    verify(dispatcher).showMessage("Network", "Server Error", "ERROR bad move");
+  }
+
+  @Test
+  void messageOpponent() throws Exception {
+    BoardView boardView = mock(BoardView.class);
+    dispatcher.setBoardView(boardView);
+    when(engine.play(any(Move.class))).thenReturn(true);
+
+    setPrivateField(dispatcher, "myTurn", false);
+
+    interact(() -> invokeHandleServerMessage(dispatcher, "OPPONENT_MOVE e8-e7"));
+    WaitForAsyncUtils.waitForFxEvents();
+
+    verify(engine).play(any(Move.class));
+    verify(boardView).drawBoard();
+    assertTrue(dispatcher.isMyTurn());
   }
 }

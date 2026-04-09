@@ -1,6 +1,8 @@
 package fr.bordeaux.main;
 
-/** Factory for creating the appropriate {@link AppLauncher} based on the {@link AppMode}. */
+/**
+ * Factory for creating the appropriate {@link AppLauncher} based on the selected {@link AppMode}.
+ */
 public final class AppLauncherFactory {
 
   /** Default constructor. Constructs a new AppLauncherFactory instance. */
@@ -13,12 +15,14 @@ public final class AppLauncherFactory {
    * @return the appropriate launcher implementation
    */
   public static AppLauncher create(final AppMode mode) {
+    final AppLauncher launcher;
     if (mode == AppMode.GUI) {
-      return new GuiLauncher();
+      launcher = new GuiLauncher();
+    } else if (mode == AppMode.NETWORK) {
+      launcher = new NetworkLauncher();
+    } else {
+      launcher = new CliLauncher();
     }
-    if (mode == AppMode.NETWORK) {
-      return new NetworkLauncher();
-    }
-    return new CliLauncher();
+    return launcher;
   }
 }

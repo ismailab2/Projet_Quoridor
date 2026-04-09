@@ -4,16 +4,17 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Provides internationalization (I18n) support for the application. This class is responsible for
- * managing resource bundles, locale settings, and translating UI strings to support multiple
- * languages.
+ * Provides internationalization support for the application. Manages resource bundles, locale
+ * settings, and translated UI strings.
  */
 public final class I18n {
+  /** Base path of the translation bundles. */
   private static final String BUNDLE_NAME = "international/messages";
-  private static ResourceBundle bundle;
-  private static Locale currentLocale;
 
-  // Default param
+  /** Currently loaded translation bundle. */
+  private static ResourceBundle bundle;
+
+  /** Initializes the default locale used by the application. */
   static {
     if (System.getProperty("quoridor.test") != null) {
       setLocale(Locale.ENGLISH);
@@ -27,9 +28,8 @@ public final class I18n {
    *
    * @param locale the location to set the language
    */
-  public static void setLocale(Locale locale) {
-    currentLocale = locale;
-    bundle = ResourceBundle.getBundle(BUNDLE_NAME, currentLocale);
+  public static void setLocale(final Locale locale) {
+    bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
   }
 
   /**
@@ -38,7 +38,7 @@ public final class I18n {
    * @param key the text to display from properties
    * @return text depending on the language choosen
    */
-  public static String get(String key) {
+  public static String get(final String key) {
     return bundle.getString(key);
   }
 
@@ -49,16 +49,19 @@ public final class I18n {
    * @param params more text
    * @return text depending on the language choosen
    */
-  public static String get(String key, Object... params) {
-    String pattern = bundle.getString(key);
+  public static String get(final String key, final Object... params) {
+    final String pattern = bundle.getString(key);
+    final String message;
     if (params.length > 0 && pattern.contains("{0}")) {
-      return java.text.MessageFormat.format(pattern, params);
+      message = java.text.MessageFormat.format(pattern, params);
+    } else {
+      final StringBuilder messageBuilder = new StringBuilder(pattern);
+      for (final Object param : params) {
+        messageBuilder.append(' ').append(param);
+      }
+      message = messageBuilder.toString();
     }
-    StringBuilder sb = new StringBuilder(pattern);
-    for (Object s : params) {
-      sb.append(" ").append(s);
-    }
-    return sb.toString();
+    return message;
   }
 
   /** Constructs a new I18n manager. */

@@ -10,24 +10,28 @@ import java.util.Properties;
 @SuppressWarnings("PMD.GuardLogStatement")
 public final class ConfigManager {
 
+  /** Logger used while loading and saving configuration values. */
   private static final Logger LOGGER = Logger.getInstance();
 
   /** Configuration properties and shortcuts. */
   private final Properties props = new Properties();
 
+  /** Singleton instance of the configuration manager. */
   private static ConfigManager instance;
 
   /** Private constructor for singleton pattern */
   private ConfigManager() {}
 
   /**
-   * Returns the singleton instance of ConfigManager. Lazily initialized. initialized.
+   * Returns the singleton instance of ConfigManager. Lazily initializes it on first access.
    *
-   * @return The unique {@link ConfigManager} instance.
+   * @return the unique {@link ConfigManager} instance
    */
-  public static synchronized ConfigManager getInstance() {
-    if (instance == null) {
-      instance = new ConfigManager();
+  public static ConfigManager getInstance() {
+    synchronized (ConfigManager.class) {
+      if (instance == null) {
+        instance = new ConfigManager();
+      }
     }
     return instance;
   }
@@ -39,10 +43,13 @@ public final class ConfigManager {
    */
   private Path getFilePath() {
     final String customPath = System.getProperty("quoridor.config.file");
+    final Path filePath;
     if (customPath != null) {
-      return Paths.get(customPath);
+      filePath = Paths.get(customPath);
+    } else {
+      filePath = Paths.get(System.getProperty("user.home"), ".quoridorrc");
     }
-    return Paths.get(System.getProperty("user.home"), ".quoridorrc");
+    return filePath;
   }
 
   /** Loads config if it exists. Otherwise saves defaults. */
@@ -51,7 +58,7 @@ public final class ConfigManager {
     final Path path = getFilePath();
     if (Files.exists(path)) {
 
-      try (final InputStream inputStream = Files.newInputStream(path)) {
+      try (InputStream inputStream = Files.newInputStream(path)) {
 
         props.load(inputStream);
 
@@ -74,7 +81,7 @@ public final class ConfigManager {
 
   /** Saves the current properties to the configuration file. */
   public void save() {
-    try (final OutputStream out = Files.newOutputStream(getFilePath())) {
+    try (OutputStream out = Files.newOutputStream(getFilePath())) {
 
       props.store(out, "Quoridor configuration");
 
@@ -123,13 +130,16 @@ public final class ConfigManager {
    * @return integer value of property
    */
   public int getInt(final String key, final int defaultValue) {
+    int value = defaultValue;
     try {
-      final String value = props.getProperty(key);
-      if (value == null) return defaultValue;
-      return Integer.parseInt(value);
+      final String property = props.getProperty(key);
+      if (property != null) {
+        value = Integer.parseInt(property);
+      }
     } catch (final NumberFormatException e) {
-      return defaultValue;
+      value = defaultValue;
     }
+    return value;
   }
 
   /**

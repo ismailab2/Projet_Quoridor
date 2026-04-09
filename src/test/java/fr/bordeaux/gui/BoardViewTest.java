@@ -1,6 +1,7 @@
 package fr.bordeaux.gui;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.bordeaux.core.*;
@@ -25,6 +26,7 @@ class BoardViewTest {
   private Board board;
   private Player player1, player2;
   private BoardView boardView;
+  private ActionDispatcher dispatcher;
 
   @BeforeEach
   void setup() {
@@ -35,6 +37,7 @@ class BoardViewTest {
     board = mock(Board.class);
     player1 = mock(Player.class);
     player2 = mock(Player.class);
+    dispatcher = mock(ActionDispatcher.class);
     fr.bordeaux.graph.Graph graph = mock(fr.bordeaux.graph.Graph.class);
 
     when(engine.getState()).thenReturn(state);
@@ -47,8 +50,9 @@ class BoardViewTest {
     when(player1.getColor()).thenReturn(fr.bordeaux.core.Color.WHITE);
     when(player2.getPosition()).thenReturn(new Position(1, 1));
     when(player2.getColor()).thenReturn(fr.bordeaux.core.Color.BLACK);
+    when(dispatcher.isNetworkGame()).thenReturn(false);
 
-    boardView = new BoardView(engine);
+    boardView = new BoardView(engine, dispatcher);
   }
 
   @Test
@@ -64,9 +68,28 @@ class BoardViewTest {
 
   @Test
   void testHandleCellClickCallsEnginePlay() {
-    when(engine.play(any(Move.class))).thenReturn(true);
-    boardView.handleCellClick(0, 1);
-    verify(engine, times(1)).play(any(Move.class));
+    Rectangle slot =
+        boardView.getChildren().stream()
+            .filter(n -> n instanceof Rectangle)
+            .map(n -> (Rectangle) n)
+            .filter(r -> r.getFill().equals(javafx.scene.paint.Color.TRANSPARENT))
+            .findFirst()
+            .orElse(null);
+
+    assertNotNull(slot, "Should find at least one wall slot");
+
+    var event = mock(javafx.scene.input.MouseEvent.class);
+    when(event.getButton()).thenReturn(MouseButton.SECONDARY);
+
+    try (MockedStatic<RuleChecker> checker = mockStatic(RuleChecker.class)) {
+      checker
+          .when(() -> RuleChecker.isMoveLegal(any(GameState.class), any(Move.class)))
+          .thenReturn(true);
+
+      slot.getOnMouseClicked().handle(event);
+
+      verify(dispatcher, atLeastOnce()).playBoardMove(argThat(move -> move.isWall()));
+    }
   }
 
   @Test
@@ -75,12 +98,11 @@ class BoardViewTest {
       checker
           .when(() -> RuleChecker.isMoveLegal(any(GameState.class), any(Move.class)))
           .thenReturn(true);
-      when(engine.play(any(Move.class))).thenReturn(true);
 
       boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
 
       checker.verify(() -> RuleChecker.isMoveLegal(any(GameState.class), any(Move.class)));
-      verify(engine, times(1)).play(any(Move.class));
+      verify(dispatcher, times(1)).playBoardMove(any(Move.class));
     }
   }
 
@@ -99,7 +121,7 @@ class BoardViewTest {
 
     cell.getOnMouseClicked().handle(event);
 
-    verify(engine, atLeast(0)).play(any(Move.class));
+    verify(dispatcher, atLeast(0)).playBoardMove(any(Move.class));
   }
 
   @Test
@@ -116,14 +138,13 @@ class BoardViewTest {
       checker
           .when(() -> RuleChecker.isMoveLegal(any(GameState.class), any(Move.class)))
           .thenReturn(true);
-      when(engine.play(any(Move.class))).thenReturn(true);
 
       var event = mock(javafx.scene.input.MouseEvent.class);
       when(event.getButton()).thenReturn(MouseButton.SECONDARY);
 
       cell.getOnMouseClicked().handle(event);
 
-      verify(engine, atLeast(0)).play(any(Move.class));
+      verify(dispatcher, atLeast(0)).playBoardMove(any(Move.class));
     }
   }
 
@@ -141,7 +162,7 @@ class BoardViewTest {
   void testHighlightCurrentPlayerGameOver() {
     when(state.isGameOver()).thenReturn(true);
     // Create a new boardView so the constructor call also sees isGameOver = true
-    BoardView bv = new BoardView(engine);
+    BoardView bv = new BoardView(engine, new ActionDispatcher(engine, null));
 
     // Reset mock to ignore the calls from constructor if any
     clearInvocations(state);
@@ -236,8 +257,6 @@ class BoardViewTest {
   /** Test clicking on a wall slot (interactive zone between cells) triggers engine.play */
   @Test
   void testWallSlotClickCallsEnginePlay() {
-    // Wall slots are Rectangles added directly to the BoardView (GridPane)
-    // We look for one that is transparent (initial state of slots)
     Rectangle slot =
         boardView.getChildren().stream()
             .filter(n -> n instanceof Rectangle)
@@ -248,14 +267,22 @@ class BoardViewTest {
 
     assertNotNull(slot, "Should find at least one wall slot");
 
+    when(player1.isAI()).thenReturn(false);
+    when(dispatcher.isNetworkGame()).thenReturn(false);
+
     var event = mock(javafx.scene.input.MouseEvent.class);
     when(event.getButton()).thenReturn(MouseButton.SECONDARY);
 
-    when(engine.play(any(Move.class))).thenReturn(true);
+    try (MockedStatic<RuleChecker> checker = mockStatic(RuleChecker.class)) {
+      checker
+          .when(() -> RuleChecker.isMoveLegal(any(GameState.class), any(Move.class)))
+          .thenReturn(true);
 
-    slot.getOnMouseClicked().handle(event);
+      slot.getOnMouseClicked().handle(event);
 
-    verify(engine, atLeastOnce()).play(argThat(move -> move.isWall()));
+      checker.verify(() -> RuleChecker.isMoveLegal(any(GameState.class), any(Move.class)));
+      verify(dispatcher, times(1)).playBoardMove(argThat(Move::isWall));
+    }
   }
 
   @Test
@@ -317,7 +344,7 @@ class BoardViewTest {
 
     slot.getOnMouseClicked().handle(event);
 
-    verify(engine, never()).play(any());
+    verify(dispatcher, never()).playBoardMove(any());
   }
 
   @Test
@@ -338,7 +365,7 @@ class BoardViewTest {
 
     slot.getOnMouseClicked().handle(event);
 
-    verify(engine, never()).play(any());
+    verify(dispatcher, never()).playBoardMove(any());
   }
 
   @Test
@@ -374,7 +401,7 @@ class BoardViewTest {
     when(state.getPlayers()).thenReturn(List.of(player1, player2));
 
     // Create a new boardView so it uses our updated mock from the start
-    BoardView bv = new BoardView(engine);
+    BoardView bv = new BoardView(engine, new ActionDispatcher(engine, null));
     bv.drawPlayers();
 
     // Since drawBoard is called in constructor, cell2 should already be empty if isDisabled was
@@ -403,19 +430,15 @@ class BoardViewTest {
   void testHandleCellClickAI() {
     when(player1.isAI()).thenReturn(true);
     boardView.handleCellClick(0, 1);
-    verify(engine, never()).play(any());
+    verify(dispatcher, never()).playBoardMove(any());
   }
 
   @Test
   void testHandleCellClickUnsuccessfulPlay() {
     when(player1.isAI()).thenReturn(false);
-    when(engine.play(any())).thenReturn(false);
+    boardView.handleCellClick(0, 1);
 
-    BoardView bvSpy = spy(boardView);
-    bvSpy.handleCellClick(0, 1);
-
-    // Verify drawBoard should not be called if play fails
-    verify(bvSpy, never()).drawBoard();
+    verify(dispatcher, times(1)).playBoardMove(any(Move.class));
   }
 
   @Test
@@ -425,7 +448,7 @@ class BoardViewTest {
       when(player1.isAI()).thenReturn(false);
 
       boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
-      verify(engine, never()).play(any());
+      verify(dispatcher, never()).playBoardMove(any());
     }
   }
 
@@ -433,7 +456,7 @@ class BoardViewTest {
   void testHandleWallClickAI() {
     when(player1.isAI()).thenReturn(true);
     boardView.handleWallClick(0, 0, MouseButton.SECONDARY);
-    verify(engine, never()).play(any());
+    verify(dispatcher, never()).playBoardMove(any());
   }
 
   @Test
