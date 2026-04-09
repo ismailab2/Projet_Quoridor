@@ -11,7 +11,7 @@ public class NetworkLauncher implements AppLauncher {
 
   /** Default host used when no address is provided. */
   private static final String DEFAULT_HOST = "localhost";
-  
+
   /** Default TCP port used when no port is provided. */
   private static final int DEFAULT_PORT = 12345;
 

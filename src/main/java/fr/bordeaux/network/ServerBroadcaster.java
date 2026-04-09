@@ -63,9 +63,9 @@ public class ServerBroadcaster implements Runnable {
       final byte[] buf = msg.getBytes(StandardCharsets.UTF_8);
       final DatagramPacket packet = new DatagramPacket(buf, buf.length, address, broadcastPort);
       while (running.get()) {
-      socket.send(packet);
-      Thread.sleep(delayMs);
-    }
+        socket.send(packet);
+        Thread.sleep(delayMs);
+      }
     } catch (final IOException e) {
       if (Logger.getInstance().isErrorEnabled()) {
         Logger.getInstance().error("UDP Broadcast I/O error: {0}", e.getMessage());
