@@ -90,7 +90,7 @@ Si le pion d’un autre joueur se trouve juste devant le pion du joueur actif, i
 Dans le cas où le pion est bloqué par un autre pion et qu’un mur ou le bord du plateau empêche de sauter directement derrière le pion, le joueur peut effectuer un déplacement en diagonale. Cette règle donne une flexibilité stratégique intéressante, car elle permet d’éviter les situations où un pion serait complètement coincé par les autres. Les déplacements diagonaux ne sont donc pas une option de base mais une solution spéciale pour résoudre des situations de blocage (Fig.~\ref{fig:regles_specifiques}).
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.40\linewidth]{regles3}
+    \includegraphics[width=0.6\linewidth]{regles3}
     \caption{Déplacement diagonal (saut d'un joueur)}
     \label{fig:regles_specifiques}
 \end{figure}
@@ -165,14 +165,9 @@ L’un des signes de la reconnaissance du jeu est son prix \textit{Mind Game}, d
 
 \paragraph{Versions en ligne et communautés de joueurs}
 
-Avec le développement des technologies numériques, Quoridor a très vite été adapté en versions informatiques. Aujourd’hui, il existe de nombreuses plateformes en ligne où il est possible de jouer à Quoridor gratuitement contre d’autres joueurs à travers le monde. Ces environnements en ligne offrent plusieurs avantages par rapport à la version physique :
+Avec le développement des technologies numériques, Quoridor a très vite été adapté en versions informatiques. Aujourd’hui, il existe de nombreuses plateformes en ligne où il est possible de jouer à Quoridor gratuitement contre d’autres joueurs à travers le monde.
 
-\begin{itemize}
-    \item \textbf{Accessibilité immédiate} : nul besoin d’acheter un plateau physique ou de trouver un adversaire en face de soi ; il suffit d’un navigateur ou d’une application.
-    \item \textbf{Matchmaking automatisé} : beaucoup de versions en ligne proposent de jumeler les joueurs par niveau, ce qui permet d’affronter des adversaires de force comparable et d’améliorer progressivement son jeu.
-    \item \textbf{Analyse des parties} : certaines plateformes offrent un historique des parties ou un système de replay permettant de revoir les coups joués, ce qui est extrêmement utile pour apprendre et s’améliorer.
-    \item \textbf{Statistiques et classement} : des systèmes de classement ELO ou similaires permettent de suivre sa progression et de se mesurer à une communauté plus large.
-\end{itemize}
+Ces environnements en ligne offrent plusieurs avantages par rapport à la version physique. Premièrement, ils garantissent une \textbf{accessibilité immédiate} puisqu'il n'y a nul besoin d'acheter un plateau physique ; un simple navigateur suffit. Deuxièmement, le \textbf{matchmaking automatisé} permet de jumeler les joueurs par niveau pour affronter des adversaires de force comparable. Troisièmement, l'\textbf{analyse des parties} via l'historique ou un système de replay est extrêmement utile pour apprendre. Enfin, des \textbf{statistiques et un classement} ELO permettent de suivre sa progression au sein d'une communauté active.
 
 Ces adaptations numériques ont grandement contribué à la popularité actuelle de Quoridor, en particulier auprès d’un public jeune et connecté. Elles ont aussi facilité l’organisation de tournois, de défis et d’événements en ligne autour du jeu, ce qui a favorisé l’émergence d’une communauté active autour de Quoridor.
 
@@ -180,13 +175,8 @@ Ces adaptations numériques ont grandement contribué à la popularité actuelle
 
 Au‑delà des versions commerciales et des plateformes en ligne, le jeu a inspiré de nombreux passionnés à créer leurs propres implémentations. Sur des plateformes de partage de code telles que GitHub, il est possible de trouver plusieurs projets qui reproduisent ou étendent Quoridor dans des langages de programmation variés.
 
-Deux exemples de projets particulièrement intéressants sont :
 
-\begin{itemize}
-    \item \textbf{Le dépôt de \textit{alainrinder}} : disponible à l’adresse \href{https://github.com/alainrinder/quoridor.py}{https://github.com/alainrinder/quoridor.py}, ce projet propose une implémentation en Python de Quoridor avec une interface graphique. Il permet de jouer contre une IA basique et constitue une base solide pour quiconque souhaite étudier le jeu ou développer une IA plus avancée.
-
-    \item \textbf{Le dépôt de \textit{pavlosdais}} : disponible sur \href{https://github.com/pavlosdais/Quoridor}{https://github.com/pavlosdais/Quoridor}, ce projet propose une version du jeu en langage C fonctionnant dans le terminal. Ce type de projet est particulièrement utile pour comprendre les mécanismes internes du jeu et implémenter des moteurs de décision légers.
-\end{itemize}
+Deux exemples de projets particulièrement intéressants illustrent cette diversité. \textbf{Le dépôt de \textit{alainrinder}}, disponible à l’adresse \href{https://github.com/alainrinder/quoridor.py}{https://github.com/alainrinder/quoridor.py}, propose une implémentation en Python avec interface graphique, idéale pour étudier le jeu ou développer une IA. Parallèlement, \textbf{le dépôt de \textit{pavlosdais}}, accessible sur \href{https://github.com/pavlosdais/Quoridor}{https://github.com/pavlosdais/Quoridor}, propose une version en langage C fonctionnant dans le terminal, utile pour comprendre les mécanismes internes et implémenter des moteurs légers.
 
 Ces projets sont des ressources précieuses pour les développeurs, car ils permettent de manipuler directement les structures de données associées aux plateaux, aux pions et aux murs. Ils servent aussi de point de départ pour expérimenter différentes stratégies d’IA ou pour intégrer le jeu dans des environnements plus larges.
 
@@ -202,15 +192,8 @@ Par la suite, plusieurs études ont adopté des méthodes plus sophistiquées po
 
 Un autre champ important de la recherche est l’étude des heuristiques et des fonctions d’évaluation spécifiques à ce jeu. Par exemple, des travaux ont tenté de définir des mesures qui estiment la distance effective d’un pion à sa ligne d’arrivée en tenant compte des murs déjà placés, ou encore de combiner plusieurs métriques pour guider la recherche de coups dans des espaces de décision très vastes.
 
-En plus des méthodes de recherche locale comme MCTS, d’autres techniques issues de l’intelligence artificielle ont été explorées, comme :
 
-\begin{itemize}
-    \item \textbf{Les algorithmes Minimax et alpha‑bêta}, classiques dans les jeux à deux joueurs, qui explorent l’arbre des coups possibles pour déterminer les actions optimales en partant de la logique que l’adversaire joue parfaitement.
-
-    \item \textbf{Les méthodes hybrides}, qui combinent des heuristiques locales, des simulations et des approximations de valeur pour accélérer la prise de décision.
-
-    \item \textbf{L’apprentissage automatique}, où des modèles peuvent être entraînés à partir de données de parties pour apprendre des stratégies gagnantes sans programmation explicite des règles tactiques.
-\end{itemize}
+En plus des méthodes de recherche locale comme MCTS, d’autres techniques issues de l’intelligence artificielle ont été explorées. L'utilisation des \textbf{algorithmes Minimax et alpha-bêta}, classiques dans les jeux à deux joueurs, permet d'explorer l'arbre des coups optimaux. Les \textbf{méthodes hybrides} combinent quant à elles des heuristiques locales et des simulations pour accélérer la prise de décision. Enfin, l'\textbf{apprentissage automatique} permet d'entraîner des modèles à partir de données de parties pour découvrir des stratégies gagnantes de manière autonome.
 
 Les travaux de Jose et al. sur Quoridor explorent ces aspects sous un angle plus moderne, en discutant de l’intégration d’algorithmes d’intelligence artificielle dans l’analyse stratégique du jeu\cite{jose2022quoridorai}. Il constitue une ressource intéressante pour comprendre comment les concepts théoriques d’IA se traduisent dans la pratique du jeu.
 
@@ -246,72 +229,14 @@ Les implémentations disponibles, qu’elles soient grand public ou issues de pr
 
 \subsection{Objectifs du projet réalisés}
 
-Quelques objectifs qu’il était plus que nécessaire et une évidence de réaliser afin de proposer une expérience de jeu cohérente et satisfaisante étaient : 
-
-\begin{itemize}
-\item Afficher le plateau selon ses configurations (taille, position des pions et murs, murs restants);
-
-
-\item Gérer les coups disponibles à chaque tour des joueurs (coups autorisés, coups illégaux, requêtes erronées, contraintes des murs);
-
-
-\item Adapter la partie selon les configurations demandées (interface clavier/graphique, mode blitz/en ligne, adversaire humain/IA et leur nombre, nombre de murs, …);
-
-
-\item Proposer une langue adaptative selon la région du joueur (au moins anglais et français);
-
-
-\end{itemize}
+Quelques objectifs qu’il était plus que nécessaire et une évidence de réaliser afin de proposer une expérience de jeu cohérente et satisfaisante étaient d'afficher le plateau selon ses multiples configurations (taille, position des pions et murs, murs restants) et de gérer rigoureusement les coups disponibles à chaque tour des joueurs. Cela inclut la validation des coups autorisés, le traitement des coups illégaux ou des requêtes erronées, ainsi que le respect des contraintes liées aux murs. Il était également crucial d'adapter la partie selon les configurations demandées, qu'il s'agisse de l'interface (clavier ou graphique), du mode de jeu (blitz ou en ligne) ou des adversaires (humains ou IA). Enfin, l'intégration d'une langue adaptative selon la région du joueur, supportant au moins l'anglais et le français, constituait un pilier de l'accessibilité du projet.
 La réalisation de ces objectifs devait être notre première priorité sans quoi il aurait été compliqué de parvenir à la fin de ce projet. Nous avons alors pu accomplir ces tâches afin de poursuivre vers des objectifs plus poussés, dont nous dirions même plus challengeant.
 
 
 
 \subsection{Fonctionnalités attendues dans le cahier des charges.}
 
-Le projet requiert 15 généralités que nous avons respectés et qui auront été notre base de départ afin de fournir un code complet et rigoureux: 
-
-\begin{itemize}
-\item Langage de programmation : JAVA SE 21+;
-
-
-\item Style de codage : Coding style de Google;
-
-
-\item Documentation : Javadoc;
-
-
-\item Langue par défaut du code : Anglais;
-
-
-\item Système crible : Fonctionne sur des systèmes GNU/Linux;
-
-
-\item Tests : Tester et valider le code (à hauteur de 85% de couverture);
-
-\item Bugs : Aucun bug ne fait crasher le programme et un message d’erreur explicite est affiché à l’utilisateur;
-
-\item Performances : Mesurer et documenter sur différentes entrées ainsi que ses cas limites;
-
-\item Bibliothèques : Seul la bibliothèque du langage et celle listées sont acceptées;
-
-\item Build-system : Maven;
-
-\item Framework de tests : JUnit + Jacoco;
-
-
-\item Gestion des options : Bibliothèque commons-cli;
-
-
-\item Bibliothèque graphique : JavaFx;
-
-
-\item Internationalisation: ResourceBundle et Locale;
-
-
-\item Apprentissage automatique : Bibliothèque TensorFlow (Java API);
-
-
-\end{itemize}
+Le projet repose sur un ensemble de généralités techniques fondamentales qui garantissent la rigueur et la portabilité du code. \textbf{Environnement et standards :} le développement utilise le langage Java SE 21+ avec le coding style de Google. L'intégralité du code et de la documentation Javadoc est rédigée en anglais. \textbf{Outils de build et qualité :} le système de build Maven orchestre le projet, tandis que les frameworks JUnit et Jacoco assurent une couverture de tests supérieure à 85\% sur les systèmes GNU/Linux. Une attention particulière est portée à la robustesse afin qu'aucun bug ne fasse crasher le programme sans un message explicite. \textbf{Bibliothèques et frameworks :} une sélection de bibliothèques est utilisée, notamment commons-cli pour les options, JavaFX pour l'interface graphique, ainsi que TensorFlow pour l'apprentissage automatique. L'internationalisation est gérée via ResourceBundle et Locale pour assurer une expérience utilisateur multilingue.
 Le projet nécessitait également la réalisation de multiples tâches réparties en 40 besoins dont nous avons précisé l’avancement de chacun des 40 en annexe à la fin de ce document comprenant les objectifs cités dans la section précédente 1.6 Objectifs du projet réalisés.
 
 
@@ -349,21 +274,7 @@ Pour cela, la classe \texttt{MultiGameServer} a été conçue. Contrairement au 
 
 \subsubsection{Protocole de communication et format des messages}
 
-
-Le choix du protocole de communication s’est porté sur un modèle simple, basé sur l’échange de chaînes ASCII terminées par un retour à la ligne. Cette approche présente plusieurs avantages : les messages sont faciles à lire, à comprendre et à déboguer, ce qui est particulièrement utile pendant le développement et les tests. Les commandes principales incluent :
-
-
-\begin{itemize}
-
-\item \texttt{HELLO} : initialisation de la connexion entre le client et le serveur.
-
-\item \texttt{PING} : vérification de la disponibilité du serveur.
-
-\item \texttt{QUIT} : fermeture propre de la session client.
-
-\item \texttt{MOVE} : envoi d’un coup effectué par le joueur.
-
-\end{itemize}
+Le choix du protocole de communication s’est porté sur un modèle simple, basé sur l’échange de chaînes ASCII terminées par un retour à la ligne. Cette approche présente l'avantage d'être facilement lisible et débogable. Les commandes principales incluent \texttt{HELLO} pour l’initialisation de la connexion, \texttt{PING} pour vérifier la disponibilité du serveur, \texttt{QUIT} pour fermer la session proprement, et \texttt{MOVE} pour l’envoi d’un coup effectué par le joueur.
 
 
 Les réponses du serveur incluent des messages tels que \texttt{WELCOME}, \texttt{PONG}, \texttt{BYE}, \texttt{OK}, \texttt{ERROR}, ainsi que des notifications spécifiques au jeu comme \texttt{GAME\_START}, \texttt{OPPONENT\_MOVE} et \texttt{GAME\_OVER}. Ce format simple garantit une compréhension claire des échanges et permet au client d’interpréter rapidement les messages pour mettre à jour son interface graphique ou sa logique de jeu.
@@ -396,22 +307,8 @@ Cette approche permet également de gérer les cas d’exception, tels que la d�
 \subsubsection{Évolutivité et architecture future}
 
 
-L’architecture client/serveur adoptée pour le projet offre une grande flexibilité pour des évolutions futures. Il est par exemple possible d’intégrer des fonctionnalités supplémentaires telles que :
 
-
-\begin{itemize}
-
-\item un système de matchmaking pour associer automatiquement les joueurs selon leur niveau,
-
-\item des parties classées avec calcul de scores et de statistiques,
-
-\item l’intégration d’IA côté serveur pour remplacer un joueur absent ou compléter une partie,
-
-\item un suivi historique des parties pour permettre aux utilisateurs de revoir leurs stratégies,
-
-\item une sécurité renforcée avec authentification et chiffrement des communications.
-
-\end{itemize}
+L’architecture client/serveur adoptée pour le projet offre une grande flexibilité pour des évolutions futures. Il est par exemple envisageable d’intégrer un système de matchmaking pour associer automatiquement les joueurs selon leur niveau, ou de mettre en place des parties classées avec calcul de scores et de statistiques. L’intégration d’IA côté serveur permettrait également de remplacer un joueur absent ou de compléter une partie. De plus, un suivi historique des parties pourrait être mis en œuvre pour permettre aux utilisateurs de revoir leurs stratégies, tandis qu'une sécurité renforcée avec authentification et chiffrement assurerait la protection des communications.
 
 
 En adoptant une architecture modulaire, dans laquelle la communication réseau est séparée de la logique métier et des interfaces, il est possible de faire évoluer le projet sans perturber les composants existants. Chaque module (réseau, interface, IA, logique métier) peut être testé et amélioré indépendamment.
@@ -420,24 +317,8 @@ En adoptant une architecture modulaire, dans laquelle la communication réseau e
 \subsubsection{Résumé de l’approche}
 
 
-En résumé, l’implémentation réseau de Quoridor repose sur :
 
-
-\begin{itemize}
-
-\item une architecture client/serveur centralisée garantissant la cohérence des règles,
-
-\item un protocole simple basé sur des chaînes ASCII pour faciliter le développement et le débogage,
-
-\item la gestion de plusieurs clients et parties simultanées via \texttt{MultiGameServer},
-
-\item une découverte basique de serveurs via UDP avec \texttt{ServerBroadcaster},
-
-\item la validation stricte des coups côté serveur via le moteur de jeu et \texttt{NetworkMoveParser},
-
-\item une synchronisation continue des états entre clients pour une expérience de jeu fluide et cohérente.
-
-\end{itemize}
+En résumé, l’implémentation réseau de Quoridor repose sur une architecture client/serveur centralisée garantissant la cohérence des règles, portée par un protocole simple basé sur des chaînes ASCII. La gestion de plusieurs clients et parties simultanées est assurée via \texttt{MultiGameServer}, complétée par une découverte de serveurs via UDP avec \texttt{ServerBroadcaster}. Enfin, la validation stricte des coups est effectuée côté serveur par le moteur de jeu et le \texttt{NetworkMoveParser}, assurant une synchronisation continue des états entre les clients pour une expérience fluide.
 
 
 Cette approche permet non seulement de jouer à distance avec des amis ou d’autres utilisateurs, mais également de poser les bases d’une plateforme de jeu évolutive, modulable et sécurisée, tout en respectant strictement les règles du Quoridor original.
@@ -472,32 +353,13 @@ En parallèle, un thread de timeout examine régulièrement la liste des clients
 
 
 
-Chaque connexion crée une \texttt{ClientSession}. Lorsqu’un client envoie une commande :
-\begin{itemize}
-    \item \texttt{HELLO} : enregistre le joueur
-    \item \texttt{PING} : réponse \texttt{PONG}
-    \item \texttt{QUIT} : réponse \texttt{BYE}
-    \item \texttt{MOVE} : traitement du coup
-\end{itemize}
+Chaque connexion crée une \texttt{ClientSession}. Lorsqu’un client envoie une commande, le serveur l'interprète selon son type : \texttt{HELLO} enregistre le joueur, \texttt{PING} déclenche une réponse \texttt{PONG}, \texttt{QUIT} provoque l'envoi de \texttt{BYE}, et \texttt{MOVE} initie le traitement d'un coup de jeu.
 
-Pour un coup :
-\begin{itemize}
-    \item Vérification du joueur et du tour
-    \item Conversion en \texttt{Move}
-    \item Validation par le moteur de jeu
-\end{itemize}
+Pour chaque coup reçu, le serveur suit une procédure rigoureuse. Il vérifie d'abord que le joueur appartient bien à la partie et que c'est bien son tour. Ensuite, il convertit le texte du coup en objet \texttt{Move} et en valide la légalité via le moteur de jeu du cœur métier.
 
-Si le coup est valide :
-\begin{itemize}
-    \item Envoi de \texttt{OK}
-    \item Diffusion de \texttt{OPPONENT\_MOVE}
-\end{itemize}
+Si le coup est valide, le serveur confirme l'action en envoyant un message \texttt{OK} au joueur actif, puis diffuse une notification \texttt{OPPONENT\_MOVE} aux autres participants pour mettre à jour leur plateau local.
 
-Fin de partie :
-\begin{itemize}
-    \item Mise à jour du score
-    \item Envoi de \texttt{GAME\_OVER WIN} ou \texttt{GAME\_OVER LOSE}
-\end{itemize}
+En fin de partie, le serveur met à jour le tableau des scores global et notifie les joueurs du résultat final via les messages \texttt{GAME\_OVER WIN} ou \texttt{GAME\_OVER LOSE}.
 
 
 \subsubsection{Synchronisation entre serveur et client}
@@ -612,7 +474,7 @@ Ce processus de remontée des valeurs (des feuilles à la racine) permet à l'IA
 
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{MiniMax.jpg}}
+    \frame{\includegraphics[width=0.75\textwidth]{MiniMax.jpg}}
     \caption{Algorithme Minimax et arbre de décision}\label{fig:minimax}
 \end{figure}
 
@@ -682,7 +544,7 @@ Contrairement au Minimax qui tente d’évaluer toutes les éventualités, le MC
 
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{mcts-algorithm-1a.png}}
+    \frame{\includegraphics[width=0.75\textwidth]{mcts-algorithm-1a.png}}
     \caption{Les quatre phases de l'algorithme MCTS}\label{fig:mcts}
 \end{figure}
 
@@ -720,7 +582,7 @@ Le fonctionnement de ce neurone repose sur une équation mathématique fondament
 
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.60\textwidth]{Neurone_4_poids.jpeg}}
+    \frame{\includegraphics[width=0.8\textwidth]{Neurone_4_poids.jpeg}}
     \caption{Modèle de neurone artificiel pour l'évaluation}\label{fig:neurone}
 \end{figure}
 
@@ -743,6 +605,7 @@ Afin de corriger cette erreur de prédiction, l'algorithme fait appel à un opti
 
 
 
+\newpage
 \section{Architecture du projet}
 
 Notre projet  consiste à implémenter le jeu Quoridor en Java, en respectant strictement l’ensemble des règles détaillées
@@ -771,34 +634,18 @@ ou de communication, ce qui garantit que la logique métier reste cohérente et 
 
 Cette approche est cohérente avec les recommandations de Fowler\cite{fowler2002patterns} sur les patterns d’architecture logicielle.
 Fowler insiste sur la nécessité de séparer les préoccupations et de structurer les systèmes en couches bien définies, afin de réduire
-les dépendances entre les composants et de faciliter la maintenance. En suivant ce principe, notre architecture repose sur des couches
-clairement identifiées :
-\begin{itemize}
-    \item \textbf{Cœur métier (\texttt{Core})} : contient toutes les entités métier, les règles de validation, les calculs de victoire et les états de partie.
-    \item \textbf{Interfaces d’adaptation (\texttt{Adapters})} : représentent les points d’entrée et de sortie du système, tels que la CLI, la GUI, le réseau et les modules d’IA.
-    \item \textbf{Infrastructure (\texttt{Infrastructure})} : regroupe les implémentations concrètes nécessaires pour faire communiquer le cœur métier avec les interfaces, comme la persistance ou les modules de communication réseau.
-\end{itemize}
+les dépendances entre les composants et de faciliter la maintenance.
+En suivant ce principe, notre architecture repose sur des couches clairement identifiées : le \textbf{Cœur métier (\texttt{Core})} qui regroupe les entités métier et les règles de validation ; les \textbf{Interfaces d’adaptation (\texttt{Adapters})} qui servent de points d’entrée et de sortie comme la CLI ou la GUI ; et l'\textbf{Infrastructure (\texttt{Infrastructure})} qui assure la communication concrète et la persistance.
 
 \paragraph{Avantages pratiques de cette approche}
 
-L’un des principaux avantages de cette architecture est sa modularité. En séparant clairement le cœur métier des interfaces, nous pouvons :
-\begin{itemize}
-    \item Développer et tester chaque composant de manière indépendante. Les tests unitaires peuvent se concentrer uniquement sur le cœur métier sans nécessiter l’exécution de la GUI ou du réseau.
-    \item Ajouter de nouvelles fonctionnalités ou interfaces sans impacter les modules existants. Par exemple, il est possible de créer une nouvelle version web ou mobile de Quoridor simplement en développant un nouvel adaptateur qui interagit avec le cœur via des interfaces abstraites.
-    \item Introduire ou modifier les algorithmes d’intelligence artificielle (Minimax, MCTS, ou d’autres) sans toucher aux règles du jeu. Chaque algorithme peut être implémenté comme un service indépendant qui sollicite le cœur métier pour connaître l’état de la partie et proposer un coup.
-\end{itemize}
+L’un des principaux avantages de cette architecture est sa modularité. Elle permet de développer et tester chaque composant indépendamment, les tests unitaires pouvant se focaliser sur le cœur métier sans dépendances. Elle offre également la flexibilité d'ajouter des fonctionnalités (comme une version mobile) sans impacter l'existant, et facilite l'introduction de nouveaux algorithmes d'IA qui sollicitent simplement le cœur via des interfaces.
 
 Un autre avantage majeur réside dans la robustesse et la sécurité fonctionnelle. Toutes les actions initiées par un joueur ou par un algorithme passent par le cœur métier pour validation. Cela signifie qu’aucune interface ne peut créer d’état invalide : impossible de poser un mur illégal, de déplacer un pion hors du plateau ou de contourner les règles fondamentales. Cette approche centralise la logique critique et prévient les bugs liés à des incohérences entre différents modules.
 
 \paragraph{Interaction entre couches et adaptateurs}
 
-Les adaptateurs constituent le lien entre le monde extérieur et le cœur métier. Chaque adaptateur utilise des interfaces abstraites définies dans le cœur pour communiquer avec celui-ci. Par exemple :
-\begin{itemize}
-    \item La CLI lit les entrées du joueur (déplacement de pion ou pose de mur), transmet ces actions au cœur métier via l’interface \texttt{GameEngine}, puis affiche le résultat sur le terminal.
-    \item La GUI capte les clics de l’utilisateur sur le plateau graphique, envoie les actions au cœur, puis met à jour l’affichage en fonction de l’état retourné.
-    \item Le module réseau convertit les messages reçus d’un autre joueur en actions valides, puis informe le cœur métier. De même, les changements d’état du cœur sont convertis en messages envoyés aux clients connectés.
-    \item Les modules d’IA consultent le cœur métier pour analyser l’état du plateau et générer le meilleur coup possible selon la stratégie choisie.
-\end{itemize}
+Les adaptateurs constituent le lien entre le monde extérieur et le cœur métier via des interfaces abstraites. La CLI interprète les commandes terminal pour \texttt{GameEngine}, tandis que la GUI gère les interactions graphiques. Le module réseau synchronise les actions distantes avec le cœur, et les modules d'IA génèrent les meilleurs coups en analysant l'état du plateau.
 
 Cette conception permet à chaque adaptateur de se concentrer sur ses responsabilités spécifiques sans se soucier des règles métier, tout en assurant une cohérence globale du système.
 
@@ -810,11 +657,7 @@ De plus, la maintenance est facilitée. Si, à l’avenir, nous souhaitons modif
 
 \paragraph{Flexibilité pour les algorithmes d’intelligence artificielle}
 
-Dans le cadre de notre projet, la Clean Architecture est particulièrement adaptée à l’intégration d’algorithmes d’IA. La séparation des couches permet d’implémenter indépendamment :
-\begin{itemize}
-    \item \textbf{Minimax}, pour évaluer systématiquement les coups et anticiper les réponses de l’adversaire dans un arbre de décision.
-    \item \textbf{Monte Carlo Tree Search (MCTS)}, pour explorer de manière probabiliste les coups et identifier les stratégies les plus prometteuses.
-\end{itemize}
+Dans le cadre de notre projet, la Clean Architecture est particulièrement adaptée à l’intégration d’algorithmes d’IA, permettant d’implémenter indépendamment \textbf{Minimax} pour une évaluation systématique par arbre de décision, et \textbf{Monte Carlo Tree Search (MCTS)} pour une exploration probabiliste des stratégies prometteuses.
 
 Chaque algorithme interagit uniquement avec le cœur métier via des interfaces abstraites, ce qui permet d’ajouter ou de remplacer un algorithme sans modifier la logique du jeu. Par exemple, nous pourrions expérimenter un nouvel algorithme hybride combinant MCTS et Minimax, ou encore intégrer des techniques d’apprentissage automatique pour améliorer les performances de l’IA, sans toucher au reste de l’architecture.
 
@@ -888,7 +731,7 @@ jamais l'inverse. Cette contrainte est visible dans le diagramme.
 Schéma en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{quoridor}}
+    \frame{\includegraphics[width=0.75\textwidth]{quoridor}}
     \caption{Une architecture en couches concentriques}\label{fig:example1}
 \end{figure}
 
@@ -905,7 +748,7 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 Schéma de la couche Core de notre architecture (Fig.~\ref{fig:example0}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{core.jpg}}
+    \frame{\includegraphics[width=0.75\textwidth]{core.jpg}}
     \caption{Le cœur métier (Core)}\label{fig:example0}
 \end{figure}
 
@@ -922,7 +765,7 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 Schéma de la couche Main de notre architecture (Fig.~\ref{fig:example2}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{main.jpg}}
+    \frame{\includegraphics[width=0.75\textwidth]{main.jpg}}
     \caption{Couche Principale (Main)}\label{fig:example2}
 \end{figure}
 
@@ -940,10 +783,11 @@ Voici un diagramme indiquant comment sont liées les différentes classes du pac
 schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{cli.jpg}}
+    \frame{\includegraphics[width=0.75\textwidth]{cli.jpg}}
     \caption{Couche CLI}\label{fig:example3}
 \end{figure}
 
+\newpage
 \section{Revue critique du projet}
 
 Cette section propose un bilan analytique du projet, en examinant les succès techniques, les limites rencontrées lors du développement et les perspectives d'évolution pour le futur.
@@ -969,6 +813,13 @@ Malgré une architecture robuste, certaines limitations techniques subsistent. T
 \subsection{Améliorations possibles}
 
 Pour faire évoluer ce projet vers une version encore plus aboutie, plusieurs pistes de développement sont envisageables. La priorité résiderait dans la finalisation d'un système de salon de jeu complet, permettant une gestion fluide des invitations et des tournois en ligne. Sur le plan algorithmique, l'intégration de corpus de données issus de parties réelles jouées par des experts constituerait une avancée majeure pour affiner le modèle neuronal. Actuellement basé sur un entraînement par auto-jeu (self-play) incluant une part de coups aléatoires pour l'exploration, le système pourrait gagner en précision tactique en s'appuyant sur des séquences de jeu de haut niveau dépourvues de toute stochasticité artificielle (définie précédemment à la Section \ref{sec:stochasticite}). Cette approche permettrait à l'intelligence artificielle d'acquérir une compréhension plus profonde des ouvertures classiques et des stratégies de blocage complexes rencontrées dans les compétitions. Une autre évolution majeure consisterait à enrichir l'expérience utilisateur en passant d'une représentation bidimensionnelle à un moteur de rendu en trois dimensions, offrant une immersion accrue dans l'espace de jeu. Enfin, la portabilité du logiciel pourrait être étendue par l'adaptation de l'interface graphique pour les plateformes mobiles nativement, ou via une exportation vers le web, afin de rendre Quoridor accessible sur un plus large éventail de terminaux.
+
+\subsection{IA utilisées}
+
+Durant ce projet, nous avons utilisé certaines IAs pour nous aider, notamment pour la génération de code, la correction de bugs, et l'amélioration de notre code. L'utilisation de ces outils s'est faite de manière raisonnée, c'est-à-dire qu'on a pris le temps de comprendre chaque portion de code générée avant son intégration. Les IA nous ont également servi de support pour appréhender plus rapidement le fonctionnement des bibliothèques Java utilisées, notamment pour le GUI et les tests. Voici les outils que nous avons utilisés : Gemini Chatbot, Gemini Agent, ChatGPT, ChatGPT Codex.
+
+
+
 %------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
 %------------------------------------------------------------------------------
@@ -1077,7 +928,7 @@ Pour faire évoluer ce projet vers une version encore plus aboutie, plusieurs pi
         \hline
         F39 & Réseau : Multi-clients & Serveur gérant plusieurs parties, scoreboard et validation anti-triche. &  FAIT \\
         \hline
-        F40 & Réseau : Invitations & Système avancé d'invitations (accept/decline) et gestion des statuts joueurs. & Partiellement FAIT \\
+        F40 & Réseau : Invitations & Système avancé d'invitations (accept/decline) et gestion des statuts joueurs. & Non Fait\\
         \hline
     \end{tabular}
     \caption{Vue d'ensemble des besoins et leurs réalisations}
