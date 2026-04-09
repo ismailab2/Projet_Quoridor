@@ -42,13 +42,14 @@ Le jeu est également intéressant d’un point de vue scientifique et informati
 
 Quoridor est souvent utilisé pour tester différentes approches d’intelligence artificielle. Sa complexité combinatoire, moins élevée que celle des échecs ou du go, reste suffisante pour rendre inefficaces les méthodes de recherche exhaustive. Cela en fait un terrain idéal pour des algorithmes comme Minimax, l’élagage alpha-bêta ou le Monte Carlo Tree Search (MCTS). La règle obligeant à laisser un chemin libre ajoute une difficulté supplémentaire pour générer et valider les coups.
 
-Plusieurs ouvrages analysent le jeu et ses stratégies. Glendenning\cite{glendenning2006quoridor} détaille les stratégies de base et insiste sur l’importance de bien choisir quand poser un mur et anticiper les actions de l’adversaire. Lloyd\cite{lloyd2022quoridor} s’est intéressé plus récemment à l’intelligence artificielle, en étudiant comment des algorithmes peuvent analyser et améliorer le jeu.
+Plusieurs ouvrages analysent le jeu et ses stratégies. Glendenning\cite{Glendenning2002MasteringQ} détaille les stratégies de base et insiste sur l’importance de bien choisir quand poser un mur et anticiper les actions de l’adversaire. Jose et al.\cite{jose2022quoridorai} se sont intéressés plus récemment à l’intelligence artificielle, en étudiant comment des algorithmes peuvent analyser et améliorer le jeu.
 
 Avec l’avènement du numérique, Quoridor existe aussi sous forme d’applications mobiles, de plateformes en ligne et de projets académiques. Ces versions ont permis d’élargir le nombre de joueurs et de tester de nouvelles approches algorithmiques. Elles permettent aussi de collecter des données de jeu pour faire des analyses statistiques ou de l’apprentissage automatique.
 
-Le jeu est aussi utilisé dans l’enseignement pour illustrer des concepts en informatique : graphes, algorithmes de recherche, complexité algorithmique ou systèmes multi-agents. Comme le souligne Bezakova\cite{bezakova2013boardgames}, les jeux de plateau sont un excellent support pour apprendre la stratégie algorithmique et la logique.
+Le jeu est aussi utilisé dans l’enseignement pour illustrer des concepts en informatique : graphes, algorithmes de recherche, complexité algorithmique ou systèmes multi-agents. Comme le souligne Heliotis et al.\cite{bezakova2014}, les jeux de plateau sont un excellent support pour apprendre la stratégie algorithmique et la logique.
 
 Enfin, Quoridor est un excellent choix pour un projet informatique, car il combine plusieurs aspects : modélisation d’un système complexe, implémentation d’algorithmes de recherche, gestion de l’interface utilisateur et conception logicielle. Il est simple à comprendre mais offre une grande profondeur stratégique et un intérêt scientifique certain. Son histoire, sa popularité et les recherches qui lui sont consacrées montrent qu’il reste un jeu adapté aux défis contemporains, notamment en intelligence artificielle.
+
 \subsection{Principe général du jeu}
 
 Quoridor se joue sur un plateau carré composé de 9 × 9 cases dans sa version classique. Dans le cadre de notre projet, nous avons également envisagé des variantes avec des tailles différentes, allant de 3 × 3 à 15 × 15, à condition que la taille reste impaire. Cela permet de garder un bon équilibre entre les joueurs, car chacun part avec les mêmes chances.
@@ -128,93 +129,29 @@ L’une des subtilités de Quoridor réside dans la combinaison des déplacement
 
 Par exemple, si un adversaire est proche de votre ligne de départ, il peut être judicieux de poser un mur pour l’obliger à faire un détour. À l’inverse, il peut être plus avantageux de concentrer ses murs sur des zones où plusieurs pions se croisent afin de créer des effets combinés, obligeant plusieurs adversaires à changer leur chemin.
 
-\paragraph{Exemple concret}
-Supposons qu’un joueur A a son pion devant un mur et que le joueur B est juste derrière lui. Le joueur B ne peut pas sauter par-dessus le mur pour atteindre directement l’autre côté, mais il pourra utiliser le saut diagonal si nécessaire. Les combinaisons de ces situations créent une profondeur stratégique très importante malgré la simplicité des règles de base.
-
 \subsubsection{Limitations et contraintes}
 
-Le Quoridor impose plusieurs contraintes pour maintenir l’équilibre du jeu et éviter des abus tactiques.
+Le Quoridor impose plusieurs contraintes fondamentales pour maintenir l’équilibre du jeu et éviter les abus tactiques. La première contrainte majeure est la gestion des ressources : chaque mur représente une ressource rare et précieuse. Comme leur nombre est limité, chaque pose doit être mûrement réfléchie, car un mur utilisé trop tôt peut manquer d'impact, tandis qu'une économie excessive peut laisser l'adversaire prendre une avance irrattrapable. Cette pression est renforcée par la permanence des actions ; contrairement aux déplacements de pions, la pose d'un mur est définitive. Un mur ne peut être ni déplacé ni retiré, rendant toute erreur de placement irréversible et potentiellement préjudiciable pour celui qui l'a commise.
 
-1. **Une seule case par pion** : chaque case ne peut être occupée que par un pion, empêchant les collisions.
-2. **Murs fixes et non déplaçables** : un mur posé ne peut plus être retiré, ce qui oblige à réfléchir avant de le placer.
-3. **Chemin obligatoire** : il doit toujours rester un chemin vers la ligne d’arrivée pour chaque joueur, garantissant que personne ne soit bloqué complètement.
-4. **Déplacements limités** : un pion avance d’une seule case, sauf pour le saut par-dessus un adversaire ou le saut diagonal.
-5. **Respect des bordures** : ni les pions ni les murs ne peuvent sortir du plateau.
+Par ailleurs, l'intégrité du chemin constitue une règle inviolable : il doit toujours exister au moins un accès libre vers la ligne d’arrivée pour chaque joueur, interdisant ainsi tout enfermement total. Enfin, des contraintes physiques simples régissent le plateau : une case ne peut être occupée que par un seul pion à la fois, et aucun élément — pion ou mur — ne peut sortir des limites strictes du jeu. Ces limitations forcent les joueurs à planifier leurs actions avec rigueur tout en respectant l'espace de liberté des adversaires.
 
 \subsubsection{Aspects tactiques}
 
-Ces règles simples cachent une richesse stratégique immense. Le joueur doit constamment prendre des décisions tactiques : avancer son pion, poser un mur pour gêner un adversaire, anticiper ses déplacements, utiliser les sauts et diagonales de manière optimale. La combinaison des déplacements simples et des murs crée un espace de décision très vaste, où chaque coup peut avoir des conséquences sur plusieurs tours à venir.
+Ces règles simples cachent une richesse stratégique immense qui s'intensifie selon le nombre de participants. Le joueur doit constamment arbitrer entre deux objectifs contradictoires : avancer son propre pion pour se rapprocher de la victoire ou poser un mur pour entraver la progression adverse. Dans une partie à deux joueurs, la stratégie est directe et repose sur l'anticipation réciproque. En revanche, le passage à quatre joueurs transforme radicalement la dynamique du jeu. Chaque participant doit alors surveiller trois adversaires simultanément, ce qui réduit le contrôle individuel sur l'évolution du plateau. Un mur placé pour ralentir un concurrent peut involontairement ouvrir une voie royale à un autre, ou forcer un détour imprévu pour celui qui l'a posé. Cette dimension multi-joueurs impose une vigilance constante et une adaptabilité permanente aux actions often imprévisibles des autres.
 
-De plus, la limitation du nombre de murs et le fait que chaque joueur possède un seul pion rendent le jeu très équilibré. Le joueur doit toujours évaluer le rapport bénéfice/risque de poser un mur ou d’avancer son pion, car chaque décision influence directement la probabilité de victoire.
-
-\paragraph{Exemple de stratégie}
-Un joueur pourrait décider de ne pas poser de mur immédiatement pour avancer rapidement, mais cela peut permettre à un adversaire de progresser librement. À l’inverse, poser un mur tôt peut ralentir un adversaire, mais peut aussi le pousser à trouver un chemin plus court que prévu. La gestion de ces choix crée une tension permanente et rend chaque partie unique.
+La gestion du rapport bénéfice/risque est au cœur de chaque décision. Faut-il économiser ses murs pour la fin de partie ou tenter de bloquer l'adversaire dès les premiers tours ? La réponse dépend non seulement de la position des pions, mais aussi de la psychologie des adversaires et de la vision globale de l'espace de jeu. Cette combinaison de simplicité mécanique et de profondeur décisionnelle fait de Quoridor un excellent terrain pour l'étude de la planification stratégique.
 
 \subsubsection{Conclusion sur les règles}
 
-En résumé, Quoridor repose sur des règles simples mais exigeantes : chaque pion se déplace d’une case, les murs sont limités et doivent être placés avec prudence, et il faut toujours laisser un chemin libre pour tous les joueurs. Les règles sur le saut et le saut diagonal ajoutent des subtilités qui enrichissent la stratégie. Cette combinaison de simplicité et de profondeur stratégique fait de Quoridor un jeu accessible mais riche, parfaitement adapté à l’étude des stratégies, à l’intelligence artificielle et à la réflexion logique.
+En résumé, Quoridor repose sur des règles simples mais exigeantes : chaque pion se déplace d'une case, les murs sont limités et doivent être placés avec prudence, et il faut toujours laisser un chemin libre pour tous les joueurs. Les règles sur le saut et le saut diagonal ajoutent des subtilités qui enrichissent la stratégie. Cette combinaison de simplicité et de profondeur stratégique fait de Quoridor un jeu accessible mais riche, parfaitement adapté à l'étude des stratégies, à l'intelligence artificielle et à la réflexion logique.
 
+\subsection{Analyse de la complexité du jeu}
 
-
-
-
-\subsection{Contraintes et difficultés du jeu}
-
-Le Quoridor est un jeu de stratégie dont la simplicité apparente cache des contraintes et des difficultés très importantes. Pour bien comprendre pourquoi ce jeu est si exigeant, il est nécessaire de détailler les différents types de limitations que chaque joueur doit gérer tout au long de la partie, ainsi que les défis stratégiques qu’elles impliquent. Ces contraintes touchent aussi bien la gestion des murs que les déplacements des pions, et elles s’intensifient lorsque le nombre de joueurs augmente.
-
-\subsubsection{Contraintes liées aux murs}
-
-L’une des contraintes majeures du Quoridor réside dans le nombre limité de murs que chaque joueur possède. Chaque mur représente une ressource rare et précieuse, et il n’est pas possible d’en poser autant que l’on souhaite. Cette limitation force le joueur à réfléchir à chaque placement et à évaluer soigneusement le moment où il sera le plus efficace. Poser un mur trop tôt peut ne pas avoir beaucoup d’impact, tandis que le poser trop tard peut permettre à un adversaire de prendre une avance irrattrapable.
-
-De plus, la pose de murs est soumise à plusieurs règles strictes. Il est interdit de placer un mur qui bloque complètement l’accès à la ligne d’arrivée d’un joueur, ce qui oblige à calculer chaque coup pour s’assurer que personne n’est complètement enfermé. Cela signifie que le joueur ne peut pas simplement poser un mur “au hasard” pour ralentir un adversaire : il doit anticiper les conséquences de son action sur l’ensemble du plateau et sur tous les joueurs.
-
-Chaque mur posé est permanent, ce qui renforce la pression sur le joueur. Une erreur de placement est irréversible et peut compromettre sa propre progression ou, dans certains cas, offrir un avantage stratégique à un adversaire. Cette permanence oblige les joueurs à combiner rigueur et anticipation dans leur planification.
-
-\subsubsection{Contraintes liées au mouvement des pions}
-
-Les déplacements des pions sont également soumis à des contraintes précises. Chaque pion ne peut se déplacer que d’une case à la fois, sauf dans le cas des sauts ou des déplacements diagonaux. Cette limitation impose au joueur de planifier ses trajets plusieurs tours à l’avance, car un mauvais choix peut le ralentir ou le forcer à contourner des obstacles, ce qui augmente le nombre de coups nécessaires pour atteindre la ligne d’arrivée.
-
-L’interaction entre pions et murs crée une autre contrainte importante : un joueur doit toujours tenir compte de la position des autres pions. Si un adversaire se trouve directement devant lui, le joueur peut sauter par-dessus, mais uniquement si la case derrière l’adversaire n’est pas bloquée par un mur ou le bord du plateau. Dans le cas contraire, le joueur doit effectuer un saut diagonal. Ces règles introduisent des situations complexes où chaque déplacement nécessite une analyse des possibilités immédiates et futures.
-
-\subsubsection{Contraintes dans les parties à plusieurs joueurs}
-
-Le nombre de joueurs influence fortement la complexité et les contraintes du jeu. Dans une partie à deux joueurs, le joueur doit gérer uniquement un adversaire et peut donc anticiper plus facilement les mouvements et le placement de murs. En revanche, dans une partie à quatre joueurs, chaque joueur doit surveiller les déplacements et les stratégies de trois adversaires simultanément.
-
-Cette augmentation du nombre de participants crée plusieurs difficultés supplémentaires. Tout d’abord, le joueur dispose de moins de contrôle sur l’évolution du plateau, car les autres participants peuvent poser des murs de manière imprévisible et modifier le trajet optimal. Ensuite, il devient beaucoup plus difficile de prévoir les conséquences de chaque coup, car un mur placé pour ralentir un joueur peut en même temps bénéficier à un autre adversaire en modifiant le chemin le plus court. Enfin, la gestion des murs devient plus stratégique : chaque mur doit être utilisé non seulement pour bloquer un adversaire mais aussi pour protéger sa propre progression.
-
-\subsubsection{Contraintes stratégiques et anticipatives}
-
-La vraie difficulté de Quoridor réside dans la nécessité d’adopter une stratégie à la fois anticipative et flexible. Un joueur ne peut pas se contenter de déplacer son pion de manière linéaire vers la ligne d’arrivée ou de poser des murs au hasard. Il doit constamment évaluer le plateau, prévoir les coups des adversaires et ajuster sa stratégie en fonction de la situation.
-
-Cette planification implique de jongler entre deux objectifs parfois contradictoires : avancer son pion pour se rapprocher de la victoire et ralentir ses adversaires pour gagner du temps. Chaque décision a un coût et un bénéfice, et il faut savoir les équilibrer. Par exemple, poser un mur pour bloquer un adversaire peut rallonger le chemin du joueur actuel si ce mur est mal placé, tandis qu’avancer trop rapidement son pion peut laisser l’adversaire libre de progresser sans contraintes.
-
-\paragraph{Exemple concret}
-Imaginons un joueur avec trois murs restants. Un adversaire avance rapidement et menace d’atteindre la ligne d’arrivée avant lui. Le joueur doit décider : poser immédiatement un mur pour le ralentir, ce qui risque de l’empêcher lui-même de suivre sa trajectoire optimale, ou économiser ses murs pour une situation ultérieure, en espérant pouvoir rattraper son retard autrement. Ce type de choix illustre la complexité stratégique du jeu.
-
-\subsubsection{Contraintes combinatoires et complexité}
-
-Le Quoridor est également complexe du point de vue combinatoire. Chaque tour offre plusieurs options : déplacer le pion dans une direction, poser un mur horizontal ou vertical sur une multitude de cases disponibles, ou sauter un adversaire. Cette grande variété de coups possibles fait que le nombre de positions envisageables augmente très rapidement, même après quelques tours seulement.
-
-Cette explosion combinatoire rend le calcul exhaustif des coups très difficile, et c’est pourquoi des stratégies optimales ne peuvent être trouvées que par des méthodes avancées comme l’intelligence artificielle ou la planification algorithmique. Les joueurs humains doivent donc se baser sur des heuristiques et des prévisions partielles, ce qui ajoute une couche supplémentaire de difficulté et de créativité dans le jeu.
-
-\subsubsection{Contraintes psychologiques et décisionnelles}
-
-Au-delà des contraintes techniques et stratégiques, Quoridor impose des contraintes psychologiques importantes. Le joueur doit gérer la pression de prendre des décisions optimales à chaque tour, souvent sous la menace d’avancer plus lentement qu’un adversaire. Chaque mur posé ou chaque déplacement doit être réfléchi, car une erreur peut être coûteuse.
-
-De plus, le joueur doit faire preuve de patience et d’adaptabilité. Une stratégie qui semblait efficace à un moment donné peut devenir inefficace à cause des actions des adversaires, et il faut savoir modifier son plan sans perdre de vue l’objectif final.
-
-\subsubsection{Résumé des contraintes}
-
-En résumé, les contraintes de Quoridor peuvent être classées en plusieurs catégories :
-
-\begin{itemize}
-    \item \textbf{Contraintes de ressources :} nombre limité de murs, permanence des murs posés.
-    \item \textbf{Contraintes de mouvement :} déplacement limité à une case, respect des règles de saut et diagonales.
-    \item \textbf{Contraintes stratégiques :} équilibre entre avancer son pion et ralentir les adversaires.
-    \item \textbf{Contraintes combinatoires :} grand nombre de coups possibles, explosion des positions envisageables.
-    \item \textbf{Contraintes psychologiques :} nécessité d’anticipation, gestion de la pression et adaptation continue.
-\end{itemize}
-La combinaison de toutes ces contraintes rend le Quoridor extrêmement stimulant et difficile, tout en offrant une profondeur stratégique comparable à celle des échecs. La réussite dans ce jeu dépend de la capacité du joueur à gérer simultanément les ressources, les déplacements, l’anticipation des adversaires et l’évolution dynamique du plateau. C’est cette richesse et cette complexité qui en font un excellent support d’étude pour l’intelligence artificielle, la planification algorithmique et le développement de stratégies optimales.
+Le \emph{Quoridor} est classé parmi les jeux à haute complexité combinatoire, se situant entre les échecs et le jeu de Go en raison de la nature hybride de ses coups. Le plateau comporte 81 cases. Avec deux pions, on obtient $81 \times 80 = 6480$ positions distinctes. Il existe 64 points d'intersection pour les murs, chacun pouvant être orienté verticalement ou horizontalement, soit 128 possibilités. En prenant en compte 20 murs, et en utilisant la formule de Mertens :
+\begin{equation}
+S_f = \sum_{n=0}^{20} \left( \prod_{i=0}^{n-1} (128 - 4i) \right)
+\end{equation}
+on peut estimer la complexité de l'espace d'états à environ $10^{42}$ \cite{mertens2006}. Le facteur de branchement moyen est estimé à $\sim 60$ \cite{Glendenning2002MasteringQ}, contre 35 pour les échecs. Une partie dure en moyenne 100 demi-coups, ce qui donne une complexité totale de l'arbre de jeu de $60^{100} \approx 10^{177}$.
 
 \subsection{Jeux ou implémentations existantes}
 
@@ -259,9 +196,9 @@ En complément de ces projets open‑source, on trouve également des tutoriels,
 
 Quoridor n’est pas seulement un jeu de société apprécié des joueurs ; il a aussi attiré l’attention des chercheurs en intelligence artificielle et en informatique théorique. La raison principale est que, malgré sa simplicité apparente, Quoridor offre une complexité stratégique significative qui en fait un excellent test pour des méthodes d’IA.
 
-L’un des premiers travaux scientifiques sur ce sujet est celui de Mertens, qui s’intéresse à la conception d’un agent capable de jouer à Quoridor\cite{mertens2006quoridor}. Ce travail explore les défis associés à la modélisation du jeu, à la génération de coups légaux et à la mise en place d’une stratégie compétitive.
+L’un des premiers travaux scientifiques sur ce sujet est celui de Mertens, qui s’intéresse à la conception d’un agent capable de jouer à Quoridor\cite{mertens2006}. Ce travail explore les défis associés à la modélisation du jeu, à la génération de coups légaux et à la mise en place d’une stratégie compétitive.
 
-Par la suite, plusieurs études ont adopté des méthodes plus sophistiquées pour aborder ce problème. L’une des approches dominantes dans la recherche sur les jeux combinatoires est le \textit{Monte Carlo Tree Search} (MCTS), un algorithme qui a démontré des performances remarquables sur des jeux complexes comme le go, et qui a été appliqué avec succès à Quoridor\cite{browne2012mcts,koirala2018artificial}. Cet algorithme utilise des simulations statistiques pour estimer la valeur des positions de jeu et choisir les coups les plus prometteurs, ce qui en fait un candidat naturel pour des jeux à haute complexité stratégique comme Quoridor.
+Par la suite, plusieurs études ont adopté des méthodes plus sophistiquées pour aborder ce problème. L’une des approches dominantes dans la recherche sur les jeux combinatoires est le \textit{Monte Carlo Tree Search} (MCTS), un algorithme qui a démontré des performances remarquables sur des jeux complexes comme le go, et qui a été appliqué avec succès à Quoridor\cite{browne2012mcts,koirala2024artificial}. Cet algorithme utilise des simulations statistiques pour estimer la valeur des positions de jeu et choisir les coups les plus prometteurs, ce qui en fait un candidat naturel pour des jeux à haute complexité stratégique comme Quoridor.
 
 Un autre champ important de la recherche est l’étude des heuristiques et des fonctions d’évaluation spécifiques à ce jeu. Par exemple, des travaux ont tenté de définir des mesures qui estiment la distance effective d’un pion à sa ligne d’arrivée en tenant compte des murs déjà placés, ou encore de combiner plusieurs métriques pour guider la recherche de coups dans des espaces de décision très vastes.
 
@@ -275,15 +212,15 @@ En plus des méthodes de recherche locale comme MCTS, d’autres techniques issu
     \item \textbf{L’apprentissage automatique}, où des modèles peuvent être entraînés à partir de données de parties pour apprendre des stratégies gagnantes sans programmation explicite des règles tactiques.
 \end{itemize}
 
-Le livre de Lloyd sur Quoridor explore ces aspects sous un angle plus moderne, en discutant de l’intégration d’algorithmes d’intelligence artificielle dans l’analyse stratégique du jeu\cite{lloyd2022quoridor}. Il constitue une ressource intéressante pour comprendre comment les concepts théoriques d’IA se traduisent dans la pratique du jeu.
+Les travaux de Jose et al. sur Quoridor explorent ces aspects sous un angle plus moderne, en discutant de l’intégration d’algorithmes d’intelligence artificielle dans l’analyse stratégique du jeu\cite{jose2022quoridorai}. Il constitue une ressource intéressante pour comprendre comment les concepts théoriques d’IA se traduisent dans la pratique du jeu.
 
 \paragraph{Ressources pédagogiques et didactiques}
 
 Au‑delà des travaux scientifiques et des implémentations logicielles, Quoridor est utilisé dans
-des contextes pédagogiques pour enseigner des concepts d’informatique. Par exemple, comme le souligne Bezakova,
+des contextes pédagogiques pour enseigner des concepts d’informatique. Par exemple, comme le souligne Heliotis et al.,
 les jeux de plateau servent souvent d’introduction aux stratégies algorithmiques dans les cours d’informatique,
 car ils permettent d’illustrer des idées comme la recherche de plus court chemin, l’exploration d’arbres de décision
-ou la conception de moteurs de jeu\cite{bezakova2013boardgames}.
+ou la conception de moteurs de jeu\cite{bezakova2014}.
 
 Dans ce cadre, les étudiants peuvent s’initier à la notion de parcours de graphe pour calculer les chemins optimaux
 autour des murs, ou encore à la notion d’heuristique pour guider la prise de décision dans un espace de jeu très large.
@@ -775,7 +712,7 @@ L'implémentation repose sur des structures de données spécifiquement choisies
 
 \paragraph{L'Approfondissement Itératif (Iterative Deepening)}
 
-Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'Iterative Deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. Cette méthode introduit donc une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
+Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment\cite{KORF198597}. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'Iterative Deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. Cette méthode introduit donc une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
 
 Cependant, l’inconvénient de cette méthode réside dans la redondance : chaque nouvelle itération recommence l'exploration des premiers niveaux de l'arbre déjà parcourus. Cependant, dans un jeu comme le Quoridor où le facteur de branchement est important, ce surcoût reste acceptable car le temps recalculé pour une profondeur $p$ va représenter un temps de calcul très faible par rapport à celui de l'itération finale.
 
@@ -799,9 +736,9 @@ La première phase est la sélection, étape au cours de laquelle l'algorithme a
 
 Cependant, dès que l'algorithme croise au cours de sa descente un nœud disposant encore d'au moins un coup légal non essayé (une condition vérifiée dynamiquement par la méthode hasUntriedLegalMoves), la phase de sélection s'arrête net. Ce nœud partiellement exploré devient alors la cible prioritaire absolue pour la phase suivante, garantissant ainsi que l'arbre s'élargisse systématiquement pour évaluer toutes les options initiales d'une position avant de se creuser aveuglément en profondeur.
 
-Vient ensuite la phase d'expansion. Si le nœud sélectionné n'est pas un état de fin de partie, un coup non testé est extrait pour créer un nouveau nœud enfant dans l'arbre de recherche. Pour implémenter cela efficacement, la classe MctsNode s'appuie sur des listes dynamiques. Lors de sa création, chaque état génère et stocke ses coups potentiels dans une liste dédiée nommée untriedMoves. Afin de garantir la stochasticité de l'algorithme, c'est-à-dire l'introduction d'un hasard mathématique visant à neutraliser l'ordre prévisible dans lequel le jeu génère initialement les actions, cette collection est immédiatement mélangée grâce à la fonction Collections.shuffle\cite{browne2012mcts}.
+Vient ensuite la phase d'expansion. Si le nœud sélectionné n'est pas un état de fin de partie, un coup non testé est extrait pour créer un nouveau nœud enfant dans l'arbre de recherche. Pour implémenter cela efficacement, la classe MctsNode s'appuie sur des listes dynamiques. Lors de sa création, chaque état génère et stocke ses coups potentiels dans une liste dédiée nommée untriedMoves. Afin de garantir la stochasticité de l'algorithme\label{sec:stochasticite}, c'est-à-dire l'introduction d'un hasard mathématique visant à neutraliser l'ordre prévisible dans lequel le jeu génère initialement les actions, cette collection est immédiatement mélangée grâce à la fonction Collections.shuffle\cite{browne2012mcts}.
 
-Une optimisation majeure de cette phase d'expansion réside dans la vérification paresseuse des coups. Dans un jeu comme Quoridor, calculer la légalité absolue de toutes les poses de murs possibles est extrêmement lourd en ressources. Pour éviter ce goulet d'étranglement, la création du nœud génère uniquement des coups dits "pseudo-légaux". Ce type d’optimisation est couramment utilisé dans les implémentations pratiques du MCTS\cite{respall2018mcts}.
+Une optimisation majeure de cette phase d'expansion réside dans la vérification paresseuse des coups. Dans un jeu comme Quoridor, calculer la légalité absolue de toutes les poses de murs possibles est extrêmement lourd en ressources. Pour éviter ce goulet d'étranglement, la création du nœud génère uniquement des coups dits "pseudo-légaux". Ce type d’optimisation est couramment utilisé dans les implémentations pratiques du MCTS\cite{browne2012mcts}.
 
 
 Dans le cas contraire, si l'expansion aboutit à un état en cours de jeu, l'algorithme enclenche la troisième phase : la simulation (Playout). À partir de ce nouveau nœud, l'algorithme simule une fin de partie en jouant une série de déplacements aléatoires jusqu'à déterminer un vainqueur.
@@ -818,7 +755,7 @@ Mathématiquement, l'algorithme calcule pour chaque nœud enfant un score compos
 
 \subparagraph{Les Limites de la Simulation Aléatoire et l'Introduction au Machine Learning}
 
-Si la méthode UCT standard est très performante pour diriger la recherche, elle repose fondamentalement sur la phase de simulation (le Playout aléatoire) pour évaluer la qualité d'un nœud. Dans un jeu complexe, jouer des coups au hasard jusqu'à la fin de la partie peut aboutir à des résultats chaotiques qui ne reflètent pas la véritable valeur stratégique d'une position. Un simple mur placé au hasard peut fausser toute l'évaluation. Pour pallier cette limite, l'intelligence artificielle introduit un modèle d'apprentissage automatique supervisé, une architecture héritée des travaux révolutionnaires d'AlphaZero combinant recherche arborescente et évaluation neuronale\cite{silver2017alphazero}. La classe \texttt{MctsPlayer} agit alors comme un aiguilleur paramétrable offrant la possibilité de configurer le moteur de recherche selon deux modes exclusifs, c'est-à-dire en utilisant soit l'approche UCT traditionnelle, soit le réseau de neurones. Lorsque l'apprentissage automatique est sélectionné, le modèle neuronal évalue instantanément les chances de victoire de la position en cours au lieu de se fier au calcul mathématique classique. Cette approche remplace ainsi avantageusement la dépendance à la lourde phase de simulation aléatoire par une prédiction déterministe et stratégiquement éclairée. Le terme déterministe certifie que pour une configuration strictement identique du plateau, le réseau de neurones renverra toujours exactement le même score de victoire, puisqu'il remplace le hasard des simulations par un calcul matriciel aux paramètres fixes. Parallèlement, cette prédiction est qualifiée de stratégiquement éclairée car elle ne se base plus sur des déplacements effectués à l'aveugle. Le modèle analyse concrètement la qualité de la position en évaluant la véritable distance séparant les joueurs de leur ligne d'arrivée et en comptabilisant le nombre de murs restants dans les réserves, appliquant ainsi une réelle compréhension tactique acquise lors de son entraînement.
+Si la méthode UCT standard est très performante pour diriger la recherche, elle repose fondamentalement sur la phase de simulation (le Playout aléatoire) pour évaluer la qualité d'un nœud. Dans un jeu complexe, jouer des coups au hasard jusqu'à la fin de la partie peut aboutir à des résultats chaotiques qui ne reflètent pas la véritable valeur stratégique d'une position. Un simple mur placé au hasard peut fausser toute l'évaluation. Pour pallier cette limite, l'intelligence artificielle introduit un modèle d'apprentissage automatique supervisé, une architecture héritée des travaux révolutionnaires d'AlphaZero combinant recherche arborescente et évaluation neuronale\cite{silver2017masteringchessshogiselfplay}. La classe \texttt{MctsPlayer} agit alors comme un aiguilleur paramétrable offrant la possibilité de configurer le moteur de recherche selon deux modes exclusifs, c'est-à-dire en utilisant soit l'approche UCT traditionnelle, soit le réseau de neurones. Lorsque l'apprentissage automatique est sélectionné, le modèle neuronal évalue instantanément les chances de victoire de la position en cours au lieu de se fier au calcul mathématique classique. Cette approche remplace ainsi avantageusement la dépendance à la lourde phase de simulation aléatoire par une prédiction déterministe et stratégiquement éclairée. Le terme déterministe certifie que pour une configuration strictement identique du plateau, le réseau de neurones renverra toujours exactement le même score de victoire, puisqu'il remplace le hasard des simulations par un calcul matriciel aux paramètres fixes. Parallèlement, cette prédiction est qualifiée de stratégiquement éclairée car elle ne se base plus sur des déplacements effectués à l'aveugle. Le modèle analyse concrètement la qualité de la position en évaluant la véritable distance séparant les joueurs de leur ligne d'arrivée et en comptabilisant le nombre de murs restants dans les réserves, appliquant ainsi une réelle compréhension tactique acquise lors de son entraînement.
 
 \subparagraph{L'Architecture du Neurone et la Gestion des Tenseurs}
 
@@ -1060,11 +997,31 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
   \item \textbf{Builder pour MinimaxPlayer} : on a une configuration déclarative et lisible de l’IA
 \end{itemize}
 
-\subsection{Axes d'amélioration}
+\section{Revue critique du projet}
 
+Cette section propose un bilan analytique du projet, en examinant les succès techniques, les limites rencontrées lors du développement et les perspectives d'évolution pour le futur.
 
+\subsection{Bilan des réalisations}
 
+Le projet a atteint la grande majorité des objectifs fixés initialement. Toutes les fonctionnalités fondamentales (F1 à F11) liées à la gestion du jeu, à la validation des coups et à l'arbitrage automatique sont pleinement opérationnelles. Les interfaces CLI et GUI (JavaFX) offrent une expérience utilisateur fluide, intégrant la gestion des configurations ($F2$), l'internationalisation ($F3$) et le support du mode Blitz ($F5$). 
 
+Sur le plan technique, l'implémentation des algorithmes d'IA (Minimax avec élagage alpha-bêta, MCTS et prototypes ML) constitue un succès majeur, tout comme le serveur réseau multi-clients ($F38$, $F39$). Seul le système avancé d'invitations (F40) reste partiellement réalisé, la découverte automatique des serveurs via UDP étant parfois limitée par les configurations réseaux spécifiques.
+
+\subsection{Performances et cas limites}
+
+L'utilisation d'une structure de graphe avec listes d'adjacence pour modéliser le plateau permet des calculs de chemin extrêmement rapides (via BFS), garantissant que la validation de la pose d'un mur reste imperceptible pour l'utilisateur.
+
+En termes d'IA, l'algorithme Minimax combiné à l'approfondissement itératif (\emph{iterative deepening}\cite{KORF198597}) parvient à explorer l'arbre de jeu jusqu'à une profondeur de 4 à 6 niveaux dans le temps imparti de 5 secondes sur un matériel standard. Cependant, sur des plateaux de taille maximale ($15 \times 15$), le facteur de branchement élevé limite l'IA Minimax, rendant l'approche MCTS plus pertinente grâce à sa gestion probabiliste de l'exploration.
+
+Les cas limites, tels que la pose d'un mur visant à enfermer totalement un joueur, sont systématiquement détectés et empêchés par le \texttt{RuleChecker}, assurant qu'au moins un chemin vers l'objectif reste toujours disponible, conformément aux règles officielles.
+
+\subsection{Limitations et bugs connus}
+
+Malgré une architecture robuste, certaines limitations techniques subsistent. Tout d'abord, le mécanisme de découverte réseau repose sur un protocole \emph{UDP broadcast} qui, bien qu'efficace sur un réseau domestique standard, peut présenter des défaillances sur des infrastructures plus complexes ou des réseaux locaux restreints par des pare-feux. Concernant l'interface graphique, bien que parfaitement fonctionnelle pour le mode classique, l'initialisation de parties à quatre joueurs via le menu réseau a révélé des temps de latence dans la synchronisation initiale de l'état du plateau, nécessitant une optimisation future. Enfin, le prototype basé sur l'apprentissage automatique constitue une avancée encourageante mais souffre encore d'un manque de généralisation. Pour rivaliser pleinement avec le moteur MCTS sur des configurations de plateau atypiques, le modèle nécessiterait un corpus de données d'entraînement beaucoup plus vaste et varié.
+
+\subsection{Améliorations possibles}
+
+Pour faire évoluer ce projet vers une version encore plus aboutie, plusieurs pistes de développement sont envisageables. La priorité résiderait dans la finalisation d'un système de salon de jeu complet, permettant une gestion fluide des invitations et des tournois en ligne. Sur le plan algorithmique, l'intégration de corpus de données issus de parties réelles jouées par des experts constituerait une avancée majeure pour affiner le modèle neuronal. Actuellement basé sur un entraînement par auto-jeu (self-play) incluant une part de coups aléatoires pour l'exploration, le système pourrait gagner en précision tactique en s'appuyant sur des séquences de jeu de haut niveau dépourvues de toute stochasticité artificielle (définie précédemment à la Section \ref{sec:stochasticite}). Cette approche permettrait à l'intelligence artificielle d'acquérir une compréhension plus profonde des ouvertures classiques et des stratégies de blocage complexes rencontrées dans les compétitions. Une autre évolution majeure consisterait à enrichir l'expérience utilisateur en passant d'une représentation bidimensionnelle à un moteur de rendu en trois dimensions, offrant une immersion accrue dans l'espace de jeu. Enfin, la portabilité du logiciel pourrait être étendue par l'adaptation de l'interface graphique pour les plateformes mobiles nativement, ou via une exportation vers le web, afin de rendre Quoridor accessible sur un plus large éventail de terminaux.
 %------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
 %------------------------------------------------------------------------------
