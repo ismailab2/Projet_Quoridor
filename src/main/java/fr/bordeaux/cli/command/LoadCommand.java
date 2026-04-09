@@ -7,7 +7,6 @@ import fr.bordeaux.persistence.GameLoader;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that loads a saved game from a file. state. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class LoadCommand implements Command {
 
   /** Command entered by the user */
@@ -35,10 +34,14 @@ public class LoadCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens == null || tokens.length != 2) {
-      LOGGER.info(I18n.get("usage") + ": " + I18n.get("loadUsage"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0}: {1}", I18n.get("usage"), I18n.get("loadUsage"));
+      }
     } else {
       try {
-        LOGGER.info(I18n.get("loading") + " {0}", tokens[1]);
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("{0} {1}", I18n.get("loading"), tokens[1]);
+        }
         if (engine.getBlitzManager() != null) {
           engine.getBlitzManager().pause();
         }
@@ -46,7 +49,9 @@ public class LoadCommand implements Command {
         engine.getState().loadState(loadedState);
         engine.initializeBlitz();
       } catch (final Exception e) {
-        LOGGER.error(I18n.get("loadError") + " {0}: {1}", tokens[1], e.getMessage());
+        if (LOGGER.isErrorEnabled()) {
+          LOGGER.error("{0} {1}: {2}", I18n.get("loadError"), tokens[1], e.getMessage());
+        }
       }
     }
     return engine;
@@ -55,14 +60,16 @@ public class LoadCommand implements Command {
   /** Displays help information for the load command. example. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("loadHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("loadUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("loadDesc"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("loadHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info("  {0}\n", I18n.get("loadUsage"));
+      LOGGER.info(I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("loadDesc"));
+    }
     LOGGER.verbose(I18n.get("arguments"));
-    LOGGER.verbose("  " + I18n.get("loadArg"));
+    LOGGER.verbose("  {0}", I18n.get("loadArg"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  " + I18n.get("loadExampleCmd") + "\n");
+    LOGGER.verbose("  {0}\n", I18n.get("loadExampleCmd"));
   }
 }

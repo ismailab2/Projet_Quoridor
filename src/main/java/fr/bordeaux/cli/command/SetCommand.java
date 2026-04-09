@@ -6,7 +6,6 @@ import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that modifies a game configuration parameter. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class SetCommand implements Command {
 
   /** Command entered by the user */
@@ -47,13 +46,17 @@ public class SetCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens == null || tokens.length < 2) {
-      LOGGER.info(I18n.get("usage") + ": set PARAM=VALUE");
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0}: set PARAM=VALUE", I18n.get("usage"));
+      }
       return engine;
     }
 
     final String argument = tokens[1];
     if (!argument.contains("=")) {
-      LOGGER.error(I18n.get("setUsageExample", I18n.get("usage")));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("setUsageExample", I18n.get("usage")));
+      }
       return engine;
     }
 
@@ -63,7 +66,9 @@ public class SetCommand implements Command {
     final String value = parts[1].trim();
 
     if (key.isEmpty() || value.isEmpty()) {
-      LOGGER.error(I18n.get("setEmpty"));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("setEmpty"));
+      }
       return engine;
     }
 
@@ -98,9 +103,13 @@ public class SetCommand implements Command {
           break;
       }
 
-      LOGGER.debug(I18n.get("setUpdate", key, I18n.get("setTo"), value));
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(I18n.get("setUpdate", key, I18n.get("setTo"), value));
+      }
     } catch (final Exception e) {
-      LOGGER.error(I18n.get("setFailed", key), e);
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("setFailed", key), e);
+      }
     }
 
     return engine;
@@ -109,15 +118,17 @@ public class SetCommand implements Command {
   /** Displays help information for the set command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("setHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage") + ":");
-    LOGGER.info("  " + I18n.get("setUsage") + "\n");
-    LOGGER.info(I18n.get("description") + ":");
-    LOGGER.info("  " + I18n.get("setDesc"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("setHeader"), I18n.get("cliTitle"));
+      LOGGER.info("{0}:", I18n.get("usage"));
+      LOGGER.info("  {0}\n", I18n.get("setUsage"));
+      LOGGER.info("{0}:", I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("setDesc"));
+    }
     LOGGER.verbose(I18n.get("arguments"));
-    LOGGER.verbose("  PARAM   : " + I18n.get("setParam"));
-    LOGGER.verbose("  VALUE   : " + I18n.get("setValue"));
+    LOGGER.verbose("  PARAM   : {0}", I18n.get("setParam"));
+    LOGGER.verbose("  VALUE   : {0}", I18n.get("setValue"));
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  " + I18n.get("setExampleCmd") + "\n");
+    LOGGER.verbose("  {0}\n", I18n.get("setExampleCmd"));
   }
 }

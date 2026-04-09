@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /** TCP client for Quoridor. Sends commands (PING, QUIT) and discovers servers via UDP broadcast. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class GameClient {
 
   /** TCP socket used for the connection */
@@ -80,13 +79,17 @@ public class GameClient {
           new BufferedReader(
               new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       writer = new PrintWriter(socket.getOutputStream(), true);
-      Logger.getInstance().info(I18n.get("connected") + " {0}:{1,number,0}", host, port);
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info("{0} {1}:{2,number,0}", I18n.get("connected"), host, port);
+      }
 
       startListener();
       return true;
 
     } catch (final IOException exception) {
-      Logger.getInstance().error(I18n.get("failedCo", ": ") + exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error("{0}{1}", I18n.get("failedCo", ": "), exception.getMessage());
+      }
       return false;
     }
   }
@@ -103,7 +106,9 @@ public class GameClient {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        Logger.getInstance().info(I18n.get("server", line));
+                        if (Logger.getInstance().isInfoEnabled()) {
+                          Logger.getInstance().info(I18n.get("server", line));
+                        }
                       }
                       notifyServerMessage(line);
                     } catch (InterruptedException ie) {
@@ -113,12 +118,16 @@ public class GameClient {
                     }
                   } else {
                     Logger.getInstance().verbose("Net In: {0}", line);
-                    Logger.getInstance().info(I18n.get("server", line));
+                    if (Logger.getInstance().isInfoEnabled()) {
+                      Logger.getInstance().info(I18n.get("server", line));
+                    }
                     notifyServerMessage(line);
                   }
                 }
               } catch (final IOException exception) {
-                Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
+                if (Logger.getInstance().isInfoEnabled()) {
+                  Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
+                }
               }
             });
     listenerThread.setDaemon(true);
@@ -206,7 +215,9 @@ public class GameClient {
           message = I18n.get("server", " BYE");
           Logger.getInstance().info(message);
         } else if (res != null) {
-          Logger.getInstance().info(I18n.get("server", res));
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info(I18n.get("server", res));
+          }
         } else {
           expectingDirectReply.set(false);
           message = I18n.get("noBye");
@@ -223,7 +234,9 @@ public class GameClient {
       }
     }
 
-    Logger.getInstance().info(I18n.get("clientQuit"));
+    if (Logger.getInstance().isInfoEnabled()) {
+      Logger.getInstance().info(I18n.get("clientQuit"));
+    }
     return message;
   }
 
@@ -281,7 +294,9 @@ public class GameClient {
         }
       }
     } catch (final IOException exception) {
-      Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error(I18n.get("discoFail", ": ", exception.getMessage()));
+      }
     }
 
     final long now = System.currentTimeMillis();
@@ -300,7 +315,9 @@ public class GameClient {
    */
   private boolean checkConnection() {
     if (!isConnected()) {
-      Logger.getInstance().info(I18n.get("notConnected"));
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info(I18n.get("notConnected"));
+      }
       return false;
     }
     return true;

@@ -102,8 +102,10 @@ public class BlitzManager {
         }
 
       } catch (Exception e) {
-        CoreServiceProvider.getLogger()
-            .error(CoreServiceProvider.getTranslator().translate("blitzTaskFailed"), e);
+        if (CoreServiceProvider.getLogger().isErrorEnabled()) {
+          CoreServiceProvider.getLogger()
+              .error(CoreServiceProvider.getTranslator().translate("blitzTaskFailed"), e);
+        }
       }
     }
   }

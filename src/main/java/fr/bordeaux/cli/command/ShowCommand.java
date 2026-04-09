@@ -14,7 +14,6 @@ import java.io.PrintStream;
 import java.util.List;
 
 /** CLI command that displays game information, board state, or history. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class ShowCommand implements Command {
 
   /** Configuration translation key reused in the output. */
@@ -114,7 +113,9 @@ public class ShowCommand implements Command {
           break;
         }
       default:
-        LOGGER.error(I18n.get("showNot", tokens[1], I18n.get("notExist")));
+        if (LOGGER.isErrorEnabled()) {
+          LOGGER.error(I18n.get("showNot", tokens[1], I18n.get("notExist")));
+        }
         break;
     }
     return engine;
@@ -150,61 +151,75 @@ public class ShowCommand implements Command {
     }
 
     if (!helpDisplayed) {
-      LOGGER.info(
-          HELP_HEADER_PREFIX + I18n.get("showHelpHeader") + " " + I18n.get("cliTitle") + " ===\n");
-      LOGGER.info(I18n.get(USAGE_KEY));
-      LOGGER.info("  " + I18n.get("showBoardUsage"));
-      LOGGER.info("  " + I18n.get("showHistoUsage"));
-      LOGGER.info("  " + I18n.get("showConfigUsage"));
-      LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
-      LOGGER.info(I18n.get(DESCRIPTION_KEY));
-      LOGGER.info("  " + I18n.get("showDesc"));
-      LOGGER.verbose("  " + I18n.get("showVerb"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info(
+            HELP_HEADER_PREFIX
+                + I18n.get("showHelpHeader")
+                + " "
+                + I18n.get("cliTitle")
+                + " ===\n");
+        LOGGER.info(I18n.get(USAGE_KEY));
+        LOGGER.info("  {0}", I18n.get("showBoardUsage"));
+        LOGGER.info("  {0}", I18n.get("showHistoUsage"));
+        LOGGER.info("  {0}", I18n.get("showConfigUsage"));
+        LOGGER.info("  {0}\n", I18n.get("showTimeUsage"));
+        LOGGER.info(I18n.get(DESCRIPTION_KEY));
+        LOGGER.info("  {0}", I18n.get("showDesc"));
+      }
+      LOGGER.verbose("  {0}", I18n.get("showVerb"));
       LOGGER.verbose(I18n.get("arguments"));
-      LOGGER.verbose("  board         : " + I18n.get("showVBoard"));
-      LOGGER.verbose("  history       : " + I18n.get("showVHisto"));
-      LOGGER.verbose("  configuration : " + I18n.get("showVConfig"));
-      LOGGER.verbose("  time          : " + I18n.get("showVTime"));
+      LOGGER.verbose("  board         : {0}", I18n.get("showVBoard"));
+      LOGGER.verbose("  history       : {0}", I18n.get("showVHisto"));
+      LOGGER.verbose("  configuration : {0}", I18n.get("showVConfig"));
+      LOGGER.verbose("  time          : {0}", I18n.get("showVTime"));
       LOGGER.verbose(I18n.get("showVMore"));
     }
   }
 
   /** Displays help information for the "show board" option. */
   public void helpBoard() {
-    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " BOARD ===\n");
-    LOGGER.info(I18n.get(USAGE_KEY));
-    LOGGER.info("  " + I18n.get("showBoardUsage") + "\n");
-    LOGGER.info(I18n.get(DESCRIPTION_KEY));
-    LOGGER.info("  " + I18n.get("showDescBoard"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1} BOARD ===\n", HELP_HEADER_PREFIX, I18n.get(SHOW_HEADER_KEY));
+      LOGGER.info(I18n.get(USAGE_KEY));
+      LOGGER.info("  {0}\n", I18n.get("showBoardUsage"));
+      LOGGER.info(I18n.get(DESCRIPTION_KEY));
+      LOGGER.info("  {0}", I18n.get("showDescBoard"));
+    }
   }
 
   /** Displays help information for the "show history" option. */
   public void helpHistory() {
-    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " HISTORY ===\n");
-    LOGGER.info(I18n.get(USAGE_KEY));
-    LOGGER.info("  " + I18n.get("showHistoUsage") + "\n");
-    LOGGER.info(I18n.get(DESCRIPTION_KEY));
-    LOGGER.info("  " + I18n.get("showDescHisto"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1} HISTORY ===\n", HELP_HEADER_PREFIX, I18n.get(SHOW_HEADER_KEY));
+      LOGGER.info(I18n.get(USAGE_KEY));
+      LOGGER.info("  {0}\n", I18n.get("showHistoUsage"));
+      LOGGER.info(I18n.get(DESCRIPTION_KEY));
+      LOGGER.info("  {0}", I18n.get("showDescHisto"));
+    }
   }
 
   /** Displays help information for the "show time" option. */
   public void helpTime() {
-    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " TIME ===\n");
-    LOGGER.info(I18n.get(USAGE_KEY));
-    LOGGER.info("  " + I18n.get("showTimeUsage") + "\n");
-    LOGGER.info(I18n.get(DESCRIPTION_KEY));
-    LOGGER.info("  " + I18n.get("showDescTime"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1} TIME ===\n", HELP_HEADER_PREFIX, I18n.get(SHOW_HEADER_KEY));
+      LOGGER.info(I18n.get(USAGE_KEY));
+      LOGGER.info("  {0}\n", I18n.get("showTimeUsage"));
+      LOGGER.info(I18n.get(DESCRIPTION_KEY));
+      LOGGER.info("  {0}", I18n.get("showDescTime"));
+    }
   }
 
   /** Displays help information for the "show configuration" option. */
   public void helpConfig() {
-    LOGGER.info(HELP_HEADER_PREFIX + I18n.get(SHOW_HEADER_KEY) + " CONFIGURATION ===\n");
-    LOGGER.info(I18n.get(USAGE_KEY));
-    LOGGER.info("  " + I18n.get("showConfigUsage") + "\n");
-    LOGGER.info(I18n.get(DESCRIPTION_KEY));
-    LOGGER.info("  " + I18n.get("showDescConfig"));
-    LOGGER.verbose("  " + I18n.get("showDescVConfig"));
-    LOGGER.verbose("    " + I18n.get("showCfgs"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("{0}{1} CONFIGURATION ===\n", HELP_HEADER_PREFIX, I18n.get(SHOW_HEADER_KEY));
+      LOGGER.info(I18n.get(USAGE_KEY));
+      LOGGER.info("  {0}\n", I18n.get("showConfigUsage"));
+      LOGGER.info(I18n.get(DESCRIPTION_KEY));
+      LOGGER.info("  {0}", I18n.get("showDescConfig"));
+    }
+    LOGGER.verbose("  {0}", I18n.get("showDescVConfig"));
+    LOGGER.verbose("    {0}", I18n.get("showCfgs"));
     LOGGER.verbose(I18n.get("showCfgsMore"));
   }
 

@@ -6,7 +6,6 @@ import fr.bordeaux.util.Logger;
 import org.apache.commons.cli.CommandLine;
 
 /** Handles game rules, server settings, and time constraints from CLI. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public final class GameOptionsHandler {
 
   private static final Logger LOGGER = Logger.getInstance();
@@ -27,7 +26,9 @@ public final class GameOptionsHandler {
     if (commandLine.hasOption("t")) {
       final boolean blitz = config.getBoolean("blitz", false);
       if (!blitz) {
-        LOGGER.info("--time " + I18n.get("needsBlitz"));
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("--time {0}", I18n.get("needsBlitz"));
+        }
       } else {
         final String value = commandLine.getOptionValue("t");
         try {

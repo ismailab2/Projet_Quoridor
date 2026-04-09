@@ -336,7 +336,6 @@ class CliAppTest {
 
   @Test
   void boardSync() throws IOException {
-    @SuppressWarnings("unchecked")
     final ArgumentCaptor<Consumer<String>> captor = ArgumentCaptor.forClass(Consumer.class);
 
     verify(networkClient).setServerMessageHandler(captor.capture());
@@ -350,7 +349,6 @@ class CliAppTest {
 
   @Test
   void opponentSync() {
-    @SuppressWarnings("unchecked")
     final ArgumentCaptor<Consumer<String>> captor = ArgumentCaptor.forClass(Consumer.class);
 
     verify(networkClient).setServerMessageHandler(captor.capture());

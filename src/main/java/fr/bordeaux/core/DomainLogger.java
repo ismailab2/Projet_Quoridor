@@ -72,4 +72,45 @@ public interface DomainLogger {
    * @param params parameters for formatting
    */
   void verbose(String message, Object... params);
+
+  /**
+   * Prints a message without a newline (useful for CLI prompts).
+   *
+   * @param message the message to print
+   */
+  void prompt(String message);
+
+  /**
+   * Prints a raw message followed by a newline (no prefixes, no colors).
+   *
+   * @param message the message to print
+   */
+  void raw(String message);
+
+  /**
+   * Returns whether info-level logging is enabled.
+   *
+   * @return true if info messages should be logged
+   */
+  default boolean isInfoEnabled() {
+    return true;
+  }
+
+  /**
+   * Returns whether debug-level logging is enabled.
+   *
+   * @return true if debug messages should be logged
+   */
+  default boolean isDebugEnabled() {
+    return true;
+  }
+
+  /**
+   * Returns whether error-level logging is enabled.
+   *
+   * @return true if error messages should be logged
+   */
+  default boolean isErrorEnabled() {
+    return true;
+  }
 }

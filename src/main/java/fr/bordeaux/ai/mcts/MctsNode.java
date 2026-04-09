@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 /** Inner class representing a node within the MCTS search tree. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MctsNode {
 
   /** The game state associated with this node. */
@@ -126,7 +125,9 @@ public class MctsNode {
     }
 
     if (Thread.currentThread().isInterrupted()) {
-      LOGGER.debug(I18n.get("mctsInterrupted", limit));
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(I18n.get("mctsInterrupted", limit));
+      }
     }
 
     final Move bestMove = this.extractBestMove();
@@ -220,8 +221,6 @@ public class MctsNode {
    * @param allPlayers list of all players in the game
    * @return the index of the winner if the move results in a win, or -1 otherwise
    */
-  @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.LawOfDemeter"})
-  /* Negligible overhead for MCTS and LOD can't be satisfied */
   private int simulateOneStep(final GameState temp, final List<Player> allPlayers) {
     final Position currentPos = temp.getCurrentPlayer().getPosition();
     final int curX = currentPos.getX();

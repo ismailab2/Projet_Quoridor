@@ -10,7 +10,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /** Engine responsible for executing the Minimax search algorithm. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class MinimaxSearch {
 
   /** The heuristic evaluation strategy. */
@@ -60,7 +59,9 @@ public class MinimaxSearch {
     while (System.currentTimeMillis() < endTime) {
       final Move tempMove = miniMax(state, currentDepth, endTime);
       if (System.currentTimeMillis() >= endTime) {
-        LOGGER.debug(I18n.get("miniInterrupted", currentDepth));
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug(I18n.get("miniInterrupted", currentDepth));
+        }
         break;
       }
       if (tempMove != null) {

@@ -19,7 +19,6 @@ import org.jline.terminal.Terminal;
  * CLI command that starts a new game, configuring board size and players. of players, and
  * interactively asks for the type and name of each player.
  */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class NewCommand implements Command {
 
   /** Command entered by the user */
@@ -74,7 +73,9 @@ public class NewCommand implements Command {
     GameEngine result = engine;
 
     if (tokens.length > 5) {
-      LOGGER.error(I18n.get("newNbArgs"));
+      if (LOGGER.isErrorEnabled()) {
+        LOGGER.error(I18n.get("newNbArgs"));
+      }
     } else if (tokens.length == 1) {
       final int size = 8;
       result =
@@ -103,8 +104,10 @@ public class NewCommand implements Command {
 
       for (int index = 0; index < nbPlayer && !aborted; index++) {
         try {
-          LOGGER.info(I18n.get("playersType", I18n.get("availType")));
-          LOGGER.info(I18n.get("playerTypeOptions"));
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(I18n.get("playersType", I18n.get("availType")));
+            LOGGER.info(I18n.get("playerTypeOptions"));
+          }
           final String typePlayer = reader.readLine(I18n.get("playersType", " >> "));
           if (typePlayer == null) {
             throw new EndOfFileException();
@@ -114,13 +117,17 @@ public class NewCommand implements Command {
               && !"mini".equals(typePlayer)
               && !"r".equals(typePlayer)
               && !"mctsnn".equals(typePlayer)) {
-            LOGGER.error(I18n.get("wrongType"));
+            if (LOGGER.isErrorEnabled()) {
+              LOGGER.error(I18n.get("wrongType"));
+            }
             index--;
             continue;
           }
           final String inputName = reader.readLine(I18n.get("playersName", " >> "));
           if (inputName == null) {
-            LOGGER.error(I18n.get("shouldName"));
+            if (LOGGER.isErrorEnabled()) {
+              LOGGER.error(I18n.get("shouldName"));
+            }
             throw new EndOfFileException();
           }
           switch (typePlayer) {
@@ -146,11 +153,15 @@ public class NewCommand implements Command {
               break;
           }
         } catch (EndOfFileException | UserInterruptException exception) {
-          LOGGER.error(I18n.get("termClose"));
+          if (LOGGER.isErrorEnabled()) {
+            LOGGER.error(I18n.get("termClose"));
+          }
           try {
             terminal.close();
           } catch (Exception exc) {
-            LOGGER.error(I18n.get("termClose"));
+            if (LOGGER.isErrorEnabled()) {
+              LOGGER.error(I18n.get("termClose"));
+            }
           }
           aborted = true;
         } catch (final IOException e) {
@@ -177,19 +188,21 @@ public class NewCommand implements Command {
 
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("newHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("newUsageEmpty"));
-    LOGGER.info("  " + I18n.get("newUsageArgs") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("newDesc"));
-    LOGGER.info(I18n.get("arguments"));
-    LOGGER.info("  boardSize    : " + I18n.get("newBoardSize"));
-    LOGGER.info("  playerCount  : " + I18n.get("newNbPlayers"));
-    LOGGER.info(I18n.get("newHelp"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("newHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info("  {0}", I18n.get("newUsageEmpty"));
+      LOGGER.info("  {0}\n", I18n.get("newUsageArgs"));
+      LOGGER.info(I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("newDesc"));
+      LOGGER.info(I18n.get("arguments"));
+      LOGGER.info("  boardSize    : {0}", I18n.get("newBoardSize"));
+      LOGGER.info("  playerCount  : {0}", I18n.get("newNbPlayers"));
+      LOGGER.info(I18n.get("newHelp"));
+    }
     LOGGER.verbose(I18n.get("loadEx"));
-    LOGGER.verbose("  new       -> 2 " + I18n.get("newEx", "9x9"));
-    LOGGER.verbose("  new 5     -> 2 " + I18n.get("newEx", "5x5"));
-    LOGGER.verbose("  new 7 4   -> 4 " + I18n.get("newEx", "7x7"));
+    LOGGER.verbose("  new       -> 2 {0}", I18n.get("newEx", "9x9"));
+    LOGGER.verbose("  new 5     -> 2 {0}", I18n.get("newEx", "5x5"));
+    LOGGER.verbose("  new 7 4   -> 4 {0}", I18n.get("newEx", "7x7"));
   }
 }

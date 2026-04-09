@@ -6,7 +6,6 @@ import fr.bordeaux.persistence.GameSaver;
 import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
-@SuppressWarnings({"PMD.GuardLogStatement"})
 public class SaveCommand implements Command {
 
   /** Command entered by the user */
@@ -42,14 +41,22 @@ public class SaveCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) {
     if (tokens.length < 2) {
-      LOGGER.info(I18n.get("usage") + " " + I18n.get("saveUsage"));
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0} {1}", I18n.get("usage"), I18n.get("saveUsage"));
+      }
     } else {
-      LOGGER.info(I18n.get("attempt") + " {0}", tokens[1]);
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("{0} {1}", I18n.get("attempt"), tokens[1]);
+      }
       try {
         GameSaver.saveGame(engine, tokens[1]);
-        LOGGER.info(I18n.get("success"));
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info(I18n.get("success"));
+        }
       } catch (final Exception e) {
-        LOGGER.error(I18n.get("failed") + " {0}", tokens[1]);
+        if (LOGGER.isErrorEnabled()) {
+          LOGGER.error("{0} {1}", I18n.get("failed"), tokens[1]);
+        }
       }
     }
     return engine;
@@ -58,12 +65,14 @@ public class SaveCommand implements Command {
   /** Displays help information for the save command. */
   @Override
   public void helpText() {
-    LOGGER.info("=== " + I18n.get("saveHeader") + " " + I18n.get("cliTitle") + " ===\n");
-    LOGGER.info(I18n.get("usage"));
-    LOGGER.info("  " + I18n.get("saveUsage") + "\n");
-    LOGGER.info(I18n.get("description"));
-    LOGGER.info("  " + I18n.get("saveDesc"));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("=== {0} {1} ===\n", I18n.get("saveHeader"), I18n.get("cliTitle"));
+      LOGGER.info(I18n.get("usage"));
+      LOGGER.info("  {0}\n", I18n.get("saveUsage"));
+      LOGGER.info(I18n.get("description"));
+      LOGGER.info("  {0}", I18n.get("saveDesc"));
+    }
     LOGGER.verbose(I18n.get("arguments"));
-    LOGGER.verbose("  FILE   : " + I18n.get("saveFile"));
+    LOGGER.verbose("  FILE   : {0}", I18n.get("saveFile"));
   }
 }
