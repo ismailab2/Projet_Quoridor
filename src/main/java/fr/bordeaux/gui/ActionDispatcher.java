@@ -11,6 +11,8 @@ import fr.bordeaux.main.PlayerFactory;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
 import fr.bordeaux.network.NetworkMoveParser;
+import fr.bordeaux.persistence.GameLoader;
+import fr.bordeaux.persistence.GameSaver;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -126,14 +128,27 @@ public class ActionDispatcher {
   private void handleLoadGame() throws IOException {
     final String path = fileHandler.chooseLoadFile();
     if (path != null) {
-      engine.loadGame(path);
+      try {
+        if (engine.getBlitzManager() != null) {
+          engine.getBlitzManager().pause();
+        }
+        final fr.bordeaux.core.GameState loadedState = GameLoader.loadGame(engine, path);
+        engine.getState().loadState(loadedState);
+        engine.initializeBlitz();
+      } catch (final Exception e) {
+        showMessage("Load Error", "Error loading file", e.getMessage());
+      }
     }
   }
 
   private void handleSaveGame() throws IOException {
     final String path = fileHandler.chooseSaveFile();
     if (path != null) {
-      engine.saveGame(path);
+      try {
+        GameSaver.saveGame(engine, path);
+      } catch (final IOException e) {
+        showMessage("Save Error", "Error saving file", e.getMessage());
+      }
     }
   }
 

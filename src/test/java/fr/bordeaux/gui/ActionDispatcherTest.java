@@ -12,6 +12,8 @@ import fr.bordeaux.core.Position;
 import fr.bordeaux.i18n.I18n;
 import fr.bordeaux.network.GameClient;
 import fr.bordeaux.network.MultiGameServer;
+import fr.bordeaux.persistence.GameLoader;
+import fr.bordeaux.persistence.GameSaver;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -132,16 +134,21 @@ class ActionDispatcherTest extends ApplicationTest {
 
   @Test
   void testLoadGame() throws IOException {
-    when(fileHandler.chooseLoadFile()).thenReturn("test.txt");
-    dispatcher.dispatch(Action.LOAD_GAME);
-    verify(engine).loadGame("test.txt");
+    try (MockedStatic<GameLoader> mockedLoader = mockStatic(GameLoader.class)) {
+      when(fileHandler.chooseLoadFile()).thenReturn("test.txt");
+      mockedLoader.when(() -> GameLoader.loadGame(any(), anyString())).thenReturn(mock(GameState.class));
+      dispatcher.dispatch(Action.LOAD_GAME);
+      mockedLoader.verify(() -> GameLoader.loadGame(engine, "test.txt"));
+    }
   }
 
   @Test
   void testSaveGame() throws IOException {
-    when(fileHandler.chooseSaveFile()).thenReturn("test.txt");
-    dispatcher.dispatch(Action.SAVE_GAME);
-    verify(engine).saveGame("test.txt");
+    try (MockedStatic<GameSaver> mockedSaver = mockStatic(GameSaver.class)) {
+      when(fileHandler.chooseSaveFile()).thenReturn("test.txt");
+      dispatcher.dispatch(Action.SAVE_GAME);
+      mockedSaver.verify(() -> GameSaver.saveGame(engine, "test.txt"));
+    }
   }
 
   @Test

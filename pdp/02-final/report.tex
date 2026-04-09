@@ -397,7 +397,7 @@ Le projet nécessitait également la réalisation de multiples tâches répartie
 \subsection{Fonctionnalité 1 : Réseau client/serveur et gestion multi-clients}
 
 
-\subsubsections{Dimension réseau du projet Quoridor}
+\subsubsection{Dimension réseau du projet Quoridor}
 
 
 L’un des objectifs principaux de notre projet consistait à étendre le jeu Quoridor à une dimension réseau, afin de permettre à plusieurs joueurs de s’affronter à distance. Cette fonctionnalité transforme radicalement la manière dont le jeu peut être pratiqué : il ne s’agit plus uniquement d’un jeu local sur un ordinateur unique, mais d’une application distribuée dans laquelle plusieurs utilisateurs interagissent via leurs machines respectives, tout en partageant un état de jeu centralisé. Cette extension réseau implique non seulement de gérer les aspects techniques liés aux communications entre machines, mais également de garantir que les règles du jeu soient respectées de manière cohérente pour tous les participants, indépendamment de leur localisation.
@@ -719,6 +719,13 @@ L'exploration de l'arbre alterne entre deux objectifs :
 \end{itemize}
 Ce processus de remontée des valeurs (des feuilles à la racine) permet à l'IA de choisir le premier coup garantissant le meilleur résultat possible.
 
+\begin{figure}[H]
+    \centering
+    \frame{\includegraphics[width=.85\textwidth]{MiniMax.jpg}}
+    \caption{Algorithme Minimax et arbre de décision}\label{fig:minimax}
+\end{figure}
+
+
 
 La complexité exponentielle du Minimax l'oblige à explorer des branches dont le calcul s'avère en réalité inutile, l'élagage Alpha-Bêta permet précisément de les ignorer.
 
@@ -787,6 +794,13 @@ L'implémentation repose sur des structures de données spécifiquement choisies
 
 \end{itemize}
 
+\paragraph{L'Approfondissement Itératif (Iterative Deepening)}
+
+Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'iterative deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. L'Iterative Deepening va donc introduire une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
+
+Cependant, l’inconvénient de cette méthode réside dans la redondance : chaque nouvelle itération recommence l'exploration des premiers niveaux de l'arbre déjà parcourus. Cependant, dans un jeu comme le Quoridor où le facteur de branchement est important, ce surcoût reste acceptable car le temps recalculé pour une profondeur $p$ va représenter un temps de calcul très faible par rapport à celui de l'itération finale.
+
+
 Bien que l'algorithme Minimax soit redoutable, son exploration systématique montre ses limites face à des situations présentant un fort facteur de branchement, où le nombre de coups possibles devient beaucoup trop grand pour être calculé dans le temps imparti. C'est pour pallier cette explosion combinatoire qu'intervient l'algorithme Monte Carlo Tree Search (MCTS).
 
 
@@ -794,6 +808,13 @@ Bien que l'algorithme Minimax soit redoutable, son exploration systématique mon
 \subparagraph{Mécanique de l'Algorithme Monte Carlo Tree Search}
 
 Contrairement au Minimax qui tente d'évaluer toutes les éventualités, le MCTS ne vérifie pas toutes les possibilités. Il s'agit d'une approche probabiliste, signifiant qu'elle fait intervenir l'aléatoire dans ses choix de simulation, et asymétrique, car elle concentre sa puissance de calcul pour explorer en profondeur les branches les plus prometteuses plutôt que de parcourir l'arbre de manière uniforme\cite{browne2012mcts}. Le processus itératif s'exécute en boucle selon quatre phases distinctes orchestrées par la méthode getBestMoveAfterSearch dans la classe MctsNode.
+
+\begin{figure}[H]
+    \centering
+    \frame{\includegraphics[width=.85\textwidth]{mcts-algorithm-1a.png}}
+    \caption{Les quatre phases de l'algorithme MCTS}\label{fig:mcts}
+\end{figure}
+
 
 La première phase est la sélection, étape au cours de laquelle l'algorithme amorce sa recherche en descendant dans l'arbre depuis la racine. Le but de cette descente est de trouver le candidat idéal pour poursuivre l'exploration. L'algorithme obéit à une règle de priorité stricte dictant le passage à l'étape suivante. En effet, tant qu'un état a déjà testé l'intégralité de ses coups possibles et possède des nœuds enfants, la phase de sélection continue de s'enfoncer dans l'arbre. À chaque intersection, l'intelligence artificielle choisit de descendre vers le nœud enfant le plus "prometteur", c'est-à-dire celui qui maximise le score évalué par la méthode bestUCT. Ce score prometteur désigne le meilleur compromis mathématique calculé entre l'exploitation d'une branche affichant déjà un fort taux de victoire et l'exploration nécessaire des chemins encore peu visités, principe fondamental du MCTS\cite{browne2012mcts}.
 
@@ -826,6 +847,13 @@ Si la méthode UCT standard est très performante pour diriger la recherche, ell
 L'évaluation neuronale est encapsulée dans la classe NeuralNetworkEvaluator, qui sert d'interface avec le moteur de calcul TensorFlow. Ce modèle s'appuie spécifiquement sur une architecture de type régression logistique, ce qui correspond structurellement à l'utilisation d'un unique neurone artificiel.
 
 Le fonctionnement de ce neurone repose sur une équation mathématique fondamentale où la prédiction finale est le résultat de l'opération $P = \sigma(W \cdot X + b)$. Dans cette formule, la variable $X$ représente les caractéristiques en entrée fournies par le jeu. La variable $W$ désigne les poids de la matrice, représentant l'importance accordée par l'intelligence artificielle à chaque paramètre. Enfin, la variable $b$ correspond au biais, un ajustement numérique global indépendant des entrées.
+
+\begin{figure}[H]
+    \centering
+    \frame{\includegraphics[width=.60\textwidth]{Neurone_4_poids.jpeg}}
+    \caption{Modèle de neurone artificiel pour l'évaluation}\label{fig:neurone}
+\end{figure}
+
 
 Le système prend en entrée quatre caractéristiques mathématiques précises extraites de la partie en cours. Il calcule d'abord la véritable distance séparant le joueur de sa ligne d'arrivée en effectuant un parcours de graphe BFS. Pour que cette donnée soit exploitable par le réseau de neurones, elle doit être normalisée. L'algorithme divise donc ce nombre de pas par la distance maximale théorique du plateau, puis inverse mathématiquement ce résultat. Ainsi, une distance nulle produit la valeur maximale de 1.0 pour indiquer une victoire atteinte, tandis que l'éloignement maximal donne un résultat de 0.0. Il intègre ensuite la distance de l'adversaire, elle aussi obtenue par un algorithme BFS et divisée par la distance maximale. Il est important de noter que cette valeur adverse n'est pas inversée, car pour l'intelligence artificielle, un résultat de 1.0 indiquant que l'ennemi est bloqué très loin constitue une situation hautement favorable. Les troisième et quatrième paramètres sont respectivement le nombre de murs restants pour l'IA et pour son adversaire, tous deux divisés par leur capacité initiale de dix (si la capacité initiale est supérieure à 10, on s’assure de rester dans l'intervalle [0,1] en prenant 1.0 au maximum) . Cette dernière opération permet de ramener l'intégralité des données fournies au neurone sur une échelle mathématique parfaitement homogène comprise entre zéro et un.
 

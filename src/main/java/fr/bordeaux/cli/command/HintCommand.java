@@ -1,5 +1,6 @@
 package fr.bordeaux.cli.command;
 
+import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.core.GameState;
 import fr.bordeaux.core.Move;
@@ -35,8 +36,8 @@ public class HintCommand implements Command {
   @Override
   public GameEngine execute(final GameEngine engine) throws IOException {
     LOGGER.info(I18n.get("hintCalc"));
-    final Move hint = engine.hint();
     final GameState state = engine.getState();
+    final Move hint = MctsPlayer.hint(state.getCurrentPlayer(), state, 3000, true);
 
     if (!RuleChecker.isMoveLegal(state, hint)) {
       LOGGER.error(I18n.get("suggestedLegal"), hint);

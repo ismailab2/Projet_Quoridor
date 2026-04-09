@@ -1,8 +1,6 @@
 package fr.bordeaux.core;
 
-import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.i18n.I18n;
-import fr.bordeaux.persistence.GameLoadException;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 
@@ -58,7 +56,7 @@ public class GameEngine {
   }
 
   /** Helper method to initialize the BlitzManager based on the current state. */
-  private void initializeBlitz() {
+  public void initializeBlitz() {
     if (this.blitz) {
       this.blitzManager = new BlitzManager(this);
       this.blitzManager.start();
@@ -122,34 +120,6 @@ public class GameEngine {
   /**
    * Saves the current game state to a file.
    *
-   * @param filename The path to the file where the game will be saved.
-   */
-  public void saveGame(final String filename) {
-    try {
-      fr.bordeaux.persistence.GameSaver.saveGame(this, filename);
-    } catch (final IOException exception) {
-      Logger.getInstance().error(I18n.get("engineSave") + exception.getMessage());
-    }
-  }
-
-  /**
-   * Loads a game state from a specified file.
-   *
-   * @param filename The path to the file to load.
-   */
-  public void loadGame(final String filename) {
-    try {
-      if (blitzManager != null) {
-        blitzManager.pause();
-      }
-      final GameState loadedState = fr.bordeaux.persistence.GameLoader.loadGame(this, filename);
-      state.loadState(loadedState);
-      initializeBlitz();
-    } catch (final IOException | GameLoadException exception) {
-      Logger.getInstance().error(I18n.get("engineLoad") + exception.getMessage());
-    }
-  }
-
   /** Reverts the last move made in the game. */
   public void undo() {
     state.undo();
@@ -180,55 +150,6 @@ public class GameEngine {
     }
   }
 
-  /**
-   * Suggests the best move using AI for the current player.
-   *
-   * @return The best move for the current player.
-   * @throws IOException If an I/O error occurs.
-   */
-  public Move hint() throws IOException {
-    final Player currentPlayer = state.getCurrentPlayer();
-    final Move bestMove = MctsPlayer.hint(currentPlayer, state, 3000, true);
-    if (bestMove != null) {
-      moveToString(bestMove);
-    }
-    return bestMove;
-  }
-
-  /**
-   * Converts a Move object into a human-readable string (e.g., "e2-e3" or "e2h").
-   *
-   * @param move The move to convert.
-   * @return A formatted string representation of the move.
-   */
-  private String moveToString(final Move move) {
-    final Move.Type moveType = move.getType();
-    final String result;
-    if (moveType == Move.Type.PAWN) {
-      final Position from = move.getFrom();
-      final Position targetPosition = move.getTo();
-      result = posToString(from) + "-" + posToString(targetPosition);
-    } else {
-      final Orientation orientation = move.getOrientation();
-      final char orientationChar = orientation == Orientation.HORIZONTAL ? 'h' : 'v';
-      final Position targetPosition = move.getTo();
-      result = posToString(targetPosition) + orientationChar;
-    }
-    return result;
-  }
-
-  /**
-   * Converts a Position object into algebraic notation (e.g., "a0", "b1").
-   *
-   * @param pos The position to convert.
-   * @return A string representing the coordinates.
-   */
-  private String posToString(final Position pos) {
-    final int posX = pos.getX();
-    final int posY = pos.getY();
-    final char letter = (char) ('a' + posX);
-    return String.valueOf(letter) + posY;
-  }
 
   /**
    * Returns the current state of the game.

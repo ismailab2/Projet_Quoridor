@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.bordeaux.ai.minimax.MinimaxPlayer;
 import fr.bordeaux.config.ConfigManager;
+import fr.bordeaux.persistence.GameLoader;
+import fr.bordeaux.persistence.GameSaver;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,11 +106,13 @@ public class GameEngineTest {
   }
 
   @Test
-  public void save_and_load_game() {
+  public void save_and_load_game() throws Exception {
     final String file = "engine_test.json";
-    engine.saveGame(file);
+    GameSaver.saveGame(engine, file);
     engine.newGame(9, fr.bordeaux.main.PlayerFactory.createPlayers(configManager), null);
-    engine.loadGame(file);
+    final GameState loadedState = GameLoader.loadGame(engine, file);
+    engine.getState().loadState(loadedState);
+    engine.initializeBlitz();
     assertEquals(2, engine.getState().getPlayers().size());
     new File(file).delete();
   }
@@ -135,11 +139,13 @@ public class GameEngineTest {
   }
 
   @Test
-  public void testLoadGame_WithBlitz() {
+  public void testLoadGame_WithBlitz() throws Exception {
     engine = new GameEngine(state, true, false, false, false, 10);
     final String file = "engine_load_blitz.json";
-    engine.saveGame(file);
-    engine.loadGame(file);
+    GameSaver.saveGame(engine, file);
+    final GameState loadedState = GameLoader.loadGame(engine, file);
+    engine.getState().loadState(loadedState);
+    engine.initializeBlitz();
     assertNotNull(engine.getBlitzManager());
     new File(file).delete();
   }
@@ -163,21 +169,6 @@ public class GameEngineTest {
     engine.pause(); // Resume
     assertFalse(state.isPaused());
     assertTrue(engine.getBlitzManager().isRunning());
-  }
-
-  @Test
-  public void testMoveToString_WallOrientation() throws Exception {
-    java.lang.reflect.Method method =
-        GameEngine.class.getDeclaredMethod("moveToString", Move.class);
-    method.setAccessible(true);
-
-    Move horizontal = Move.wall(new Position(1, 1), Orientation.HORIZONTAL);
-    String hStr = (String) method.invoke(engine, horizontal);
-    assertEquals("b1h", hStr);
-
-    Move vertical = Move.wall(new Position(2, 2), Orientation.VERTICAL);
-    String vStr = (String) method.invoke(engine, vertical);
-    assertEquals("c2v", vStr);
   }
 
   @Test

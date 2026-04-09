@@ -2,6 +2,7 @@ package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
 import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.persistence.GameSaver;
 import fr.bordeaux.util.Logger;
 
 /** Command that saves the current game state to a file. */
@@ -45,7 +46,7 @@ public class SaveCommand implements Command {
     } else {
       LOGGER.info(I18n.get("attempt") + " {0}", tokens[1]);
       try {
-        engine.saveGame(tokens[1]);
+        GameSaver.saveGame(engine, tokens[1]);
         LOGGER.info(I18n.get("success"));
       } catch (final Exception e) {
         LOGGER.error(I18n.get("failed") + " {0}", tokens[1]);

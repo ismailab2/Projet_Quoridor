@@ -3,6 +3,8 @@ package fr.bordeaux.gui;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.bordeaux.ai.mcts.MctsPlayer;
+
 import fr.bordeaux.core.*;
 import java.io.IOException;
 import java.util.List;
@@ -421,20 +423,26 @@ class QuoridorAppTest extends ApplicationTest {
     BoardView boardView = mock(BoardView.class);
     Move hintMove = Move.pawn(new Position(4, 4), new Position(4, 5));
 
-    // Simulate delay
-    when(engine.hint())
-        .thenAnswer(
-            inv -> {
-              Thread.sleep(100);
-              return hintMove;
-            });
-
     final AtomicReference<Button> btnRef = new AtomicReference<>();
     final AtomicReference<Label> labelRef = new AtomicReference<>();
 
     interact(
         () -> {
-          javafx.scene.Node hintArea = new QuoridorApp().createHintArea(engine, boardView);
+          // Use a subclass to override computeHint and avoid MockedStatic issues
+          QuoridorApp appWithMockHint =
+              new QuoridorApp() {
+                @Override
+                protected Move computeHint(GameEngine eng) {
+                  try {
+                    Thread.sleep(100);
+                  } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                  }
+                  return hintMove;
+                }
+              };
+
+          javafx.scene.Node hintArea = appWithMockHint.createHintArea(engine, boardView);
           HBox container = (HBox) hintArea;
           Button btn = (Button) container.getChildren().get(0);
           Label label = (Label) container.getChildren().get(1);
@@ -453,7 +461,7 @@ class QuoridorAppTest extends ApplicationTest {
     // Wait for the async task and Platform.runLater
     WaitForAsyncUtils.waitForFxEvents();
     try {
-      Thread.sleep(300);
+      Thread.sleep(500);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }

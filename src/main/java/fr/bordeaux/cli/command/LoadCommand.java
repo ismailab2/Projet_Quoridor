@@ -1,7 +1,10 @@
 package fr.bordeaux.cli.command;
 
 import fr.bordeaux.core.GameEngine;
+import fr.bordeaux.core.GameState;
 import fr.bordeaux.i18n.I18n;
+import fr.bordeaux.persistence.GameLoadException;
+import fr.bordeaux.persistence.GameLoader;
 import fr.bordeaux.util.Logger;
 
 /** CLI command that loads a saved game from a file. state. */
@@ -37,9 +40,14 @@ public class LoadCommand implements Command {
     } else {
       try {
         LOGGER.info(I18n.get("loading") + " {0}", tokens[1]);
-        engine.loadGame(tokens[1]);
+        if (engine.getBlitzManager() != null) {
+          engine.getBlitzManager().pause();
+        }
+        final GameState loadedState = GameLoader.loadGame(engine, tokens[1]);
+        engine.getState().loadState(loadedState);
+        engine.initializeBlitz();
       } catch (final Exception e) {
-        LOGGER.error(I18n.get("loadError") + " {0}", tokens[1]);
+        LOGGER.error(I18n.get("loadError") + " {0}: {1}", tokens[1], e.getMessage());
       }
     }
     return engine;

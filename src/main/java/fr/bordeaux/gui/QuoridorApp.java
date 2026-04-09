@@ -1,8 +1,10 @@
 package fr.bordeaux.gui;
 
+import fr.bordeaux.ai.mcts.MctsPlayer;
 import fr.bordeaux.config.ConfigManager;
 import fr.bordeaux.core.*;
 import fr.bordeaux.main.GuiLauncher;
+import fr.bordeaux.persistence.GameLoader;
 import fr.bordeaux.util.Logger;
 import java.io.IOException;
 import java.util.List;
@@ -108,8 +110,14 @@ public class QuoridorApp extends Application {
     // Chargement d’une partie si load-file est défini
     final String loadFile = ConfigManager.getInstance().getOption("load-file", null);
     if (loadFile != null) {
-      engine.loadGame(loadFile);
-      Logger.getInstance().debug("Loaded game from file: " + loadFile);
+      try {
+        final GameState loadedState = GameLoader.loadGame(engine, loadFile);
+        engine.getState().loadState(loadedState);
+        engine.initializeBlitz();
+        Logger.getInstance().debug("Loaded game from file: " + loadFile);
+      } catch (final Exception exception) {
+        Logger.getInstance().error("Failed to load initial game: " + exception.getMessage());
+      }
     }
     final GameState state = engine.getState();
 
@@ -190,14 +198,7 @@ public class QuoridorApp extends Application {
 
           final CompletableFuture<Move> future =
               CompletableFuture.supplyAsync(
-                  () -> {
-                    try {
-                      return engine.hint();
-                    } catch (IOException e) {
-                      Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
-                      return null;
-                    }
-                  });
+                  () -> computeHint(engine));
 
           currentHintTask.set(future);
 
@@ -214,6 +215,21 @@ public class QuoridorApp extends Application {
                       }));
         });
     return container;
+  }
+
+  /**
+   * Computes a hint using MCTS AI. This method can be overridden for testing.
+   *
+   * @param engine the game engine
+   * @return the suggested move, or null if failed
+   */
+  protected Move computeHint(final GameEngine engine) {
+    try {
+      return MctsPlayer.hint(engine.getState().getCurrentPlayer(), engine.getState(), 3000, true);
+    } catch (final Exception e) {
+      Logger.getInstance().error("Error computing hint: {0}", e.getMessage());
+      return null;
+    }
   }
 
   /**
