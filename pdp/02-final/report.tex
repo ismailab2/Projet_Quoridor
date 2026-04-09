@@ -89,7 +89,7 @@ Si le pion d’un autre joueur se trouve juste devant le pion du joueur actif, i
 Dans le cas où le pion est bloqué par un autre pion et qu’un mur ou le bord du plateau empêche de sauter directement derrière le pion, le joueur peut effectuer un déplacement en diagonale. Cette règle donne une flexibilité stratégique intéressante, car elle permet d’éviter les situations où un pion serait complètement coincé par les autres. Les déplacements diagonaux ne sont donc pas une option de base mais une solution spéciale pour résoudre des situations de blocage (Fig.~\ref{fig:regles_specifiques}).
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.45\linewidth]{regles3}
+    \includegraphics[width=0.65\linewidth]{regles3}
     \caption{Déplacement diagonal (saut d'un joueur)}
     \label{fig:regles_specifiques}
 \end{figure}
@@ -114,7 +114,7 @@ Les murs permettent de ralentir un adversaire ou de forcer un joueur à modifier
         \label{fig:position_normale}
     \end{minipage}
     \hfill
-    \begin{minipage}{0.45\textwidth}
+    \begin{minipage}{0.55\textwidth}
         \centering
         \includegraphics[width=\linewidth]{regles2}
         \caption{Murs interdits}
@@ -837,7 +837,7 @@ Le fonctionnement de ce neurone repose sur une équation mathématique fondament
 
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.60\textwidth]{Neurone_4_poids.jpeg}}
+    \frame{\includegraphics[width=.70\textwidth]{Neurone_4_poids.jpeg}}
     \caption{Modèle de neurone artificiel pour l'évaluation}\label{fig:neurone}
 \end{figure}
 
@@ -1007,7 +1007,7 @@ jamais l'inverse. Cette contrainte est visible dans le diagramme.
 schema en couches concentriques de notre architecture du projet (Fig.~\ref{fig:example1}).
 \begin{figure}[H]
     \centering
-    \frame{\includegraphics[width=.85\textwidth]{architecture_quoridor}}
+    \frame{\includegraphics[width=.85\textwidth]{quoridor}}
     \caption{Une architecture en couches}\label{fig:example1}
 \end{figure}
 
@@ -1072,9 +1072,6 @@ schema du couche cli de notre architecture (Fig.~\ref{fig:example3}).
   \item \textbf{Persistance découplée} : notre \texttt{GameSaver} / \texttt{GameLoader} ne connaissent que les classes du \texttt{core}
   \item \textbf{Builder pour MinimaxPlayer} : on a une configuration déclarative et lisible de l’IA
 \end{itemize}
-
-\subsection{Axes d'amélioration}
-
 
 
 
