@@ -130,7 +130,7 @@ public class NetworkLauncher implements AppLauncher {
             final String move = cmd.substring("move ".length()).trim();
             client.sendMove(move);
           } else if ("server list".equals(cmd)) {
-            client.serverList();
+            Logger.getInstance().info("{0}", client.serverList());
           } else if ("quit".equals(cmd) || "exit".equals(cmd)) {
             if ("quit".equals(cmd)) {
               client.quit();

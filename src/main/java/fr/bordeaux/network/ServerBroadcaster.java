@@ -55,7 +55,7 @@ public class ServerBroadcaster implements Runnable {
   public void run() {
     try (DatagramSocket socket = new DatagramSocket()) {
       socket.setBroadcast(true);
-      final InetAddress address = InetAddress.getLoopbackAddress();
+      final InetAddress address = InetAddress.getByName("255.255.255.255");
 
       while (running.get()) {
         final String msg = name + ":" + port;
