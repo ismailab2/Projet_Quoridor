@@ -20,6 +20,7 @@ public class OptionsParserTest {
 
   @BeforeEach
   public void setUp() throws Exception {
+    fr.bordeaux.util.Logger.resetInstance();
     Path tempDir = java.nio.file.Files.createTempDirectory("options-test-config");
     tempConfigFile = tempDir.resolve(".quoridorrc");
     System.setProperty("quoridor.config.file", tempConfigFile.toString());

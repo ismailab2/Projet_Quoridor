@@ -67,19 +67,19 @@ public class NetworkLauncher implements AppLauncher {
       }
     }
 
-    Logger.getInstance().info("Commands:");
-    Logger.getInstance().info("server start [port]");
-    Logger.getInstance().info("server stop");
-    Logger.getInstance().info("server list");
-    Logger.getInstance().info("join [ip[:port]]");
-    Logger.getInstance().info("ping");
-    Logger.getInstance().info("quit");
-    Logger.getInstance().info("server status");
-    Logger.getInstance().info("players");
-    Logger.getInstance().info("scoreboard");
-    Logger.getInstance().info("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
-    Logger.getInstance().info("hello NAME");
-    Logger.getInstance().info("move MOVE");
+    Logger.getInstance().raw("Commands:");
+    Logger.getInstance().raw("server start [port]");
+    Logger.getInstance().raw("server stop");
+    Logger.getInstance().raw("server list");
+    Logger.getInstance().raw("join [ip[:port]]");
+    Logger.getInstance().raw("ping");
+    Logger.getInstance().raw("quit");
+    Logger.getInstance().raw("server status");
+    Logger.getInstance().raw("players");
+    Logger.getInstance().raw("scoreboard");
+    Logger.getInstance().raw("new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+    Logger.getInstance().raw("hello NAME");
+    Logger.getInstance().raw("move MOVE");
 
     try (Scanner scanner = new Scanner(System.in)) {
       boolean running = true;
@@ -95,30 +95,22 @@ public class NetworkLauncher implements AppLauncher {
           } else if ("server stop".equals(cmd)) {
             multiServer.stop();
           } else if ("server status".equals(cmd)) {
-            if (Logger.getInstance().isInfoEnabled()) {
-              Logger.getInstance().info("{0}", multiServer.getServerStatus());
-            }
+            Logger.getInstance().raw(multiServer.getServerStatus());
 
           } else if ("players".equals(cmd)) {
-            if (Logger.getInstance().isInfoEnabled()) {
-              Logger.getInstance().info("{0}", multiServer.listPlayers());
-            }
+            Logger.getInstance().raw(multiServer.listPlayers());
 
           } else if ("scoreboard".equals(cmd)) {
-            if (Logger.getInstance().isInfoEnabled()) {
-              Logger.getInstance().info("{0}", multiServer.getScoreboard());
-            }
+            Logger.getInstance().raw(multiServer.getScoreboard());
 
           } else if (cmd.startsWith("new ")) {
             final String[] parts = cmd.split(" ");
             if (parts.length != 3 && parts.length != 5) {
-              Logger.getInstance().info("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
+              Logger.getInstance().raw("Usage: new PLAYER1 PLAYER2 [PLAYER3 PLAYER4]");
             } else {
               final String[] playerIds = new String[parts.length - 1];
               System.arraycopy(parts, 1, playerIds, 0, playerIds.length);
-              if (Logger.getInstance().isInfoEnabled()) {
-                Logger.getInstance().info("{0}", multiServer.createGame(playerIds));
-              }
+              Logger.getInstance().raw(multiServer.createGame(playerIds));
             }
 
           } else if (cmd.equals("join") || cmd.startsWith("join ")) {
@@ -129,7 +121,7 @@ public class NetworkLauncher implements AppLauncher {
             final int port = hostPort.length > 1 ? Integer.parseInt(hostPort[1]) : DEFAULT_PORT;
             final boolean success = client.join(host, port);
             if (!success) {
-              Logger.getInstance().info("Failed to connect to {0}:{1,number,0}", host, port);
+              Logger.getInstance().raw("Failed to connect to " + host + ":" + port);
             }
           } else if (cmd.startsWith("hello ")) {
             final String name = cmd.substring("hello ".length()).trim();
@@ -140,22 +132,20 @@ public class NetworkLauncher implements AppLauncher {
             final String move = cmd.substring("move ".length()).trim();
             client.sendMove(move);
           } else if ("server list".equals(cmd)) {
-            Logger.getInstance().info("{0}", client.serverList());
+            Logger.getInstance().raw(client.serverList());
           } else if ("quit".equals(cmd) || "exit".equals(cmd)) {
             if ("quit".equals(cmd)) {
               client.quit();
             }
             running = false;
           } else {
-            Logger.getInstance().info("Unknown command");
+            Logger.getInstance().raw("Unknown command");
           }
         } catch (final Exception exception) {
-          if (Logger.getInstance().isInfoEnabled()) {
-            Logger.getInstance().info("Error: {0}", exception.getMessage());
-          }
+          Logger.getInstance().raw("Error: " + exception.getMessage());
         }
       }
     }
-    Logger.getInstance().info("Network mode exited.");
+    Logger.getInstance().raw("Network mode exited.");
   }
 }

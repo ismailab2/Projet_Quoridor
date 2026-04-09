@@ -44,13 +44,7 @@ public class LoggerTest {
    * Resets the Singleton instance using reflection to allow testing different constructor paths.
    */
   private void resetSingleton() throws Exception {
-    Field instanceField = Logger.class.getDeclaredField("instance");
-    instanceField.setAccessible(true);
-    instanceField.set(null, null);
-
-    Field fileField = Logger.class.getDeclaredField("logFile");
-    fileField.setAccessible(true);
-    fileField.set(null, null);
+    Logger.resetInstance();
   }
 
   @Test

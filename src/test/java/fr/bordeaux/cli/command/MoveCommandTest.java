@@ -170,7 +170,7 @@ class MoveCommandTest {
 
   @Test
   void testHandleMove_NullMove() {
-    MoveCommand command = new MoveCommand('e');
+    MoveCommand command = new MoveCommand("e");
     Logger.getInstance().setInfoEnabled(false);
 
     assertThrows(IllegalArgumentException.class, () -> command.handleMove(engine));

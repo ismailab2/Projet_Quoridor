@@ -82,13 +82,17 @@ public class GameClient {
           new BufferedReader(
               new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       writer = new PrintWriter(socket.getOutputStream(), true);
-      Logger.getInstance().info(I18n.get("connected") + " {0}:{1,number,0}", host, port);
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info(I18n.get("connected") + " {0}:{1,number,0}", host, port);
+      }
 
       startListener();
       return true;
 
     } catch (final IOException exception) {
-      Logger.getInstance().error(I18n.get("failedCo", ": ") + exception.getMessage());
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error(I18n.get("failedCo", ": ") + exception.getMessage());
+      }
       return false;
     }
   }
@@ -105,7 +109,9 @@ public class GameClient {
                     try {
                       final boolean delivered = syncResponse.offer(line, 3, TimeUnit.SECONDS);
                       if (!delivered) {
-                        Logger.getInstance().info(I18n.get("server", line));
+                        if (Logger.getInstance().isInfoEnabled()) {
+                          Logger.getInstance().info(I18n.get("server", line));
+                        }
                       }
                       notifyServerMessage(line);
                     } catch (InterruptedException ie) {
@@ -114,13 +120,19 @@ public class GameClient {
                       expectingDirectReply.set(false);
                     }
                   } else {
-                    Logger.getInstance().verbose("Net In: {0}", line);
-                    Logger.getInstance().info(I18n.get("server", line));
+                    if (Logger.getInstance().isVerboseEnabled()) {
+                      Logger.getInstance().verbose("Net In: {0}", line);
+                    }
+                    if (Logger.getInstance().isInfoEnabled()) {
+                      Logger.getInstance().info(I18n.get("server", line));
+                    }
                     notifyServerMessage(line);
                   }
                 }
               } catch (final IOException exception) {
-                Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
+                if (Logger.getInstance().isInfoEnabled()) {
+                  Logger.getInstance().info(I18n.get("connecClosed", exception.getMessage()));
+                }
               }
             });
     listenerThread.setDaemon(true);
@@ -163,8 +175,12 @@ public class GameClient {
         final long start = System.currentTimeMillis();
 
         expectingDirectReply.set(true);
-        Logger.getInstance().info("Client: PING");
-        Logger.getInstance().verbose("Net Out: PING");
+        if (Logger.getInstance().isInfoEnabled()) {
+          Logger.getInstance().info("Client: PING");
+        }
+        if (Logger.getInstance().isVerboseEnabled()) {
+          Logger.getInstance().verbose("Net Out: PING");
+        }
         writer.println("PING");
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
@@ -172,16 +188,22 @@ public class GameClient {
 
         if (res != null) {
           message = MessageFormat.format(I18n.get("server") + " {0} TIME={1,number,0}ms", res, rtt);
-          Logger.getInstance().info(message);
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info(message);
+          }
         } else {
           expectingDirectReply.set(false);
           message = I18n.get("pingTimeout");
-          Logger.getInstance().info(message);
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info(message);
+          }
         }
       } catch (final InterruptedException exception) {
         Thread.currentThread().interrupt();
         message = I18n.get("pingInterrupt");
-        Logger.getInstance().info(message);
+        if (Logger.getInstance().isInfoEnabled()) {
+          Logger.getInstance().info(message);
+        }
       }
     }
 
@@ -199,20 +221,30 @@ public class GameClient {
     if (checkConnection()) {
       try {
         expectingDirectReply.set(true);
-        Logger.getInstance().info("Client: QUIT");
-        Logger.getInstance().verbose("Net Out: QUIT");
+        if (Logger.getInstance().isInfoEnabled()) {
+          Logger.getInstance().info("Client: QUIT");
+        }
+        if (Logger.getInstance().isVerboseEnabled()) {
+          Logger.getInstance().verbose("Net Out: QUIT");
+        }
         writer.println("QUIT");
 
         final String res = syncResponse.poll(5, TimeUnit.SECONDS);
         if ("BYE".equals(res)) {
           message = I18n.get("server", " BYE");
-          Logger.getInstance().info(message);
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info(message);
+          }
         } else if (res != null) {
-          Logger.getInstance().info(I18n.get("server", res));
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info(I18n.get("server", res));
+          }
         } else {
           expectingDirectReply.set(false);
           message = I18n.get("noBye");
-          Logger.getInstance().info(message);
+          if (Logger.getInstance().isInfoEnabled()) {
+            Logger.getInstance().info(message);
+          }
         }
 
         socket.close();
@@ -225,7 +257,9 @@ public class GameClient {
       }
     }
 
-    Logger.getInstance().info(I18n.get("clientQuit"));
+    if (Logger.getInstance().isInfoEnabled()) {
+      Logger.getInstance().info(I18n.get("clientQuit"));
+    }
     return message;
   }
 
@@ -268,7 +302,9 @@ public class GameClient {
       discoverySocket.setSoTimeout(DISCOVERY_SOCKET_TIMEOUT_MS);
       discoveryStarted = true;
     } catch (IOException e) {
-      Logger.getInstance().error(I18n.get("discoFail", ": ", e.getMessage()));
+      if (Logger.getInstance().isErrorEnabled()) {
+        Logger.getInstance().error(I18n.get("discoFail", ": ", e.getMessage()));
+      }
       return;
     }
 
@@ -333,7 +369,9 @@ public class GameClient {
    */
   private boolean checkConnection() {
     if (!isConnected()) {
-      Logger.getInstance().info(I18n.get("notConnected"));
+      if (Logger.getInstance().isInfoEnabled()) {
+        Logger.getInstance().info(I18n.get("notConnected"));
+      }
       return false;
     }
     return true;
@@ -358,7 +396,9 @@ public class GameClient {
       return;
     }
     writer.println("HELLO " + name);
-    Logger.getInstance().verbose("Net Out: HELLO {0}", name);
+    if (Logger.getInstance().isVerboseEnabled()) {
+      Logger.getInstance().verbose("Net Out: HELLO {0}", name);
+    }
   }
 
   /**
@@ -371,6 +411,8 @@ public class GameClient {
       return;
     }
     writer.println("MOVE " + move);
-    Logger.getInstance().verbose("Net Out: MOVE {0}", move);
+    if (Logger.getInstance().isVerboseEnabled()) {
+      Logger.getInstance().verbose("Net Out: MOVE {0}", move);
+    }
   }
 }

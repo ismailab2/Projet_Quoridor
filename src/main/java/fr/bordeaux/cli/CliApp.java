@@ -368,8 +368,8 @@ public class CliApp {
         case CMD_SERVER -> handleServerCommand(tokens);
         case CMD_JOIN -> handleJoinCommand(tokens);
         case CMD_PING -> networkClient.ping();
-        case CMD_PLAYERS -> LOGGER.info(networkServer.listPlayers());
-        case CMD_SCOREBOARD -> LOGGER.info(networkServer.getScoreboard());
+        case CMD_PLAYERS -> LOGGER.raw(networkServer.listPlayers());
+        case CMD_SCOREBOARD -> LOGGER.raw(networkServer.getScoreboard());
         case CMD_HELLO -> handleHelloCommand(input);
         case CMD_NEW -> {
           if (tokens.length > 1 && looksLikePlayerId(tokens[1])) {
@@ -434,8 +434,8 @@ public class CliApp {
       }
       case "stop" -> networkServer.stop();
       case "list" -> LOGGER.info(networkClient.serverList());
-      case "status" -> LOGGER.info(networkServer.getServerStatus());
-      default -> LOGGER.info(I18n.get("unknownServerCmd"));
+      case "status" -> LOGGER.raw(networkServer.getServerStatus());
+      default -> LOGGER.raw(I18n.get("unknownServerCmd"));
     }
   }
 
@@ -488,9 +488,8 @@ public class CliApp {
 
     final String[] playerIds = new String[tokens.length - 1];
     System.arraycopy(tokens, 1, playerIds, 0, playerIds.length);
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info(networkServer.createGame(playerIds));
-    }
+    final String result = networkServer.createGame(playerIds);
+    LOGGER.raw(result);
   }
 
   /**

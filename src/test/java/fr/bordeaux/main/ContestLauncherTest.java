@@ -34,6 +34,7 @@ public class ContestLauncherTest {
 
   @BeforeEach
   public void setUp() {
+    fr.bordeaux.util.Logger.resetInstance();
     config = ConfigManager.getInstance();
     // Reset config to avoid interference between tests
     config.setOption("contest", "false");
@@ -227,6 +228,7 @@ public class ContestLauncherTest {
 
     Files.writeString(saveFile, sb.toString());
     config.enableContest(saveFile.toString());
+    fr.bordeaux.util.Logger.getInstance().setVerboseEnabled(false);
 
     ContestLauncher launcher = newContestLauncher();
     launcher.launch(new String[] {}, config);

@@ -95,7 +95,7 @@ public final class OptionsParser {
       }
     }
     if (commandLine.hasOption("V")) {
-      logInfo("Quoridor version 1.0.0");
+      Logger.getInstance().raw("Quoridor version 1.0.0");
       if (System.getProperty("quoridor.test") == null) {
         System.exit(0);
       }
@@ -125,7 +125,7 @@ public final class OptionsParser {
    * @param message Message to log.
    */
   private static void logInfo(final String message) {
-    LOGGER.info(message);
+    Logger.getInstance().raw(message);
   }
 
   /** Prints usage and help information to the console. */

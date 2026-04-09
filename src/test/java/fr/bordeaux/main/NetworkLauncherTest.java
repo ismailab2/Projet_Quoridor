@@ -28,6 +28,7 @@ class NetworkLauncherTest {
 
   @BeforeEach
   void setUp() {
+    fr.bordeaux.util.Logger.resetInstance();
     System.setProperty("quoridor.test", "true");
     I18n.setLocale(Locale.ENGLISH);
 

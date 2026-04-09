@@ -33,6 +33,7 @@ class CliAppTest {
 
   @BeforeEach
   void setUp() {
+    fr.bordeaux.util.Logger.resetInstance();
     System.setProperty("quoridor.test", "true");
     I18n.get("activ"); // Force I18n class loading if not already done
     I18n.setLocale(java.util.Locale.ENGLISH);
