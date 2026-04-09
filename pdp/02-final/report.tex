@@ -580,19 +580,19 @@ L’intelligence artificielle est la composante du projet qui cherche le meilleu
 
 Pour cela, nous avons implémenté plusieurs stratégies d’intelligence artificielle de niveaux croissants. Ces stratégies sont organisées dans le package fr.bordeaux.ai, lui-même subdivisé en plusieurs sous-packages reflétant la séparation des responsabilités :
 
-— fr.bordeaux.ai.base — les abstractions communes à toutes les IA
+fr.bordeaux.ai.base — les abstractions communes à toutes les IA
 
 (AiPlayer, HeuristicEvaluator)
 
-— fr.bordeaux.ai.random — le joueur aléatoire
+fr.bordeaux.ai.random — le joueur aléatoire
 
-— fr.bordeaux.ai.heuristics — les trois fonctions d’évaluation de Minimax
+fr.bordeaux.ai.heuristics — les trois fonctions d’évaluation de Minimax
 
-— fr.bordeaux.ai.minimax — l’algorithme Minimax et son builder
+fr.bordeaux.ai.minimax — l’algorithme Minimax et son builder
 
-— fr.bordeaux.ai.mcts — l’algorithme Monte Carlo Tree Search
+fr.bordeaux.ai.mcts — l’algorithme Monte Carlo Tree Search
 
-— fr.bordeaux.ai.nn — le modèle de réseau de neurones
+fr.bordeaux.ai.nn — le modèle de réseau de neurones
 
 Toutes les stratégies partagent une base commune : la classe abstraite
 
@@ -616,9 +616,9 @@ L'algorithme Minimax est une méthode conçue pour déterminer la meilleure acti
 \subparagraph{Structure de l'arbre de jeu Minimax}
 
 \begin{enumerate}
-\item Racine : L'état initial du plateau.
-\item Branches : Chaque nœud se ramifie en branches représentant les coups légaux disponibles.
-\item Feuilles : Aux extrémités de l'exploration, une fonction d'évaluation heuristique attribue un score numérique à la position (avantage pour le joueur IA, le joueur MAX).
+ Racine : L'état initial du plateau.
+ Branches : Chaque nœud se ramifie en branches représentant les coups légaux disponibles.
+ Feuilles : Aux extrémités de l'exploration, une fonction d'évaluation heuristique attribue un score numérique à la position (avantage pour le joueur IA, le joueur MAX).
 \end{enumerate}
 
 \subparagraph{Principe d'alternance (MAX et MIN)}
@@ -626,10 +626,10 @@ L'algorithme Minimax est une méthode conçue pour déterminer la meilleure acti
 L'exploration de l'arbre alterne entre deux objectifs :
 
 \begin{itemize}
-\item Nœuds MAX (Tour de l'IA) : L'IA cherche à MAXimiser son score. Elle choisit le coup menant à l'état enfant avec la valeur heuristique la plus élevée.
+ Nœuds MAX (Tour de l'IA) : L'IA cherche à MAXimiser son score. Elle choisit le coup menant à l'état enfant avec la valeur heuristique la plus élevée.
 
 
-\item Nœuds MIN (Tour de l'Adversaire) : L'algorithme suppose que l'adversaire cherche à MINimiser le score de l'IA. Il simule le choix de l'adversaire menant à l'état enfant avec le score le plus bas.
+ Nœuds MIN (Tour de l'Adversaire) : L'algorithme suppose que l'adversaire cherche à MINimiser le score de l'IA. Il simule le choix de l'adversaire menant à l'état enfant avec le score le plus bas.
 
 
 \end{itemize}
@@ -654,10 +654,10 @@ L'élagage Alpha-Bêta est l'optimisation mathématique de référence pour le M
 L'exploration exhaustive de l'arbre de jeu étant trop coûteuse en ressources, l'algorithme maintient deux bornes de coupe (des limites mathématiques permettant de stopper prématurément le calcul) :
 
 \begin{itemize}
-\item $\alpha$ : Le score minimum garanti pour le joueur MAX (l'intelligence artificielle).
+ $\alpha$ : Le score minimum garanti pour le joueur MAX (l'intelligence artificielle).
 
 
-\item $\beta$ : Le score maximum garanti pour le joueur MIN (l'adversaire).
+ $\beta$ : Le score maximum garanti pour le joueur MIN (l'adversaire).
 
 
 \end{itemize}
@@ -672,7 +672,7 @@ Lorsqu'un nœud atteint la profondeur maximale ou que le temps est écoulé, la 
 
 \paragraph{L'Heuristique Simple (SimpleHeuristic)}
 
-L'Heuristique Simple (SimpleHeuristic) se concentre sur l'objectif le plus rudimentaire du jeu, qui est d’avancer vers l'arrivée. D'un point de vue théorique, elle s'appuie sur une évaluation spatiale purement absolue en calculant le nombre de cases franchies en ligne droite par rapport à sa position de départ. Bien que cette méthode arithmétique soit extrêmement rapide à calculer, elle présente des limites tactiques majeures : elle reste totalement ignorante de son environnement puisqu'elle ne prend en compte ni les murs posés sur le plateau, ni la position actuelle de l'adversaire.
+L'Heuristique Simple (SimpleHeuristic) se concentre sur l'objectif le plus rudimentaire du jeu, qui est d’avancer vers l'arrivée. D'un point de vue théorique, elle s'appuie sur une évaluation spatiale purement absolue en calculant le nombre de cases franchies en ligne droite par rapport à sa position de départ. Bien que cette méthode arithmétique soit extrêmement rapide à calculer, elle présente des limites tactiques majeures : elle reste totalement ignorante de son environnement puisqu'elle ne prend en compte ni les murs posés sur le plateau, ni la position actuelle de l'adversaire, comme le proposait Mertens \cite{mertens2006}.
 
 \paragraph{L'Heuristique Intermédiaire (MediumHeuristic)}
 
@@ -696,25 +696,22 @@ Enfin, l'algorithme gère les conditions de victoire de manière prioritaire pou
 L'implémentation repose sur des structures de données spécifiquement choisies pour limiter l'empreinte mémoire (la quantité de mémoire vive RAM consommée) et accélérer la vitesse d'exécution :
 
 \begin{itemize}
-\item File à double entrée (Deque) pour l'exploration de l'arbre : Afin d'éviter l'instanciation massive (la création répétitive et très coûteuse de nouveaux objets en mémoire pour chaque scénario), la classe MinimaxPlayer ne clone pas le plateau de jeu pour chaque branche. Elle maintient l'historique de la branche courante dans une structure de pile (Deque<Move>). L'algorithme procède par mutation directe (modification de l'état unique du plateau) grâce à un mécanisme de backtracking (retour sur ses pas) : on simule un coup pour descendre dans l'arbre, puis on le dépile pour l'annuler et remonter.
+File à double entrée (Deque) pour l'exploration de l'arbre : Afin d'éviter l'instanciation massive (la création répétitive et très coûteuse de nouveaux objets en mémoire pour chaque scénario), la classe MinimaxPlayer ne clone pas le plateau de jeu pour chaque branche. Elle maintient l'historique de la branche courante dans une structure de pile (Deque<Move>). L'algorithme procède par mutation directe (modification de l'état unique du plateau) grâce à un mécanisme de backtracking (retour sur ses pas) : on simule un coup pour descendre dans l'arbre, puis on le dépile pour l'annuler et remonter.
 
 
-\item Interface Fonctionnelle (BiFunction) : Plutôt que de vérifier à chaque coup quel algorithme utiliser via une structure de contrôle classique (type if/else), le constructeur de MinimaxPlayer fige le comportement de l'IA dès son initialisation. Il assigne la méthode de résolution choisie — Minimax standard ou Approfondissement Itératif — à un attribut nommé mode. Lors de l'exécution, l'IA appelle directement cette fonction stockée, ce qui simplifie le flux de calcul en éliminant les branchements logiques répétitifs au cœur de la prise de décision.
+Table de hachage sécurisée (ConcurrentHashMap) : Les paramètres internes de l'IA (profondeur, temps, heuristique) sont exportés via la méthode getSettings à l'aide d'une ConcurrentHashMap (un dictionnaire stockant des paires clé-valeur). Cette structure est spécifiquement conçue pour être thread-safe (protégée contre les crashs si plusieurs processus ou éléments de l'interface graphique tentent de la lire en même temps).
 
 
-\item Table de hachage sécurisée (ConcurrentHashMap) : Les paramètres internes de l'IA (profondeur, temps, heuristique) sont exportés via la méthode getSettings à l'aide d'une ConcurrentHashMap (un dictionnaire stockant des paires clé-valeur). Cette structure est spécifiquement conçue pour être thread-safe (protégée contre les crashs si plusieurs processus ou éléments de l'interface graphique tentent de la lire en même temps).
-
-
-\item Listes dynamiques (List) pour le calcul heuristique : Dans la classe AdvancedHeuristic, l'évaluation tactique ne s'arrête pas aux coordonnées brutes. Le calcul des distances réelles s'appuie sur une liste pour stocker la séquence des identifiants des cases validées par l'algorithme BFS (Breadth-First Search, un parcours de graphe en largeur garantissant de trouver le chemin le plus court tout en contournant les murs existants).
+Listes dynamiques (List) pour le calcul heuristique : Dans la classe AdvancedHeuristic, l'évaluation tactique ne s'arrête pas aux coordonnées brutes. Le calcul des distances réelles s'appuie sur une liste pour stocker la séquence des identifiants des cases validées par l'algorithme BFS (Breadth-First Search, un parcours de graphe en largeur garantissant de trouver le chemin le plus court tout en contournant les murs existants).
 
 
 \end{itemize}
 
 \paragraph{L'Approfondissement Itératif (Iterative Deepening)}
 
-Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment\cite{KORF198597}. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'Iterative Deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. Cette méthode introduit donc une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
+Cet algorithme, plutôt que d'explorer l'arbre à une profondeur fixe définie arbitrairement, exécute des recherches successives à des profondeurs croissantes. Le principal atout de cette méthode est sa capacité à fournir une réponse optimale à tout moment. Si le temps alloué (reflexionTime) s'écoule pendant l'exploration de la profondeur $p$, l'algorithme interrompt le calcul et renvoie le meilleur coup identifié lors de l'itération à la profondeur $p-1$. Contrairement à Minimax qui, s'il est interrompu, fournit un résultat aléatoire, l'Iterative Deepening garantit une décision tactique basée sur l'exploration complète la plus profonde possible. Cette méthode introduit donc une stratégie de gestion dynamique de la profondeur de recherche qui vient compléter l'élagage Alpha-Bêta pour pallier l'imprévisibilité de la qualité du coup joué.
 
-Cependant, l’inconvénient de cette méthode réside dans la redondance : chaque nouvelle itération recommence l'exploration des premiers niveaux de l'arbre déjà parcourus. Cependant, dans un jeu comme le Quoridor où le facteur de branchement est important, ce surcoût reste acceptable car le temps recalculé pour une profondeur $p$ va représenter un temps de calcul très faible par rapport à celui de l'itération finale.
+L’inconvénient de cette méthode réside dans la redondance : chaque nouvelle itération recommence l'exploration des premiers niveaux de l'arbre déjà parcourus. Cependant, dans un jeu comme le Quoridor où le facteur de branchement est important, ce surcoût reste acceptable car le temps recalculé pour une profondeur $p$ va représenter un temps de calcul très faible par rapport à celui de l'itération finale \cite{KORF198597}.
 
 
 Bien que l'algorithme Minimax soit redoutable, son exploration systématique montre ses limites face à des situations présentant un fort facteur de branchement, où le nombre de coups possibles devient beaucoup trop grand pour être calculé dans le temps imparti. C'est pour pallier cette explosion combinatoire qu'intervient l'algorithme Monte Carlo Tree Search (MCTS).
